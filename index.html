@@ -324,12 +324,42 @@ function sortActionsForDisplay(actions){
   return{active,done};
 }
 
+/* ── Export / Import ── */
+function exportData(){
+  const data=localStorage.getItem(SK);
+  if(!data){alert("Aucune donnée à exporter.");return}
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download="todolist-backup.json";a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(){
+  const input=document.createElement('input');input.type='file';input.accept='.json';
+  input.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const parsed=JSON.parse(ev.target.result);
+        if(!parsed.projects){alert("Fichier invalide.");return}
+        if(!confirm("Cela remplacera toutes les données actuelles. Continuer ?"))return;
+        localStorage.setItem(SK,ev.target.result);
+        location.reload();
+      }catch{alert("Erreur de lecture du fichier.")}
+    };reader.readAsText(file);
+  };input.click();
+}
+
 /* ── Render ── */
 function render(){
   const ta=S.projects.reduce((s,p)=>s+p.actions.length,0);
   const td=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="done").length,0);
   const tw=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="waiting").length,0);
-  let h=`<div class="header"><h1>📋 Ma Todolist</h1><div class="stats">${S.projects.length} projet${S.projects.length>1?"s":""} · ${td}/${ta} terminée${td>1?"s":""}${tw?" · "+tw+" en attente":""}</div></div>
+  let h=`<div class="header"><h1>📋 Ma Todolist</h1><div class="stats">${S.projects.length} projet${S.projects.length>1?"s":""} · ${td}/${ta} terminée${td>1?"s":""}${tw?" · "+tw+" en attente":""}</div>
+  <div style="margin-top:6px;display:flex;justify-content:center;gap:6px">
+    <button onclick="exportData()" style="border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;background:#fff;color:#6B7280;transition:all .15s" onmouseover="this.style.borderColor='#6366F1';this.style.color='#6366F1'" onmouseout="this.style.borderColor='#D1D5DB';this.style.color='#6B7280'">⬇ Exporter</button>
+    <button onclick="importData()" style="border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;background:#fff;color:#6B7280;transition:all .15s" onmouseover="this.style.borderColor='#6366F1';this.style.color='#6366F1'" onmouseout="this.style.borderColor='#D1D5DB';this.style.color='#6B7280'">⬆ Importer</button>
+  </div></div>
   <div class="tabs">
     <button class="tab-btn ${S.tab==="projects"?"active":""}" onclick="switchTab('projects')">${I.folder} Projets</button>
     <button class="tab-btn ${S.tab==="global"?"active":""}" onclick="switchTab('global')">${I.list} Vue globale</button>
