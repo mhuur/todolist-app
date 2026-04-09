@@ -150,6 +150,23 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .btn-purge:hover{background:#DC2626}
 .io-btn{border:1px solid #2A3A52;border-radius:5px;padding:2px 8px;font-size:9px;font-weight:600;font-family:inherit;cursor:pointer;background:#162032;color:#64748B;transition:all .15s}.io-btn:hover{border-color:#38BDF8;color:#38BDF8}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0B1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+/* Sync panel */
+.sync-panel{background:#162032;border:1px solid #2A3A52;border-radius:8px;padding:12px;margin-bottom:10px}
+.sync-panel h3{font-size:12px;font-weight:700;color:#38BDF8;margin-bottom:8px}
+.sync-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.sync-row label{font-size:10px;color:#94A3B8;white-space:nowrap;min-width:70px}
+.sync-input{flex:1;border:1px solid #2A3A52;border-radius:5px;padding:4px 8px;font-size:11px;font-family:inherit;background:#0B1120;color:#E2E8F0;outline:none}
+.sync-input:focus{border-color:#38BDF8}
+.sync-input.code{font-family:'Courier New',monospace;letter-spacing:1px;font-weight:700;color:#38BDF8}
+.sync-btn{border:none;border-radius:5px;padding:4px 12px;font-size:10px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s}
+.sync-btn.primary{background:#0284C7;color:#fff}.sync-btn.primary:hover{background:#0EA5E9}
+.sync-btn.secondary{background:#334155;color:#94A3B8}.sync-btn.secondary:hover{background:#475569;color:#E2E8F0}
+.sync-status{font-size:9px;color:#64748B;margin-top:4px}
+.sync-status.ok{color:#34D399}
+.sync-status.err{color:#F87171}
+.sync-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle}
+.sync-badge.on{background:rgba(52,211,153,.15);color:#34D399}
+.sync-badge.off{background:rgba(100,116,139,.15);color:#64748B}
 </style>
 </head>
 <body>
@@ -166,7 +183,101 @@ const HL_FLASH=["#FF3B30","#FF9500","#FFCC00","#34C759","#00C7BE","#007AFF","#58
 const HL_PASTEL=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#A5F3FC","#BFDBFE","#C4B5FD","#FBCFE8","#FDE68A","#D1FAE5"];
 
 function load(){let d=localStorage.getItem(SK);if(!d&&typeof INITIAL_DATA!=='undefined'){d=JSON.stringify(INITIAL_DATA);localStorage.setItem(SK,d)}try{if(d){const p=JSON.parse(d);S.projects=p.projects||[];if(p.trash)S.trash=p.trash;S.projects.forEach(p=>{S.openProjects[p.id]=true;S.showDone[p.id]=false;if(p.top===undefined)p.top=false;p.actions.forEach(a=>{if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title=""})})}}catch{}}
-function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash}))}catch{}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash}))}catch{};cloudPush()}
+
+/* ── Cloud Sync (JSONBin.io) ── */
+const SYNC_KEYS="todolist-sync-keys";
+let syncTimer=null;
+function getSyncKeys(){try{return JSON.parse(localStorage.getItem(SYNC_KEYS))||{}}catch{return{}}}
+function setSyncKeys(k){localStorage.setItem(SYNC_KEYS,JSON.stringify(k))}
+function isSyncOn(){const k=getSyncKeys();return!!(k.apiKey&&k.binId)}
+
+function cloudPush(){
+  if(!isSyncOn())return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>{
+    const k=getSyncKeys();const d=localStorage.getItem(SK);
+    fetch("https://api.jsonbin.io/v3/b/"+k.binId,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey},body:d})
+    .then(r=>{if(!r.ok)throw r;setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Synchronisé "+new Date().toLocaleTimeString())})
+    .catch(()=>updSyncUI("err","Erreur de sync"))
+  },1500);
+}
+
+function cloudPull(cb){
+  const k=getSyncKeys();if(!k.apiKey||!k.binId){if(cb)cb();return}
+  updSyncUI("","Chargement…");
+  fetch("https://api.jsonbin.io/v3/b/"+k.binId+"/latest",{headers:{"X-Master-Key":k.apiKey}})
+  .then(r=>{if(!r.ok)throw r;return r.json()})
+  .then(data=>{
+    const remote=JSON.stringify(data.record);
+    localStorage.setItem(SK,remote);
+    setSyncKeys({...k,lastSync:Date.now()});
+    updSyncUI("ok","Synchronisé");
+    if(cb)cb();
+  })
+  .catch(()=>{updSyncUI("err","Erreur de chargement");if(cb)cb()})
+}
+
+function createBin(){
+  const k=getSyncKeys();if(!k.apiKey){alert("Entre ta clé API d'abord.");return}
+  const d=localStorage.getItem(SK)||'{"projects":[],"trash":[]}';
+  updSyncUI("","Création…");
+  fetch("https://api.jsonbin.io/v3/b",{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey,"X-Bin-Private":"true","X-Bin-Name":"todolist"},body:d})
+  .then(r=>{if(!r.ok)throw r;return r.json()})
+  .then(data=>{
+    const binId=data.metadata.id;
+    setSyncKeys({...k,binId,lastSync:Date.now()});
+    updSyncUI("ok","Sync activée !");
+    render();
+  })
+  .catch(e=>{updSyncUI("err","Erreur : vérifie ta clé API");console.error(e)})
+}
+
+function joinBin(){
+  const k=getSyncKeys();if(!k.apiKey||!k.binId){alert("Remplis la clé API et le code sync.");return}
+  cloudPull(()=>{load();render()})
+}
+
+function disconnectSync(){
+  if(!confirm("Désactiver la synchronisation ?"))return;
+  localStorage.removeItem(SYNC_KEYS);render();
+}
+
+function updSyncUI(cls,msg){
+  const el=document.getElementById("sync-status");
+  if(el){el.className="sync-status"+(cls?" "+cls:"");el.textContent=msg}
+}
+
+function syncPanel(){
+  const k=getSyncKeys();const on=isSyncOn();
+  if(on){
+    return`<div class="sync-panel">
+      <h3>☁ Synchronisation <span class="sync-badge on">ACTIVE</span></h3>
+      <div class="sync-row"><label>Code sync :</label><input class="sync-input code" value="${k.binId}" readonly onclick="this.select()"></div>
+      <div style="display:flex;gap:5px;margin-top:6px">
+        <button class="sync-btn primary" onclick="cloudPull(()=>{load();render()})">↓ Récupérer</button>
+        <button class="sync-btn primary" onclick="cloudPush()">↑ Envoyer</button>
+        <button class="sync-btn secondary" onclick="disconnectSync()">Déconnecter</button>
+      </div>
+      <div id="sync-status" class="sync-status">${k.lastSync?"Dernière sync : "+new Date(k.lastSync).toLocaleTimeString():""}</div>
+    </div>`
+  }
+  return`<div class="sync-panel">
+    <h3>☁ Synchronisation <span class="sync-badge off">INACTIVE</span></h3>
+    <p style="font-size:10px;color:#64748B;margin-bottom:8px;line-height:1.5">
+      1. Crée un compte gratuit sur <a href="https://jsonbin.io" target="_blank" style="color:#38BDF8">jsonbin.io</a><br>
+      2. Copie ta clé API (X-Master-Key) depuis le dashboard<br>
+      3. Colle-la ci-dessous
+    </p>
+    <div class="sync-row"><label>Clé API :</label><input class="sync-input" id="sync-api" value="${k.apiKey||""}" placeholder="$2a$10…" oninput="setSyncKeys({...getSyncKeys(),apiKey:this.value})"></div>
+    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.binId||""}" placeholder="Laisser vide pour créer" oninput="setSyncKeys({...getSyncKeys(),binId:this.value})"></div>
+    <div style="display:flex;gap:5px;margin-top:6px">
+      <button class="sync-btn primary" onclick="createBin()">Créer la sync</button>
+      <button class="sync-btn secondary" onclick="joinBin()">Rejoindre (j'ai un code)</button>
+    </div>
+    <div id="sync-status" class="sync-status"></div>
+  </div>`
+}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#6B7280":v<0?"#DC2626":v<=3?"#D97706":"#059669"}
@@ -361,19 +472,18 @@ function importData(){
 }
 
 
-/* Export/Import */
-function exportData(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="todolist-backup.json";a.click();URL.revokeObjectURL(u)}
-function importData(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);location.reload()}catch{}};r.readAsText(f)};inp.click()}
 /* ── Render ── */
 function render(){
   const ta=S.projects.reduce((s,p)=>s+p.actions.length,0);
   const td=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="done").length,0);
   const tw=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="waiting").length,0);
   let h=`<div class="header"><h1>🌊 Ma Todolist</h1><div class="stats">${S.projects.length} projet${S.projects.length>1?"s":""} · ${td}/${ta} terminée${td>1?"s":""}${tw?" · "+tw+" en attente":""}</div>
-  <div style="margin-top:6px;display:flex;justify-content:center;gap:6px">
+  <div style="margin-top:6px;display:flex;justify-content:center;gap:5px">
     <button class="io-btn" onclick="exportData()">⬇ Exporter</button>
     <button class="io-btn" onclick="importData()">⬆ Importer</button>
+    <button class="io-btn" onclick="S.showSync=!S.showSync;render()" style="${isSyncOn()?'border-color:#34D399;color:#34D399':''}">☁ Sync${isSyncOn()?" ✓":""}</button>
   </div></div>
+  ${S.showSync?syncPanel():""}
   <div class="tabs">
     <button class="tab-btn ${S.tab==="projects"?"active":""}" onclick="switchTab('projects')">${I.folder} Projets</button>
     <button class="tab-btn ${S.tab==="global"?"active":""}" onclick="switchTab('global')">${I.list} Vue globale</button>
@@ -610,6 +720,7 @@ function moveToProject(fromPid,aid,toPid){
 }
 
 load();render();
+if(isSyncOn()){cloudPull(()=>{load();render()})}
 </script>
 </body>
 </html>
