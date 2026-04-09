@@ -185,64 +185,63 @@ const HL_PASTEL=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#A5F3FC","#BFDBFE","#C
 function load(){let d=localStorage.getItem(SK);if(!d&&typeof INITIAL_DATA!=='undefined'){d=JSON.stringify(INITIAL_DATA);localStorage.setItem(SK,d)}try{if(d){const p=JSON.parse(d);S.projects=p.projects||[];if(p.trash)S.trash=p.trash;S.projects.forEach(p=>{S.openProjects[p.id]=true;S.showDone[p.id]=false;if(p.top===undefined)p.top=false;p.actions.forEach(a=>{if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title=""})})}}catch{}}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash}))}catch{};cloudPush()}
 
-/* ── Cloud Sync (JSONBin.io) ── */
+/* ── Cloud Sync (jsonblob.com — aucun compte requis) ── */
 const SYNC_KEYS="todolist-sync-keys";
 let syncTimer=null;
 function getSyncKeys(){try{return JSON.parse(localStorage.getItem(SYNC_KEYS))||{}}catch{return{}}}
 function setSyncKeys(k){localStorage.setItem(SYNC_KEYS,JSON.stringify(k))}
-function isSyncOn(){const k=getSyncKeys();return!!(k.apiKey&&k.binId)}
+function isSyncOn(){return!!getSyncKeys().blobId}
+
+function stripImg(d){
+  if(!d||d.length<90000)return d;
+  try{const o=JSON.parse(d);o.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});return JSON.stringify(o)}catch{return d}
+}
 
 function cloudPush(){
   if(!isSyncOn())return;
   clearTimeout(syncTimer);
   syncTimer=setTimeout(()=>{
-    const k=getSyncKeys();let d=localStorage.getItem(SK);
-    if(d&&d.length>95000){try{const obj=JSON.parse(d);obj.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});d=JSON.stringify(obj)}catch{}}
-    fetch("https://api.jsonbin.io/v3/b/"+k.binId,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey.trim()},body:d})
-    .then(r=>{if(!r.ok)throw r;setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Synchronisé "+new Date().toLocaleTimeString())})
-    .catch(()=>updSyncUI("err","Erreur de sync"))
-  },1500);
+    const k=getSyncKeys();const d=stripImg(localStorage.getItem(SK));
+    fetch("https://jsonblob.com/api/jsonBlob/"+k.blobId,{method:"PUT",headers:{"Content-Type":"application/json","Accept":"application/json"},body:d})
+    .then(r=>{if(!r.ok)throw new Error(r.status);setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Sync ✓ "+new Date().toLocaleTimeString())})
+    .catch(e=>updSyncUI("err","Erreur sync : "+e.message))
+  },2000);
 }
 
 function cloudPull(cb){
-  const k=getSyncKeys();if(!k.apiKey||!k.binId){if(cb)cb();return}
+  const k=getSyncKeys();if(!k.blobId){if(cb)cb();return}
   updSyncUI("","Chargement…");
-  fetch("https://api.jsonbin.io/v3/b/"+k.binId+"/latest",{headers:{"X-Master-Key":k.apiKey.trim()}})
-  .then(r=>{if(!r.ok)throw r;return r.json()})
-  .then(data=>{
-    const remote=JSON.stringify(data.record);
-    localStorage.setItem(SK,remote);
+  fetch("https://jsonblob.com/api/jsonBlob/"+k.blobId,{headers:{"Accept":"application/json"}})
+  .then(r=>{if(!r.ok)throw new Error(r.status);return r.text()})
+  .then(txt=>{
+    localStorage.setItem(SK,txt);
     setSyncKeys({...k,lastSync:Date.now()});
-    updSyncUI("ok","Synchronisé");
+    updSyncUI("ok","Données récupérées ✓");
     if(cb)cb();
   })
-  .catch(()=>{updSyncUI("err","Erreur de chargement");if(cb)cb()})
+  .catch(e=>{updSyncUI("err","Erreur : "+e.message);if(cb)cb()})
 }
 
-function createBin(){
-  const k=getSyncKeys();
-  if(!k.apiKey||!k.apiKey.trim()){alert("Entre ta clé API d'abord.");return}
-  k.apiKey=k.apiKey.trim();setSyncKeys(k);
-  let d=localStorage.getItem(SK)||'{"projects":[],"trash":[]}';
-  /* Strip base64 images if data too large (JSONBin free = 100KB) */
-  if(d.length>95000){
-    try{const obj=JSON.parse(d);obj.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});d=JSON.stringify(obj);
-    updSyncUI("","Création (images exclues de la sync)…")}catch{}
-  }else{updSyncUI("","Création…")}
-  fetch("https://api.jsonbin.io/v3/b",{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey,"X-Bin-Private":"true","X-Bin-Name":"todolist"},body:d})
-  .then(r=>r.json().then(body=>({ok:r.ok,status:r.status,body})))
-  .then(({ok,status,body})=>{
-    if(!ok){updSyncUI("err","Erreur "+status+" : "+(body.message||JSON.stringify(body)));return}
-    const binId=body.metadata.id;
-    setSyncKeys({...k,binId,lastSync:Date.now()});
+function createSync(){
+  const d=stripImg(localStorage.getItem(SK)||'{"projects":[],"trash":[]}');
+  updSyncUI("","Création en cours…");
+  fetch("https://jsonblob.com/api/jsonBlob",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:d})
+  .then(r=>{
+    if(!r.ok)throw new Error("Erreur "+r.status);
+    const loc=r.headers.get("Location")||"";
+    const blobId=loc.split("/").pop();
+    if(!blobId)throw new Error("Pas d'ID retourné");
+    setSyncKeys({blobId,lastSync:Date.now()});
     updSyncUI("ok","Sync activée !");
     render();
   })
-  .catch(e=>{updSyncUI("err","Erreur réseau : "+e.message);console.error(e)})
+  .catch(e=>{updSyncUI("err",e.message);console.error(e)})
 }
 
-function joinBin(){
-  const k=getSyncKeys();if(!k.apiKey||!k.binId){alert("Remplis la clé API et le code sync.");return}
+function joinSync(){
+  const k=getSyncKeys();
+  if(!k.blobId||!k.blobId.trim()){alert("Entre le code sync.");return}
+  k.blobId=k.blobId.trim();setSyncKeys(k);
   cloudPull(()=>{load();render()})
 }
 
@@ -261,28 +260,27 @@ function syncPanel(){
   if(on){
     return`<div class="sync-panel">
       <h3>☁ Synchronisation <span class="sync-badge on">ACTIVE</span></h3>
-      <div class="sync-row"><label>Code sync :</label><input class="sync-input code" value="${k.binId}" readonly onclick="this.select()"></div>
+      <div class="sync-row"><label>Code sync :</label><input class="sync-input code" value="${k.blobId}" readonly onclick="this.select();document.execCommand('copy');updSyncUI('ok','Code copié !')"></div>
       <div style="display:flex;gap:5px;margin-top:6px">
         <button class="sync-btn primary" onclick="cloudPull(()=>{load();render()})">↓ Récupérer</button>
         <button class="sync-btn primary" onclick="cloudPush()">↑ Envoyer</button>
         <button class="sync-btn secondary" onclick="disconnectSync()">Déconnecter</button>
       </div>
       <div id="sync-status" class="sync-status">${k.lastSync?"Dernière sync : "+new Date(k.lastSync).toLocaleTimeString():""}</div>
+      <p style="font-size:9px;color:#475569;margin-top:5px">⚠ Les images collées restent en local uniquement</p>
     </div>`
   }
   return`<div class="sync-panel">
     <h3>☁ Synchronisation <span class="sync-badge off">INACTIVE</span></h3>
     <p style="font-size:10px;color:#64748B;margin-bottom:8px;line-height:1.5">
-      1. Crée un compte gratuit sur <a href="https://jsonbin.io" target="_blank" style="color:#38BDF8">jsonbin.io</a><br>
-      2. Copie ta clé API (X-Master-Key) depuis le dashboard<br>
-      3. Colle-la ci-dessous
+      Aucun compte requis. Clique « Activer » pour synchroniser entre tes appareils.
     </p>
-    <div class="sync-row"><label>Clé API :</label><input class="sync-input" id="sync-api" value="${k.apiKey||""}" placeholder="$2a$10…" oninput="setSyncKeys({...getSyncKeys(),apiKey:this.value.trim()})"></div>
-    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.binId||""}" placeholder="Laisser vide pour créer" oninput="setSyncKeys({...getSyncKeys(),binId:this.value.trim()})"></div>
-    <div style="display:flex;gap:5px;margin-top:6px">
-      <button class="sync-btn primary" onclick="createBin()">Créer la sync</button>
-      <button class="sync-btn secondary" onclick="joinBin()">Rejoindre (j'ai un code)</button>
+    <div style="display:flex;gap:5px;margin-bottom:8px">
+      <button class="sync-btn primary" onclick="createSync()">Activer la sync</button>
     </div>
+    <p style="font-size:10px;color:#64748B;margin-bottom:6px">Ou entre un code existant :</p>
+    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.blobId||""}" placeholder="Coller le code ici…" oninput="setSyncKeys({...getSyncKeys(),blobId:this.value.trim()})"></div>
+    <div style="margin-top:5px"><button class="sync-btn secondary" onclick="joinSync()">Rejoindre</button></div>
     <div id="sync-status" class="sync-status"></div>
   </div>`
 }
