@@ -196,8 +196,9 @@ function cloudPush(){
   if(!isSyncOn())return;
   clearTimeout(syncTimer);
   syncTimer=setTimeout(()=>{
-    const k=getSyncKeys();const d=localStorage.getItem(SK);
-    fetch("https://api.jsonbin.io/v3/b/"+k.binId,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey},body:d})
+    const k=getSyncKeys();let d=localStorage.getItem(SK);
+    if(d&&d.length>95000){try{const obj=JSON.parse(d);obj.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});d=JSON.stringify(obj)}catch{}}
+    fetch("https://api.jsonbin.io/v3/b/"+k.binId,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey.trim()},body:d})
     .then(r=>{if(!r.ok)throw r;setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Synchronisé "+new Date().toLocaleTimeString())})
     .catch(()=>updSyncUI("err","Erreur de sync"))
   },1500);
@@ -206,7 +207,7 @@ function cloudPush(){
 function cloudPull(cb){
   const k=getSyncKeys();if(!k.apiKey||!k.binId){if(cb)cb();return}
   updSyncUI("","Chargement…");
-  fetch("https://api.jsonbin.io/v3/b/"+k.binId+"/latest",{headers:{"X-Master-Key":k.apiKey}})
+  fetch("https://api.jsonbin.io/v3/b/"+k.binId+"/latest",{headers:{"X-Master-Key":k.apiKey.trim()}})
   .then(r=>{if(!r.ok)throw r;return r.json()})
   .then(data=>{
     const remote=JSON.stringify(data.record);
@@ -219,18 +220,25 @@ function cloudPull(cb){
 }
 
 function createBin(){
-  const k=getSyncKeys();if(!k.apiKey){alert("Entre ta clé API d'abord.");return}
-  const d=localStorage.getItem(SK)||'{"projects":[],"trash":[]}';
-  updSyncUI("","Création…");
+  const k=getSyncKeys();
+  if(!k.apiKey||!k.apiKey.trim()){alert("Entre ta clé API d'abord.");return}
+  k.apiKey=k.apiKey.trim();setSyncKeys(k);
+  let d=localStorage.getItem(SK)||'{"projects":[],"trash":[]}';
+  /* Strip base64 images if data too large (JSONBin free = 100KB) */
+  if(d.length>95000){
+    try{const obj=JSON.parse(d);obj.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});d=JSON.stringify(obj);
+    updSyncUI("","Création (images exclues de la sync)…")}catch{}
+  }else{updSyncUI("","Création…")}
   fetch("https://api.jsonbin.io/v3/b",{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":k.apiKey,"X-Bin-Private":"true","X-Bin-Name":"todolist"},body:d})
-  .then(r=>{if(!r.ok)throw r;return r.json()})
-  .then(data=>{
-    const binId=data.metadata.id;
+  .then(r=>r.json().then(body=>({ok:r.ok,status:r.status,body})))
+  .then(({ok,status,body})=>{
+    if(!ok){updSyncUI("err","Erreur "+status+" : "+(body.message||JSON.stringify(body)));return}
+    const binId=body.metadata.id;
     setSyncKeys({...k,binId,lastSync:Date.now()});
     updSyncUI("ok","Sync activée !");
     render();
   })
-  .catch(e=>{updSyncUI("err","Erreur : vérifie ta clé API");console.error(e)})
+  .catch(e=>{updSyncUI("err","Erreur réseau : "+e.message);console.error(e)})
 }
 
 function joinBin(){
@@ -269,8 +277,8 @@ function syncPanel(){
       2. Copie ta clé API (X-Master-Key) depuis le dashboard<br>
       3. Colle-la ci-dessous
     </p>
-    <div class="sync-row"><label>Clé API :</label><input class="sync-input" id="sync-api" value="${k.apiKey||""}" placeholder="$2a$10…" oninput="setSyncKeys({...getSyncKeys(),apiKey:this.value})"></div>
-    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.binId||""}" placeholder="Laisser vide pour créer" oninput="setSyncKeys({...getSyncKeys(),binId:this.value})"></div>
+    <div class="sync-row"><label>Clé API :</label><input class="sync-input" id="sync-api" value="${k.apiKey||""}" placeholder="$2a$10…" oninput="setSyncKeys({...getSyncKeys(),apiKey:this.value.trim()})"></div>
+    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.binId||""}" placeholder="Laisser vide pour créer" oninput="setSyncKeys({...getSyncKeys(),binId:this.value.trim()})"></div>
     <div style="display:flex;gap:5px;margin-top:6px">
       <button class="sync-btn primary" onclick="createBin()">Créer la sync</button>
       <button class="sync-btn secondary" onclick="joinBin()">Rejoindre (j'ai un code)</button>
