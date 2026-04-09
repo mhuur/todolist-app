@@ -185,15 +185,15 @@ const HL_PASTEL=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#A5F3FC","#BFDBFE","#C
 function load(){let d=localStorage.getItem(SK);if(!d&&typeof INITIAL_DATA!=='undefined'){d=JSON.stringify(INITIAL_DATA);localStorage.setItem(SK,d)}try{if(d){const p=JSON.parse(d);S.projects=p.projects||[];if(p.trash)S.trash=p.trash;S.projects.forEach(p=>{S.openProjects[p.id]=true;S.showDone[p.id]=false;if(p.top===undefined)p.top=false;p.actions.forEach(a=>{if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title=""})})}}catch{}}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash}))}catch{};cloudPush()}
 
-/* ── Cloud Sync (jsonblob.com — aucun compte requis) ── */
+/* ── Cloud Sync (npoint.io — aucun compte requis, CORS garanti) ── */
 const SYNC_KEYS="todolist-sync-keys";
 let syncTimer=null;
 function getSyncKeys(){try{return JSON.parse(localStorage.getItem(SYNC_KEYS))||{}}catch{return{}}}
 function setSyncKeys(k){localStorage.setItem(SYNC_KEYS,JSON.stringify(k))}
-function isSyncOn(){return!!getSyncKeys().blobId}
+function isSyncOn(){return!!getSyncKeys().npId}
 
 function stripImg(d){
-  if(!d||d.length<90000)return d;
+  if(!d)return d;
   try{const o=JSON.parse(d);o.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image locale]"')})});return JSON.stringify(o)}catch{return d}
 }
 
@@ -202,17 +202,17 @@ function cloudPush(){
   clearTimeout(syncTimer);
   syncTimer=setTimeout(()=>{
     const k=getSyncKeys();const d=stripImg(localStorage.getItem(SK));
-    fetch("https://jsonblob.com/api/jsonBlob/"+k.blobId,{method:"PUT",headers:{"Content-Type":"application/json","Accept":"application/json"},body:d})
-    .then(r=>{if(!r.ok)throw new Error(r.status);setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Sync ✓ "+new Date().toLocaleTimeString())})
+    fetch("https://api.npoint.io/"+k.npId,{method:"POST",headers:{"Content-Type":"application/json"},body:d})
+    .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);setSyncKeys({...k,lastSync:Date.now()});updSyncUI("ok","Sync ✓ "+new Date().toLocaleTimeString())})
     .catch(e=>updSyncUI("err","Erreur sync : "+e.message))
   },2000);
 }
 
 function cloudPull(cb){
-  const k=getSyncKeys();if(!k.blobId){if(cb)cb();return}
+  const k=getSyncKeys();if(!k.npId){if(cb)cb();return}
   updSyncUI("","Chargement…");
-  fetch("https://jsonblob.com/api/jsonBlob/"+k.blobId,{headers:{"Accept":"application/json"}})
-  .then(r=>{if(!r.ok)throw new Error(r.status);return r.text()})
+  fetch("https://api.npoint.io/"+k.npId)
+  .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text()})
   .then(txt=>{
     localStorage.setItem(SK,txt);
     setSyncKeys({...k,lastSync:Date.now()});
@@ -225,23 +225,29 @@ function cloudPull(cb){
 function createSync(){
   const d=stripImg(localStorage.getItem(SK)||'{"projects":[],"trash":[]}');
   updSyncUI("","Création en cours…");
-  fetch("https://jsonblob.com/api/jsonBlob",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:d})
+  fetch("https://api.npoint.io/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:d})})
   .then(r=>{
-    if(!r.ok)throw new Error("Erreur "+r.status);
-    const loc=r.headers.get("Location")||"";
-    const blobId=loc.split("/").pop();
-    if(!blobId)throw new Error("Pas d'ID retourné");
-    setSyncKeys({blobId,lastSync:Date.now()});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    return r.json();
+  })
+  .then(data=>{
+    if(!data.id)throw new Error("Pas d'ID");
+    setSyncKeys({npId:data.id,lastSync:Date.now()});
+    /* Push actual data to the created endpoint */
+    return fetch("https://api.npoint.io/"+data.id,{method:"POST",headers:{"Content-Type":"application/json"},body:d});
+  })
+  .then(r=>{
+    if(!r.ok)throw new Error("HTTP "+r.status);
     updSyncUI("ok","Sync activée !");
     render();
   })
-  .catch(e=>{updSyncUI("err",e.message);console.error(e)})
+  .catch(e=>{updSyncUI("err","Erreur : "+e.message);console.error(e)})
 }
 
 function joinSync(){
   const k=getSyncKeys();
-  if(!k.blobId||!k.blobId.trim()){alert("Entre le code sync.");return}
-  k.blobId=k.blobId.trim();setSyncKeys(k);
+  if(!k.npId||!k.npId.trim()){alert("Entre le code sync.");return}
+  k.npId=k.npId.trim();setSyncKeys(k);
   cloudPull(()=>{load();render()})
 }
 
@@ -260,7 +266,7 @@ function syncPanel(){
   if(on){
     return`<div class="sync-panel">
       <h3>☁ Synchronisation <span class="sync-badge on">ACTIVE</span></h3>
-      <div class="sync-row"><label>Code sync :</label><input class="sync-input code" value="${k.blobId}" readonly onclick="this.select();document.execCommand('copy');updSyncUI('ok','Code copié !')"></div>
+      <div class="sync-row"><label>Code sync :</label><input class="sync-input code" value="${k.npId}" readonly onclick="this.select();document.execCommand('copy');updSyncUI('ok','Code copié !')"></div>
       <div style="display:flex;gap:5px;margin-top:6px">
         <button class="sync-btn primary" onclick="cloudPull(()=>{load();render()})">↓ Récupérer</button>
         <button class="sync-btn primary" onclick="cloudPush()">↑ Envoyer</button>
@@ -279,7 +285,7 @@ function syncPanel(){
       <button class="sync-btn primary" onclick="createSync()">Activer la sync</button>
     </div>
     <p style="font-size:10px;color:#64748B;margin-bottom:6px">Ou entre un code existant :</p>
-    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.blobId||""}" placeholder="Coller le code ici…" oninput="setSyncKeys({...getSyncKeys(),blobId:this.value.trim()})"></div>
+    <div class="sync-row"><label>Code sync :</label><input class="sync-input code" id="sync-bin" value="${k.npId||""}" placeholder="Coller le code ici…" oninput="setSyncKeys({...getSyncKeys(),npId:this.value.trim()})"></div>
     <div style="margin-top:5px"><button class="sync-btn secondary" onclick="joinSync()">Rejoindre</button></div>
     <div id="sync-status" class="sync-status"></div>
   </div>`
