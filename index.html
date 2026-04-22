@@ -7,18 +7,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding:14px 10px 30px;color:#E2E8F0;font-size:12px}
-.ct{max-width:720px;margin:0 auto}
-.hd{text-align:center;margin-bottom:10px}
-.hd h1{font-size:18px;font-weight:800;color:#fff}
-.hd .st{color:#64748B;font-size:10px;margin-top:1px}
-.io{margin-top:4px;display:flex;justify-content:center;gap:5px}
-.io button{border:1px solid #2A3A52;border-radius:5px;padding:2px 8px;font-size:9px;font-weight:600;font-family:inherit;cursor:pointer;background:#162032;color:#64748B;transition:all .15s}
-.io button:hover{border-color:#38BDF8;color:#38BDF8}
-.tabs{display:flex;gap:2px;margin-bottom:8px;background:#162032;border:1px solid #2A3A52;border-radius:8px;padding:2px}
-.tb{flex:1;padding:4px 0;border:none;border-radius:6px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;background:transparent;color:#64748B;white-space:nowrap;transition:all .12s}
-.tb.on{background:#0284C7;color:#fff;box-shadow:0 1px 3px rgba(14,165,233,.3)}
-.tb.tr.on{background:#7F1D1D;color:#FCA5A5}
+body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding:0;color:#E2E8F0;font-size:12px;display:flex}
+.sidebar{width:56px;min-height:100vh;background:#0D1526;border-right:1px solid #1E293B;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;left:0;top:0;z-index:50}
+.sb-btn{width:42px;height:38px;border:none;border-radius:8px;background:transparent;color:#4B5563;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:inherit;font-size:7px;font-weight:700;transition:all .12s;padding:2px}
+.sb-btn:hover{background:#162032;color:#94A3B8}
+.sb-btn.on{background:#0C2D4A;color:#38BDF8}
+.sb-btn svg{flex-shrink:0}
+.sb-spacer{flex:1}
+.avatar-wrap{position:relative;cursor:pointer;margin-top:4px}
+.avatar-wrap img{width:32px;height:32px;border-radius:50%;border:2px solid #2A3A52;transition:border-color .15s}
+.avatar-wrap:hover img{border-color:#38BDF8}
+.avatar-menu{display:none;position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:#1C2A3F;border:1px solid #374863;border-radius:8px;padding:8px 12px;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:100}
+.avatar-wrap:hover .avatar-menu{display:block}
+.avatar-menu .am-name{font-size:10px;color:#94A3B8;margin-bottom:4px}
+.avatar-menu .am-sync{font-size:8px;margin-bottom:6px}
+.avatar-menu button{border:none;background:transparent;color:#F87171;cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;padding:2px 0}
+.avatar-menu button:hover{text-decoration:underline}
+.main{margin-left:56px;flex:1;padding:14px 12px 30px;max-width:720px}
+/* Status styles */
+.ar.ec{background:rgba(56,189,248,.06);border-color:rgba(56,189,248,.18);box-shadow:inset 0 0 0 1px rgba(56,189,248,.08)}
+.ar.ec .as{color:#E2E8F0}
+.st-select{border-radius:4px;padding:1px 3px;font-size:8px;font-weight:700;font-family:inherit;cursor:pointer;outline:none;background:#1E293B;border:1px solid #2A3A52;color:#64748B}
+.ar.ec .st-select{border-color:rgba(56,189,248,.3);color:#38BDF8}
+.ar.wt .st-select{border-color:rgba(125,211,252,.3);color:#7DD3FC}
+/* Validate button */
+.bdn{background:linear-gradient(135deg,#0284C7,#0EA5E9);color:#fff;border-radius:4px}.bdn:hover{box-shadow:0 0 6px rgba(56,189,248,.3)}
 .bar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
 .bar-l{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .bar-r{display:flex;gap:3px;flex-wrap:wrap}
@@ -31,7 +44,6 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .pc{background:#162032;border-radius:10px;border:1px solid #2A3A52;margin-bottom:6px;overflow:hidden}
 .pc.dragging{opacity:.35}
 .pc.dot{box-shadow:0 -2px 0 0 #38BDF8}.pc.dob{box-shadow:0 2px 0 0 #38BDF8}
-.pb{height:2px;background:#1E293B}.pf{height:100%;background:linear-gradient(90deg,#34D399,#10B981);transition:width .4s}
 .ph{padding:6px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
 .dh{cursor:grab;color:#4B5563;display:flex;align-items:center;flex-shrink:0;opacity:.5}.dh:hover{opacity:1}
 .ph input{flex:1;border:none;background:transparent;font-size:12px;font-weight:700;font-family:inherit;color:#E2E8F0;outline:none;min-width:0}
@@ -79,8 +91,6 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .ati{width:38px;border:1px solid #2A3A52;border-radius:3px;padding:1px 2px;font-size:9px;font-family:inherit;font-weight:600;background:#1E293B;color:#38BDF8;outline:none;text-align:right}
 .atl{font-size:8px;color:#64748B}
 .bi{border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
-.bdn{background:#10B981;color:#fff}.bdn:hover{background:#34D399}
-.bwt{background:#F59E0B;color:#fff}.bwt.aw{background:#B45309;box-shadow:inset 0 0 0 1.5px #FDE68A}
 .bud{background:#334155;color:#94A3B8}
 .btr{background:transparent;color:#4B5563;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
 
@@ -156,88 +166,57 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .btn-google img{width:20px;height:20px}
 .login-loading{color:#64748B;font-size:11px;margin-top:8px}
 .login-err{color:#F87171;font-size:11px;margin-top:8px}
-.user-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px}
-.user-bar img{width:18px;height:18px;border-radius:50%}
-.user-bar span{font-size:9px;color:#64748B}
-.user-bar button{border:none;background:transparent;color:#64748B;cursor:pointer;font-size:9px;font-family:inherit;text-decoration:underline;padding:0}
-.user-bar button:hover{color:#F87171}
 .sync-indicator{font-size:8px;color:#34D399;margin-left:4px}
 .sync-indicator.saving{color:#FBBF24}
 .sync-indicator.error{color:#F87171}
 
 /* ── Mobile responsive ── */
 @media(max-width:600px){
-  body{padding:8px 6px 24px;font-size:13px}
-  .ct{max-width:100%}
-  .hd h1{font-size:16px}
-  /* Tabs: scrollable, bigger touch */
-  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;gap:1px;padding:2px}
-  .tb{padding:7px 2px;font-size:9px;min-width:0;flex:none;width:19%}
-  /* Project header */
-  .ph{padding:8px 8px;gap:5px;flex-wrap:wrap}
-  .ph input{font-size:13px;min-width:100px}
+  body{flex-direction:column}
+  .sidebar{width:100%;min-height:auto;height:48px;flex-direction:row;position:fixed;bottom:0;top:auto;left:0;border-right:none;border-top:1px solid #1E293B;padding:0 4px;gap:0;justify-content:space-around;z-index:100}
+  .sb-btn{width:auto;height:auto;padding:4px 8px;gap:0;flex:1}
+  .sb-btn span{font-size:7px}
+  .sb-spacer{display:none}
+  .avatar-wrap{order:10}
+  .avatar-wrap img{width:26px;height:26px}
+  .avatar-menu{bottom:auto;top:-80px;right:0;left:auto;transform:none}
+  .main{margin-left:0;padding:8px 8px 60px;max-width:100%}
+  .ph{padding:8px;gap:5px;flex-wrap:wrap}
+  .ph input{font-size:13px;min-width:80px}
   .ph-right{gap:6px}
   .ph-date{font-size:11px;padding:2px 6px}
   .ph-btn{font-size:16px;padding:4px}
   .dt{font-size:10px}
-  /* Action row: wrap to 2 lines */
   .at{flex-wrap:wrap;gap:4px}
-  .as{flex-basis:calc(100% - 100px);font-size:12px;order:1}
-  .ac{order:0}
-  .dh{order:0}
-  .apl{order:1;font-size:10px}
-  .ari{order:2;gap:3px}
-  .us{order:3;font-size:10px;padding:3px 6px}
-  .adi{order:4;font-size:10px;padding:2px 6px}
-  .adtg{order:5;font-size:9px}
-  .ati{order:6;width:44px;font-size:10px;padding:2px 4px}
-  .atl{order:7;font-size:9px}
-  .bi{width:26px;height:26px;font-size:12px}
-  /* Detail panel */
+  .as{font-size:12px}
+  .bi{width:26px;height:26px;font-size:13px}
+  .st-select{font-size:9px;padding:3px 4px}
+  .us{font-size:10px;padding:3px 6px}
+  .adi{font-size:10px;padding:2px 6px}
+  .ati{width:44px;font-size:10px;padding:2px 4px}
   .adl{padding:6px 0 0 12px}
   .atx{font-size:13px;line-height:1.5}
   .fbtn{width:28px;height:26px;font-size:13px}
   .ffs{height:26px;font-size:10px}
-  /* Task groups */
   .tg-hd{padding:4px 6px}
   .tg-title{font-size:12px}
   .tg-add-btn{font-size:16px;padding:2px 6px}
   .tg-del{font-size:13px;padding:4px}
-  /* Urgency groups */
-  .ugt{font-size:11px;padding:10px 0 4px}
-  .pgl{font-size:10px}
-  /* Done rows */
-  .ddh{font-size:11px}
-  /* Buttons */
   .bp{padding:7px 14px;font-size:12px}
   .bs{padding:5px 10px;font-size:11px}
   .baa{padding:6px 0;font-size:11px}
-  /* Time table */
   .tt{font-size:11px}
   .tt th,.tt td{padding:5px 4px}
   .wn button{padding:4px 10px;font-size:11px}
   .wn span{font-size:12px}
-  /* Login */
   .login-box{padding:24px 20px}
   .btn-google{padding:12px 20px;font-size:14px}
-  /* User bar */
-  .user-bar{gap:8px}
-  .user-bar span{font-size:10px}
-  .user-bar button{font-size:10px}
-  .user-bar img{width:22px;height:22px}
-  /* Toolbar */
-  .bar{gap:6px}
-  /* Trash */
-  .tri{padding:8px}
-  .tii{font-size:11px}
+  .tri{padding:8px}.tii{font-size:11px}
   .brs,.bpu{padding:5px 10px;font-size:10px}
-  /* Wait */
-  .aw{font-size:11px}
-  .aw input{font-size:11px}
-  /* Export buttons */
-  .io button{padding:4px 10px;font-size:10px}
-  /* View toggle */
-  .vt{margin-bottom:8px}
+  .aw{font-size:11px}.aw input{font-size:11px}
+  .ugt{font-size:11px;padding:10px 0 4px}
+  .pgl{font-size:10px}
+  .ddh{font-size:11px}
   .vtb{padding:5px 0;font-size:10px}
 }
 </style>
@@ -250,7 +229,7 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<div id="login-screen" class="login-screen"><div class="login-box"><h1>🌊 Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Se connecter avec Google</button><div id="login-msg"></div></div></div><div class="ct" id="app" style="display:none"></div>
+<div id="login-screen" class="login-screen"><div class="login-box"><h1>🌊 Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div>
 <script>
 /* ── Firebase Init ── */
 firebase.initializeApp({
@@ -404,7 +383,7 @@ function gDD(e,u){e.preventDefault();e.currentTarget.classList.remove('dz');if(d
 
 /* ── Status ── */
 function togD(pid,aid){const a=fa(pid,aid);if(!a)return;if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date())}save();render()}
-function togW(pid,aid){const a=fa(pid,aid);if(!a)return;a.status=a.status==="waiting"?"todo":"waiting";save();render()}
+function uaSt(pid,aid,v){const a=fa(pid,aid);if(!a)return;a.status=v;save();render()}
 function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
@@ -414,7 +393,7 @@ function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.
 function restT(i){const it=S.trash[i];if(!it)return;if(it.type==="project"){S.projects.push(it.data);S.openProjects[it.data.id]=true}else{const p=fp(it.pid);if(p)p.actions.push(it.data)}S.trash.splice(i,1);save();render()}
 function purgeT(i){S.trash.splice(i,1);save();render()}
 function emptyT(){S.trash=[];save();render()}
-function colAll(){S.projects.forEach(p=>{S.openProjects[p.id]=false});render()}
+function colAll(){S.projects.forEach(p=>{S.openProjects[p.id]=false;p.tasks.forEach(t=>{S.openTasks[t.id]=false})});S.ex={};render()}
 /* Tasks */
 function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
 function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=>t.id!==tid);p.actions.forEach(a=>{if(a.taskId===tid)a.taskId=""});save();render()}
@@ -443,22 +422,23 @@ function sEd(){document.querySelectorAll('.atx[contenteditable]').forEach(el=>{i
 function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="todolist-backup.json";a.click();URL.revokeObjectURL(u)}
 function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
 
-function sortA(acts){const ac=acts.filter(x=>x.status!=="done");ac.sort((x,y)=>{if(UO[x.urgency]!==UO[y.urgency])return UO[x.urgency]-UO[y.urgency];if(x.status==="waiting"&&y.status!=="waiting")return 1;if(x.status!=="waiting"&&y.status==="waiting")return -1;return 0});return ac}
+function sortA(acts){const ac=acts.filter(x=>x.status!=="done");ac.sort((x,y)=>{if(UO[x.urgency]!==UO[y.urgency])return UO[x.urgency]-UO[y.urgency];const so={encours:0,todo:1,waiting:2};if((so[x.status]||1)!==(so[y.status]||1))return(so[x.status]||1)-(so[y.status]||1);return 0});return ac}
 
 function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`).join('');let fs=HF.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');let ps=HP.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');return`<div class="fb"><select class="ffs" onchange="fF(this)" onmousedown="event.stopPropagation()">${fo}</select><div class="fsp"></div><button class="fbtn" onmousedown="event.preventDefault();fC('bold')"><b>G</b></button><button class="fbtn" onmousedown="event.preventDefault();fC('italic')"><i>I</i></button><button class="fbtn" onmousedown="event.preventDefault();fC('underline')"><u>S</u></button><button class="fbtn" onmousedown="event.preventDefault();fC('strikeThrough')"><s>B</s></button><div class="fsp"></div><button class="fbtn fhl" onmousedown="event.preventDefault();tHP(this)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="12" width="14" height="3" rx="1" fill="#FBBF24"/><path d="M3.5 10l2-6h1L9 10M4.5 8h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg></button><div class="hp"><div class="hl">Flash</div><div class="hr">${fs}</div><div class="hl">Pastel</div><div class="hr">${ps}</div><div class="hl">Retirer</div><div class="hr"><div class="hs none" onclick="aHL('none','${pid}','${aid}')"></div></div></div></div>`}
 
 /* ── Shared action row ── */
 function rA(a,pid,o){
-  const d=a.status==="done",w=a.status==="waiting",adc=dcc(a.deadline),adl=dll(a.deadline);
-  const uc=d?"dn":w?"wt":"u"+a.urgency[0];
+  const d=a.status==="done",w=a.status==="waiting",ec=a.status==="encours",adc=dcc(a.deadline),adl=dll(a.deadline);
+  const uc=d?"dn":w?"wt":ec?"ec":"u"+a.urgency[0];
   const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
-  const sb=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')">${I.check}</button><button class="bi bwt ${w?"aw":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')">${I.pause}</button>`;
+  const sb=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">⚓</button>`;
   return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()">${I.grip}</span>`:""}
     <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
     ${sp?`<span class="apl">${esc(pN(p))}</span>`:""}
     <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">
+    <select class="st-select" onchange="uaSt('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"><option value="todo" ${a.status==="todo"?"selected":""}>Non commencé</option><option value="encours" ${a.status==="encours"?"selected":""}>En cours</option><option value="waiting" ${a.status==="waiting"?"selected":""}>En attente</option></select>
     <select class="us" onchange="uaU('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"><option value="high" ${a.urgency==="high"?"selected":""}>Haut</option><option value="medium" ${a.urgency==="medium"?"selected":""}>Moyen</option><option value="low" ${a.urgency==="low"?"selected":""}>Faible</option></select>
     <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
     ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
@@ -471,36 +451,31 @@ function rA(a,pid,o){
   </div></div>`}
 
 /* ── Render ── */
+const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`};
 function render(){
-  const ta=S.projects.reduce((s,p)=>s+p.actions.length,0);
-  const td=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="done").length,0);
-  const tw=S.projects.reduce((s,p)=>s+p.actions.filter(a=>a.status==="waiting").length,0);
-  let h=`<div class="hd"><h1>🌊 Ma Todolist</h1><div class="st">${S.projects.length} projets · ${td}/${ta} terminées${tw?" · "+tw+" en attente":""}</div>
-  <div class="user-bar">${currentUser?`<img src="${currentUser.photoURL||""}" referrerpolicy="no-referrer"><span>${currentUser.displayName||currentUser.email}</span><span id="sync-ind" class="sync-indicator">✓</span><button onclick="doLogout()">Déconnexion</button>`:""}</div>
-  <div class="io"><button onclick="expD()">⬇ Exporter</button><button onclick="impD()">⬆ Importer</button></div></div>
-  <div class="tabs">
-    <button class="tb ${S.tab==="projects"?"on":""}" onclick="sT('projects')">Projets</button>
-    <button class="tb ${S.tab==="global"?"on":""}" onclick="sT('global')">Vue globale</button>
-    <button class="tb ${S.tab==="done"?"on":""}" onclick="sT('done')">Terminées (${td})</button>
-    <button class="tb ${S.tab==="time"?"on":""}" onclick="sT('time')">${I.clock} Temps</button>
-    <button class="tb tr ${S.tab==="trash"?"on":""}" onclick="sT('trash')">${I.trash}</button>
-  </div>`;
+  /* Sidebar */
+  const tabs=[{k:"projects",l:"Projets",i:SB_ICONS.projects},{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  let sb=`<div class="sidebar">`;
+  tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
+  sb+=`<div class="sb-spacer"></div>`;
+  if(currentUser)sb+=`<div class="avatar-wrap"><img src="${currentUser.photoURL||""}" referrerpolicy="no-referrer" alt=""><div class="avatar-menu"><div class="am-name">${esc(currentUser.displayName||currentUser.email)}</div><div class="am-sync"><span id="sync-ind" class="sync-indicator">✓</span> Synchronisé</div><button onclick="doLogout()">Déconnexion</button></div></div>`;
+  sb+=`</div>`;
+  /* Main */
+  let h="";
   if(S.tab==="projects")h+=rPT();else if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else h+=rTR();
-  document.getElementById("app").innerHTML=h;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
+  document.getElementById("app").innerHTML=sb+`<div class="main">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
 
 /* ── Projects tab ── */
 function rPT(){let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="addP()">${I.plus} Projet</button><button class="bs" onclick="colAll()">${I.col} Replier</button></div><div class="bar-r"><button class="bs ${S.sortDeadline?"on":""}" onclick="ts('deadline')">Deadline</button><button class="bs ${S.sortAlpha?"on":""}" onclick="ts('alpha')">Z-A</button></div></div>`;
 let ps=[...S.projects];if(S.sortDeadline)ps.sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return -1;return a.deadline.localeCompare(b.deadline)});if(S.sortAlpha)ps.sort((a,b)=>pN(b).localeCompare(pN(a)));
 if(!ps.length)h+=`<div class="es">Aucun projet</div>`;else ps.forEach(p=>{h+=rP(p)});return h}
 
-function rP(p){const o=S.openProjects[p.id]!==false;const allActs=p.actions;const activeActs=sortA(allActs);const t=allActs.length,d=allActs.filter(a=>a.status==="done").length,pct=t?d/t*100:0,c=dcc(p.deadline);
+function rP(p){const o=S.openProjects[p.id]!==false;const allActs=p.actions;const activeActs=sortA(allActs);const c=dcc(p.deadline);
 let ah="";
 if(o){
   ah=`<div class="al">`;
-  /* Standalone actions (no task) */
   const standalone=activeActs.filter(a=>!a.taskId);
   standalone.forEach(a=>{ah+=rA(a,p.id,{})});
-  /* Task groups */
   p.tasks.forEach((tk,ti)=>{
     const tkActs=activeActs.filter(a=>a.taskId===tk.id);
     const tkOpen=S.openTasks[tk.id]!==false;
@@ -512,9 +487,9 @@ if(o){
     }
     ah+=`</div>`;
   });
-  ah+=`<button class="baa" onclick="addTask('${p.id}')" style="margin-top:3px">${I.plus} Tâche</button></div>`;
+  ah+=`</div>`;
 }
-return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="pb"><div class="pf" style="width:${pct}%"></div></div><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
+return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
 
 /* ── Global tab ── */
 function rGT(){
