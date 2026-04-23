@@ -65,12 +65,12 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar:hover{background:rgba(92,184,240,.03)}
 .ar.ec{background:rgba(92,184,240,.06);border-color:rgba(92,184,240,.15)}
 .ar.ec .as{color:#E2E8F0}
-.ar.nc{opacity:.45}
-.ar.nc .as{color:#64748B}
-.ar.wt{opacity:.65}
-.ar.wt .as{font-style:italic;color:#F59E0B}
-.ar.dn{opacity:.4}.ar.dn .as{text-decoration:line-through;color:#4B5563}
+.ar.nc .as{color:#475569}.ar.nc .ac{color:#334155}.ar.nc .a-tk{color:#334155}.ar.nc .a-sub{color:#293548}.ar.nc .adi,.ar.nc .ati,.ar.nc .atl,.ar.nc .adtg{color:#334155}.ar.nc .bi{opacity:.35}.ar.nc .dep-btn{opacity:.25}
+.ar.wt .as{font-style:italic;color:#F59E0B}.ar.wt .ac{color:#92400E}.ar.wt .a-tk{color:#92400E}.ar.wt .a-sub{color:#78350F}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#92400E}
+.ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
+/* Indent for dependent (nc) actions */
+.ar.nc.indented{margin-left:20px;border-left:2px solid #1E3050}
 .ar.dot{box-shadow:0 -2px 0 0 #5CB8F0}.ar.dob{box-shadow:0 2px 0 0 #5CB8F0}
 .at{display:flex;align-items:center;gap:4px;width:100%}
 .ac{cursor:pointer;color:#5CB8F0;display:flex;align-items:center;transition:transform .15s;flex-shrink:0}
@@ -470,7 +470,7 @@ function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`)
 function rA(a,pid,o){
   const st=getStatus(a,pid);const d=st==="done",w=st==="wt",nc=st==="nc",ec=st==="ec";
   const uc=d?"dn":w?"wt":nc?"nc":"ec";
-  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
+  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;const indent=o&&o.indent;
   const adc=dcc(a.deadline),adl=dll(a.deadline);
   const pLabel=sp?esc(pN(p)):"";
   const tkLabel=tName(pid,a.taskId);
@@ -483,7 +483,7 @@ function rA(a,pid,o){
   otherActs.sort((a,b)=>{const ai=S.globalOrder.indexOf(a.id),bi=S.globalOrder.indexOf(b.id);return(ai===-1?9999:ai)-(bi===-1?9999:bi)});
   let depHtml="";
   if(!d&&otherActs.length){depHtml=`<div class="dep-wrap"><button class="dep-btn" onclick="event.stopPropagation();togDepMenu('${a.id}')" title="Dépendances">🔗</button><div class="dep-menu" id="dep_${a.id}" onclick="event.stopPropagation()">${otherActs.map(x=>`<label><input type="checkbox" ${(a.blockedBy||[]).includes(x.id)?"checked":""} onchange="event.stopPropagation();togDep('${pid}','${a.id}','${x.id}')"> ${esc(x.title||"Sans titre")}</label>`).join("")}</div></div>`}
-  return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  return`<div id="ar_${a.id}" class="ar ${uc} ${indent?"indented":""} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     <span class="ac">${I.chev}</span>
     <div class="a-info">${tkLabel?`<span class="a-tk">${esc(tkLabel)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub">${pLabel}</div>`:""}</div>
@@ -554,18 +554,32 @@ function rGT(){
   let filtered=all;
   if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a,a.pId);return st===S.gFilter})}
   if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
+  /* Build ordered list with dependency grouping */
+  function buildGrouped(items){
+    const ordered=[];S.globalOrder.forEach(id=>{const a=items.find(x=>x.id===id);if(a)ordered.push(a)});
+    /* Separate nc (blocked) from others */
+    const main=[],blocked=[];
+    ordered.forEach(a=>{const st=getStatus(a,a.pId);if(st==='nc'&&a.blockedBy&&a.blockedBy.length)blocked.push(a);else main.push(a)});
+    /* Insert blocked actions after their lowest blocking action */
+    const result=[...main];
+    blocked.forEach(ba=>{
+      let maxIdx=-1;
+      ba.blockedBy.forEach(bid=>{const idx=result.findIndex(x=>x.id===bid);if(idx>maxIdx)maxIdx=idx});
+      if(maxIdx>=0)result.splice(maxIdx+1,0,{...ba,_indented:true});
+      else result.push({...ba,_indented:true});
+    });
+    return result;
+  }
   if(S.gv==="project"){
-    /* Group by project but order within each group follows globalOrder */
     const bp={};filtered.forEach(a=>{if(!bp[a.pId])bp[a.pId]=[];bp[a.pId].push(a)});
     Object.keys(bp).sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b)).forEach(k=>{
       const p=fp(k);
-      /* Sort actions within project by globalOrder */
-      bp[k].sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+      const grouped=buildGrouped(bp[k]);
       h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
-      bp[k].forEach(a=>{h+=rA(a,a.pId,{sp:false})})});
+      grouped.forEach(a=>{h+=rA(a,a.pId,{sp:false,indent:a._indented})})});
   }else{
-    const ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
-    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
+    const grouped=buildGrouped(filtered);
+    grouped.forEach(a=>{h+=rA(a,a.pId,{sp:true,indent:a._indented})});
   }
   return h}
 
