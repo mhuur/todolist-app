@@ -71,17 +71,22 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .tg.tg-dot{box-shadow:0 -2px 0 0 #38BDF8}.tg.tg-dob{box-shadow:0 2px 0 0 #38BDF8}
 
 /* Action row - clean design */
-.ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:8px;margin-bottom:3px;position:relative;border:none;border-left:3px solid transparent;transition:all .12s;cursor:pointer}
-.ar:hover{background:rgba(255,255,255,.02)}
-.ar.uh{border-left-color:#E24B4A}.ar.um{border-left-color:#EF9F27}.ar.ul{border-left-color:#378ADD}
+.ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:8px;margin-bottom:3px;position:relative;border:none;border-left:3px solid #2A3A52;transition:all .12s;cursor:pointer}
+.ar:hover{background:rgba(255,255,255,.03)}
 .ar.dn{opacity:.45;border-left-color:#4B5563}.ar.dn .a-title{text-decoration:line-through;color:#64748B}
-.ar.wt{opacity:.5}.ar.ec{background:rgba(56,189,248,.04);border-left-color:#38BDF8}
+.ar.wt{opacity:.5;border-left-color:#7DD3FC}.ar.ec{background:rgba(56,189,248,.04);border-left-color:#38BDF8}
 .ar.dragging{opacity:.2}.ar.dot{box-shadow:0 -2px 0 0 #38BDF8}.ar.dob{box-shadow:0 2px 0 0 #38BDF8}
-.at{display:flex;align-items:center;gap:6px;width:100%}
+.at{display:flex;align-items:center;gap:6px;width:100%;min-height:28px}
+/* Drag: entire row draggable on desktop, grip visible on hover */
+.dh{cursor:grab;color:#334155;display:flex;align-items:center;flex-shrink:0;opacity:0;transition:opacity .12s;padding:6px 2px;margin:-6px 0}
+.ar:hover .dh{opacity:.6}.dh:hover{opacity:1!important;color:#64748B}
+.dh:active{cursor:grabbing}
 .st-circ{width:16px;height:16px;border-radius:50%;border:1.5px solid #4B5563;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .st-circ:hover{border-color:#94A3B8}.st-circ.sc-ec{border-color:#38BDF8;background:rgba(56,189,248,.15)}.st-circ.sc-ec::after{content:"";width:6px;height:6px;border-radius:50%;background:#38BDF8}
 .st-circ.sc-wt{border-color:#7DD3FC;border-style:dashed}.st-circ.sc-dn{border-color:#34D399;background:#34D399}.st-circ.sc-dn::after{content:"✓";font-size:9px;color:#fff;font-weight:700}
-.a-content{flex:1;min-width:0}.a-title{font-size:12px;font-weight:600;color:#E2E8F0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-content{flex:1;min-width:0}
+.a-title{font-size:12px;font-weight:600;color:#E2E8F0;border:none;background:transparent;font-family:inherit;outline:none;width:100%;padding:0}
+.a-title::placeholder{color:#4B5563;font-weight:400}
 .a-ctx{font-size:9px;color:#4B5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}.a-ctx b{color:#64748B;font-weight:600}
 .a-badges{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .a-dl-badge{font-size:9px;padding:1px 6px;border-radius:10px;font-weight:600;background:rgba(100,116,139,.1);color:#94A3B8}
@@ -359,7 +364,6 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-const UO={high:0,medium:1,low:2};
 let S={projects:[],tab:"projects",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"priority",wo:0,openTasks:{},globalOrder:[],showWaiting:false,search:"",gFilter:"all"};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
@@ -435,6 +439,7 @@ function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefa
 function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
 function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
 function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function assignTask(pid,aid,tid){const a=fa(pid,aid);if(!a)return;if(tid==="__new__"){const p=fp(pid);if(!p)return;const t={id:gid(),title:""};p.tasks.push(t);S.openTasks[t.id]=true;a.taskId=t.id}else{a.taskId=tid}save();render()}
 
 /* ── Format ── */
 function fC(c,v){document.execCommand(c,false,v||null);sAE()}
@@ -450,28 +455,29 @@ function sEd(){document.querySelectorAll('.atx[contenteditable]').forEach(el=>{i
 function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="todolist-backup.json";a.click();URL.revokeObjectURL(u)}
 function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
 
-function sortA(acts){const ac=acts.filter(x=>x.status!=="done");ac.sort((x,y)=>{if(UO[x.urgency]!==UO[y.urgency])return UO[x.urgency]-UO[y.urgency];const so={encours:0,todo:1,waiting:2};if((so[x.status]||1)!==(so[y.status]||1))return(so[x.status]||1)-(so[y.status]||1);return 0});return ac}
+function sortA(acts){const ac=acts.filter(x=>x.status!=="done");ac.sort((x,y)=>{const so={encours:0,todo:1,waiting:2};return(so[x.status]||1)-(so[y.status]||1)});return ac}
 
 function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`).join('');let fs=HF.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');let ps=HP.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');return`<div class="fb"><select class="ffs" onchange="fF(this)" onmousedown="event.stopPropagation()">${fo}</select><div class="fsp"></div><button class="fbtn" onmousedown="event.preventDefault();fC('bold')"><b>G</b></button><button class="fbtn" onmousedown="event.preventDefault();fC('italic')"><i>I</i></button><button class="fbtn" onmousedown="event.preventDefault();fC('underline')"><u>S</u></button><button class="fbtn" onmousedown="event.preventDefault();fC('strikeThrough')"><s>B</s></button><div class="fsp"></div><button class="fbtn fhl" onmousedown="event.preventDefault();tHP(this)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="12" width="14" height="3" rx="1" fill="#FBBF24"/><path d="M3.5 10l2-6h1L9 10M4.5 8h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg></button><div class="hp"><div class="hl">Flash</div><div class="hr">${fs}</div><div class="hl">Pastel</div><div class="hr">${ps}</div><div class="hl">Retirer</div><div class="hr"><div class="hs none" onclick="aHL('none','${pid}','${aid}')"></div></div></div></div>`}
 
 /* ── Cycle status/priority ── */
 function cycleSt(pid,aid,e){e.stopPropagation();const a=fa(pid,aid);if(!a)return;const order=["todo","encours","waiting"];const i=order.indexOf(a.status);a.status=order[(i+1)%3];save();render()}
-function cyclePr(pid,aid,e){e.stopPropagation();const a=fa(pid,aid);if(!a)return;const order=["high","medium","low"];const i=order.indexOf(a.urgency);a.urgency=order[(i+1)%3];save();render()}
 function dlBadge(d){const v=du(d);if(v===null)return"";const cls=v<0?"late":v<=3?"soon":"ok";const txt=v<0?Math.abs(v)+"j retard":v===0?"Auj.":v+"j";return`<span class="a-dl-badge ${cls}">${txt}</span>`}
 
 /* ── Shared action row ── */
 function rA(a,pid,o){
   const d=a.status==="done",w=a.status==="waiting",ec=a.status==="encours";
-  const uc=d?"dn":w?"wt":ec?"ec":"u"+a.urgency[0];
+  const uc=d?"dn":w?"wt":ec?"ec":"";
   const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
   const tn=tName(pid,a.taskId);
   const scCls=d?"sc-dn":ec?"sc-ec":w?"sc-wt":"";
   const ctx=sp?`<div class="a-ctx"><b>${esc(pN(p))}</b>${tn?" › "+esc(tn):""}</div>`:(tn?`<div class="a-ctx">${esc(tn)}</div>`:"");
+  /* Subtask options for panel */
+  const tkOpts=p?p.tasks.map(t=>`<option value="${t.id}" ${a.taskId===t.id?"selected":""}>${esc(t.title||"Sans nom")}</option>`).join(''):"";
   return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" onclick="togX('${a.id}')" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
     <span class="st-circ ${scCls}" onclick="cycleSt('${pid}','${a.id}',event)" title="${d?"Terminé":ec?"En cours":w?"En attente":"Non commencé"}"></span>
-    <div class="a-content">${ctx}<div class="a-title">${esc(a.title)||"<span style='color:#4B5563'>Sans titre</span>"}</div></div>
+    <div class="a-content">${ctx}<input class="a-title" value="${esc(a.title)}" placeholder="Titre…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)"></div>
     <div class="a-badges">
       ${w&&a.waitReason?`<span class="a-wait-badge" title="${esc(a.waitReason)}">⏸ ${esc(a.waitReason)}</span>`:""}
       ${dlBadge(a.deadline)}
@@ -479,18 +485,15 @@ function rA(a,pid,o){
     </div>
   </div>
   <div class="a-panel" onclick="event.stopPropagation()">
-    <div class="a-prow"><input class="a-sum-input" value="${esc(a.title)}" placeholder="Titre de l'action…" oninput="uaT('${pid}','${a.id}',this.value)"></div>
     <div class="a-prow">
       <span class="a-plbl">Projet</span>
       <select onchange="mvAction('${pid}','${a.id}',this.value)">${S.projects.map(pr=>`<option value="${pr.id}" ${pr.id===pid?"selected":""}>${esc(pN(pr))}</option>`).join('')}</select>
+      <span class="a-plbl">Tâche</span>
+      <select onchange="assignTask('${pid}','${a.id}',this.value)"><option value="" ${!a.taskId?"selected":""}>— Aucune —</option>${tkOpts}<option value="__new__">＋ Nouvelle tâche</option></select>
     </div>
     <div class="a-prow">
       <span class="a-plbl">Statut</span>
       <select onchange="uaSt('${pid}','${a.id}',this.value)"><option value="todo" ${a.status==="todo"?"selected":""}>Non commencé</option><option value="encours" ${a.status==="encours"?"selected":""}>En cours</option><option value="waiting" ${a.status==="waiting"?"selected":""}>En attente</option></select>
-      <span class="a-plbl">Priorité</span>
-      <select onchange="uaU('${pid}','${a.id}',this.value)"><option value="high" ${a.urgency==="high"?"selected":""}>Haute</option><option value="medium" ${a.urgency==="medium"?"selected":""}>Moyenne</option><option value="low" ${a.urgency==="low"?"selected":""}>Faible</option></select>
-    </div>
-    <div class="a-prow">
       <span class="a-plbl">Deadline</span>
       <input type="date" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="this.showPicker&&this.showPicker()">
       <span class="a-plbl">Heures</span>
@@ -558,7 +561,7 @@ function syncGlobalOrder(all){
 function rGT(){
   /* Quick add bar */
   let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
-  let h=`<div class="qa"><input class="qa-input" id="qa-input" placeholder="Ajouter une action… (Entrée pour valider)" onkeydown="if(event.key==='Enter'){event.preventDefault();quickAdd()}"><select class="qa-select" id="qa-select"><option value="">Inbox</option>${projOpts}</select><button class="qa-btn" onclick="quickAdd()">＋</button></div>`;
+  let h=`<div class="qa"><input class="qa-input" id="qa-input" placeholder="Nouvelle action… (Entrée)" onkeydown="if(event.key==='Enter'){event.preventDefault();quickAdd()}"><select class="qa-select" id="qa-select"><option value="">Inbox</option>${projOpts}<option value="__new__">＋ Nouveau projet</option></select><button class="qa-btn" onclick="quickAdd()">＋</button></div>`;
   const searchIcon=`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
   h+=`<div class="search-wrap">${searchIcon}<input placeholder="Rechercher une action…" value="${esc(S.search)}" oninput="S.search=this.value;render()"></div>`;
   h+=`<div class="filters"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="priority"?"on":""}" onclick="S.gFilter='priority';render()">Priorités ↕</button><button class="chip ${S.gFilter==="project"?"on":""}" onclick="S.gFilter='project';render()">Par projet</button><button class="chip ${S.gFilter==="deadline"?"on":""}" onclick="S.gFilter='deadline';render()">Deadline</button></div>`;
@@ -664,13 +667,13 @@ function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:
 function quickAdd(){
   const inp=document.getElementById('qa-input');const sel=document.getElementById('qa-select');
   const title=(inp?inp.value:"").trim();if(!title)return;
-  const pid=sel?sel.value:"";
+  let pid=sel?sel.value:"";
+  /* Create new project if requested */
+  if(pid==="__new__"){const name=prompt("Nom du nouveau projet :");if(!name)return;const np={id:gid(),number:1,name:name,deadline:"",actions:[],tasks:[]};S.projects.push(np);S.openProjects[np.id]=true;pid=np.id}
   let p=fp(pid);
-  /* If no project selected, create "Inbox" project or find it */
   if(!p){p=S.projects.find(x=>x.name==="Inbox");if(!p){p={id:gid(),number:1,name:"Inbox",deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true}}
   const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:""};
-  p.actions.push(n);S.globalOrder.unshift(n.id);save();render();
-  /* Re-focus input after render */
+  p.actions.push(n);S.globalOrder.unshift(n.id);S.ex[n.id]=true;save();render();
   requestAnimationFrame(()=>{const el=document.getElementById('qa-input');if(el){el.value="";el.focus()}});
 }
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
