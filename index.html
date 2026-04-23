@@ -107,7 +107,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .done-tbl .dt-title{color:#CBD5E1;font-weight:600}
 .done-tbl .dt-date{color:#64748B;font-size:9px;text-align:right;width:80px;white-space:nowrap}
 .done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
-.done-tbl .dt-act{width:24px;text-align:center}
+.done-tbl .dt-act{width:44px;text-align:right;white-space:nowrap}
 .ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
 .aw-inline{font-size:9px;color:#F59E0B;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#F59E0B;font-style:italic;outline:none;width:80px}
@@ -360,7 +360,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"projects",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all"};
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all"};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -463,10 +463,10 @@ function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`)
 function rA(a,pid,o){
   const st=getStatus(a);const d=st==="done",w=st==="wt",ec=st==="ec";
   const uc=d?"dn":w?"wt":"ec";
-  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
+  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;const showTask=o&&o.stk;
   const adc=dcc(a.deadline),adl=dll(a.deadline);
   const pLabel=sp?esc(pN(p)):"";
-  const tkBreadcrumb=sp?tName(pid,a.taskId):"";
+  const tkBreadcrumb=showTask?tName(pid,a.taskId):"";
   /* Buttons */
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
@@ -488,7 +488,7 @@ function rA(a,pid,o){
 const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`};
 function render(){
   /* Sidebar */
-  const tabs=[{k:"projects",l:"Projets",i:SB_ICONS.projects},{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar">`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -496,7 +496,8 @@ function render(){
   sb+=`</div>`;
   /* Main */
   let h="";
-  if(S.tab==="projects")h+=rPT();else if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else h+=rTR();
+  if(S.tab==="projects")S.tab="global";
+  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else h+=rTR();
   document.getElementById("app").innerHTML=sb+`<div class="main">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
 
 /* ── Projects tab ── */
@@ -531,7 +532,7 @@ function rGT(){
   /* Inline add with autocomplete */
   let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
   /* View toggle + filters */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="project"?"on":""}" onclick="S.gv='project';render()">Par projet</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button></div></div>`;
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="project"?"on":""}" onclick="S.gv='project';render()">Par projet</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
@@ -548,10 +549,30 @@ function rGT(){
       const p=fp(k);
       bp[k].sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
       h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
-      bp[k].forEach(a=>{h+=rA(a,a.pId,{sp:false})})});
+      bp[k].forEach(a=>{h+=rA(a,a.pId,{stk:true})})});
+  }else if(S.gv==="task"){
+    /* Group by project, then by task within each project */
+    const projIds=[...new Set(filtered.map(a=>a.pId))].sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b));
+    projIds.forEach(pid=>{
+      const p=fp(pid);if(!p)return;
+      const pActs=filtered.filter(a=>a.pId===pid);
+      h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      /* Standalone actions (no task) */
+      const standalone=pActs.filter(a=>!a.taskId);
+      standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+      standalone.forEach(a=>{h+=rA(a,pid,{sp:false})});
+      /* Group by task */
+      const taskIds=[...new Set(pActs.filter(a=>a.taskId).map(a=>a.taskId))];
+      p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
+        const tkActs=pActs.filter(a=>a.taskId===tk.id);
+        tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+        h+=`<div style="padding:3px 0 1px 8px;font-size:9px;font-weight:700;color:#5CB8F0">${esc(tk.title||"Sans nom")}</div>`;
+        tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
+      });
+    });
   }else{
     const ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
-    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
+    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true})});
   }
   return h}
 
