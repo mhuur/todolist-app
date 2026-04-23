@@ -104,6 +104,16 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
 .search-wrap input{width:100%;border:1px solid #2A3A52;border-radius:8px;padding:7px 12px 7px 30px;font-size:11px;font-family:inherit;background:#162032;color:#E2E8F0;outline:none}
 .search-wrap input:focus{border-color:#38BDF8}.search-wrap input::placeholder{color:#4B5563}
 .search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#4B5563}
+/* Quick add */
+.qa{display:flex;gap:6px;margin-bottom:10px;align-items:center}
+.qa-input{flex:1;border:1px solid #2A3A52;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;background:#0F1A2E;color:#E2E8F0;outline:none;transition:border-color .15s}
+.qa-input:focus{border-color:#38BDF8}
+.qa-input::placeholder{color:#384860}
+.qa-select{border:1px solid #2A3A52;border-radius:6px;padding:6px 8px;font-size:10px;font-family:inherit;font-weight:600;background:#162032;color:#64748B;outline:none;cursor:pointer;max-width:180px}
+.qa-select:focus{border-color:#38BDF8;color:#94A3B8}
+.qa-btn{border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:linear-gradient(135deg,#0284C7,#0EA5E9);color:#fff;flex-shrink:0;transition:all .12s}
+.qa-btn:hover{box-shadow:0 0 10px rgba(56,189,248,.3)}
+.qa-btn:active{transform:scale(.97)}
 .filters{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
 .chip{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #2A3A52;background:transparent;color:#64748B;transition:all .12s}
 .chip:hover{border-color:#38BDF8;color:#94A3B8}.chip.on{background:rgba(56,189,248,.1);border-color:#38BDF8;color:#38BDF8}
@@ -199,6 +209,7 @@ body{font-family:'Nunito',sans-serif;background:#0B1120;min-height:100vh;padding
   .avatar-wrap img{width:26px;height:26px}
   .avatar-menu{bottom:auto;top:-80px;right:0;left:auto;transform:none}
   .main{margin-left:0;padding:8px 8px 60px;max-width:100%}
+  .qa{flex-wrap:wrap}.qa-input{font-size:13px;padding:10px 12px}.qa-select{font-size:11px;padding:7px;max-width:140px}.qa-btn{padding:10px 16px;font-size:12px}
   .ph{padding:8px;gap:5px;flex-wrap:wrap}
   .ph input{font-size:13px;min-width:80px}
   .ph-right{gap:6px}
@@ -470,6 +481,10 @@ function rA(a,pid,o){
   <div class="a-panel" onclick="event.stopPropagation()">
     <div class="a-prow"><input class="a-sum-input" value="${esc(a.title)}" placeholder="Titre de l'action…" oninput="uaT('${pid}','${a.id}',this.value)"></div>
     <div class="a-prow">
+      <span class="a-plbl">Projet</span>
+      <select onchange="mvAction('${pid}','${a.id}',this.value)">${S.projects.map(pr=>`<option value="${pr.id}" ${pr.id===pid?"selected":""}>${esc(pN(pr))}</option>`).join('')}</select>
+    </div>
+    <div class="a-prow">
       <span class="a-plbl">Statut</span>
       <select onchange="uaSt('${pid}','${a.id}',this.value)"><option value="todo" ${a.status==="todo"?"selected":""}>Non commencé</option><option value="encours" ${a.status==="encours"?"selected":""}>En cours</option><option value="waiting" ${a.status==="waiting"?"selected":""}>En attente</option></select>
       <span class="a-plbl">Priorité</span>
@@ -541,6 +556,9 @@ function syncGlobalOrder(all){
 }
 
 function rGT(){
+  /* Quick add bar */
+  let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
+  let h=`<div class="qa"><input class="qa-input" id="qa-input" placeholder="Ajouter une action… (Entrée pour valider)" onkeydown="if(event.key==='Enter'){event.preventDefault();quickAdd()}"><select class="qa-select" id="qa-select"><option value="">Inbox</option>${projOpts}</select><button class="qa-btn" onclick="quickAdd()">＋</button></div>`;
   const searchIcon=`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
   let h=`<div class="search-wrap">${searchIcon}<input placeholder="Rechercher une action…" value="${esc(S.search)}" oninput="S.search=this.value;render()"></div>`;
   h+=`<div class="filters"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="priority"?"on":""}" onclick="S.gFilter='priority';render()">Priorités ↕</button><button class="chip ${S.gFilter==="project"?"on":""}" onclick="S.gFilter='project';render()">Par projet</button><button class="chip ${S.gFilter==="deadline"?"on":""}" onclick="S.gFilter='deadline';render()">Deadline</button></div>`;
@@ -643,9 +661,22 @@ function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
 function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
 function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:""};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function quickAdd(){
+  const inp=document.getElementById('qa-input');const sel=document.getElementById('qa-select');
+  const title=(inp?inp.value:"").trim();if(!title)return;
+  const pid=sel?sel.value:"";
+  let p=fp(pid);
+  /* If no project selected, create "Inbox" project or find it */
+  if(!p){p=S.projects.find(x=>x.name==="Inbox");if(!p){p={id:gid(),number:1,name:"Inbox",deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true}}
+  const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:""};
+  p.actions.push(n);S.globalOrder.unshift(n.id);save();render();
+  /* Re-focus input after render */
+  requestAnimationFrame(()=>{const el=document.getElementById('qa-input');if(el){el.value="";el.focus()}});
+}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
+function mvAction(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
 /* Auth onAuthStateChanged handles load + render */
 </script>
 </body>
