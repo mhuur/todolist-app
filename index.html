@@ -55,6 +55,12 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .tg-hd .tg-title{flex:1;border:none;background:transparent;font-size:11px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none}
 .tg-hd .tg-title::placeholder{color:#2A5A7A}
 .tg-actions{padding:2px 0 0 16px;display:flex;flex-direction:column;gap:2px}
+.tg-sub{padding:2px 0 0 12px;display:flex;flex-direction:column;gap:2px}
+.tg .tg{background:rgba(92,184,240,.02);border-color:rgba(92,184,240,.05)}
+.tg .tg .tg{background:rgba(92,184,240,.01);border-color:rgba(92,184,240,.03)}
+.tg-add-sub{cursor:pointer;font-size:9px;color:#4B6480;opacity:.5;transition:all .12s;padding:0 3px;display:inline-flex;align-items:center;gap:2px}
+.tg-add-sub:hover{opacity:1;color:#5CB8F0}
+.tg.drop-target{background:rgba(92,184,240,.08);border-color:rgba(92,184,240,.2)}
 .tg-del{border:none;background:transparent;color:#64748B;cursor:pointer;font-size:10px;padding:1px 3px;border-radius:3px;opacity:.6;transition:all .12s}
 .tg-del:hover{color:#F87171;opacity:1}
 .tg.dragging{opacity:.3}
@@ -68,12 +74,6 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar.wt .as{font-style:italic;color:#F59E0B}.ar.wt .ac{color:#92400E}.ar.wt .a-tk{color:#92400E}.ar.wt .a-sub{color:#78350F}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#92400E}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
-/* Indent levels */
-.ar.il1{margin-left:18px;border-left:2px solid #1E3050}.ar.il1 .as{font-size:10px;color:#8899AA}
-.ar.il2{margin-left:36px;border-left:2px solid #1A2840}.ar.il2 .as{font-size:9.5px;color:#70849A}
-.ar.il3{margin-left:54px;border-left:2px solid #162236}.ar.il3 .as{font-size:9px;color:#607590}
-/* Drop indent indicator */
-.ar.dot-i{box-shadow:0 -2px 0 0 #5CB8F0;margin-left:18px}
 .ar.dot{box-shadow:0 -2px 0 0 #5CB8F0}.ar.dob{box-shadow:0 2px 0 0 #5CB8F0}
 .at{display:flex;align-items:center;gap:4px;width:100%}
 .ac{cursor:pointer;color:#5CB8F0;display:flex;align-items:center;transition:transform .15s;flex-shrink:0}
@@ -327,11 +327,12 @@ async function loadFromCloud(){
     S.projects.forEach(p=>{
       S.openProjects[p.id]=true;
       if(!p.tasks)p.tasks=[];
+      p.tasks.forEach(t=>{if(t.parentId===undefined)t.parentId=""});
       p.actions.forEach(a=>{
         if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title="";
         if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||"h";a.timeH=tu==="m"?tv/60:tu==="j"?tv*8:tv;delete a.timeVal;delete a.timeUnit}
         if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate="";if(a.taskId===undefined)a.taskId="";
-        if(!a.blockedBy){}else delete a.blockedBy;if(a.paused===undefined)a.paused=a.status==='waiting';if(a.indent===undefined)a.indent=0;
+        delete a.blockedBy;delete a.indent;if(a.paused===undefined)a.paused=a.status==='waiting';
       });
     });
   }catch(e){
@@ -369,7 +370,7 @@ const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
 
-function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.indent===undefined)a.indent=0;delete a.blockedBy})})}
+function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{if(t.parentId===undefined)t.parentId=""});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';delete a.indent;delete a.blockedBy})})}
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -381,7 +382,9 @@ function fp(id){return S.projects.find(p=>p.id===id)}
 function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
 function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.actions.find(x=>x.id===aid);if(a)found=a});return found}
 function pN(p){return p?p.name||"Sans nom":"?"}
-function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
+function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";
+  function buildPath(id,tasks){const t=tasks.find(x=>x.id===id);if(!t)return"";if(t.parentId){const parent=buildPath(t.parentId,tasks);return parent?(parent+" › "+(t.title||"")):(t.title||"")}return t.title||""}
+  return buildPath(tid,p.tasks)}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`};
 
@@ -393,45 +396,30 @@ function pDO(e,pid){if(dT==="project"&&dI!==pid){e.preventDefault();const el=e.c
 function pDL(e){e.currentTarget.classList.remove('dot','dob')}
 function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
 function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";const ar=e.currentTarget;if(ar)setTimeout(()=>ar.classList.add('dragging'),0)}
-function aDE(){dT=null;dI=null;dP=null;document.querySelectorAll('.ar').forEach(el=>{el.classList.remove('dragging','dot','dob');el.style.removeProperty('margin-left')});document.querySelectorAll('.ug').forEach(el=>el.classList.remove('dz'))}
-function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');
-  if(S.tab==="global"){
-    /* Calculate indent from mouse X position */
-    const mainEl=document.querySelector('.main');const baseX=mainEl?mainEl.getBoundingClientRect().left+8:r.left;
-    const indent=Math.max(0,Math.min(3,Math.floor((e.clientX-baseX-20)/22)));
-    el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob');
-    el.style.marginLeft=indent*18+'px';
-    el.dataset.dropIndent=indent;
-  }else{el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}}
-function aDL(e){e.currentTarget.classList.remove('dot','dob');e.currentTarget.style.removeProperty('margin-left');delete e.currentTarget.dataset.dropIndent}
-function aDD(e,pid,tid){e.preventDefault();const dropEl=e.currentTarget;const dropIndent=parseInt(dropEl.dataset.dropIndent||"0");dropEl.classList.remove('dot','dob');dropEl.style.removeProperty('margin-left');delete dropEl.dataset.dropIndent;
+function aDE(){dT=null;dI=null;dP=null;document.querySelectorAll('.ar').forEach(el=>{el.classList.remove('dragging','dot','dob')});document.querySelectorAll('.ug,.tg').forEach(el=>el.classList.remove('dz','drop-target'))}
+function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
+function aDL(e){e.currentTarget.classList.remove('dot','dob')}
+function aDD(e,pid,tid){e.preventDefault();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
   if(dT!=="action"||!dI||dI===tid)return;
   if(S.tab==="global"){
-    /* Reorder in globalOrder + set indent */
+    /* Reorder in globalOrder only */
     const fi=S.globalOrder.indexOf(dI);if(fi===-1)return;
     S.globalOrder.splice(fi,1);
     let ti=S.globalOrder.indexOf(tid);if(ti===-1)return;
-    if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;
-    S.globalOrder.splice(ti,0,dI);
-    /* Set indent level from horizontal position */
-    const a=findActionById(dI);if(a)a.indent=dropIndent;
-    save();render();return;
+    if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti++;
+    S.globalOrder.splice(ti,0,dI);save();render();return;
   }
+  /* In Projects tab: move action between tasks/projects */
   let sP=null,si=-1;S.projects.forEach(p=>{const i=p.actions.findIndex(a=>a.id===dI);if(i!==-1){sP=p;si=i}});if(!sP||si===-1)return;
   const[m]=sP.actions.splice(si,1);const tp2=fp(pid);if(!tp2)return;
   let ti3=tp2.actions.findIndex(a=>a.id===tid);
-  if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti3++;
+  if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti3++;
   tp2.actions.splice(ti3,0,m);save();render()}
-function gDO(e){if(dT!=="action")return;e.preventDefault();e.currentTarget.classList.add('dz')}
-function gDL(e){e.currentTarget.classList.remove('dz')}
-function gDD(e,u){e.preventDefault();e.currentTarget.classList.remove('dz');if(dT!=="action"||!dI)return;const a=fa(dP,dI);if(a){a.urgency=u;save();render()}}
 
 /* ── Status ── */
 function togD(pid,aid){const a=fa(pid,aid);if(!a)return;if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()}
 function togW(pid,aid){const a=fa(pid,aid);if(!a)return;a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()}
 function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
-/* Indent via drag: detect horizontal offset */
-function setIndent(pid,aid,level){const a=fa(pid,aid);if(!a)return;a.indent=Math.max(0,Math.min(3,level));save();render()}
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
@@ -442,10 +430,17 @@ function purgeT(i){S.trash.splice(i,1);save();render()}
 function emptyT(){S.trash=[];save();render()}
 function colAll(){S.projects.forEach(p=>{S.openProjects[p.id]=false;p.tasks.forEach(t=>{S.openTasks[t.id]=false})});S.ex={};render()}
 /* Tasks */
-function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
-function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=>t.id!==tid);p.actions.forEach(a=>{if(a.taskId===tid)a.taskId=""});save();render()}
+function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:"",parentId:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
+function addSubTask(pid,parentTid){const p=fp(pid);if(!p)return;const t={id:gid(),title:"",parentId:parentTid};p.tasks.push(t);S.openTasks[t.id]=true;S.openTasks[parentTid]=true;save();render()}
+function delTask(pid,tid){const p=fp(pid);if(!p)return;/* Recursively collect all descendant task ids */
+  function getDescendants(id){const kids=p.tasks.filter(t=>t.parentId===id);let ids=[id];kids.forEach(k=>{ids=ids.concat(getDescendants(k.id))});return ids}
+  const allIds=getDescendants(tid);p.tasks=p.tasks.filter(t=>!allIds.includes(t.id));p.actions.forEach(a=>{if(allIds.includes(a.taskId))a.taskId=""});save();render()}
 function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
 function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
+/* Drop action on task header */
+function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();e.currentTarget.closest('.tg').classList.add('drop-target')}
+function tgActDL(e){e.currentTarget.closest('.tg').classList.remove('drop-target')}
+function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.closest('.tg').classList.remove('drop-target');if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
 /* Task drag */
 let tdPid=null,tdTid=null;
 function tDS(e,pid,tid){tdPid=pid;tdTid=tid;e.dataTransfer.effectAllowed="move";setTimeout(()=>e.currentTarget.classList.add('dragging'),0)}
@@ -453,7 +448,7 @@ function tDE(){tdPid=null;tdTid=null;document.querySelectorAll('.tg').forEach(el
 function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefault();e.stopPropagation();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('tg-dot','tg-dob');el.classList.add(e.clientY<r.top+r.height/2?'tg-dot':'tg-dob')}
 function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
 function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
-function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,indent:0,paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
 
 /* ── Format ── */
 function fC(c,v){document.execCommand(c,false,v||null);sAE()}
@@ -480,15 +475,14 @@ function rA(a,pid,o){
   const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
   const adc=dcc(a.deadline),adl=dll(a.deadline);
   const pLabel=sp?esc(pN(p)):"";
-  const tkLabel=tName(pid,a.taskId);
-  const il=a.indent||0;const ilCls=il>0?"il"+Math.min(il,3):"";
+  const tkBreadcrumb=sp?tName(pid,a.taskId):"";
   /* Buttons */
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
-  return`<div id="ar_${a.id}" class="ar ${uc} ${ilCls} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     <span class="ac">${I.chev}</span>
-    <div class="a-info">${tkLabel?`<span class="a-tk">${esc(tkLabel)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub">${pLabel}</div>`:""}</div>
+    <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub">${pLabel}</div>`:""}</div>
     ${w?`<span class="aw-inline"><input value="${esc(a.waitReason)}" placeholder="Motif attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></span>`:""}
     <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
     ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
@@ -523,19 +517,28 @@ function rP(p){const o=S.openProjects[p.id]!==false;const allActs=p.actions;cons
 let ah="";
 if(o){
   ah=`<div class="al">`;
+  /* Standalone actions (no task) */
   const standalone=activeActs.filter(a=>!a.taskId);
   standalone.forEach(a=>{ah+=rA(a,p.id,{})});
-  p.tasks.forEach((tk,ti)=>{
-    const tkActs=activeActs.filter(a=>a.taskId===tk.id);
-    const tkOpen=S.openTasks[tk.id]!==false;
-    ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')"><div class="tg-hd" onclick="togTask('${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom de la tâche…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Ajouter action">＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer tâche">${I.trash}</button></div>`;
-    if(tkOpen){
-      ah+=`<div class="tg-actions">`;
-      tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
+  /* Recursive task rendering */
+  function rTk(parentId,depth){
+    const children=p.tasks.filter(t=>t.parentId===parentId);
+    children.forEach(tk=>{
+      const tkActs=activeActs.filter(a=>a.taskId===tk.id);
+      const tkOpen=S.openTasks[tk.id]!==false;
+      const subTasks=p.tasks.filter(t=>t.parentId===tk.id);
+      ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')">`;
+      ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Action">＋</span><span class="tg-add-sub" onclick="event.stopPropagation();addSubTask('${p.id}','${tk.id}')" title="Sous-tâche">▸＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer">${I.trash}</button></div>`;
+      if(tkOpen){
+        ah+=`<div class="tg-actions">`;
+        tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
+        ah+=`</div>`;
+        if(subTasks.length||true){ah+=`<div class="tg-sub">`;rTk(tk.id,depth+1);ah+=`</div>`}
+      }
       ah+=`</div>`;
-    }
-    ah+=`</div>`;
-  });
+    });
+  }
+  rTk("",0);
   ah+=`</div>`;
 }
 return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
@@ -601,8 +604,8 @@ function acCreate(type,name){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose()});
 
-function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",indent:0,paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
-function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",indent:0,paused:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
+function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
 function rDN(){
@@ -696,7 +699,7 @@ function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:
 function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
 function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
-function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",indent:0,paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
