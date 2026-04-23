@@ -68,7 +68,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar.nc{opacity:.45}
 .ar.nc .as{color:#64748B}
 .ar.wt{opacity:.65}
-.ar.wt .as{font-style:italic;color:#7DD3FC}
+.ar.wt .as{font-style:italic;color:#F59E0B}
 .ar.dn{opacity:.4}.ar.dn .as{text-decoration:line-through;color:#4B5563}
 .ar.dragging{opacity:.15}
 .ar.dot{box-shadow:0 -2px 0 0 #5CB8F0}.ar.dob{box-shadow:0 2px 0 0 #5CB8F0}
@@ -111,8 +111,8 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
 .done-tbl .dt-act{width:24px;text-align:center}
 .ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
-.aw-inline{font-size:9px;color:#7DD3FC;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
-.aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#7DD3FC;font-style:italic;outline:none;width:80px}
+.aw-inline{font-size:9px;color:#F59E0B;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
+.aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#F59E0B;font-style:italic;outline:none;width:80px}
 .adi{border-radius:3px;padding:0 3px;font-size:9px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid #1E3050;color:#94A3B8;background:#152236}
 .adtg{font-weight:700;font-size:8px;flex-shrink:0}
 .ati{width:38px;border:1px solid #1E3050;border-radius:3px;padding:1px 2px;font-size:9px;font-family:inherit;font-weight:600;background:#152236;color:#5CB8F0;outline:none;text-align:right}
@@ -144,16 +144,16 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .atx:empty::before{content:attr(data-placeholder);color:#4B5563}
 .atx img{max-width:100%;max-height:180px;border-radius:5px;margin:3px 0;display:block}
 .ar.dn .atx{color:#4B5563;text-decoration:line-through}
-.aw{font-size:10px;color:#7DD3FC;font-style:italic;padding:2px 0;display:flex;align-items:center;gap:3px}
-.aw input{border:none;background:transparent;font-family:inherit;font-size:10px;color:#7DD3FC;font-style:italic;outline:none;flex:1}
+.aw{font-size:10px;color:#F59E0B;font-style:italic;padding:2px 0;display:flex;align-items:center;gap:3px}
+.aw input{border:none;background:transparent;font-family:inherit;font-size:10px;color:#F59E0B;font-style:italic;outline:none;flex:1}
 .dep-wrap{position:relative;display:inline-flex}
 .dep-btn{border:none;background:transparent;cursor:pointer;font-size:11px;padding:2px;border-radius:3px;transition:all .1s;opacity:.4}
 .dep-btn:hover{opacity:1;background:rgba(92,184,240,.1)}
-.dep-menu{display:none;position:absolute;right:0;top:20px;background:#152236;border:1px solid #1E3050;border-radius:6px;padding:6px 8px;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:100;min-width:180px;max-height:200px;overflow-y:auto}
+.dep-menu{display:none;position:absolute;right:0;top:22px;background:#152236;border:1px solid #1E3050;border-radius:6px;padding:6px 8px;box-shadow:0 6px 20px rgba(0,0,0,.6);z-index:200;min-width:200px;max-height:220px;overflow-y:auto;opacity:1!important}
 .dep-menu.show{display:block}
-.dep-menu label{display:flex;align-items:center;gap:5px;font-size:10px;color:#94A3B8;padding:2px 0;cursor:pointer}
+.dep-menu label{display:flex;align-items:center;gap:5px;font-size:10px;color:#94A3B8;padding:3px 0;cursor:pointer;user-select:none}
 .dep-menu label:hover{color:#E2E8F0}
-.dep-menu input[type="checkbox"]{accent-color:#5CB8F0}
+.dep-menu input[type="checkbox"]{accent-color:#5CB8F0;cursor:pointer;width:14px;height:14px}
 .baa{display:flex;align-items:center;justify-content:center;gap:4px;border:1px dashed #2A3A52;border-radius:6px;padding:3px 0;background:transparent;color:#4B5563;cursor:pointer;font-family:inherit;font-size:10px;font-weight:600;transition:all .15s}
 .baa:hover{border-color:#38BDF8;color:#38BDF8}
 .es{text-align:center;padding:24px 14px;color:#4B6480;border:1.5px dashed #1E3050;border-radius:8px;font-size:11px;line-height:1.6}
@@ -478,9 +478,11 @@ function rA(a,pid,o){
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
   /* Dependency selector */
-  const otherActs=p?p.actions.filter(x=>x.id!==a.id&&x.status!=='done'):[];
+  let otherActs=p?p.actions.filter(x=>x.id!==a.id&&x.status!=='done'):[];
+  /* Sort by globalOrder */
+  otherActs.sort((a,b)=>{const ai=S.globalOrder.indexOf(a.id),bi=S.globalOrder.indexOf(b.id);return(ai===-1?9999:ai)-(bi===-1?9999:bi)});
   let depHtml="";
-  if(!d&&otherActs.length){depHtml=`<div class="dep-wrap"><button class="dep-btn" onclick="event.stopPropagation();togDepMenu('${a.id}')" title="Dépendances">🔗</button><div class="dep-menu" id="dep_${a.id}">${otherActs.map(x=>`<label onclick="event.stopPropagation()"><input type="checkbox" ${(a.blockedBy||[]).includes(x.id)?"checked":""} onchange="togDep('${pid}','${a.id}','${x.id}')"> ${esc(x.title||"Sans titre")}</label>`).join("")}</div></div>`}
+  if(!d&&otherActs.length){depHtml=`<div class="dep-wrap"><button class="dep-btn" onclick="event.stopPropagation();togDepMenu('${a.id}')" title="Dépendances">🔗</button><div class="dep-menu" id="dep_${a.id}" onclick="event.stopPropagation()">${otherActs.map(x=>`<label><input type="checkbox" ${(a.blockedBy||[]).includes(x.id)?"checked":""} onchange="event.stopPropagation();togDep('${pid}','${a.id}','${x.id}')"> ${esc(x.title||"Sans titre")}</label>`).join("")}</div></div>`}
   return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     <span class="ac">${I.chev}</span>
@@ -571,18 +573,18 @@ function rGT(){
 let _acSel={proj:"",projId:"",task:"",taskId:""};
 function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
 function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}
-function acFilter(wid,q,type){
+function acFilter(wid,rawQ,type){
   const list=document.querySelector('#'+wid+' .ac-list');if(!list)return;
-  q=q.toLowerCase().trim();let html="";
+  const q=rawQ.toLowerCase().trim();let html="";
   if(type==='proj'){
     S.projects.filter(p=>!q||pN(p).toLowerCase().includes(q)).forEach(p=>{
       html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
-    if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(q)}')">＋ Créer "${esc(q)}"</div>`;
+    if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
   }else{
     const p=fp(_acSel.projId);if(p&&p.tasks){
       p.tasks.filter(t=>!q||(t.title||"").toLowerCase().includes(q)).forEach(t=>{
         html+=`<div class="ac-item" onmousedown="acPick('task','${t.id}','${esc(t.title||"Sans nom")}')">${esc(t.title||"Sans nom")}</div>`});
-      if(q&&!p.tasks.some(t=>(t.title||"").toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('task','${esc(q)}')">＋ Créer "${esc(q)}"</div>`;
+      if(q&&!p.tasks.some(t=>(t.title||"").toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('task','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
     }
   }
   list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
@@ -620,7 +622,7 @@ function rDN(){
       if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
         h+=`<tr><td colspan="5" style="padding:10px 6px 4px;font-size:11px;font-weight:700;color:#5CB8F0;text-transform:capitalize;border-bottom:1px solid #1E3050">${label}</td></tr>`}
       const isA=a._archived;const pName=a._pName||pN(fp(a.pId));
-      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')">${I.undo}</span>`:""}</td></tr>`;
+      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</span><span style="cursor:pointer;color:#334155;font-size:10px;margin-left:3px" onclick="delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</span>`:""}</td></tr>`;
     });
     h+=`</table>`;
   }else{
@@ -643,7 +645,7 @@ function rDoneRow(a){
     <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
     <span class="adtg" style="color:#64748B">${a.doneDate||""}</span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
-    <div class="ari">${!isArchived?`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')">${I.undo}</button>`:""}</div>
+    <div class="ari">${!isArchived?`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</button><button class="bi btr" onclick="event.stopPropagation();delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</button>`:""}</div>
   </div>
   <div class="adl">
     <div class="ab">${!isArchived?fmB(a.pId,a.id):""}<div class="${isArchived?"":"atx"}" ${!isArchived?`contenteditable="true" data-pid="${a.pId}" data-aid="${a.id}" data-placeholder="Détails…" onclick="event.stopPropagation()"`:""} style="font-size:11px;color:#94A3B8">${a.text||""}</div></div>
