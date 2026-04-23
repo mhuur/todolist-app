@@ -55,11 +55,6 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .tg-hd .tg-title{flex:1;border:none;background:transparent;font-size:11px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none}
 .tg-hd .tg-title::placeholder{color:#2A5A7A}
 .tg-actions{padding:2px 0 0 16px;display:flex;flex-direction:column;gap:2px}
-.tg-sub{padding:2px 0 0 12px;display:flex;flex-direction:column;gap:2px}
-.tg .tg{background:rgba(92,184,240,.02);border-color:rgba(92,184,240,.05)}
-.tg .tg .tg{background:rgba(92,184,240,.01);border-color:rgba(92,184,240,.03)}
-.tg-add-sub{cursor:pointer;font-size:9px;color:#4B6480;opacity:.5;transition:all .12s;padding:0 3px;display:inline-flex;align-items:center;gap:2px}
-.tg-add-sub:hover{opacity:1;color:#5CB8F0}
 .tg.drop-target{background:rgba(92,184,240,.08);border-color:rgba(92,184,240,.2)}
 .tg-del{border:none;background:transparent;color:#64748B;cursor:pointer;font-size:10px;padding:1px 3px;border-radius:3px;opacity:.6;transition:all .12s}
 .tg-del:hover{color:#F87171;opacity:1}
@@ -327,7 +322,7 @@ async function loadFromCloud(){
     S.projects.forEach(p=>{
       S.openProjects[p.id]=true;
       if(!p.tasks)p.tasks=[];
-      p.tasks.forEach(t=>{if(t.parentId===undefined)t.parentId=""});
+      p.tasks.forEach(t=>{delete t.parentId});
       p.actions.forEach(a=>{
         if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title="";
         if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||"h";a.timeH=tu==="m"?tv/60:tu==="j"?tv*8:tv;delete a.timeVal;delete a.timeUnit}
@@ -370,7 +365,7 @@ const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
 
-function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{if(t.parentId===undefined)t.parentId=""});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';delete a.indent;delete a.blockedBy})})}
+function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';delete a.indent;delete a.blockedBy})})}
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -382,9 +377,7 @@ function fp(id){return S.projects.find(p=>p.id===id)}
 function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
 function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.actions.find(x=>x.id===aid);if(a)found=a});return found}
 function pN(p){return p?p.name||"Sans nom":"?"}
-function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";
-  function buildPath(id,tasks){const t=tasks.find(x=>x.id===id);if(!t)return"";if(t.parentId){const parent=buildPath(t.parentId,tasks);return parent?(parent+" › "+(t.title||"")):(t.title||"")}return t.title||""}
-  return buildPath(tid,p.tasks)}
+function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`};
 
@@ -425,16 +418,14 @@ function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
 function delP(id){const p=fp(id);if(!p)return;/* Archive done actions with project name */p.actions.filter(a=>a.status==="done").forEach(a=>{S.archive.push({...a,pId:id,pName:pN(p)})});S.trash.push({type:"project",data:JSON.parse(JSON.stringify(p)),date:Date.now()});S.projects=S.projects.filter(x=>x.id!==id);save();render()}
 function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.id===aid);if(!a)return;S.trash.push({type:"action",data:JSON.parse(JSON.stringify(a)),pid,pn:pN(p),date:Date.now()});p.actions=p.actions.filter(x=>x.id!==aid);save();render()}
+function delArchived(aid){S.archive=S.archive.filter(a=>a.id!==aid);save();render()}
 function restT(i){const it=S.trash[i];if(!it)return;if(it.type==="project"){S.projects.push(it.data);S.openProjects[it.data.id]=true}else{const p=fp(it.pid);if(p)p.actions.push(it.data)}S.trash.splice(i,1);save();render()}
 function purgeT(i){S.trash.splice(i,1);save();render()}
 function emptyT(){S.trash=[];save();render()}
 function colAll(){S.projects.forEach(p=>{S.openProjects[p.id]=false;p.tasks.forEach(t=>{S.openTasks[t.id]=false})});S.ex={};render()}
 /* Tasks */
-function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:"",parentId:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
-function addSubTask(pid,parentTid){const p=fp(pid);if(!p)return;const t={id:gid(),title:"",parentId:parentTid};p.tasks.push(t);S.openTasks[t.id]=true;S.openTasks[parentTid]=true;save();render()}
-function delTask(pid,tid){const p=fp(pid);if(!p)return;/* Recursively collect all descendant task ids */
-  function getDescendants(id){const kids=p.tasks.filter(t=>t.parentId===id);let ids=[id];kids.forEach(k=>{ids=ids.concat(getDescendants(k.id))});return ids}
-  const allIds=getDescendants(tid);p.tasks=p.tasks.filter(t=>!allIds.includes(t.id));p.actions.forEach(a=>{if(allIds.includes(a.taskId))a.taskId=""});save();render()}
+function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
+function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=>t.id!==tid);p.actions.forEach(a=>{if(a.taskId===tid)a.taskId=""});save();render()}
 function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
 function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
 /* Drop action on task header */
@@ -517,28 +508,20 @@ function rP(p){const o=S.openProjects[p.id]!==false;const allActs=p.actions;cons
 let ah="";
 if(o){
   ah=`<div class="al">`;
-  /* Standalone actions (no task) */
   const standalone=activeActs.filter(a=>!a.taskId);
   standalone.forEach(a=>{ah+=rA(a,p.id,{})});
-  /* Recursive task rendering */
-  function rTk(parentId,depth){
-    const children=p.tasks.filter(t=>t.parentId===parentId);
-    children.forEach(tk=>{
-      const tkActs=activeActs.filter(a=>a.taskId===tk.id);
-      const tkOpen=S.openTasks[tk.id]!==false;
-      const subTasks=p.tasks.filter(t=>t.parentId===tk.id);
-      ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')">`;
-      ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Action">＋</span><span class="tg-add-sub" onclick="event.stopPropagation();addSubTask('${p.id}','${tk.id}')" title="Sous-tâche">▸＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer">${I.trash}</button></div>`;
-      if(tkOpen){
-        ah+=`<div class="tg-actions">`;
-        tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
-        ah+=`</div>`;
-        if(subTasks.length||true){ah+=`<div class="tg-sub">`;rTk(tk.id,depth+1);ah+=`</div>`}
-      }
+  p.tasks.forEach(tk=>{
+    const tkActs=activeActs.filter(a=>a.taskId===tk.id);
+    const tkOpen=S.openTasks[tk.id]!==false;
+    ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')">`;
+    ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom de la tâche…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Ajouter action">＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer tâche">${I.trash}</button></div>`;
+    if(tkOpen){
+      ah+=`<div class="tg-actions">`;
+      tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
       ah+=`</div>`;
-    });
-  }
-  rTk("",0);
+    }
+    ah+=`</div>`;
+  });
   ah+=`</div>`;
 }
 return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
@@ -625,7 +608,7 @@ function rDN(){
       if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
         h+=`<tr><td colspan="5" style="padding:10px 6px 4px;font-size:11px;font-weight:700;color:#5CB8F0;text-transform:capitalize;border-bottom:1px solid #1E3050">${label}</td></tr>`}
       const isA=a._archived;const pName=a._pName||pN(fp(a.pId));
-      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</span><span style="cursor:pointer;color:#334155;font-size:10px;margin-left:3px" onclick="delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</span>`:""}</td></tr>`;
+      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</span>`:""}<span style="cursor:pointer;color:#334155;font-size:10px;margin-left:3px" onclick="${isA?`delArchived('${a.id}')`:`delA('${a.pId}','${a.id}')`}" title="Supprimer">${I.trash}</span></td></tr>`;
     });
     h+=`</table>`;
   }else{
@@ -641,6 +624,7 @@ function rDN(){
 function rDoneRow(a){
   const pName=a._pName||pN(fp(a.pId));
   const isArchived=a._archived;
+  const delBtn=isArchived?`<button class="bi btr" onclick="event.stopPropagation();delArchived('${a.id}')" title="Supprimer">${I.trash}</button>`:`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</button><button class="bi btr" onclick="event.stopPropagation();delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</button>`;
   return`<div id="ar_${a.id}" class="ar dn ${S.ex[a.id]?"ao":""}" style="opacity:.7">
   <div class="at">
     <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
@@ -648,7 +632,7 @@ function rDoneRow(a){
     <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
     <span class="adtg" style="color:#64748B">${a.doneDate||""}</span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
-    <div class="ari">${!isArchived?`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</button><button class="bi btr" onclick="event.stopPropagation();delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</button>`:""}</div>
+    <div class="ari">${delBtn}</div>
   </div>
   <div class="adl">
     <div class="ab">${!isArchived?fmB(a.pId,a.id):""}<div class="${isArchived?"":"atx"}" ${!isArchived?`contenteditable="true" data-pid="${a.pId}" data-aid="${a.id}" data-placeholder="Détails…" onclick="event.stopPropagation()"`:""} style="font-size:11px;color:#94A3B8">${a.text||""}</div></div>
