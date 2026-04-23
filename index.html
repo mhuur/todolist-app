@@ -87,13 +87,29 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .chip.on{background:rgba(92,184,240,.1);border-color:#5CB8F0;color:#5CB8F0}
 /* Inline add row */
 .add-row{display:flex;gap:4px;align-items:center;padding:4px 8px;margin-bottom:6px}
-.add-row input{flex:1;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:11px;font-family:inherit;background:#0F1D32;color:#E2E8F0;outline:none}
+.add-row input[type="text"],.add-row>input:not([type]){flex:1;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:11px;font-family:inherit;background:#0F1D32;color:#E2E8F0;outline:none}
 .add-row input:focus{border-color:#5CB8F0}
 .add-row input::placeholder{color:#334155}
-.add-row select{border:1px solid #1E3050;border-radius:5px;padding:4px 6px;font-size:10px;font-family:inherit;font-weight:600;background:#152236;color:#64748B;outline:none;cursor:pointer;max-width:140px}
-.add-row select:focus{border-color:#5CB8F0;color:#94A3B8}
 .add-row button{border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#22C55E;color:#fff;flex-shrink:0}
 .add-row button:hover{background:#16A34A}
+/* Autocomplete */
+.ac-wrap{position:relative;flex-shrink:0;width:140px}
+.ac-wrap input{width:100%;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:10px;font-family:inherit;font-weight:600;background:#152236;color:#94A3B8;outline:none}
+.ac-wrap input:focus{border-color:#5CB8F0;color:#E2E8F0}
+.ac-wrap input::placeholder{color:#334155}
+.ac-list{display:none;position:absolute;top:100%;left:0;right:0;background:#152236;border:1px solid #1E3050;border-top:none;border-radius:0 0 5px 5px;max-height:160px;overflow-y:auto;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.ac-wrap.open .ac-list{display:block}
+.ac-item{padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
+.ac-item:hover{background:#1A2D47;color:#E2E8F0}
+.ac-item.create{color:#5CB8F0;font-style:italic}
+/* Done table view */
+.done-tbl{width:100%;border-collapse:collapse}
+.done-tbl td{padding:3px 6px;font-size:11px;border-bottom:1px solid #152236;vertical-align:middle}
+.done-tbl .dt-proj{color:#4B6480;font-weight:700;font-size:10px;width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.done-tbl .dt-title{color:#CBD5E1;font-weight:600}
+.done-tbl .dt-date{color:#64748B;font-size:9px;text-align:right;width:80px;white-space:nowrap}
+.done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
+.done-tbl .dt-act{width:24px;text-align:center}
 .ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
 .aw-inline{font-size:9px;color:#7DD3FC;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#7DD3FC;font-style:italic;outline:none;width:80px}
@@ -522,9 +538,8 @@ return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)
 
 /* ── Global tab ── */
 function rGT(){
-  /* Inline add */
-  let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
-  let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><select id="ga-proj" onchange="updGaTasks()"><option value="">Projet…</option>${projOpts}</select><select id="ga-task"><option value="">Tâche…</option></select><button onclick="qaGlobal()">＋</button></div>`;
+  /* Inline add with autocomplete */
+  let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
   /* View toggle + filters */
   h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="project"?"on":""}" onclick="S.gv='project';render()">Par projet</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button><button class="chip ${S.gFilter==="nc"?"on":""}" onclick="S.gFilter='nc';render()">Non commencé</button></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
@@ -538,24 +553,59 @@ function rGT(){
   if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a,a.pId);return st===S.gFilter})}
   if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
   if(S.gv==="project"){
+    /* Group by project but order within each group follows globalOrder */
     const bp={};filtered.forEach(a=>{if(!bp[a.pId])bp[a.pId]=[];bp[a.pId].push(a)});
     Object.keys(bp).sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b)).forEach(k=>{
-      const p=fp(k);h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
-      bp[k].forEach(a=>{h+=rA(a,a.pId,{sp:false,nd:true})})});
+      const p=fp(k);
+      /* Sort actions within project by globalOrder */
+      bp[k].sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+      h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      bp[k].forEach(a=>{h+=rA(a,a.pId,{sp:false})})});
   }else{
     const ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
     ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
   }
   return h}
-function updGaTasks(){const sel=document.getElementById('ga-proj');const tSel=document.getElementById('ga-task');if(!sel||!tSel)return;const p=fp(sel.value);tSel.innerHTML='<option value="">Tâche…</option>';if(p)p.tasks.forEach(t=>{tSel.innerHTML+=`<option value="${t.id}">${esc(t.title||"Sans nom")}</option>`})}
-function qaGlobal(){const ti=document.getElementById('ga-title'),ps=document.getElementById('ga-proj'),ts=document.getElementById('ga-task');const title=(ti?ti.value:"").trim();if(!title)return;const pid=ps?ps.value:"";let p=fp(pid);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:ts?ts.value:"",blockedBy:[],paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
-function qaDone(){const ti=document.getElementById('da-title'),ps=document.getElementById('da-proj'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;const pid=ps?ps.value:"";let p=fp(pid);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",blockedBy:[],paused:false};p.actions.push(n);save();render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
+
+/* ── Autocomplete engine ── */
+let _acSel={proj:"",projId:"",task:"",taskId:""};
+function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
+function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}
+function acFilter(wid,q,type){
+  const list=document.querySelector('#'+wid+' .ac-list');if(!list)return;
+  q=q.toLowerCase().trim();let html="";
+  if(type==='proj'){
+    S.projects.filter(p=>!q||pN(p).toLowerCase().includes(q)).forEach(p=>{
+      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
+    if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(q)}')">＋ Créer "${esc(q)}"</div>`;
+  }else{
+    const p=fp(_acSel.projId);if(p&&p.tasks){
+      p.tasks.filter(t=>!q||(t.title||"").toLowerCase().includes(q)).forEach(t=>{
+        html+=`<div class="ac-item" onmousedown="acPick('task','${t.id}','${esc(t.title||"Sans nom")}')">${esc(t.title||"Sans nom")}</div>`});
+      if(q&&!p.tasks.some(t=>(t.title||"").toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('task','${esc(q)}')">＋ Créer "${esc(q)}"</div>`;
+    }
+  }
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
+}
+function acPick(type,id,label){
+  if(type==='proj'){_acSel.projId=id;_acSel.proj=label;const inp=document.getElementById('ga-proj-q')||document.getElementById('da-proj-q');if(inp)inp.value=label;_acSel.taskId="";_acSel.task="";const ti=document.getElementById('ga-task-q');if(ti)ti.value=""}
+  else{_acSel.taskId=id;_acSel.task=label;const inp=document.getElementById('ga-task-q');if(inp)inp.value=label}
+  acClose();
+}
+function acCreate(type,name){
+  if(type==='proj'){const p={id:gid(),number:1,name:name,deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;_acSel.projId=p.id;_acSel.proj=name;save();const inp=document.getElementById('ga-proj-q')||document.getElementById('da-proj-q');if(inp)inp.value=name}
+  else{const p=fp(_acSel.projId);if(p){const t={id:gid(),title:name};p.tasks.push(t);S.openTasks[t.id]=true;_acSel.taskId=t.id;_acSel.task=name;save();const inp=document.getElementById('ga-task-q');if(inp)inp.value=name}}
+  acClose();
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose()});
+
+function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",blockedBy:[],paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",blockedBy:[],paused:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
 function rDN(){
-  /* Inline add done action */
-  let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
-  let h=`<div class="add-row"><input id="da-title" placeholder="Action terminée…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaDone()}"><select id="da-proj"><option value="">Projet…</option>${projOpts}</select><input id="da-hours" type="number" min="0" step="0.25" placeholder="h" style="width:50px"><button onclick="qaDone()">＋</button></div>`;
+  /* Inline add with autocomplete */
+  let h=`<div class="add-row"><input id="da-title" placeholder="Action terminée…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaDone()}"><div class="ac-wrap" id="acw-dproj"><input id="da-proj-q" placeholder="Projet…" onfocus="acOpen('acw-dproj')" oninput="acFilter('acw-dproj',this.value,'proj')"><div class="ac-list" id="acl-dproj"></div></div><input id="da-hours" type="number" min="0" step="0.25" placeholder="h" style="width:50px;border:1px solid #1E3050;border-radius:5px;padding:4px 6px;font-size:10px;font-family:inherit;background:#152236;color:#5CB8F0;outline:none"><button onclick="qaDone()">＋</button></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done")all.push({...a,pId:p.id,_pName:pN(p)})})});
   S.archive.forEach(a=>{all.push({...a,_pName:a.pName||"?",_archived:true})});
   if(!all.length){h+=`<div class="es">Aucune action terminée.</div>`;return h}
@@ -564,14 +614,17 @@ function rDN(){
   if(S.doneView==="date"){
     all.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||""));
     let lastDate="";
+    h+=`<table class="done-tbl">`;
     all.forEach(a=>{
       const dd=a.doneDate||"";
-      if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short",year:"numeric"});h+=`<div class="ddh">${label}</div>`}
-      h+=rDoneRow(a);
+      if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+        h+=`<tr><td colspan="5" style="padding:10px 6px 4px;font-size:11px;font-weight:700;color:#5CB8F0;text-transform:capitalize;border-bottom:1px solid #1E3050">${label}</td></tr>`}
+      const isA=a._archived;const pName=a._pName||pN(fp(a.pId));
+      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')">${I.undo}</span>`:""}</td></tr>`;
     });
+    h+=`</table>`;
   }else{
     const byP={};all.forEach(a=>{const k=a.pId||"_archived";if(!byP[k])byP[k]={name:a._pName,items:[]};byP[k].items.push(a)});
-    /* Sort: existing projects in display order, then archived at end */
     const keys=Object.keys(byP).sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a),bi=S.projects.findIndex(p=>p.id===b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi});
     keys.forEach(k=>{
       h+=`<div class="pgl" style="padding-top:8px"><span>${esc(byP[k].name)}</span><div class="pgln"></div></div>`;
