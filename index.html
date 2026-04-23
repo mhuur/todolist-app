@@ -560,7 +560,7 @@ function rGT(){
   let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
   let h=`<div class="qa"><input class="qa-input" id="qa-input" placeholder="Ajouter une action… (Entrée pour valider)" onkeydown="if(event.key==='Enter'){event.preventDefault();quickAdd()}"><select class="qa-select" id="qa-select"><option value="">Inbox</option>${projOpts}</select><button class="qa-btn" onclick="quickAdd()">＋</button></div>`;
   const searchIcon=`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
-  let h=`<div class="search-wrap">${searchIcon}<input placeholder="Rechercher une action…" value="${esc(S.search)}" oninput="S.search=this.value;render()"></div>`;
+  h+=`<div class="search-wrap">${searchIcon}<input placeholder="Rechercher une action…" value="${esc(S.search)}" oninput="S.search=this.value;render()"></div>`;
   h+=`<div class="filters"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="priority"?"on":""}" onclick="S.gFilter='priority';render()">Priorités ↕</button><button class="chip ${S.gFilter==="project"?"on":""}" onclick="S.gFilter='project';render()">Par projet</button><button class="chip ${S.gFilter==="deadline"?"on":""}" onclick="S.gFilter='deadline';render()">Deadline</button></div>`;
   let all=getAllActive();
   /* Search filter */
