@@ -75,10 +75,25 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .at{display:flex;align-items:center;gap:4px;width:100%}
 .ac{cursor:pointer;color:#5CB8F0;display:flex;align-items:center;transition:transform .15s;flex-shrink:0}
 .ar.ao .ac{transform:rotate(90deg)}
-.a-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
-.as{border:none;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:#CBD5E1;outline:none;min-width:0;padding:0}
+.a-info{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 4px}
+.as{border:none;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:#CBD5E1;outline:none;min-width:60px;padding:0;flex:1}
 .as::placeholder{color:#4B5563;font-weight:400}
-.a-sub{font-size:8px;color:#4B6480;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-tk{font-size:9px;color:#5CB8F0;font-weight:700;white-space:nowrap;flex-shrink:0}
+.a-sub{font-size:8px;color:#4B6480;font-weight:600;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Filters */
+.filters{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.chip{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#4B6480;transition:all .12s}
+.chip:hover{border-color:#5CB8F0;color:#94A3B8}
+.chip.on{background:rgba(92,184,240,.1);border-color:#5CB8F0;color:#5CB8F0}
+/* Inline add row */
+.add-row{display:flex;gap:4px;align-items:center;padding:4px 8px;margin-bottom:6px}
+.add-row input{flex:1;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:11px;font-family:inherit;background:#0F1D32;color:#E2E8F0;outline:none}
+.add-row input:focus{border-color:#5CB8F0}
+.add-row input::placeholder{color:#334155}
+.add-row select{border:1px solid #1E3050;border-radius:5px;padding:4px 6px;font-size:10px;font-family:inherit;font-weight:600;background:#152236;color:#64748B;outline:none;cursor:pointer;max-width:140px}
+.add-row select:focus{border-color:#5CB8F0;color:#94A3B8}
+.add-row button{border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#22C55E;color:#fff;flex-shrink:0}
+.add-row button:hover{background:#16A34A}
 .ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
 .aw-inline{font-size:9px;color:#7DD3FC;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#7DD3FC;font-style:italic;outline:none;width:80px}
@@ -339,7 +354,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"projects",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"auto",wo:0,openTasks:{},globalOrder:[],showWaiting:false};
+let S={projects:[],tab:"projects",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all"};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -355,6 +370,7 @@ function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
 function fp(id){return S.projects.find(p=>p.id===id)}
 function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
 function pN(p){return p?p.name||"Sans nom":"?"}
+function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`};
 
@@ -441,6 +457,7 @@ function rA(a,pid,o){
   const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;
   const adc=dcc(a.deadline),adl=dll(a.deadline);
   const pLabel=sp?esc(pN(p)):"";
+  const tkLabel=tName(pid,a.taskId);
   /* Buttons */
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
@@ -451,7 +468,7 @@ function rA(a,pid,o){
   return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" draggable="${nd?"false":"true"}" ${!nd?`ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()"`:""} ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     <span class="ac">${I.chev}</span>
-    <div class="a-info"><input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub">${pLabel}</div>`:""}</div>
+    <div class="a-info">${tkLabel?`<span class="a-tk">${esc(tkLabel)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub">${pLabel}</div>`:""}</div>
     ${w?`<span class="aw-inline"><input value="${esc(a.waitReason)}" placeholder="Motif attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></span>`:""}
     <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
     ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
@@ -505,31 +522,45 @@ return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)
 
 /* ── Global tab ── */
 function rGT(){
+  /* Inline add */
+  let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
+  let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><select id="ga-proj" onchange="updGaTasks()"><option value="">Projet…</option>${projOpts}</select><select id="ga-task"><option value="">Tâche…</option></select><button onclick="qaGlobal()">＋</button></div>`;
+  /* View toggle + filters */
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="project"?"on":""}" onclick="S.gv='project';render()">Par projet</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button><button class="chip ${S.gFilter==="nc"?"on":""}" onclick="S.gFilter='nc';render()">Non commencé</button></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
-  if(!all.length)return`<div class="es">Aucune action en cours.</div>`;
+  if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
   const ids=new Set(all.map(a=>a.id));
   S.globalOrder=S.globalOrder.filter(id=>ids.has(id));
   all.forEach(a=>{if(!S.globalOrder.includes(a.id))S.globalOrder.push(a.id)});
-  /* Split active vs waiting */
-  const active=[],waiting=[];
-  S.globalOrder.forEach(id=>{const a=all.find(x=>x.id===id);if(a){const st=getStatus(a,a.pId);if(st==="wt")waiting.push(a);else active.push(a)}});
-  let h="";
-  active.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
-  if(waiting.length){
-    h+=`<div class="done-toggle" style="margin-top:6px" onclick="S.showWaiting=!S.showWaiting;render()"><span class="cv ${S.showWaiting?"op":""}">${I.chev}</span> En attente (${waiting.length})</div>`;
-    if(S.showWaiting)waiting.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
+  /* Apply status filter */
+  let filtered=all;
+  if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a,a.pId);return st===S.gFilter})}
+  if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
+  if(S.gv==="project"){
+    const bp={};filtered.forEach(a=>{if(!bp[a.pId])bp[a.pId]=[];bp[a.pId].push(a)});
+    Object.keys(bp).sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b)).forEach(k=>{
+      const p=fp(k);h+=`<div class="pgl"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      bp[k].forEach(a=>{h+=rA(a,a.pId,{sp:false,nd:true})})});
+  }else{
+    const ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
+    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true})});
   }
   return h}
+function updGaTasks(){const sel=document.getElementById('ga-proj');const tSel=document.getElementById('ga-task');if(!sel||!tSel)return;const p=fp(sel.value);tSel.innerHTML='<option value="">Tâche…</option>';if(p)p.tasks.forEach(t=>{tSel.innerHTML+=`<option value="${t.id}">${esc(t.title||"Sans nom")}</option>`})}
+function qaGlobal(){const ti=document.getElementById('ga-title'),ps=document.getElementById('ga-proj'),ts=document.getElementById('ga-task');const title=(ti?ti.value:"").trim();if(!title)return;const pid=ps?ps.value:"";let p=fp(pid);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:ts?ts.value:"",blockedBy:[],paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),ps=document.getElementById('da-proj'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;const pid=ps?ps.value:"";let p=fp(pid);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",blockedBy:[],paused:false};p.actions.push(n);save();render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
 function rDN(){
+  /* Inline add done action */
+  let projOpts=S.projects.map(p=>`<option value="${p.id}">${esc(pN(p))}</option>`).join('');
+  let h=`<div class="add-row"><input id="da-title" placeholder="Action terminée…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaDone()}"><select id="da-proj"><option value="">Projet…</option>${projOpts}</select><input id="da-hours" type="number" min="0" step="0.25" placeholder="h" style="width:50px"><button onclick="qaDone()">＋</button></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done")all.push({...a,pId:p.id,_pName:pN(p)})})});
-  /* Include archived actions from deleted projects */
   S.archive.forEach(a=>{all.push({...a,_pName:a.pName||"?",_archived:true})});
-  if(!all.length)return`<div class="es">Aucune action terminée.</div>`;
+  if(!all.length){h+=`<div class="es">Aucune action terminée.</div>`;return h}
   if(!S.doneView)S.doneView="project";
-  let h=`<div class="vt"><button class="vtb ${S.doneView==="project"?"on":""}" onclick="S.doneView='project';render()">Par projet</button><button class="vtb ${S.doneView==="date"?"on":""}" onclick="S.doneView='date';render()">Par date</button></div>`;
+  h+=`<div class="vt"><button class="vtb ${S.doneView==="project"?"on":""}" onclick="S.doneView='project';render()">Par projet</button><button class="vtb ${S.doneView==="date"?"on":""}" onclick="S.doneView='date';render()">Par date</button></div>`;
   if(S.doneView==="date"){
     all.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||""));
     let lastDate="";
@@ -550,13 +581,12 @@ function rDN(){
   return h}
 
 function rDoneRow(a){
-  const ucls="u"+a.urgency[0];
   const pName=a._pName||pN(fp(a.pId));
   const isArchived=a._archived;
-  return`<div id="ar_${a.id}" class="ar ${ucls} ${S.ex[a.id]?"ao":""}" style="opacity:1">
+  return`<div id="ar_${a.id}" class="ar dn ${S.ex[a.id]?"ao":""}" style="opacity:.7">
   <div class="at">
     <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
-    ${S.doneView==="date"?`<span class="apl">${esc(pName)}</span>`:""}
+    ${S.doneView==="date"?`<span class="a-tk" style="color:#4B6480">${esc(pName)} ›</span>`:""}
     <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
     <span class="adtg" style="color:#64748B">${a.doneDate||""}</span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
