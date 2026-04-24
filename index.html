@@ -1,23 +1,830 @@
-Bonjour Mr Scellier, 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌊 Ma Todolist</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding:0;color:#E2E8F0;font-size:12px;display:flex}
+.sidebar{width:56px;min-height:100vh;background:#0F1D32;border-right:1px solid #1E3050;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;left:0;top:0;z-index:50}
+.sb-btn{width:42px;height:38px;border:none;border-radius:8px;background:transparent;color:#4B6480;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:inherit;font-size:7px;font-weight:700;transition:all .12s;padding:2px}
+.sb-btn:hover{background:#1A2D47;color:#94B4D0}
+.sb-btn.on{background:#112944;color:#5CB8F0}
+.sb-btn svg{flex-shrink:0}
+.sb-spacer{flex:1}
+.avatar-wrap{position:relative;cursor:pointer;margin-top:4px}
+.avatar-wrap img{width:32px;height:32px;border-radius:50%;border:2px solid #2A3A52;transition:border-color .15s}
+.avatar-wrap:hover img{border-color:#38BDF8}
+.avatar-menu{display:none;position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:#1C2A3F;border:1px solid #374863;border-radius:8px;padding:8px 12px;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:100}
+.avatar-wrap:hover .avatar-menu{display:block}
+.avatar-menu .am-name{font-size:10px;color:#94A3B8;margin-bottom:4px}
+.avatar-menu .am-sync{font-size:8px;margin-bottom:6px}
+.avatar-menu button{border:none;background:transparent;color:#F87171;cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;padding:2px 0}
+.avatar-menu button:hover{text-decoration:underline}
+.main{margin-left:56px;flex:1;padding:14px 12px 30px;max-width:720px}
+.bar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.bar-l{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.bar-r{display:flex;gap:3px;flex-wrap:wrap}
+.bp{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:6px;border:none;background:linear-gradient(135deg,#0284C7,#0EA5E9);color:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(14,165,233,.2);transition:all .15s}
+.bp:hover{box-shadow:0 2px 8px rgba(14,165,233,.3)}
+.bs{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #2A3A52;background:#162032;color:#64748B;transition:all .15s}
+.bs:hover{border-color:#38BDF8;color:#38BDF8}
+.bs.on{border-color:#38BDF8;background:rgba(56,189,248,.1);color:#38BDF8}
+/* Project */
+.pc{background:#162032;border-radius:10px;border:1px solid #2A3A52;margin-bottom:6px;overflow:hidden}
+.pc.dragging{opacity:.35}
+.pc.dot{box-shadow:0 -2px 0 0 #38BDF8}.pc.dob{box-shadow:0 2px 0 0 #38BDF8}
+.ph{padding:6px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.dh{cursor:grab;color:#4B5563;display:flex;align-items:center;flex-shrink:0;opacity:.5}.dh:hover{opacity:1}
+.ph input{flex:1;border:none;background:transparent;font-size:12px;font-weight:700;font-family:inherit;color:#E2E8F0;outline:none;min-width:0}
+.ph-right{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.ph-date{border-radius:4px;padding:0 4px;font-size:10px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;background:#1E293B;border:1px solid #2A3A52;color:#94A3B8}
+.dt{font-weight:700;font-size:9px}
+.ph-btn{cursor:pointer;font-size:13px;color:#64748B;transition:all .12s;display:flex;align-items:center;padding:1px 2px;border-radius:3px}
+.ph-btn:hover{color:#38BDF8}
+.ph-del{color:#64748B;font-size:11px}.ph-del:hover{color:#F87171;background:rgba(248,113,113,.1)}
+.tg-add-btn{cursor:pointer;font-size:12px;color:#38BDF8;opacity:.6;transition:all .12s;padding:0 2px}
+.tg-add-btn:hover{opacity:1}
+.al{padding:0 10px 6px;display:flex;flex-direction:column;gap:3px}
 
-Nous remettons une offre fin de semaine prochaine pour une installation de production osmosée avec pré-traitement sur filtre à sable. 
-Seriez-vous s’il vous plait en mesure de me fournir un prix pour 1 réservoir avec les caractéristiques suivantes, ou selon vos standards :  
+/* Task group */
+.tg{margin-bottom:4px;background:rgba(56,189,248,.03);border-radius:6px;border:1px solid rgba(56,189,248,.08);padding:3px}
+.tg-hd{display:flex;align-items:center;gap:5px;padding:2px 4px;cursor:pointer;user-select:none}
+.tg-hd .tg-title{flex:1;border:none;background:transparent;font-size:11px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none}
+.tg-hd .tg-title::placeholder{color:#2A5A7A}
+.tg-actions{padding:2px 0 0 16px;display:flex;flex-direction:column;gap:2px}
+.tg.drop-target{background:rgba(92,184,240,.08);border-color:rgba(92,184,240,.2)}
+.tg-del{border:none;background:transparent;color:#64748B;cursor:pointer;font-size:10px;padding:1px 3px;border-radius:3px;opacity:.6;transition:all .12s}
+.tg-del:hover{color:#F87171;opacity:1}
+.tg.dragging{opacity:.3}
+.tg.tg-dot{box-shadow:0 -2px 0 0 #38BDF8}.tg.tg-dob{box-shadow:0 2px 0 0 #38BDF8}
 
-Filtre : 1
-Débit : 120 m3/h
-Hauteur média : 1.25 m
-Hauteur cylindrique  (media + bord libre): 2m
-Vitesse linéaire : 12 m/h
-Diamètre : environ 3.5 m, selon vos dimensions standard
-Rétrolavage : air/eau
--	Air 500 Nm3/h
--	Eau 385 m3/h 
-Construction : 
--	Matériau : Acier revêtu
--	Emplacement : extérieur
--	Distribution : plancher crépiné 
--	Mobile : non
--	Trou d’homme latéral
+/* Action row */
+.ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:6px;margin-bottom:3px;position:relative;border:1px solid transparent;transition:all .2s ease;animation:fadeSlideIn .25s ease}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ar:hover{background:rgba(92,184,240,.04)}
+.ar.ec{background:rgba(92,184,240,.05);border-color:rgba(92,184,240,.1)}
+.ar.ec .as{color:#E2E8F0}
+.ar.prio{border-left:3px solid #F59E0B;border-radius:0 6px 6px 0}.ar.prio .as{color:#FBBF24}
+.ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#2A6A80}
+.ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
+.ar.dragging{opacity:.15}
+/* Task drop zones in Par tâche view */
+.tk-zone{border-radius:6px;padding:2px 0;margin-bottom:2px;transition:background .15s,box-shadow .15s}
+.tk-zone.drop-hi{background:rgba(92,184,240,.06);box-shadow:inset 0 0 0 1px rgba(92,184,240,.2)}
+.tk-hd{padding:4px 8px;display:flex;align-items:center;gap:4px}
+/* During drag, disable pointer events on task header children so drop works */
+body.dragging-active .tk-hd *{pointer-events:none}
+/* Flash feedback */
+.ar.flash-done{animation:flashDone .4s ease}
+.ar.flash-wt{animation:flashWt .4s ease}
+@keyframes flashDone{0%{background:rgba(34,197,94,.2)}100%{background:transparent}}
+@keyframes flashWt{0%{background:rgba(100,181,208,.2)}100%{background:transparent}}
+.ar.dot{box-shadow:0 -2px 0 0 #5CB8F0}.ar.dob{box-shadow:0 2px 0 0 #5CB8F0}
+.at{display:flex;align-items:center;gap:5px;width:100%}
+.ac{cursor:pointer;color:#5CB8F0;display:flex;align-items:center;transition:transform .2s ease;flex-shrink:0}
+.ar.ao .ac{transform:rotate(90deg)}
+.a-info{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 5px}
+.as{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:#CBD5E1;outline:none;min-width:60px;padding:0;flex:1}
+.as::placeholder{color:#4B5563;font-weight:400}
+.a-tk{font-size:9px;color:#5CB8F0;font-weight:700;white-space:nowrap;flex-shrink:0}
+.a-sub{font-size:7.5px;color:#4B6480;font-weight:600;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+/* Filters */
+.flt-wrap{position:relative;display:inline-flex}
+.flt-btn{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#5CB8F0;transition:all .12s;display:flex;align-items:center;gap:3px}
+.flt-btn:hover{border-color:#5CB8F0;background:rgba(92,184,240,.05)}
+.flt-btn svg{width:8px;height:8px}
+.flt-dd{display:none;position:absolute;top:100%;right:0;margin-top:3px;background:#152236;border:1px solid #1E3050;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:90;min-width:110px;overflow:hidden}
+.flt-wrap.open .flt-dd{display:block}
+.flt-opt{padding:5px 10px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s;display:flex;align-items:center;gap:5px}
+.flt-opt:hover{background:#1A2D47;color:#E2E8F0}
+.flt-opt.on{color:#5CB8F0;font-weight:700}
+.flt-opt.on::before{content:"✓";font-size:8px}
+/* Sort buttons */
+.sort-row{display:flex;gap:3px;margin-bottom:6px;align-items:center}
+.sort-lbl{font-size:8px;color:#334155;margin-right:2px}
+.sort-btn{padding:2px 8px;border-radius:10px;font-size:8px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#4B6480;transition:all .12s}
+.sort-btn:hover{border-color:#5CB8F0;color:#94A3B8}
+.sort-btn.on{background:rgba(92,184,240,.08);border-color:#5CB8F0;color:#5CB8F0}
+/* Inline add row */
+.add-row{display:flex;gap:4px;align-items:center;padding:6px 8px;margin-bottom:6px;position:sticky;top:0;z-index:30;background:rgba(14,27,46,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid #1E3050;border-radius:0 0 6px 6px}
+.add-row input[type="text"],.add-row>input:not([type]){flex:1;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:11px;font-family:inherit;background:#0F1D32;color:#E2E8F0;outline:none}
+.add-row input:focus{border-color:#5CB8F0}
+.add-row input::placeholder{color:#334155}
+.add-row button{border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#22C55E;color:#fff;flex-shrink:0}
+.add-row button:hover{background:#16A34A}
+/* Autocomplete */
+.ac-wrap{position:relative;flex-shrink:0;width:140px}
+.ac-wrap input{width:100%;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:10px;font-family:inherit;font-weight:600;background:#152236;color:#94A3B8;outline:none}
+.ac-wrap input:focus{border-color:#5CB8F0;color:#E2E8F0}
+.ac-wrap input::placeholder{color:#334155}
+.ac-list{display:none;position:absolute;top:100%;left:0;right:0;background:#152236;border:1px solid #1E3050;border-top:none;border-radius:0 0 5px 5px;max-height:160px;overflow-y:auto;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.ac-wrap.open .ac-list{display:block}
+.ac-item{padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
+.ac-item:hover{background:#1A2D47;color:#E2E8F0}
+.ac-item.create{color:#5CB8F0;font-style:italic}
+/* Done table view */
+.done-tbl{width:100%;border-collapse:collapse}
+.done-tbl td{padding:3px 6px;font-size:11px;border-bottom:1px solid #152236;vertical-align:middle}
+.done-tbl .dt-proj{color:#4B6480;font-weight:700;font-size:10px;width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.done-tbl .dt-title{color:#CBD5E1;font-weight:600}
+.done-tbl .dt-date{color:#64748B;font-size:9px;text-align:right;width:80px;white-space:nowrap}
+.done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
+.done-tbl .dt-act{width:44px;text-align:right;white-space:nowrap}
+.ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.aw-inline{font-size:9px;color:#64B5D0;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
+.aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#64B5D0;font-style:italic;outline:none;width:80px}
+.adi{border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid #1E3050;color:#64748B;background:#152236}
+.adtg{font-weight:700;font-size:7px;flex-shrink:0}
+.ati{width:36px;border:1px solid #1E3050;border-radius:3px;padding:1px 2px;font-size:8px;font-family:inherit;font-weight:600;background:#152236;color:#5CB8F0;outline:none;text-align:right}
+.atl{font-size:7px;color:#4B6480}
+.bi{border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
+.bdn{background:#22C55E;color:#fff}.bdn:hover{background:#16A34A}
+.bwt{background:transparent;color:#4B6480;border:1px solid #1E3050}.bwt:hover{color:#64B5D0}.bwt.active{color:#64B5D0;border-color:#64B5D0;background:rgba(100,181,208,.1)}
+.bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}
+.bud{background:#334155;color:#94A3B8}
+.btr{background:transparent;color:#334155;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
 
- 
-Filtres existants à titre indicatif
+/* Detail */
+.adl{display:none;padding:4px 0 0 20px;animation:slideDown .2s ease}
+.ar.ao .adl{display:block}
+@keyframes slideDown{from{opacity:0;max-height:0}to{opacity:1;max-height:500px}}
+.ab{display:flex;flex-direction:column;gap:2px;position:relative}
+.fb{display:none;align-items:center;gap:2px;flex-wrap:wrap;padding:2px 0;position:relative}
+.ab.ed .fb{display:flex}
+.fbtn{border:none;border-radius:3px;width:22px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:#64748B;font-size:11px;font-family:inherit;padding:0;transition:all .12s}
+.fbtn:hover{background:rgba(56,189,248,.12);color:#38BDF8}
+.fsp{width:1px;height:14px;background:#2A3A52;margin:0 1px}
+.ffs{border:1px solid #2A3A52;border-radius:3px;padding:0 3px;font-size:9px;font-family:inherit;color:#94A3B8;background:#1E293B;outline:none;cursor:pointer;height:20px;max-width:80px}
+.hp{position:absolute;top:24px;left:0;background:#1C2A3F;border:1px solid #374863;border-radius:6px;padding:5px;box-shadow:0 4px 12px rgba(0,0,0,.4);display:none;z-index:100;width:170px}
+.hp.show{display:block}
+.hl{font-size:8px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;margin-top:3px}.hl:first-child{margin-top:0}
+.hr{display:flex;gap:2px;flex-wrap:wrap}
+.hs{width:17px;height:17px;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:all .12s}
+.hs:hover{transform:scale(1.15);border-color:#38BDF8}
+.hs.none{background:#334155;position:relative}.hs.none::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:#64748B}
+.atx{border:none;background:transparent;font-family:inherit;font-size:11px;line-height:1.4;outline:none;min-height:16px;color:#94A3B8;word-break:break-word}
+.atx:empty::before{content:attr(data-placeholder);color:#4B5563}
+.atx img{max-width:100%;max-height:180px;border-radius:5px;margin:3px 0;display:block}
+.ar.dn .atx{color:#4B5563;text-decoration:line-through}
+.aw{font-size:10px;color:#64B5D0;font-style:italic;padding:2px 0;display:flex;align-items:center;gap:3px}
+.baa{display:flex;align-items:center;justify-content:center;gap:4px;border:1px dashed #2A3A52;border-radius:6px;padding:3px 0;background:transparent;color:#4B5563;cursor:pointer;font-family:inherit;font-size:10px;font-weight:600;transition:all .15s}
+.baa:hover{border-color:#38BDF8;color:#38BDF8}
+.es{text-align:center;padding:24px 14px;color:#4B6480;border:1.5px dashed #1E3050;border-radius:8px;font-size:11px;line-height:1.6}
+.done-toggle{display:flex;align-items:center;gap:4px;padding:3px 6px;cursor:pointer;font-size:10px;font-weight:600;color:#4B6480;user-select:none;border-radius:4px;transition:background .12s}
+.done-toggle:hover{background:#1A2D47}
+
+/* Groups */
+.ugt{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:8px 0 2px;display:flex;align-items:center;gap:5px}
+.ugt .ln{flex:1;height:1px}
+.ug{min-height:4px;padding-bottom:3px}
+.ug.dz{background:rgba(56,189,248,.05);border-radius:6px}
+.pgl{font-size:9px;font-weight:700;color:#38BDF8;padding:4px 0 1px;display:flex;align-items:center;gap:4px}
+.pgl .pgln{flex:1;height:1px;background:#2A3A52}
+.cv{transition:transform .15s;display:inline-flex}.cv.op{transform:rotate(90deg)}
+
+/* Sub-views */
+.vt{display:flex;gap:2px;background:#0F1A2E;border-radius:6px;padding:2px;margin-bottom:6px}
+.vtb{flex:1;padding:3px 0;border:none;border-radius:4px;font-family:inherit;font-size:9px;font-weight:700;cursor:pointer;background:transparent;color:#4B5563;transition:all .12s}
+.vtb.on{background:#1E293B;color:#38BDF8}
+
+/* Done date */
+.ddh{font-size:10px;font-weight:700;color:#64748B;padding:8px 0 3px;text-transform:uppercase;letter-spacing:.3px}
+
+/* Trash */
+.tri{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#162032;border:1px solid #2A3A52;border-radius:6px;margin-bottom:4px}
+.tri .tii{flex:1;min-width:0;font-size:10px;color:#64748B}.tri b{color:#E2E8F0}
+.brs{border:none;border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;font-family:inherit;cursor:pointer;background:#10B981;color:#fff}
+.bpu{border:none;border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;font-family:inherit;cursor:pointer;background:#EF4444;color:#fff;margin-left:3px}
+
+/* Time table */
+.tt{width:100%;border-collapse:collapse;font-size:10px}
+.tt th{text-align:left;padding:4px 6px;color:#64748B;font-weight:700;border-bottom:1px solid #2A3A52;font-size:9px;text-transform:uppercase}
+.tt td{padding:4px 6px;border-bottom:1px solid #1E293B;color:#94A3B8}
+.tt .pn{color:#E2E8F0;font-weight:600}
+.tt .ttr td{border-top:2px solid #2A3A52;color:#38BDF8;font-weight:700}
+.wn{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.wn button{border:1px solid #2A3A52;background:#162032;color:#64748B;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:600}
+.wn button:hover{border-color:#38BDF8;color:#38BDF8}
+.wn span{font-size:11px;color:#94A3B8;font-weight:600}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0B1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+/* Login */
+.login-screen{position:fixed;inset:0;background:#0B1120;display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
+.login-box{background:#162032;border:1px solid #2A3A52;border-radius:16px;padding:32px 28px;text-align:center;max-width:320px;width:90%}
+.login-box h1{font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-box p{color:#64748B;font-size:12px;margin-bottom:20px}
+.btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 24px;border-radius:8px;border:1px solid #2A3A52;background:#1E293B;color:#E2E8F0;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-google:hover{border-color:#38BDF8;background:#243347}
+.btn-google img{width:20px;height:20px}
+.login-loading{color:#64748B;font-size:11px;margin-top:8px}
+.login-err{color:#F87171;font-size:11px;margin-top:8px}
+.sync-indicator{font-size:8px;color:#34D399;margin-left:4px}
+.sync-indicator.saving{color:#FBBF24}
+.sync-indicator.error{color:#F87171}
+
+/* ── Mobile responsive ── */
+@media(max-width:600px){
+  body{flex-direction:column}
+  .sidebar{width:100%;min-height:auto;height:48px;flex-direction:row;position:fixed;bottom:0;top:auto;left:0;border-right:none;border-top:1px solid #1E293B;padding:0 4px;gap:0;justify-content:space-around;z-index:100}
+  .sb-btn{width:auto;height:auto;padding:4px 8px;gap:0;flex:1}
+  .sb-btn span{font-size:7px}
+  .sb-spacer{display:none}
+  .avatar-wrap{order:10}
+  .avatar-wrap img{width:26px;height:26px}
+  .avatar-menu{bottom:auto;top:-80px;right:0;left:auto;transform:none}
+  .main{margin-left:0;padding:8px 8px 60px;max-width:100%}
+  .ph{padding:8px;gap:5px;flex-wrap:wrap}
+  .ph input{font-size:13px;min-width:80px}
+  .ph-right{gap:6px}
+  .ph-date{font-size:11px;padding:2px 6px}
+  .ph-btn{font-size:16px;padding:4px}
+  .dt{font-size:10px}
+  .at{flex-wrap:wrap;gap:4px}
+  .as{font-size:12px}
+  .bi{width:26px;height:26px;font-size:13px}
+  .adi{font-size:10px;padding:2px 6px}
+  .ati{width:44px;font-size:10px;padding:2px 4px}
+  .adl{padding:6px 0 0 12px}
+  .atx{font-size:13px;line-height:1.5}
+  .fbtn{width:28px;height:26px;font-size:13px}
+  .ffs{height:26px;font-size:10px}
+  .tg-hd{padding:4px 6px}
+  .tg-title{font-size:12px}
+  .tg-add-btn{font-size:16px;padding:2px 6px}
+  .tg-del{font-size:13px;padding:4px}
+  .bp{padding:7px 14px;font-size:12px}
+  .bs{padding:5px 10px;font-size:11px}
+  .baa{padding:6px 0;font-size:11px}
+  .tt{font-size:11px}
+  .tt th,.tt td{padding:5px 4px}
+  .wn button{padding:4px 10px;font-size:11px}
+  .wn span{font-size:12px}
+  .login-box{padding:24px 20px}
+  .btn-google{padding:12px 20px;font-size:14px}
+  .tri{padding:8px}.tii{font-size:11px}
+  .brs,.bpu{padding:5px 10px;font-size:10px}
+  .aw{font-size:11px}.aw input{font-size:11px}
+  .ugt{font-size:11px;padding:10px 0 4px}
+  .pgl{font-size:10px}
+  .ddh{font-size:11px}
+  .vtb{padding:5px 0;font-size:10px}
+}
+
+/* CRM */
+.crm-count{font-size:8px;color:#334155;padding:2px 8px;margin-bottom:4px}
+.crm-row{display:flex;align-items:flex-start;gap:6px;padding:6px 10px;border-radius:6px;margin-bottom:2px;transition:background .15s}
+.crm-row:hover{background:rgba(92,184,240,.04)}
+.crm-name{font-size:11px;font-weight:600;color:#CBD5E1;flex:1;min-width:0}
+.crm-meta{display:flex;flex-wrap:wrap;gap:2px;max-width:50%}
+.crm-tag{font-size:7px;padding:1px 5px;border-radius:8px;background:rgba(92,184,240,.08);color:#5CB8F0;font-weight:600;white-space:nowrap}
+.crm-del{border:none;background:transparent;color:#334155;cursor:pointer;font-size:10px;flex-shrink:0;padding:0 2px;transition:color .12s}
+.crm-del:hover{color:#F87171}
+.crm-create{padding:8px 12px;color:#5CB8F0;font-size:11px;cursor:pointer;border-radius:6px;transition:background .12s;font-style:italic}
+.crm-create:hover{background:rgba(92,184,240,.06)}
+.crm-sup{border-radius:6px;margin-bottom:3px;border:1px solid transparent;transition:all .15s}
+.crm-sup.open{background:rgba(92,184,240,.03);border-color:rgba(92,184,240,.06)}
+.crm-sup-hd{display:flex;align-items:center;gap:5px;padding:6px 10px;cursor:pointer;border-radius:6px;transition:background .12s}
+.crm-sup-hd:hover{background:rgba(92,184,240,.04)}
+.crm-sup-name{font-size:12px;font-weight:700;color:#E2E8F0;flex:1}
+.crm-sup-count{font-size:8px;color:#4B6480;background:#152236;padding:1px 6px;border-radius:8px;font-weight:700}
+.crm-sup-body{padding:2px 10px 8px 22px}
+.crm-prod-add{margin-bottom:4px}
+.crm-prod-row{display:flex;align-items:center;gap:4px;padding:3px 6px;font-size:10px;color:#94A3B8;border-radius:4px;transition:background .1s}
+.crm-prod-row:hover{background:rgba(92,184,240,.04)}
+.crm-prod-del{border:none;background:transparent;color:#334155;cursor:pointer;font-size:9px;opacity:0;transition:opacity .12s}
+.crm-prod-row:hover .crm-prod-del{opacity:1}
+.crm-prod-del:hover{color:#F87171}
+</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B1120">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Ma%20Todolist%22%2C%22short_name%22%3A%22Todolist%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B1120%22%2C%22theme_color%22%3A%22%230B1120%22%7D">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div id="login-screen" class="login-screen"><div class="login-box"><h1>🌊 Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div>
+<script>
+/* ── Firebase Init ── */
+firebase.initializeApp({
+  apiKey: "AIzaSyDcJVr4u2S19LC6gfM349xdOHsq-uhnfik",
+  authDomain: "totolist-mhuur2.firebaseapp.com",
+  projectId: "totolist-mhuur2",
+  storageBucket: "totolist-mhuur2.firebasestorage.app",
+  messagingSenderId: "694775853329",
+  appId: "1:694775853329:web:0fa8b21db48addbeb09cb0"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+let currentUser=null;
+let saveTimer=null;
+let syncEl=null;
+
+function doLogin(){
+  document.getElementById('login-msg').innerHTML='<div class="login-loading">Connexion…</div>';
+  const provider=new firebase.auth.GoogleAuthProvider();
+  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(isMobile){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(e=>{
+    document.getElementById('login-msg').innerHTML=`<div class="login-err">${e.message}</div>`;
+  })}
+}
+function doLogout(){if(confirm("Se déconnecter ?"))auth.signOut()}
+
+auth.onAuthStateChanged(async user=>{
+  currentUser=user;
+  if(user){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    await loadFromCloud();
+    migrateData();
+    render();
+  }else{
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+function stripImgs(d){
+  try{const o=JSON.parse(d);o.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image]"')})});return JSON.stringify(o)}catch{return d}
+}
+
+async function loadFromCloud(){
+  try{
+    const doc=await db.collection('users').doc(currentUser.uid).get();
+    if(doc.exists){
+      const d=doc.data();
+      S.projects=d.projects||[];S.trash=d.trash||[];S.archive=d.archive||[];S.globalOrder=d.globalOrder||[];
+      if(d.crm){S.crm=d.crm}else{initCRM()}
+      /* Also cache locally */
+      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm}));
+    }else{
+      /* First login: check if localStorage has data to migrate */
+      const local=localStorage.getItem(SK);
+      if(local){
+        const p=JSON.parse(local);
+        S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];
+        if(p.crm){S.crm=p.crm}else{initCRM()}
+        await saveToCloudNow();
+      }
+    }
+    /* Apply migrations */
+    S.projects.forEach(p=>{
+      S.openProjects[p.id]=true;
+      if(!p.tasks)p.tasks=[];
+      p.tasks.forEach(t=>{delete t.parentId});
+      p.actions.forEach(a=>{
+        if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title="";
+        if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||"h";a.timeH=tu==="m"?tv/60:tu==="j"?tv*8:tv;delete a.timeVal;delete a.timeUnit}
+        if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate="";if(a.taskId===undefined)a.taskId="";
+        delete a.blockedBy;delete a.indent;if(a.priority===undefined)a.priority=false;if(a.paused===undefined)a.paused=a.status==='waiting';
+      });
+    });
+  }catch(e){
+    console.error("Cloud load error:",e);
+    /* Fallback to localStorage */
+    const local=localStorage.getItem(SK);
+    if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
+    S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
+  }
+}
+
+async function saveToCloudNow(){
+  if(!currentUser)return;
+  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm};
+  const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
+  try{
+    await db.collection('users').doc(currentUser.uid).set(stripped);
+    if(syncEl){syncEl.textContent="✓";syncEl.className="sync-indicator"}
+  }catch(e){
+    console.error("Cloud save error:",e);
+    if(syncEl){syncEl.textContent="✗";syncEl.className="sync-indicator error"}
+  }
+}
+
+function saveToCloud(){
+  if(!currentUser)return;
+  if(syncEl){syncEl.textContent="…";syncEl.className="sync-indicator saving"}
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveToCloudNow,1500);
+}
+
+const SK="todolist-data-v3";
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:""};
+const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
+const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
+const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
+
+function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.priority===undefined)a.priority=false;delete a.indent;delete a.blockedBy})})}
+function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
+const PCOLS=["#5CB8F0","#22C55E","#F59E0B","#A78BFA","#F87171","#34D399","#FB923C","#60A5FA","#E879F9","#FBBF24"];
+function pCol(pid){const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
+function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm}))}catch{};saveToCloud()}
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
+function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
+function dll(d){const v=du(d);if(v===null)return"";if(v<0)return Math.abs(v)+"j";if(v===0)return"Auj.";return v+"j"}
+function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function fp(id){return S.projects.find(p=>p.id===id)}
+function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
+function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.actions.find(x=>x.id===aid);if(a)found=a});return found}
+function pN(p){return p?p.name||"Sans nom":"?"}
+function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
+function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`};
+
+/* ── Drag ── */
+let dT=null,dI=null,dP=null;
+function pDS(e,pid){dT="project";dI=pid;e.dataTransfer.effectAllowed="move";const c=e.currentTarget.closest('.pc');if(c)setTimeout(()=>c.classList.add('dragging'),0)}
+function pDE(){dT=null;dI=null;document.querySelectorAll('.pc').forEach(el=>el.classList.remove('dragging','dot','dob'))}
+function pDO(e,pid){if(dT==="project"&&dI!==pid){e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}else if(dT==="action"&&dP!==pid){e.preventDefault();e.currentTarget.classList.add('dob')}}
+function pDL(e){e.currentTarget.classList.remove('dot','dob')}
+function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
+function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",aid);document.body.classList.add('dragging-active');const ar=e.target.closest('.ar');if(ar){const ghost=ar.cloneNode(true);ghost.style.cssText="position:fixed;top:-999px;opacity:.7;width:"+ar.offsetWidth+"px;pointer-events:none";document.body.appendChild(ghost);e.dataTransfer.setDragImage(ghost,20,15);setTimeout(()=>{document.body.removeChild(ghost);ar.classList.add('dragging')},0)}}
+function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-zone').forEach(el=>{el.classList.remove('dz','drop-target','drop-hi')})}
+function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob');/* Highlight parent task zone */if(S.gv==="task"){const zone=el.closest('.tk-zone');if(zone)zone.classList.add('drop-hi')}}
+function aDL(e){e.currentTarget.classList.remove('dot','dob');if(S.gv==="task"){const zone=e.currentTarget.closest('.tk-zone');if(zone){const rel=e.relatedTarget;if(!rel||!zone.contains(rel))zone.classList.remove('drop-hi')}}}
+function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
+  if(dT!=="action"||!dI||dI===tid)return;
+  if(S.tab==="global"){
+    const fi=S.globalOrder.indexOf(dI);if(fi===-1)return;
+    S.globalOrder.splice(fi,1);
+    let ti=S.globalOrder.indexOf(tid);if(ti===-1)return;
+    if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti++;
+    S.globalOrder.splice(ti,0,dI);
+    /* In task view, also move to same task as target */
+    if(S.gv==="task"){const src=findActionById(dI),tgt=findActionById(tid);if(src&&tgt)src.taskId=tgt.taskId}
+    save();render();return;
+  }
+  let sP=null,si=-1;S.projects.forEach(p=>{const i=p.actions.findIndex(a=>a.id===dI);if(i!==-1){sP=p;si=i}});if(!sP||si===-1)return;
+  const[m]=sP.actions.splice(si,1);const tp2=fp(pid);if(!tp2)return;
+  let ti3=tp2.actions.findIndex(a=>a.id===tid);
+  if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti3++;
+  tp2.actions.splice(ti3,0,m);save();render()}
+
+/* ── Status ── */
+function togD(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-done');setTimeout(()=>{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()},300)}else{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()}}
+function togW(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-wt');setTimeout(()=>{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()},250)}else{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()}}
+function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
+function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=!a.priority;save();render()}
+function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
+function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
+function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
+function delP(id){const p=fp(id);if(!p)return;/* Archive done actions with project name */p.actions.filter(a=>a.status==="done").forEach(a=>{S.archive.push({...a,pId:id,pName:pN(p)})});S.trash.push({type:"project",data:JSON.parse(JSON.stringify(p)),date:Date.now()});S.projects=S.projects.filter(x=>x.id!==id);save();render()}
+function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.id===aid);if(!a)return;S.trash.push({type:"action",data:JSON.parse(JSON.stringify(a)),pid,pn:pN(p),date:Date.now()});p.actions=p.actions.filter(x=>x.id!==aid);save();render()}
+function delArchived(aid){S.archive=S.archive.filter(a=>a.id!==aid);save();render()}
+function restT(i){const it=S.trash[i];if(!it)return;if(it.type==="project"){S.projects.push(it.data);S.openProjects[it.data.id]=true}else{const p=fp(it.pid);if(p)p.actions.push(it.data)}S.trash.splice(i,1);save();render()}
+function purgeT(i){S.trash.splice(i,1);save();render()}
+function emptyT(){S.trash=[];save();render()}
+function colAll(){S.projects.forEach(p=>{S.openProjects[p.id]=false;p.tasks.forEach(t=>{S.openTasks[t.id]=false})});S.ex={};render()}
+/* Tasks */
+function addTask(pid){const p=fp(pid);if(!p)return;const t={id:gid(),title:""};p.tasks.push(t);S.openTasks[t.id]=true;save();render()}
+function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=>t.id!==tid);p.actions.forEach(a=>{if(a.taskId===tid)a.taskId=""});save();render()}
+function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
+function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
+/* Drop action on task header */
+function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.dataTransfer.dropEffect="move";const zone=e.currentTarget;zone.classList.add('drop-hi')}
+function tgActDL(e){/* Only remove if truly leaving the zone */const zone=e.currentTarget;const related=e.relatedTarget;if(!related||!zone.contains(related)){zone.classList.remove('drop-hi')}}
+function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('drop-hi');if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a&&a.taskId!==tid){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
+/* Task drag */
+let tdPid=null,tdTid=null;
+function tDS(e,pid,tid){tdPid=pid;tdTid=tid;e.dataTransfer.effectAllowed="move";setTimeout(()=>e.currentTarget.classList.add('dragging'),0)}
+function tDE(){tdPid=null;tdTid=null;document.querySelectorAll('.tg').forEach(el=>el.classList.remove('dragging','tg-dot','tg-dob'))}
+function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefault();e.stopPropagation();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('tg-dot','tg-dob');el.classList.add(e.clientY<r.top+r.height/2?'tg-dot':'tg-dob')}
+function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
+function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
+function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+
+/* ── Format ── */
+function fC(c,v){document.execCommand(c,false,v||null);sAE()}
+function fF(s){document.execCommand('fontName',false,s.value);sAE()}
+function sAE(){const el=document.activeElement;if(el&&el.classList.contains('atx')){const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}}}
+let aHB=null;function tHP(b){const p=b.parentElement.querySelector('.hp');const o=p.classList.contains('show');cAP();if(!o){p.classList.add('show');aHB=b}}
+function cAP(){document.querySelectorAll('.hp.show').forEach(p=>p.classList.remove('show'));aHB=null}
+function aHL(c,pid,aid){const e=document.querySelector(`.atx[data-pid="${pid}"][data-aid="${aid}"]`);if(e)e.focus();c==='none'?document.execCommand('removeFormat',false,null):document.execCommand('hiliteColor',false,c);cAP();const a=fa(pid,aid);if(a&&e){a.text=e.innerHTML;save()}}
+document.addEventListener('mousedown',e=>{if(aHB&&!e.target.closest('.hp')&&!e.target.closest('.fhl'))cAP()});
+function oEF(el){document.querySelectorAll('.ab.ed').forEach(b=>b.classList.remove('ed'));el.closest('.ab').classList.add('ed')}
+function oEB(el){setTimeout(()=>{if(document.activeElement===el)return;const b=el.closest('.ab');if(b&&!b.contains(document.activeElement))b.classList.remove('ed')},200)}
+function sEd(){document.querySelectorAll('.atx[contenteditable]').forEach(el=>{if(el._r)return;el._r=true;el.addEventListener('focus',()=>oEF(el));el.addEventListener('blur',()=>oEB(el));el.addEventListener('paste',function(e){const it=e.clipboardData&&e.clipboardData.items;if(!it)return;for(let i=0;i<it.length;i++){if(it[i].type.indexOf('image')!==-1){e.preventDefault();const f=it[i].getAsFile();const r=new FileReader();r.onload=function(ev){const img=document.createElement('img');img.src=ev.target.result;const s=window.getSelection();if(s.rangeCount){const rr=s.getRangeAt(0);rr.deleteContents();rr.insertNode(img);rr.collapse(false)}else el.appendChild(img);const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}};r.readAsDataURL(f);break}}});el.addEventListener('input',function(){const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}})})}
+function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="todolist-backup.json";a.click();URL.revokeObjectURL(u)}
+function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
+
+function sortA(acts){return acts.filter(x=>x.status!=="done")}
+
+function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`).join('');let fs=HF.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');let ps=HP.map(c=>`<div class="hs" style="background:${c}" onclick="aHL('${c}','${pid}','${aid}')"></div>`).join('');return`<div class="fb"><select class="ffs" onchange="fF(this)" onmousedown="event.stopPropagation()">${fo}</select><div class="fsp"></div><button class="fbtn" onmousedown="event.preventDefault();fC('bold')"><b>G</b></button><button class="fbtn" onmousedown="event.preventDefault();fC('italic')"><i>I</i></button><button class="fbtn" onmousedown="event.preventDefault();fC('underline')"><u>S</u></button><button class="fbtn" onmousedown="event.preventDefault();fC('strikeThrough')"><s>B</s></button><div class="fsp"></div><button class="fbtn fhl" onmousedown="event.preventDefault();tHP(this)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="12" width="14" height="3" rx="1" fill="#FBBF24"/><path d="M3.5 10l2-6h1L9 10M4.5 8h3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg></button><div class="hp"><div class="hl">Flash</div><div class="hr">${fs}</div><div class="hl">Pastel</div><div class="hr">${ps}</div><div class="hl">Retirer</div><div class="hr"><div class="hs none" onclick="aHL('none','${pid}','${aid}')"></div></div></div></div>`}
+
+/* ── Shared action row ── */
+function rA(a,pid,o){
+  const st=getStatus(a);const d=st==="done",w=st==="wt",ec=st==="ec";
+  const uc=d?"dn":w?"wt":"ec";
+  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;const showTask=o&&o.stk;
+  const adc=dcc(a.deadline),adl=dll(a.deadline);
+  const pLabel=sp?esc(pN(p)):"";
+  const tkBreadcrumb=showTask?tName(pid,a.taskId):"";
+  /* Buttons */
+  const prioBtn=d?"":`<button class="bi bprio ${a.priority?"active":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Prioritaire">!</button>`;
+  const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
+  const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
+  const pc=pCol(pid);
+  return`<div id="ar_${a.id}" class="ar ${uc} ${a.priority?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  <div class="at" onclick="togX('${a.id}')">
+    ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
+    <span class="ac">${I.chev}</span>
+    <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${pc};margin-right:3px;flex-shrink:0"></span>${pLabel}</div>`:""}</div>
+    ${w?`<span class="aw-inline"><input value="${esc(a.waitReason)}" placeholder="Motif attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></span>`:""}
+    <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
+    ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
+    <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
+    <div class="ari">${prioBtn}${pauseBtn}${doneBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
+  </div>
+  <div class="adl" onclick="event.stopPropagation()">
+    <div class="ab">${fmB(pid,a.id)}<div class="atx" contenteditable="true" data-pid="${pid}" data-aid="${a.id}" data-placeholder="Notes…">${a.text||""}</div></div>
+  </div></div>`}
+
+/* ── Render ── */
+const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`};
+function render(){
+  /* Sidebar */
+  const tabs=[{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  let sb=`<div class="sidebar">`;
+  tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
+  sb+=`<div class="sb-spacer"></div>`;
+  if(currentUser)sb+=`<div class="avatar-wrap"><img src="${currentUser.photoURL||""}" referrerpolicy="no-referrer" alt=""><div class="avatar-menu"><div class="am-name">${esc(currentUser.displayName||currentUser.email)}</div><div class="am-sync"><span id="sync-ind" class="sync-indicator">✓</span> Synchronisé</div><button onclick="doLogout()">Déconnexion</button></div></div>`;
+  sb+=`</div>`;
+  /* Main */
+  let h="";
+  if(S.tab==="projects")S.tab="global";
+  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else h+=rTR();
+  document.getElementById("app").innerHTML=sb+`<div class="main">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
+
+/* ── Projects tab ── */
+function rPT(){let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="addP()">${I.plus} Projet</button><button class="bs" onclick="colAll()">${I.col} Replier</button></div><div class="bar-r"><button class="bs ${S.sortDeadline?"on":""}" onclick="ts('deadline')">Deadline</button><button class="bs ${S.sortAlpha?"on":""}" onclick="ts('alpha')">Z-A</button></div></div>`;
+let ps=[...S.projects];if(S.sortDeadline)ps.sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return -1;return a.deadline.localeCompare(b.deadline)});if(S.sortAlpha)ps.sort((a,b)=>pN(b).localeCompare(pN(a)));
+if(!ps.length)h+=`<div class="es">Aucun projet</div>`;else ps.forEach(p=>{h+=rP(p)});return h}
+
+function rP(p){const o=S.openProjects[p.id]!==false;const allActs=p.actions;const activeActs=sortA(allActs);const c=dcc(p.deadline);
+let ah="";
+if(o){
+  ah=`<div class="al">`;
+  const standalone=activeActs.filter(a=>!a.taskId);
+  standalone.forEach(a=>{ah+=rA(a,p.id,{})});
+  p.tasks.forEach(tk=>{
+    const tkActs=activeActs.filter(a=>a.taskId===tk.id);
+    const tkOpen=S.openTasks[tk.id]!==false;
+    ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')">`;
+    ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom de la tâche…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Ajouter action">＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer tâche">${I.trash}</button></div>`;
+    if(tkOpen){
+      ah+=`<div class="tg-actions">`;
+      tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
+      ah+=`</div>`;
+    }
+    ah+=`</div>`;
+  });
+  ah+=`</div>`;
+}
+return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
+
+/* ── Global tab ── */
+function rGT(){
+  /* Inline add with autocomplete */
+  let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
+  /* View toggle + filters */
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
+  let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
+  if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
+  /* Sync globalOrder */
+  const ids=new Set(all.map(a=>a.id));
+  S.globalOrder=S.globalOrder.filter(id=>ids.has(id));
+  all.forEach(a=>{if(!S.globalOrder.includes(a.id))S.globalOrder.push(a.id)});
+  /* Apply status filter */
+  let filtered=all;
+  if(S.gFilter==="prio"){filtered=all.filter(a=>a.priority)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
+  if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
+  if(S.gv==="task"){
+    /* Group by project, then by task within each project */
+    const projIds=[...new Set(filtered.map(a=>a.pId))].sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b));
+    projIds.forEach(pid=>{
+      const p=fp(pid);if(!p)return;
+      const pActs=filtered.filter(a=>a.pId===pid);
+      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      /* Standalone actions (no task) */
+      const standalone=pActs.filter(a=>!a.taskId);
+      standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+      standalone.forEach(a=>{h+=rA(a,pid,{sp:false})});
+      /* Group by task */
+      const taskIds=[...new Set(pActs.filter(a=>a.taskId).map(a=>a.taskId))];
+      p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
+        const tkActs=pActs.filter(a=>a.taskId===tk.id);
+        tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
+        h+=`<div class="tk-zone" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')">`;
+        h+=`<div class="tk-hd"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
+        tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
+        h+=`</div>`;
+      });
+    });
+  }else{
+    h+=`<div class="sort-row"><span class="sort-lbl">Tri :</span><button class="sort-btn ${S.gSort==="deadline"?"on":""}" onclick="S.gSort=S.gSort==='deadline'?'':'deadline';render()">Deadline</button><button class="sort-btn ${S.gSort==="project"?"on":""}" onclick="S.gSort=S.gSort==='project'?'':'project';render()">Projet</button></div>`;
+    let ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
+    if(S.gSort==="deadline"){ordered.sort((a,b)=>{if(!a.deadline&&!b.deadline)return 0;if(!a.deadline)return 1;if(!b.deadline)return -1;return a.deadline.localeCompare(b.deadline)})}
+    else if(S.gSort==="project"){ordered.sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a.pId),bi=S.projects.findIndex(p=>p.id===b.pId);return ai-bi})}
+    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true})});
+  }
+  return h}
+
+/* ── Autocomplete engine ── */
+let _acSel={proj:"",projId:"",task:"",taskId:""};
+function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
+function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}
+function acFilter(wid,rawQ,type){
+  const list=document.querySelector('#'+wid+' .ac-list');if(!list)return;
+  const q=rawQ.toLowerCase().trim();let html="";
+  if(type==='proj'){
+    S.projects.filter(p=>!q||pN(p).toLowerCase().includes(q)).forEach(p=>{
+      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
+    if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
+  }else{
+    const p=fp(_acSel.projId);if(p&&p.tasks){
+      p.tasks.filter(t=>!q||(t.title||"").toLowerCase().includes(q)).forEach(t=>{
+        html+=`<div class="ac-item" onmousedown="acPick('task','${t.id}','${esc(t.title||"Sans nom")}')">${esc(t.title||"Sans nom")}</div>`});
+      if(q&&!p.tasks.some(t=>(t.title||"").toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('task','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
+    }
+  }
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
+}
+function acPick(type,id,label){
+  if(type==='proj'){_acSel.projId=id;_acSel.proj=label;const inp=document.getElementById('ga-proj-q')||document.getElementById('da-proj-q');if(inp)inp.value=label;_acSel.taskId="";_acSel.task="";const ti=document.getElementById('ga-task-q');if(ti)ti.value=""}
+  else{_acSel.taskId=id;_acSel.task=label;const inp=document.getElementById('ga-task-q');if(inp)inp.value=label}
+  acClose();
+}
+function acCreate(type,name){
+  if(type==='proj'){const p={id:gid(),number:1,name:name,deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;_acSel.projId=p.id;_acSel.proj=name;save();const inp=document.getElementById('ga-proj-q')||document.getElementById('da-proj-q');if(inp)inp.value=name}
+  else{const p=fp(_acSel.projId);if(p){const t={id:gid(),title:name};p.tasks.push(t);S.openTasks[t.id]=true;_acSel.taskId=t.id;_acSel.task=name;save();const inp=document.getElementById('ga-task-q');if(inp)inp.value=name}}
+  acClose();
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}});
+
+function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
+
+/* ── Terminées (colored, two views) ── */
+function rDN(){
+  /* Inline add with autocomplete */
+  let h=`<div class="add-row"><input id="da-title" placeholder="Action terminée…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaDone()}"><div class="ac-wrap" id="acw-dproj"><input id="da-proj-q" placeholder="Projet…" onfocus="acOpen('acw-dproj')" oninput="acFilter('acw-dproj',this.value,'proj')"><div class="ac-list" id="acl-dproj"></div></div><input id="da-hours" type="number" min="0" step="0.25" placeholder="h" style="width:50px;border:1px solid #1E3050;border-radius:5px;padding:4px 6px;font-size:10px;font-family:inherit;background:#152236;color:#5CB8F0;outline:none"><button onclick="qaDone()">＋</button></div>`;
+  let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done")all.push({...a,pId:p.id,_pName:pN(p)})})});
+  S.archive.forEach(a=>{all.push({...a,_pName:a.pName||"?",_archived:true})});
+  if(!all.length){h+=`<div class="es">Aucune action terminée.</div>`;return h}
+  if(!S.doneView)S.doneView="project";
+  h+=`<div class="vt"><button class="vtb ${S.doneView==="project"?"on":""}" onclick="S.doneView='project';render()">Par projet</button><button class="vtb ${S.doneView==="date"?"on":""}" onclick="S.doneView='date';render()">Par date</button></div>`;
+  if(S.doneView==="date"){
+    all.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||""));
+    let lastDate="";
+    h+=`<table class="done-tbl">`;
+    all.forEach(a=>{
+      const dd=a.doneDate||"";
+      if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+        h+=`<tr><td colspan="5" style="padding:10px 6px 4px;font-size:11px;font-weight:700;color:#5CB8F0;text-transform:capitalize;border-bottom:1px solid #1E3050">${label}</td></tr>`}
+      const isA=a._archived;const pName=a._pName||pN(fp(a.pId));
+      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</span>`:""}<span style="cursor:pointer;color:#334155;font-size:10px;margin-left:3px" onclick="${isA?`delArchived('${a.id}')`:`delA('${a.pId}','${a.id}')`}" title="Supprimer">${I.trash}</span></td></tr>`;
+    });
+    h+=`</table>`;
+  }else{
+    const byP={};all.forEach(a=>{const k=a.pId||"_archived";if(!byP[k])byP[k]={name:a._pName,items:[]};byP[k].items.push(a)});
+    const keys=Object.keys(byP).sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a),bi=S.projects.findIndex(p=>p.id===b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi});
+    keys.forEach(k=>{
+      h+=`<div class="pgl" style="padding-top:8px;border-bottom:2px solid ${pCol(k)};padding-bottom:3px"><span>${esc(byP[k].name)}</span><div class="pgln"></div></div>`;
+      byP[k].items.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||"")).forEach(a=>{h+=rDoneRow(a)});
+    });
+  }
+  return h}
+
+function rDoneRow(a){
+  const pName=a._pName||pN(fp(a.pId));
+  const isArchived=a._archived;
+  const delBtn=isArchived?`<button class="bi btr" onclick="event.stopPropagation();delArchived('${a.id}')" title="Supprimer">${I.trash}</button>`:`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</button><button class="bi btr" onclick="event.stopPropagation();delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</button>`;
+  return`<div id="ar_${a.id}" class="ar dn ${S.ex[a.id]?"ao":""}" style="opacity:.7">
+  <div class="at">
+    <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
+    ${S.doneView==="date"?`<span class="a-tk" style="color:#4B6480">${esc(pName)} ›</span>`:""}
+    <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
+    <span class="adtg" style="color:#64748B">${a.doneDate||""}</span>
+    <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
+    <div class="ari">${delBtn}</div>
+  </div>
+  <div class="adl">
+    <div class="ab">${!isArchived?fmB(a.pId,a.id):""}<div class="${isArchived?"":"atx"}" ${!isArchived?`contenteditable="true" data-pid="${a.pId}" data-aid="${a.id}" data-placeholder="Détails…" onclick="event.stopPropagation()"`:""} style="font-size:11px;color:#94A3B8">${a.text||""}</div></div>
+  </div></div>`}
+
+/* ── Temps tab ── */
+function rTM(){
+  const now=new Date();const mon=new Date(now);mon.setDate(mon.getDate()-mon.getDay()+1+S.wo*7);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  const monS=lDS(mon),sunS=lDS(sun);
+  const label=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" – "+sun.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
+  /* Build day strings */
+  const days=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);days.push(lDS(d))}
+  const dayLabels=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  /* Collect: merge by project name */
+  const byN={};let gt=0;const gtD=[0,0,0,0,0,0,0];
+  const allSources=[];
+  S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done"&&a.doneDate&&a.doneDate>=monS&&a.doneDate<=sunS)allSources.push({pName:pN(p),doneDate:a.doneDate,timeH:a.timeH||0})})});
+  S.archive.forEach(a=>{if(a.doneDate&&a.doneDate>=monS&&a.doneDate<=sunS)allSources.push({pName:a.pName||"?",doneDate:a.doneDate,timeH:a.timeH||0})});
+  allSources.forEach(a=>{
+    if(!byN[a.pName])byN[a.pName]={name:a.pName,total:0,days:[0,0,0,0,0,0,0]};
+    const di=days.indexOf(a.doneDate);
+    if(di!==-1){byN[a.pName].days[di]+=a.timeH;gtD[di]+=a.timeH}
+    byN[a.pName].total+=a.timeH;gt+=a.timeH;
+  });
+  let h=`<div class="wn"><button onclick="S.wo--;render()">◀</button><span>${label}</span><button onclick="S.wo++;render()">▶</button><button onclick="S.wo=0;render()" style="margin-left:4px">Auj.</button></div>`;
+  if(!Object.keys(byN).length){h+=`<div class="es">Aucun temps cette semaine.</div>`;return h}
+  h+=`<div style="overflow-x:auto"><table class="tt"><tr><th>Projet</th>`;
+  dayLabels.forEach(d=>{h+=`<th style="text-align:right;min-width:36px">${d}</th>`});
+  h+=`<th style="text-align:right">Total</th></tr>`;
+  Object.values(byN).sort((a,b)=>b.total-a.total).forEach(p=>{
+    h+=`<tr><td class="pn">${esc(p.name)}</td>`;
+    p.days.forEach(d=>{h+=`<td style="text-align:right">${d?d.toFixed(2):"-"}</td>`});
+    h+=`<td style="text-align:right;font-weight:600">${p.total.toFixed(2)}h</td></tr>`;
+  });
+  h+=`<tr class="ttr"><td>Total</td>`;
+  gtD.forEach(d=>{h+=`<td style="text-align:right">${d?d.toFixed(2):"-"}</td>`});
+  h+=`<td style="text-align:right">${gt.toFixed(2)}h</td></tr></table></div>`;return h}
+
+/* ── Trash ── */
+function rTR(){if(!S.trash.length)return`<div class="es">Corbeille vide.</div>`;let h=`<div class="bar"><div></div><button class="bs" style="border-color:#F87171;color:#F87171" onclick="if(confirm('Vider ?'))emptyT()">Vider</button></div>`;S.trash.slice().reverse().forEach((it,ri)=>{const i=S.trash.length-1-ri;const m=Math.round((Date.now()-it.date)/60000);const t=m<1?"maintenant":m<60?m+"min":Math.round(m/60)+"h";const label=it.type==="project"?it.data.name:(it.data.title||"Sans titre");const sub=it.type==="project"?"Projet":"Action · "+esc(it.pn||"");h+=`<div class="tri"><div class="tii"><b>${esc(label)}</b> <span style="font-size:9px;color:#4B6480">${sub}</span> · ${t}</div><button class="brs" onclick="restT(${i})">↩</button><button class="bpu" onclick="purgeT(${i})">✕</button></div>`});return h}
+
+/* ── Mutations ── */
+function sT(t){S.tab=t;render()}
+function ts(t){if(t==="deadline"){S.sortDeadline=!S.sortDeadline;S.sortAlpha=false}if(t==="alpha"){S.sortAlpha=!S.sortAlpha;S.sortDeadline=false}render()}
+function tGP(){S.groupByProject=!S.groupByProject;render()}
+/* ── CRM ── */
+const CRM_SEED={"p":["AERATION - Airjet","AERATION - Aérateurs de fond","AERATION - Aérateurs de surface","AERATION - Dégraisseurs croûte flottante","AERATION - Hydro-ejecteurs","AERATION - Turbines immergées","AERATION - Turbines lentes","AERATION - Turbines rapides","AGITATION - Agitateurs","AGITATION - Agitateurs canal","AGITATION - Agitateurs immergés","AGITATION - Malaxeur horizontal","AGITATION - Malaxeur laveur mélangeur","AGITATION - Mélangeur vertical à vis","AGITATION - Mélangeurs flottants","AGITATION - Mélangeurs lents","AIR COMPRIME - Compresseurs","AIR COMPRIME - Surpresseurs","Absorbeur CO2","BIO - BRM","BIO - Lagunes","BIO - MBBR","BIO - Stockage boues","BIO - Trémies et silos","BROYAGE - Calibration broyeurs","CABINET CONSEIL","CENTRES DE RECHERCHE","CHARBON ACTIF","CHLORATION","CONTAINERS AMENAGEMENT","CONTROLE ET REJET - Canal de comptage","CONTROLE ET REJET - Echantilloneur","CONTROLE ET REJET - Echantillonneur (location)","CONTROLE ET REJET - Enregisteurs","CRINOLINES, ECHELLES, PASSERELLE, CAILLEBOTIS, GARDES CORPS, ESCALIERS","CUVES - ACIER","CUVES - ACIER (Méthanisation)","CUVES - PE Rotomoulées","CUVES - PLASTIQUE","CUVES - SVR","CUVES PLASTIQUE 100 m3","CUVES PLASTIQUE 120 m3","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","CUVES PLASTIQUE 80 m3","DAF (Aéroflottateurs)","DECANTEUR LAMELLAIRE","DECANTEURS - CLARI-FLOCULATEURS","DECANTEURS - CLARIFICATEURS","DECANTEURS - EPAISSISSEURS","DEGAZEURS","DEGAZEURS < 70 M3/H","DEGAZEURS MEMBRANAIRES","DEGRILLAGE - Dégrilleurs courbes","DEGRILLAGE - Dégrilleurs droits raclage continu","DEGRILLAGE - Dégrilleurs escaliers","DEGRILLAGE - Dégrilleurs fins","DEGRILLAGE - Dégrilleurs inclinés","DEGRILLAGE - Dégrilleurs rotatifs","DEGRILLAGE - Dégrilleurs statiques","DEGRILLAGE - Dégrilleurs verticaux","DEGRILLAGE - Filtres gravitaires","DEGRILLAGE - Matières de vidange","DEGRILLAGE - Prise d'eau passive","DEGRILLAGE - Pré-traitrement compact","DEGRILLAGE - Tamis rotatifs","DEGRILLAGE - Tamis à vis","DEGRILLAGE - Tout type","DESHUILAGE","DESHUILAGE - Gravitaire","DESHYDRATATION DES BOUES - Décanteurs centrifuges","DESHYDRATATION DES BOUES - Egouttoirs à vis","DESHYDRATATION DES BOUES - Epaississant ceinture","DESHYDRATATION DES BOUES - FILTRE PRESSE","DESHYDRATATION DES BOUES - Filtres à tambours","DESHYDRATATION DES BOUES - Fitlre à tamis rotatif","DESHYDRATATION DES BOUES - Presse à disques","DESHYDRATATION DES BOUES - Presse à vis","DESHYDRATATION DES BOUES - Presses à bandes","DESHYDRATATION DES BOUES - Sécheurs de boue","DESHYDRATATION DES BOUES - Sécheurs solaires","DESHYDRATATION DES BOUES - Sécheurs thermiques","DESHYDRATATION DES BOUES - Sécheurs à bande basse température (BDS)","DESHYDRATATION DES BOUES - Sécheurs à lit fluidisé","DESHYDRATATION DES BOUES - Sécheurs à pales","DESHYDRATATION DES BOUES - Sécheurs à tambour","DESHYDRATATION DES BOUES - Tables d'égouttage","DESIGN & BUILD","EAU DE PLUIE","ECHANGEURS DE CHALEUR","ECSB (Méthanisation)","EDI","ELEC/AUTOM - Armoires électriques","ELEC/AUTOM - Câblage","ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates","ELECT/AUTOM - Redresseurs","ELECTROLYSEURS","EVAPORATEURS - CMV","EVAPORATEURS - Eau chaude/Eau froide","EVAPORATEURS - HMD (humidité)","EVAPORATEURS - PàC","FIBRES ECHANGEUSES D'IONS","FILTRE - BERNOUILLI","FILTRE - SEPARATEUR CENTRIFUGE","FILTRE - SEPARATEUR HYDROCARBURES","FILTRE - Tout types","FILTRE A SABLE","FILTRE A SABLE CONTINU","FILTRES - Crépines","FILTRES - RESERVOIRS SOUS PRESSION","FILTRES A CARTOUCHE","FILTRES A DISQUES","FILTRES A MEDIA DEROULANT","FILTRES A POCHE","FILTRES A TAMBOUR","FILTRES A TAMIS","FILTRES AUTOMATIQUES","FILTRES BIOLOGIQUES","FILTRES CENTRIFUGES","FILTRES ROTATIFS","GARNISSAGE METHANISEURS","GAZOMETRES","GROUPES ELECTROGENES","HYDROLYSE THERMIQUE","HYGIENISATION","INCORPORATION - Vis et convoyeurs","INSTRUM - Analyseurs en ligne","INSTRUM - Compteurs d'eau","INSTRUM - Débitmètres électromagnétiques","INSTRUM - Manomètres","INSTRUM - Niveaux (liquides)","INSTRUM - Niveaux à palette (poudre)","INSTRUM - Pressostats","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température","LABORATOIRE - Matériel","LABORATOIRES & ANALYSES","LABORATOIRES - Mesures émissions","MARKETING & STRATEGIE ENTREPRISE","MEDIA FILTRANTS","MEDIA FILTRANTS - AFM","MEDIA FILTRANTS - Arsenic","MEDIA FILTRANTS - Fer","MEDIA FILTRANTS - Manganèse","MEDIA FILTRANTS - Métaux","MEDIA FILTRANTS - Pesticides","MELANGEURS STATIQUES","MEMBRANE -  Energy recovery","MEMBRANE - AUTOPSIE DE MEMBRANES","MEMBRANE - HOUSING","MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)","MEMBRANE - Membranes céramiques","MEMBRANE - Osmoseurs (eau de ville)","MEMBRANE - Skids MF/UF (céramique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)","METHA - EPURATION BIOGAZ","METHA- UASB (Méthanisation)","ORGANISMES EAU","OXYDATION H2O2 UV","OZONEURS","PALETTE RETENTION","POMPES A BOUE HP","POMPES A ENTRAINEMENT MAGNETIQUE","POMPES A LOBES (BIO)","POMPES A MEMBRANES","POMPES A ROTOR EXCENTRE","POMPES A VIDE (BIO)","POMPES AUTO-AMORCANTES (BIO)","POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES","POMPES DILASCERATRICES","POMPES DOSEUSES","POMPES DOSEUSES PERILSTATIQUES","POMPES EAUX CHARGEES","POMPES HP PISTON (Osmoseurs)","POMPES MULTIVIS","POMPES RECIRCULATION (BIO)","POMPES SUBMERSIBLES","POMPES VIDE-FUT","PREPARATION POLYMERE","REACTIFS - Additifs bassins aération","REACTIFS - Anti-mousse","REACTIFS - Anti-scalant","REACTIFS - Biocide","REACTIFS - Coagulants","REACTIFS - Dispersants","REACTIFS - Floculants","REACTIFS - Inhibiteurs de corrosion","REACTIFS - Insolubilisants","REACTIFS - Lait de chaux","REACTIFS - Tout type","RESINES - Adoucisseurs","RESINES - Centres de retraitement","RESINES - Chélatentes de métaux","RESINES - Lits mélangés","RESINES - TOUT TYPE","RESINES PFAS - Destruction","RESISTANCES CHAUFFANTES","REVETEMENTS SOLS","ROBINETTERIE ACIER - VANNES","ROBINETTERIE DIVERS","ROBINETTERIE PLASTIQUE","ROBINETTERIE PLASTIQUE - GIRAIR","SERVICES","STRIPPING AMMONIAC","TORCHERES","TRANSPORT - CONTAINERS","TUYAUTERIE FLEXIBLES","TUYAUTEURS","UV LAMPES"],"s":[{"n":"1H2O3","p":["DECANTEUR LAMELLAIRE","DECANTEURS - CLARI-FLOCULATEURS","DESHYDRATATION DES BOUES - Fitlre à tamis rotatif","FILTRES A TAMBOUR","FILTRES ROTATIFS","UV LAMPES"]},{"n":"2GARENI INDUSTRIE","p":["GROUPES ELECTROGENES"]},{"n":"2PA","p":["CRINOLINES, ECHELLES, PASSERELLE, CAILLEBOTIS, GARDES CORPS, ESCALIERS"]},{"n":"3M","p":["DEGAZEURS MEMBRANAIRES"]},{"n":"ABEL","p":["POMPES A BOUE HP"]},{"n":"ABIOTEC","p":["UV LAMPES"]},{"n":"ABRITEC","p":["ELEC/AUTOM - Armoires électriques"]},{"n":"ACORE","p":["ELECT/AUTOM - Redresseurs"]},{"n":"ACTEMIUM","p":["SERVICES"]},{"n":"ACTIPLAST","p":["CONTAINERS AMENAGEMENT","CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 8 m3"]},{"n":"ADH2OC","p":["Absorbeur CO2","CHARBON ACTIF","CUVES - PE Rotomoulées","EDI","FILTRE - Tout types","FILTRE A SABLE","FILTRES - Crépines","FILTRES - RESERVOIRS SOUS PRESSION","FILTRES A CARTOUCHE","FILTRES A POCHE","FILTRES A TAMIS","FILTRES AUTOMATIQUES","FILTRES CENTRIFUGES","MEDIA FILTRANTS","MEMBRANE - HOUSING","MEMBRANE - Osmoseurs (eau de ville)","MEMBRANE - Skids MF/UF (organique)","RESINES - Adoucisseurs","RESINES - Lits mélangés","RESINES - TOUT TYPE","UV LAMPES"]},{"n":"ADIQUIMICA","p":["REACTIFS - Anti-mousse","REACTIFS - Anti-scalant","REACTIFS - Biocide","REACTIFS - Coagulants","REACTIFS - Dispersants","REACTIFS - Floculants","REACTIFS - Inhibiteurs de corrosion"]},{"n":"AERZEN","p":["AIR COMPRIME - Surpresseurs"]},{"n":"AFFETTI","p":["POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES"]},{"n":"AFI 95","p":["TUYAUTEURS"]},{"n":"AGIMEL","p":["AGITATION - Agitateurs"]},{"n":"AGITEC","p":["AGITATION - Agitateurs"]},{"n":"AJELIS","p":["FIBRES ECHANGEUSES D'IONS"]},{"n":"ALBIN PUMP","p":["POMPES DOSEUSES PERILSTATIQUES"]},{"n":"ALFALAVAL","p":["BIO - BRM","DESHYDRATATION DES BOUES - Décanteurs centrifuges","DESHYDRATATION DES BOUES - FILTRE PRESSE","DESHYDRATATION DES BOUES - Filtres à tambours","DESHYDRATATION DES BOUES - Presses à bandes","DESHYDRATATION DES BOUES - Tables d'égouttage","ECHANGEURS DE CHALEUR","FILTRES A DISQUES"]},{"n":"ALIAXIS","p":["ROBINETTERIE PLASTIQUE - GIRAIR"]},{"n":"ALLEN BRADLEY","p":["ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates"]},{"n":"ALSAPLAST","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","CUVES PLASTIQUE 80 m3"]},{"n":"ALSYS / ORELIS","p":["DESIGN & BUILD","MEMBRANE - Membranes céramiques","MEMBRANE - Skids MF/UF (organique)"]},{"n":"ALTING","p":["DEGAZEURS MEMBRANAIRES","MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"AMCON","p":["DESHYDRATATION DES BOUES - Presses à bandes"]},{"n":"AMIAD","p":["FILTRES AUTOMATIQUES"]},{"n":"AMPAC","p":["INSTRUM - Débitmètres électromagnétiques"]},{"n":"ANALYSIS","p":["LABORATOIRES - Mesures émissions"]},{"n":"ANDRITZ","p":["DECANTEURS - CLARIFICATEURS","DECANTEURS - EPAISSISSEURS","DEGRILLAGE - Dégrilleurs fins","DEGRILLAGE - Dégrilleurs rotatifs","DEGRILLAGE - Dégrilleurs statiques","DEGRILLAGE - Filtres gravitaires","DEGRILLAGE - Prise d'eau passive","DESHYDRATATION DES BOUES - Décanteurs centrifuges","DESHYDRATATION DES BOUES - FILTRE PRESSE","DESHYDRATATION DES BOUES - Filtres à tambours","DESHYDRATATION DES BOUES - Presse à vis","DESHYDRATATION DES BOUES - Presses à bandes","DESHYDRATATION DES BOUES - Sécheurs à bande basse température (BDS)","DESHYDRATATION DES BOUES - Sécheurs à lit fluidisé","DESHYDRATATION DES BOUES - Sécheurs à pales","DESHYDRATATION DES BOUES - Sécheurs à tambour","DESHYDRATATION DES BOUES - Tables d'égouttage"]},{"n":"APEI","p":["CUVES - PLASTIQUE"]},{"n":"API PLAST","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 8 m3"]},{"n":"AQUA.COM","p":["FILTRES - Crépines","FILTRES - RESERVOIRS SOUS PRESSION","FILTRES A CARTOUCHE","FILTRES A TAMIS","MEDIA FILTRANTS","MEDIA FILTRANTS - AFM","MEDIA FILTRANTS - Fer","MEDIA FILTRANTS - Manganèse","MEMBRANE - HOUSING","RESINES - Adoucisseurs","RESINES - TOUT TYPE"]},{"n":"AQUACOLLECT","p":["EAU DE PLUIE"]},{"n":"AQUADEP","p":["DESIGN & BUILD"]},{"n":"AQUALABO","p":["CONTROLE ET REJET - Canal de comptage","CONTROLE ET REJET - Echantilloneur","INSTRUM - Analyseurs en ligne"]},{"n":"AQUAPROX I-Tech","p":["DESIGN & BUILD","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"AQUASYSTEMS","p":["AERATION - Aérateurs de fond","AERATION - Turbines rapides"]},{"n":"ARDOINES INDUSTRIE","p":["CUVES - ACIER","TUYAUTEURS"]},{"n":"ARGAL","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES A MEMBRANES","POMPES CENTRIFUGES PLASTIQUES"]},{"n":"ARMATUREN","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"ARO","p":["POMPES A MEMBRANES"]},{"n":"AROL-ENERGY","p":["GAZOMETRES","METHA - EPURATION BIOGAZ","TORCHERES"]},{"n":"ARSILAC","p":["POMPES DOSEUSES PERILSTATIQUES"]},{"n":"ARTFLEX","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"ASTRO","p":["CUVES - PE Rotomoulées"]},{"n":"AT-TECHNIC","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","TUYAUTEURS"]},{"n":"ATELIER DU PLASTIQUE","p":["CUVES PLASTIQUE 35 m3","TUYAUTEURS"]},{"n":"ATLANTIQUE INDUSTRIE","p":["AERATION - Airjet","AERATION - Aérateurs de fond","AERATION - Aérateurs de surface","AERATION - Dégraisseurs croûte flottante","AGITATION - Agitateurs canal","AGITATION - Agitateurs immergés","AGITATION - Mélangeurs flottants","AGITATION - Mélangeurs lents","DECANTEUR LAMELLAIRE","DEGRILLAGE - Dégrilleurs rotatifs","DESHYDRATATION DES BOUES - Egouttoirs à vis","DESHYDRATATION DES BOUES - Presse à disques","DESHYDRATATION DES BOUES - Presse à vis","HYGIENISATION","POMPES A VIDE (BIO)","POMPES AUTO-AMORCANTES (BIO)","POMPES DILASCERATRICES","POMPES EAUX CHARGEES","POMPES RECIRCULATION (BIO)"]},{"n":"AUTAA","p":["TRANSPORT - CONTAINERS"]},{"n":"AUTOMAT SYSTEM","p":["ELEC/AUTOM - Câblage"]},{"n":"AVENPLAST","p":["CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3"]},{"n":"Applexion","p":["MEMBRANE - Skids MF/UF (céramique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"BAMO","p":["CONTROLE ET REJET - Canal de comptage","CONTROLE ET REJET - Echantilloneur","CONTROLE ET REJET - Enregisteurs","INSTRUM - Compteurs d'eau","INSTRUM - Débitmètres électromagnétiques","INSTRUM - Manomètres","INSTRUM - Niveaux (liquides)","INSTRUM - Niveaux à palette (poudre)","INSTRUM - Pressostats","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température","ROBINETTERIE PLASTIQUE"]},{"n":"BARRIQUAND","p":["ECHANGEURS DE CHALEUR"]},{"n":"BB&B","p":["MARKETING & STRATEGIE ENTREPRISE"]},{"n":"BECKER","p":["POMPES A VIDE (BIO)"]},{"n":"BELAIR","p":["AIR COMPRIME - Compresseurs"]},{"n":"BENE INOX","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"BENVITEC","p":["DEGAZEURS"]},{"n":"BERGHOF Membranes","p":["MEMBRANE - Skids MF/UF (organique)"]},{"n":"BEST UV","p":["UV LAMPES"]},{"n":"BIO UV","p":["UV LAMPES"]},{"n":"BIOME","p":["EVAPORATEURS - CMV"]},{"n":"BIOTRADE","p":["DAF (Aéroflottateurs)","DEGRILLAGE - Dégrilleurs courbes","DEGRILLAGE - Dégrilleurs droits raclage continu","DEGRILLAGE - Dégrilleurs escaliers","DEGRILLAGE - Dégrilleurs inclinés","DEGRILLAGE - Dégrilleurs verticaux","DEGRILLAGE - Matières de vidange","DEGRILLAGE - Tamis rotatifs","INCORPORATION - Vis et convoyeurs"]},{"n":"BOHLPLAST","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 100 m3","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","CUVES PLASTIQUE 80 m3","TUYAUTEURS"]},{"n":"BOLLFILTER","p":["FILTRES AUTOMATIQUES"]},{"n":"BORGER","p":["AGITATION - Agitateurs immergés","BIO - Trémies et silos","POMPES A LOBES (BIO)"]},{"n":"BRAY CONTROLS FRANCE","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"BREDEL","p":["POMPES DOSEUSES PERILSTATIQUES"]},{"n":"BRENNTAG","p":["REACTIFS - Coagulants","REACTIFS - Tout type"]},{"n":"BRENTWOOD","p":["GARNISSAGE METHANISEURS"]},{"n":"BROQUET PUMPS","p":["FILTRES AUTOMATIQUES"]},{"n":"BUDé","p":["CONTAINERS AMENAGEMENT"]},{"n":"BUREAU VERITAS","p":["LABORATOIRES - Mesures émissions"]},{"n":"BURKERT","p":["INSTRUM - Débitmètres électromagnétiques","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température","MEMBRANE - Membrane & Modules MF/UF (organique)","ROBINETTERIE PLASTIQUE"]},{"n":"BWT","p":["DESIGN & BUILD","MEMBRANE - Skids RO (organique)"]},{"n":"BWT AQUAGED","p":["REACTIFS - Additifs bassins aération","REACTIFS - Anti-mousse","REACTIFS - Anti-scalant","REACTIFS - Biocide","REACTIFS - Floculants"]},{"n":"BactoSense","p":["INSTRUM - Analyseurs en ligne"]},{"n":"Brightwork","p":["FILTRE A SABLE CONTINU"]},{"n":"C2S","p":["LABORATOIRES & ANALYSES"]},{"n":"CADIOU","p":["CUVES PLASTIQUE 100 m3","CUVES PLASTIQUE 120 m3","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","CUVES PLASTIQUE 80 m3"]},{"n":"CALDIC","p":["RESINES - Chélatentes de métaux"]},{"n":"CALLISTO","p":["DESIGN & BUILD"]},{"n":"CALORPLAST","p":["ECHANGEURS DE CHALEUR"]},{"n":"CALPEDA","p":["POMPES CENTRIFUGES INOX"]},{"n":"CALPLAS","p":["FILTRES - RESERVOIRS SOUS PRESSION"]},{"n":"CAMBI","p":["HYDROLYSE THERMIQUE"]},{"n":"CAODURO IMPIANTI","p":["INSTRUM - Sondes pH/rH/Conductivité"]},{"n":"CAPRARI","p":["POMPES CENTRIFUGES INOX"]},{"n":"CAPSA CONTAINERS","p":["CONTAINERS AMENAGEMENT"]},{"n":"CARSO","p":["LABORATOIRES & ANALYSES"]},{"n":"CATS PUMP","p":["POMPES HP PISTON (Osmoseurs)"]},{"n":"CEBEDEAU","p":["CENTRES DE RECHERCHE","ORGANISMES EAU"]},{"n":"CEPIC","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES PLASTIQUES"]},{"n":"CERTIS","p":["CHARBON ACTIF","EDI","FILTRE - Tout types","FILTRE A SABLE","FILTRES - Crépines","FILTRES - RESERVOIRS SOUS PRESSION","FILTRES A CARTOUCHE","FILTRES A POCHE","FILTRES A TAMIS","INSTRUM - Manomètres","MEDIA FILTRANTS","MEMBRANE - HOUSING","MEMBRANE - Skids MF/UF (organique)","RESINES - Adoucisseurs","RESINES - Lits mélangés","RESINES - TOUT TYPE","UV LAMPES"]},{"n":"CG IBERICA","p":["EVAPORATEURS - PàC"]},{"n":"CHAUDRONNERIE PLASTIQUE DE L'OUEST","p":["CUVES - PLASTIQUE","TUYAUTEURS"]},{"n":"CHAUDRONNERIE PLASTIQUE NANTAISE","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 8 m3","TUYAUTEURS"]},{"n":"CHEMDOC WATER","p":["DESIGN & BUILD","EDI","FILTRES A DISQUES","FILTRES A POCHE","FILTRES ROTATIFS","MEDIA FILTRANTS - Arsenic","MEDIA FILTRANTS - Fer","MEDIA FILTRANTS - Manganèse","MEDIA FILTRANTS - Pesticides","MEMBRANE - HOUSING","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids RO (organique)","RESINES - Adoucisseurs","RESINES - TOUT TYPE"]},{"n":"CHEMVIRON","p":["CHARBON ACTIF"]},{"n":"CHOQUENET","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE"]},{"n":"CIFEC","p":["CHLORATION","INSTRUM - Analyseurs en ligne"]},{"n":"CINTROPUR","p":["FILTRES A CARTOUCHE","FILTRES A TAMIS","UV LAMPES"]},{"n":"CIPRIANI","p":["ECHANGEURS DE CHALEUR"]},{"n":"CLOUP","p":["LABORATOIRE - Matériel","REACTIFS - Tout type"]},{"n":"CMO Valves","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"CODELINE","p":["MEMBRANE - HOUSING"]},{"n":"COHIN ENVIRONNEMENT","p":["DESIGN & BUILD"]},{"n":"COMAP","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"COMPTOIR DU PLASTIC","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 100 m3","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3","CUVES PLASTIQUE 80 m3"]},{"n":"CONCEPT CUVE","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 8 m3"]},{"n":"CONCEPT-PLAST","p":["CUVES - PLASTIQUE"]},{"n":"CP PUMPEN","p":["POMPES A ENTRAINEMENT MAGNETIQUE"]},{"n":"CPN","p":["CUVES - PLASTIQUE","TUYAUTEURS"]},{"n":"CREATIV POMPES","p":["POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES"]},{"n":"CTI Groupe","p":["FILTRES - RESERVOIRS SOUS PRESSION"]},{"n":"CTRI","p":["POMPES A ENTRAINEMENT MAGNETIQUE"]},{"n":"Coveca","p":["TUYAUTERIE FLEXIBLES"]},{"n":"DANFOSS","p":["ELEC/AUTOM - Variateurs de fréquence","POMPES HP PISTON (Osmoseurs)","ROBINETTERIE ACIER - VANNES"]},{"n":"DE NORA","p":["FILTRES BIOLOGIQUES"]},{"n":"DENIOS","p":["PALETTE RETENTION"]},{"n":"DESOTEC","p":["CHARBON ACTIF"]},{"n":"DIEMME","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE"]},{"n":"DIP PLASTIQUE","p":["ROBINETTERIE PLASTIQUE"]},{"n":"DN FRANCE","p":["CUVES - ACIER","CUVES - SVR","DECANTEUR LAMELLAIRE","DECANTEURS - CLARIFICATEURS","FILTRE A SABLE","FILTRES - RESERVOIRS SOUS PRESSION"]},{"n":"DONAU","p":["CHARBON ACTIF"]},{"n":"DUBUISSON FILTRATION","p":["FILTRES A MEDIA DEROULANT"]},{"n":"DUPONT","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"DVP","p":["AIR COMPRIME - Surpresseurs"]},{"n":"EBARA","p":["POMPES CENTRIFUGES INOX"]},{"n":"ECL ECONET","p":["FILTRES A MEDIA DEROULANT"]},{"n":"ECO-TECHNO","p":["EVAPORATEURS - CMV","EVAPORATEURS - Eau chaude/Eau froide","EVAPORATEURS - PàC"]},{"n":"ECOTEAM","p":["EVAPORATEURS - CMV","EVAPORATEURS - Eau chaude/Eau froide","EVAPORATEURS - PàC"]},{"n":"EKOPAK","p":["DESIGN & BUILD"]},{"n":"ELMATEC","p":["DESIGN & BUILD","EDI","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"ELOY WATER","p":["DESHUILAGE","EAU DE PLUIE"]},{"n":"EMEC","p":["POMPES DOSEUSES"]},{"n":"EMERSON","p":["INSTRUM - Débitmètres électromagnétiques","INSTRUM - Manomètres","INSTRUM - Niveaux (liquides)","INSTRUM - Sondes température"]},{"n":"EMMERICH","p":["POMPES A BOUE HP"]},{"n":"EMO","p":["AERATION - Turbines lentes","AERATION - Turbines rapides","DEGRILLAGE - Tout type","DESHYDRATATION DES BOUES - FILTRE PRESSE","DESHYDRATATION DES BOUES - Presse à vis","DESHYDRATATION DES BOUES - Presses à bandes","DESHYDRATATION DES BOUES - Sécheurs thermiques","DESHYDRATATION DES BOUES - Sécheurs à bande basse température (BDS)","INCORPORATION - Vis et convoyeurs"]},{"n":"ENDRESS HAUSER","p":["CONTROLE ET REJET - Canal de comptage","CONTROLE ET REJET - Echantilloneur","CONTROLE ET REJET - Enregisteurs","INSTRUM - Débitmètres électromagnétiques","INSTRUM - Manomètres","INSTRUM - Niveaux (liquides)","INSTRUM - Niveaux à palette (poudre)","INSTRUM - Pressostats","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température"]},{"n":"ENECO DISTRIBUTION","p":["RESINES - TOUT TYPE"]},{"n":"EREC","p":["ELEC/AUTOM - Câblage"]},{"n":"ERLA","p":["CUVES - PLASTIQUE"]},{"n":"ESSELENT SOLUTIONS","p":["DESHUILAGE - Gravitaire"]},{"n":"ETIREX","p":["RESISTANCES CHAUFFANTES"]},{"n":"ETSE","p":["DECANTEUR LAMELLAIRE","FILTRES - Crépines","MEDIA FILTRANTS"]},{"n":"EURO TECHNI SOL","p":["REVETEMENTS SOLS"]},{"n":"EURO-SCIENTIFIC","p":["LABORATOIRE - Matériel"]},{"n":"EUROCARB","p":["CHARBON ACTIF"]},{"n":"EUROFINS","p":["LABORATOIRES & ANALYSES"]},{"n":"EUROPE ENVIRONMENT","p":["STRIPPING AMMONIAC"]},{"n":"EUROPE ENVIRONNEMENT","p":["DEGAZEURS"]},{"n":"EUROWATER","p":["DEGAZEURS < 70 M3/H"]},{"n":"EVALED","p":["EVAPORATEURS - CMV","EVAPORATEURS - Eau chaude/Eau froide","EVAPORATEURS - PàC"]},{"n":"EVERS","p":["MEDIA FILTRANTS - Fer","MEDIA FILTRANTS - Manganèse"]},{"n":"Energy Recovery","p":["MEMBRANE -  Energy recovery"]},{"n":"FAIVRE","p":["FILTRES A TAMBOUR"]},{"n":"FAURE","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE","POMPES A BOUE HP"]},{"n":"FESTO","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"FEUCHT","p":["POMPES A BOUE HP"]},{"n":"FILTRATION BV","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE","FILTRE A SABLE","FILTRES A CARTOUCHE","FILTRES A POCHE","FILTRES AUTOMATIQUES"]},{"n":"FILTRATION SASU","p":["FILTRES A CARTOUCHE","FILTRES A POCHE"]},{"n":"FILTRE MONNET","p":["DESHUILAGE","FILTRES A MEDIA DEROULANT"]},{"n":"FIP","p":["ROBINETTERIE PLASTIQUE"]},{"n":"FLOERGER SNF WATER","p":["REACTIFS - Anti-scalant","REACTIFS - Coagulants","REACTIFS - Floculants","REACTIFS - Insolubilisants"]},{"n":"FLYGT","p":["AERATION - Hydro-ejecteurs"]},{"n":"FORDIATEC","p":["CRINOLINES, ECHELLES, PASSERELLE, CAILLEBOTIS, GARDES CORPS, ESCALIERS"]},{"n":"FOURE LAGADEC","p":["CUVES - ACIER"]},{"n":"FPZ","p":["AIR COMPRIME - Surpresseurs"]},{"n":"FRANCE EVAPORATION","p":["EVAPORATEURS - CMV"]},{"n":"FRANS BONHOMME","p":["ROBINETTERIE PLASTIQUE"]},{"n":"FRIATEC","p":["POMPES CENTRIFUGES PLASTIQUES"]},{"n":"FRISTAM","p":["POMPES HP PISTON (Osmoseurs)"]},{"n":"FUJI","p":["INSTRUM - Pressostats"]},{"n":"GACHE CHIMIE","p":["LABORATOIRES - Mesures émissions"]},{"n":"GACHOT","p":["ROBINETTERIE DIVERS"]},{"n":"GALVATEK","p":["RESISTANCES CHAUFFANTES"]},{"n":"GAW Water technologies","p":["EDI","MEDIA FILTRANTS","MEMBRANE - Skids MF/UF (céramique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)","RESINES - Adoucisseurs","RESINES - Chélatentes de métaux","RESINES - Lits mélangés","RESINES - TOUT TYPE"]},{"n":"GD CONTAINERS","p":["CONTAINERS AMENAGEMENT"]},{"n":"GEA","p":["EVAPORATEURS - CMV"]},{"n":"GEMU","p":["INSTRUM - Débitmètres électromagnétiques","ROBINETTERIE ACIER - VANNES","ROBINETTERIE DIVERS","ROBINETTERIE PLASTIQUE"]},{"n":"GEORGE FISCHER","p":["INSTRUM - Débitmètres électromagnétiques","ROBINETTERIE PLASTIQUE"]},{"n":"GLYNWED","p":["INSTRUM - Débitmètres électromagnétiques"]},{"n":"GRACO HUSKY","p":["POMPES A MEMBRANES"]},{"n":"GROSCLAUDE","p":["POMPES CENTRIFUGES INOX"]},{"n":"GRUNDFOS","p":["POMPES CENTRIFUGES INOX","POMPES DOSEUSES","POMPES SUBMERSIBLES"]},{"n":"GUINARD","p":["POMPES CENTRIFUGES INOX"]},{"n":"GUY MARIE","p":["CUVES - PLASTIQUE","DECANTEURS - CLARIFICATEURS"]},{"n":"GWE (EKOPAK)","p":["DESIGN & BUILD"]},{"n":"H2O","p":["EVAPORATEURS - CMV"]},{"n":"H2O PRODUCTION","p":["MEMBRANE - Osmoseurs (eau de ville)","RESINES - Centres de retraitement","RESINES - Lits mélangés","RESINES - TOUT TYPE"]},{"n":"HAARSLEV","p":["BIO - Trémies et silos","BROYAGE - Calibration broyeurs","HYGIENISATION"]},{"n":"HACH LANGE","p":["CONTROLE ET REJET - Echantilloneur","INSTRUM - Analyseurs en ligne","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température","LABORATOIRE - Matériel"]},{"n":"HANNA Instrument","p":["LABORATOIRE - Matériel"]},{"n":"HECTRON","p":["FILTRES AUTOMATIQUES"]},{"n":"HERMEX","p":["CUVES - SVR","DECANTEURS - CLARIFICATEURS"]},{"n":"HILGE","p":["POMPES CENTRIFUGES INOX"]},{"n":"HMS CONSULTING (Henry Lugan)","p":["CABINET CONSEIL"]},{"n":"HONEYWELL","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"HORUS ENVIRONNEMENT","p":["DECANTEUR LAMELLAIRE","MELANGEURS STATIQUES"]},{"n":"HUBER","p":["CHARBON ACTIF","DEGRILLAGE - Dégrilleurs droits raclage continu","DEGRILLAGE - Dégrilleurs fins","DEGRILLAGE - Dégrilleurs rotatifs","DEGRILLAGE - Matières de vidange","DEGRILLAGE - Pré-traitrement compact","DEGRILLAGE - Tamis à vis","DESHYDRATATION DES BOUES - Epaississant ceinture","DESHYDRATATION DES BOUES - Presse à disques","DESHYDRATATION DES BOUES - Presse à vis","DESHYDRATATION DES BOUES - Presses à bandes","DESHYDRATATION DES BOUES - Sécheurs solaires","DESHYDRATATION DES BOUES - Sécheurs à bande basse température (BDS)","FILTRE A SABLE","FILTRES A DISQUES"]},{"n":"HYDRANAUTICS","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"HYDRASAND","p":["FILTRE A SABLE","FILTRE A SABLE CONTINU"]},{"n":"HYDRATEC","p":["CABINET CONSEIL"]},{"n":"HYDREKA","p":["CONTROLE ET REJET - Echantilloneur","CONTROLE ET REJET - Echantillonneur (location)"]},{"n":"HYDROBIOS","p":["DESIGN & BUILD","MEDIA FILTRANTS - Fer","MEDIA FILTRANTS - Manganèse","MEMBRANE - Skids RO (organique)","RESINES - Adoucisseurs","RESINES - TOUT TYPE"]},{"n":"HYDROTECH (Véolia)","p":["FILTRES A TAMBOUR"]},{"n":"HYDROTHANE","p":["ECSB (Méthanisation)","METHA- UASB (Méthanisation)"]},{"n":"IANESCO","p":["LABORATOIRES & ANALYSES"]},{"n":"IFM","p":["INSTRUM - Pressostats"]},{"n":"IFTS","p":["CENTRES DE RECHERCHE","ORGANISMES EAU"]},{"n":"IJINUS","p":["CONTROLE ET REJET - Echantilloneur"]},{"n":"INDAVER","p":["RESINES PFAS - Destruction"]},{"n":"INEOSURF","p":["CENTRES DE RECHERCHE"]},{"n":"INOPOR","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)","MEMBRANE - Skids MF/UF (organique)"]},{"n":"INOXPA","p":["POMPES CENTRIFUGES INOX"]},{"n":"INSITUO","p":["CABINET CONSEIL"]},{"n":"INTERAPP","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"INVENT","p":["AERATION - Turbines immergées"]},{"n":"IRT M2P","p":["CENTRES DE RECHERCHE"]},{"n":"IWAKI","p":["INSTRUM - Sondes température","POMPES A ENTRAINEMENT MAGNETIQUE","POMPES A MEMBRANES","POMPES DOSEUSES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"Isvag","p":["RESINES PFAS - Destruction"]},{"n":"JEANNOT","p":["RESISTANCES CHAUFFANTES"]},{"n":"JOHN COCKERILL PROSERPOL","p":["DESIGN & BUILD"]},{"n":"JOHN COCKERILL SERVICE","p":["TUYAUTEURS"]},{"n":"JOHNSON PUMP","p":["POMPES CENTRIFUGES INOX"]},{"n":"JOLAS","p":["INSTRUM - Niveaux (liquides)"]},{"n":"JUMO","p":["CONTROLE ET REJET - Enregisteurs","INSTRUM - Niveaux (liquides)","INSTRUM - Sondes température"]},{"n":"JWI","p":["DESHYDRATATION DES BOUES - Sécheurs de boue"]},{"n":"John Cockeril Proserpol","p":["MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"KAIROS","p":["TUYAUTEURS"]},{"n":"KAMPS","p":["FILTRE A SABLE CONTINU"]},{"n":"KAPP","p":["ECHANGEURS DE CHALEUR"]},{"n":"KHRONE","p":["INSTRUM - Débitmètres électromagnétiques","INSTRUM - Niveaux (liquides)"]},{"n":"KIMO","p":["INSTRUM - Pressostats"]},{"n":"KLINGER","p":["FILTRE - BERNOUILLI","FILTRE - SEPARATEUR CENTRIFUGE","FILTRE - SEPARATEUR HYDROCARBURES","FILTRE - Tout types","FILTRES A CARTOUCHE","FILTRES AUTOMATIQUES"]},{"n":"KMU","p":["EVAPORATEURS - CMV","EVAPORATEURS - Eau chaude/Eau froide","EVAPORATEURS - PàC"]},{"n":"KOCH TECHNOLOGY SOLUTIONS","p":["MEMBRANE - Membrane & Modules MF/UF (organique)"]},{"n":"KRAFTPOWERCON","p":["ELECT/AUTOM - Redresseurs"]},{"n":"KRONE FILTER","p":["FILTRES AUTOMATIQUES"]},{"n":"KSB","p":["POMPES CENTRIFUGES INOX"]},{"n":"KSB-AMRI","p":["ROBINETTERIE DIVERS"]},{"n":"KWI","p":["DESIGN & BUILD","FILTRE A SABLE CONTINU"]},{"n":"Kurita-water","p":["MEMBRANE - AUTOPSIE DE MEMBRANES","REACTIFS - Anti-scalant"]},{"n":"L'ELECTROLYSE","p":["RESINES - Centres de retraitement"]},{"n":"LAKOS","p":["FILTRES CENTRIFUGES"]},{"n":"LANXESS","p":["RESINES - Chélatentes de métaux","RESINES - TOUT TYPE"]},{"n":"LEGRAND","p":["ELEC/AUTOM - Armoires électriques"]},{"n":"LEISTER","p":["AIR COMPRIME - Surpresseurs"]},{"n":"LENNTECH","p":["MEMBRANE - Membrane & Modules RO (organique)","RESINES - TOUT TYPE"]},{"n":"LEVIATHAN DYNAMICS","p":["EVAPORATEURS - CMV"]},{"n":"LEWA","p":["POMPES A MEMBRANES","POMPES DOSEUSES"]},{"n":"LG Water Solutions","p":["MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"LHOIST","p":["REACTIFS - Lait de chaux"]},{"n":"LOGAPRO","p":["ELEC/AUTOM - IHM et supervision"]},{"n":"LOWA","p":["POMPES CENTRIFUGES INOX"]},{"n":"LUMPP","p":["AGITATION - Agitateurs"]},{"n":"LUTZ JESCO","p":["ELECTROLYSEURS","INSTRUM - Débitmètres électromagnétiques","POMPES A ROTOR EXCENTRE","POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES","POMPES DOSEUSES","POMPES VIDE-FUT","PREPARATION POLYMERE"]},{"n":"MANUTAN","p":["AIR COMPRIME - Compresseurs","PALETTE RETENTION"]},{"n":"MATEC","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE"]},{"n":"MAZURKAZK","p":["INSTRUM - Niveaux (liquides)","INSTRUM - Sondes température","RESISTANCES CHAUFFANTES"]},{"n":"MECANA (AQUA-AEROBICS)","p":["FILTRES A DISQUES","FILTRES A TAMBOUR"]},{"n":"MEDIACO","p":["TRANSPORT - CONTAINERS"]},{"n":"MEFIAG","p":["POMPES CENTRIFUGES PLASTIQUES"]},{"n":"MERIEUX","p":["LABORATOIRES & ANALYSES"]},{"n":"MERSEN","p":["ECHANGEURS DE CHALEUR"]},{"n":"METHROM","p":["CONTROLE ET REJET - Echantilloneur","INSTRUM - Analyseurs en ligne"]},{"n":"METTLER TOLEDO","p":["INSTRUM - Débitmètres électromagnétiques","INSTRUM - Sondes pH/rH/Conductivité"]},{"n":"MICREAU","p":["BIO - Lagunes","BIO - MBBR","GAZOMETRES","METHA - EPURATION BIOGAZ","TORCHERES"]},{"n":"MICRONICS","p":["ELECT/AUTOM - Redresseurs"]},{"n":"MILTON ROY","p":["AGITATION - Agitateurs","POMPES DOSEUSES"]},{"n":"MITA WATER TECHNOLOGIES","p":["FILTRES A DISQUES"]},{"n":"MITSUBISHI","p":["ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates"]},{"n":"MIXXEL","p":["AGITATION - Agitateurs"]},{"n":"MOBILSTOCK","p":["CONTAINERS AMENAGEMENT"]},{"n":"MOTOREN-FRANCOYS","p":["POMPES A ENTRAINEMENT MAGNETIQUE"]},{"n":"MOUVBOX","p":["CONTAINERS AMENAGEMENT"]},{"n":"MPC UV","p":["UV LAMPES"]},{"n":"MUNSCH","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES INOX"]},{"n":"MacDERMID","p":["DESIGN & BUILD"]},{"n":"NALCOWATER","p":["DESIGN & BUILD","REACTIFS - Tout type"]},{"n":"NEOCHIMIE","p":["REACTIFS - Coagulants","REACTIFS - Floculants","REACTIFS - Insolubilisants","REACTIFS - Lait de chaux"]},{"n":"NETZSCH","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE","POMPES A BOUE HP","POMPES A LOBES (BIO)","POMPES A ROTOR EXCENTRE","POMPES DOSEUSES PERILSTATIQUES","POMPES MULTIVIS"]},{"n":"NORDIC WATER","p":["DECANTEUR LAMELLAIRE"]},{"n":"NORTON","p":["ECHANGEURS DE CHALEUR"]},{"n":"NUOVE ENERGIE","p":["FILTRES A DISQUES"]},{"n":"NX FILTRATION","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"Nijhuis Saur Industries","p":["DESIGN & BUILD"]},{"n":"OIEau","p":["CENTRES DE RECHERCHE","ORGANISMES EAU"]},{"n":"OMEAX FLOWINN","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"OMRON","p":["ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates"]},{"n":"OMYA","p":["REACTIFS - Lait de chaux"]},{"n":"OPAL INGENIERIE","p":["AGITATION - Malaxeur horizontal","AGITATION - Mélangeur vertical à vis","BIO - Stockage boues","DEGRILLAGE - Dégrilleurs statiques","INCORPORATION - Vis et convoyeurs"]},{"n":"OPTIMIA (Traitement surface)","p":["CABINET CONSEIL"]},{"n":"OSMOTECH","p":["MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"OVIVE","p":["DESIGN & BUILD"]},{"n":"OXYMONTAGE","p":["CONTAINERS AMENAGEMENT"]},{"n":"PALL","p":["FILTRES A CARTOUCHE","MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Skids MF/UF (organique)"]},{"n":"PAV-SIMON","p":["CRINOLINES, ECHELLES, PASSERELLE, CAILLEBOTIS, GARDES CORPS, ESCALIERS","CUVES - SVR"]},{"n":"PCE","p":["INSTRUM - Sondes pH/rH/Conductivité"]},{"n":"PCI Membranes","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)","MEMBRANE - Skids MF/UF (organique)"]},{"n":"PCM","p":["POMPES A MEMBRANES","POMPES A ROTOR EXCENTRE","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"PCVUE","p":["ELEC/AUTOM - IHM et supervision"]},{"n":"PEARL","p":["MEDIA FILTRANTS","MEDIA FILTRANTS - Métaux"]},{"n":"PENTAIR","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)"]},{"n":"PERFORMANCE PROCESS","p":["DESIGN & BUILD"]},{"n":"PFACOMPOSITES","p":["CUVES - SVR"]},{"n":"PHA","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"PLASTI MARNE","p":["CUVES - PLASTIQUE","CUVES PLASTIQUE 30 m3","CUVES PLASTIQUE 35 m3","CUVES PLASTIQUE 40 m3","CUVES PLASTIQUE 50 m3","CUVES PLASTIQUE 60 m3","CUVES PLASTIQUE 8 m3"]},{"n":"PLASTICON","p":["MEMBRANE - HOUSING"]},{"n":"PLASTIQUE DE L'AISNE","p":["CUVES - PLASTIQUE","TUYAUTEURS"]},{"n":"PMS","p":["AGITATION - Agitateurs"]},{"n":"POLYMEM","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules RO (organique)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)"]},{"n":"POMPE AB","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"PRODEVAL","p":["GAZOMETRES","METHA - EPURATION BIOGAZ","TORCHERES"]},{"n":"PROGALVANO","p":["INSTRUM - Débitmètres électromagnétiques"]},{"n":"PROMINENT","p":["POMPES DOSEUSES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"PURETECH","p":["DESIGN & BUILD"]},{"n":"PUREWATER","p":["EDI"]},{"n":"PURFLOW","p":["FILTRE A SABLE CONTINU"]},{"n":"PUROLITE","p":["RESINES - Chélatentes de métaux","RESINES - TOUT TYPE"]},{"n":"Pelosi","p":["CONTAINERS AMENAGEMENT","CUVES - ACIER","CUVES - PLASTIQUE"]},{"n":"Phytocontrol","p":["LABORATOIRES & ANALYSES"]},{"n":"QUALIFILTRE","p":["FILTRES A CARTOUCHE"]},{"n":"RDS PLASTIQUE","p":["CUVES - PLASTIQUE"]},{"n":"REDA","p":["EVAPORATEURS - PàC"]},{"n":"RESINEX","p":["RESINES - TOUT TYPE"]},{"n":"REXEL","p":["INSTRUM - Pressostats"]},{"n":"RITTAL","p":["ELEC/AUTOM - Armoires électriques"]},{"n":"ROHM & HASS","p":["RESINES - Chélatentes de métaux","RESINES - TOUT TYPE"]},{"n":"ROTO-SIEVE","p":["CUVES - ACIER (Méthanisation)","DEGRILLAGE - Dégrilleurs rotatifs","DEGRILLAGE - Tamis à vis","DESHYDRATATION DES BOUES - Presse à vis"]},{"n":"ROUSSEAU","p":["CUVES - SVR"]},{"n":"RTE","p":["ELEC/AUTOM - Câblage"]},{"n":"RUSSEL","p":["FILTRES AUTOMATIQUES"]},{"n":"SAFI","p":["ROBINETTERIE PLASTIQUE"]},{"n":"SAFNOR","p":["TUYAUTEURS"]},{"n":"SAMSON","p":["POMPES CENTRIFUGES INOX"]},{"n":"SANEL PLASTIMARNE","p":["CUVES - PLASTIQUE"]},{"n":"SATI","p":["FILTRES AUTOMATIQUES"]},{"n":"SAUR","p":["DESIGN & BUILD"]},{"n":"SCAM FILTER","p":["FILTRES AUTOMATIQUES"]},{"n":"SCANDYMET","p":["INSTRUM - Niveaux (liquides)","INSTRUM - Sondes température","RESISTANCES CHAUFFANTES"]},{"n":"SCHNEIDER","p":["ELEC/AUTOM - Armoires électriques","ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates","INSTRUM - Pressostats"]},{"n":"SCHULTZ & PARTNER","p":["EVAPORATEURS - PàC"]},{"n":"SCOLARI","p":["DESHYDRATATION DES BOUES - Sécheurs à bande basse température (BDS)"]},{"n":"SECTORIEL","p":["ROBINETTERIE ACIER - VANNES","ROBINETTERIE DIVERS","ROBINETTERIE PLASTIQUE"]},{"n":"SEEPEX","p":["POMPES A BOUE HP"]},{"n":"SEKO","p":["AIR COMPRIME - Surpresseurs","POMPES DOSEUSES"]},{"n":"SELIP","p":["CUVES - SVR"]},{"n":"SERFILCO","p":["POMPES CENTRIFUGES PLASTIQUES"]},{"n":"SERINOL","p":["CUVES - ACIER","DAF (Aéroflottateurs)","DECANTEURS - CLARIFICATEURS","DEGRILLAGE - Dégrilleurs statiques","DEGRILLAGE - Tamis rotatifs","DEGRILLAGE - Tamis à vis","DESHYDRATATION DES BOUES - Fitlre à tamis rotatif"]},{"n":"SERIP","p":["AGITATION - Malaxeur laveur mélangeur","BIO - Trémies et silos","INCORPORATION - Vis et convoyeurs","POMPES A BOUE HP"]},{"n":"SETEM","p":["ROBINETTERIE DIVERS"]},{"n":"SEUCIE EQUIPEMENTS","p":["CONTAINERS AMENAGEMENT","CUVES - PLASTIQUE","TUYAUTEURS"]},{"n":"SGS Ewacs NV","p":["RESINES PFAS - Destruction"]},{"n":"SIEBEC","p":["DESHUILAGE","FILTRES A CARTOUCHE","FILTRES A POCHE","POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES PLASTIQUES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"SIEMENS","p":["ELEC/AUTOM - IHM et supervision","ELEC/AUTOM - Variateurs de fréquence","ELECT/AUTOM - Automates","INSTRUM - Niveaux (liquides)","INSTRUM - Niveaux à palette (poudre)"]},{"n":"SIGMA ALDRICH","p":["REACTIFS - Tout type"]},{"n":"SIKA","p":["INSTRUM - Niveaux (liquides)"]},{"n":"SOCLA","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"SODAF GEO INDUSTRIE","p":["CUVES - PLASTIQUE"]},{"n":"SODEMA","p":["EAU DE PLUIE"]},{"n":"SODIMATE","p":["PREPARATION POLYMERE"]},{"n":"SODIPIA","p":["CUVES - SVR"]},{"n":"SOLVENTUM","p":["DEGAZEURS MEMBRANAIRES"]},{"n":"SOMEFLU","p":["POMPES A ENTRAINEMENT MAGNETIQUE","POMPES CENTRIFUGES INOX","POMPES CENTRIFUGES PLASTIQUES"]},{"n":"SOURCES","p":["DESIGN & BUILD"]},{"n":"SPIRAX SARCO","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"STF-VICAN","p":["FILTRE A SABLE","FILTRES AUTOMATIQUES"]},{"n":"STUBBE","p":["INSTRUM - Débitmètres électromagnétiques"]},{"n":"SUEZ","p":["DESHYDRATATION DES BOUES - Sécheurs de boue"]},{"n":"SUKO","p":["MEDIA FILTRANTS - AFM"]},{"n":"SULZER","p":["AERATION - Turbines immergées","DECANTEUR LAMELLAIRE","FILTRES A DISQUES"]},{"n":"SWAN","p":["INSTRUM - Sondes pH/rH/Conductivité"]},{"n":"Storagetech","p":["Absorbeur CO2"]},{"n":"TASK","p":["DEGAZEURS","STRIPPING AMMONIAC"]},{"n":"TCST","p":["CUVES - PLASTIQUE"]},{"n":"TECFLUID","p":["INSTRUM - Niveaux (liquides)"]},{"n":"TECH-POMPES","p":["POMPES DOSEUSES"]},{"n":"TECHEVAP","p":["EVAPORATEURS - CMV","EVAPORATEURS - PàC"]},{"n":"TECHNOFIL INDUSTRIE","p":["FILTRE A SABLE","FILTRES - RESERVOIRS SOUS PRESSION"]},{"n":"TECHNOS","p":["RESINES - Centres de retraitement","RESINES PFAS - Destruction"]},{"n":"TECOFI","p":["ROBINETTERIE ACIER - VANNES"]},{"n":"TEFSA","p":["DESHYDRATATION DES BOUES - FILTRE PRESSE"]},{"n":"TMI","p":["AGITATION - Agitateurs","PREPARATION POLYMERE"]},{"n":"TMW","p":["EVAPORATEURS - HMD (humidité)","FILTRES A MEDIA DEROULANT"]},{"n":"TOMORROW WATER","p":["FILTRES BIOLOGIQUES"]},{"n":"TORAY","p":["MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)"]},{"n":"TORK","p":["ROBINETTERIE ACIER - VANNES","ROBINETTERIE PLASTIQUE"]},{"n":"TRAVENI","p":["POMPES CENTRIFUGES INOX"]},{"n":"TREDI","p":["RESINES PFAS - Destruction"]},{"n":"TREEWATER","p":["OXYDATION H2O2 UV"]},{"n":"TRESCH","p":["DAF (Aéroflottateurs)","DECANTEUR LAMELLAIRE","DECANTEURS - CLARIFICATEURS","DEGAZEURS MEMBRANAIRES","EDI","FILTRE A SABLE","FILTRES A CARTOUCHE","MEDIA FILTRANTS","MEMBRANE - Osmoseurs (eau de ville)","MEMBRANE - Skids MF/UF (organique)","MEMBRANE - Skids NF (organique)","MEMBRANE - Skids RO (organique)","RESINES - Adoucisseurs","RESINES - TOUT TYPE"]},{"n":"TROJAN","p":["UV LAMPES"]},{"n":"TSCT","p":["CUVES PLASTIQUE 8 m3","TUYAUTEURS"]},{"n":"Technos","p":["RESINES - Centres de retraitement"]},{"n":"Triange-Industrie","p":["CUVES - ACIER","FILTRES - RESERVOIRS SOUS PRESSION"]},{"n":"UNIVAR","p":["REACTIFS - Insolubilisants"]},{"n":"URACA","p":["POMPES HP PISTON (Osmoseurs)"]},{"n":"UV GERMI","p":["UV LAMPES"]},{"n":"UVRER","p":["UV LAMPES"]},{"n":"VALVAN CONTAINERS","p":["CONTAINERS AMENAGEMENT"]},{"n":"VEGA","p":["INSTRUM - Niveaux (liquides)"]},{"n":"VENTACID","p":["CUVES - PLASTIQUE","TUYAUTEURS"]},{"n":"VENTUR","p":["AIR COMPRIME - Surpresseurs"]},{"n":"VEOLIA","p":["DESIGN & BUILD","FILTRES A DISQUES","FILTRES BIOLOGIQUES","MEMBRANE - Membrane & Modules MF/UF (organique)","MEMBRANE - Membrane & Modules NF (organique)","MEMBRANE - Membrane & Modules RO (organique)","OZONEURS"]},{"n":"VERDER","p":["POMPES A MEMBRANES","POMPES A ROTOR EXCENTRE","POMPES DOSEUSES","POMPES DOSEUSES PERILSTATIQUES"]},{"n":"VILO","p":["POMPES CENTRIFUGES INOX"]},{"n":"VIVLO","p":["DESIGN & BUILD","EVAPORATEURS - PàC"]},{"n":"VOIGT","p":["FILTRES AUTOMATIQUES"]},{"n":"VULCANIC","p":["RESISTANCES CHAUFFANTES"]},{"n":"WATERLEAU","p":["DESIGN & BUILD"]},{"n":"WATROPUR","p":["DESHYDRATATION DES BOUES - Sécheurs de boue"]},{"n":"WBG","p":["FILTRE A SABLE CONTINU"]},{"n":"WCS GROUP","p":["FILTRES A DISQUES"]},{"n":"WEDECO","p":["UV LAMPES"]},{"n":"WEIR MINERAL","p":["POMPES DOSEUSES PERILSTATIQUES"]},{"n":"WIKA-KLUBER","p":["INSTRUM - Niveaux (liquides)"]},{"n":"WILDEN","p":["POMPES A MEMBRANES"]},{"n":"XYLEM","p":["AERATION - Airjet","AERATION - Hydro-ejecteurs","AGITATION - Malaxeur horizontal","FILTRES A DISQUES","FILTRES BIOLOGIQUES","INSTRUM - Analyseurs en ligne","INSTRUM - Niveaux (liquides)","INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température","LABORATOIRE - Matériel","POMPES A ROTOR EXCENTRE","POMPES CENTRIFUGES INOX","POMPES SUBMERSIBLES"]},{"n":"YOKOGAWA","p":["INSTRUM - Sondes pH/rH/Conductivité","INSTRUM - Sondes température"]},{"n":"YVELINES ENVIRONNEMENT SERVICE (Franck Chevalier)","p":["CABINET CONSEIL"]},{"n":"ZIEMEX","p":["ECHANGEURS DE CHALEUR"]},{"n":"ZOPPAS","p":["RESISTANCES CHAUFFANTES"]},{"n":"kobold","p":["INSTRUM - Niveaux (liquides)","INSTRUM - Niveaux à palette (poudre)","ROBINETTERIE ACIER - VANNES"]}]};
+function initCRM(){if(S.crm.products&&S.crm.products.length)return;S.crm.products=CRM_SEED.p.slice();S.crm.suppliers=CRM_SEED.s.map(s=>({id:gid(),name:s.n,products:s.p.slice()}))}
+function rCRM(){
+  let h=`<div class="vt" style="margin-bottom:6px"><button class="vtb ${S.crmView==="sup"?"on":""}" onclick="S.crmView='sup';render()">Fournisseurs</button><button class="vtb ${S.crmView==="prod"?"on":""}" onclick="S.crmView='prod';render()">Produits</button></div>`;
+  h+=`<div class="add-row" style="position:static"><input id="crm-search" placeholder="${S.crmView==="sup"?"Rechercher / ajouter fournisseur…":"Rechercher / ajouter produit…"}" value="${esc(S.crmQ)}" oninput="S.crmQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('crm-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})" onkeydown="if(event.key==='Enter'){event.preventDefault();crmAdd()}"><button onclick="crmAdd()">＋</button></div>`;
+  const q=S.crmQ.toLowerCase().trim();
+  if(S.crmView==="prod"){
+    let prods=S.crm.products.filter(p=>!q||p.toLowerCase().includes(q));
+    prods.sort((a,b)=>a.localeCompare(b));
+    if(!prods.length&&q)h+=`<div class="crm-create" onclick="crmAddProd('${esc(S.crmQ.trim())}')">＋ Créer "<b>${esc(S.crmQ.trim())}</b>"</div>`;
+    else if(!prods.length)h+=`<div class="es">Aucun produit.</div>`;
+    h+=`<div class="crm-count">${prods.length} produit${prods.length>1?"s":""}</div>`;
+    prods.forEach(p=>{
+      const sups=S.crm.suppliers.filter(s=>s.products.includes(p)).map(s=>s.name);
+      h+=`<div class="crm-row"><div class="crm-name">${esc(p)}</div><div class="crm-meta">${sups.length?sups.map(s=>`<span class="crm-tag">${esc(s)}</span>`).join(""):"<span style='color:#334155'>Aucun fournisseur</span>"}</div><button class="crm-del" onclick="crmDelProd('${esc(p)}')" title="Supprimer">✕</button></div>`;
+    });
+  }else{
+    let sups=S.crm.suppliers.filter(s=>!q||s.name.toLowerCase().includes(q));
+    sups.sort((a,b)=>a.name.localeCompare(b.name));
+    if(!sups.length&&q)h+=`<div class="crm-create" onclick="crmAddSup('${esc(S.crmQ.trim())}')">＋ Créer "<b>${esc(S.crmQ.trim())}</b>"</div>`;
+    else if(!sups.length)h+=`<div class="es">Aucun fournisseur.</div>`;
+    h+=`<div class="crm-count">${sups.length} fournisseur${sups.length>1?"s":""}</div>`;
+    sups.forEach(s=>{
+      const open=S.ex["crm_"+s.id];
+      h+=`<div class="crm-sup ${open?"open":""}"><div class="crm-sup-hd" onclick="S.ex['crm_${s.id}']=!S.ex['crm_${s.id}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><span class="crm-sup-name">${esc(s.name)}</span><span class="crm-sup-count">${s.products.length}</span><button class="crm-del" onclick="event.stopPropagation();crmDelSup('${s.id}')" title="Supprimer">✕</button></div>`;
+      if(open){
+        h+=`<div class="crm-sup-body">`;
+        h+=`<div class="crm-prod-add"><div class="ac-wrap" id="acw-crm-${s.id}" style="width:100%"><input placeholder="Ajouter produit…" onfocus="acOpen('acw-crm-${s.id}')" oninput="crmProdFilter('${s.id}',this.value)" onclick="event.stopPropagation()"><div class="ac-list" id="acl-crm-${s.id}"></div></div></div>`;
+        s.products.sort((a,b)=>a.localeCompare(b));
+        s.products.forEach(p=>{
+          h+=`<div class="crm-prod-row"><span>${esc(p)}</span><button class="crm-prod-del" onclick="event.stopPropagation();crmRemProdFromSup('${s.id}','${esc(p)}')">✕</button></div>`;
+        });
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    });
+  }
+  return h}
+function crmAdd(){const q=S.crmQ.trim();if(!q)return;if(S.crmView==="sup")crmAddSup(q);else crmAddProd(q);S.crmQ="";render()}
+function crmAddProd(name){if(!S.crm.products.includes(name)){S.crm.products.push(name);save();S.crmQ="";render()}}
+function crmDelProd(name){S.crm.products=S.crm.products.filter(p=>p!==name);S.crm.suppliers.forEach(s=>{s.products=s.products.filter(p=>p!==name)});save();render()}
+function crmAddSup(name){if(S.crm.suppliers.some(s=>s.name.toLowerCase()===name.toLowerCase()))return;S.crm.suppliers.push({id:gid(),name:name,products:[]});save();S.crmQ="";render()}
+function crmDelSup(id){S.crm.suppliers=S.crm.suppliers.filter(s=>s.id!==id);save();render()}
+function crmAddProdToSup(sid,pname){const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;if(!s.products.includes(pname)){s.products.push(pname);if(!S.crm.products.includes(pname))S.crm.products.push(pname);save();render()}}
+function crmRemProdFromSup(sid,pname){const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;s.products=s.products.filter(p=>p!==pname);save();render()}
+function crmProdFilter(sid,rawQ){
+  const list=document.querySelector('#acw-crm-'+sid+' .ac-list');if(!list)return;
+  const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;
+  const q=rawQ.toLowerCase().trim();let html="";
+  const available=S.crm.products.filter(p=>!s.products.includes(p)&&(!q||p.toLowerCase().includes(q)));
+  available.slice(0,15).forEach(p=>{html+=`<div class="ac-item" onmousedown="crmAddProdToSup('${sid}','${p.replace(/'/g,"\\'")}')">${esc(p)}</div>`});
+  if(q&&!S.crm.products.some(p=>p.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="crmAddProdToSup('${sid}','${rawQ.trim()}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
+  document.getElementById('acw-crm-'+sid).classList.add('open');
+}
+
+function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;save();render()}
+function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
+function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
+function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
+function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
+function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
+function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
+/* Auth onAuthStateChanged handles load + render */
+</script>
+</body>
+</html>
