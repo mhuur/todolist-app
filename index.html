@@ -71,8 +71,12 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#2A6A80}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
+/* Task drop zones in Par tâche view */
+.tk-zone{border-radius:6px;padding:2px 0;margin-bottom:2px;transition:background .15s,box-shadow .15s}
+.tk-zone.drop-hi{background:rgba(92,184,240,.06);box-shadow:inset 0 0 0 1px rgba(92,184,240,.2)}
+.tk-hd{padding:4px 8px;display:flex;align-items:center;gap:4px}
 /* During drag, disable pointer events on task header children so drop works */
-body.dragging-active .tk-drop *{pointer-events:none}
+body.dragging-active .tk-hd *{pointer-events:none}
 /* Flash feedback */
 .ar.flash-done{animation:flashDone .4s ease}
 .ar.flash-wt{animation:flashWt .4s ease}
@@ -414,7 +418,7 @@ function pDO(e,pid){if(dT==="project"&&dI!==pid){e.preventDefault();const el=e.c
 function pDL(e){e.currentTarget.classList.remove('dot','dob')}
 function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
 function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",aid);document.body.classList.add('dragging-active');const ar=e.target.closest('.ar');if(ar){const ghost=ar.cloneNode(true);ghost.style.cssText="position:fixed;top:-999px;opacity:.7;width:"+ar.offsetWidth+"px;pointer-events:none";document.body.appendChild(ghost);e.dataTransfer.setDragImage(ghost,20,15);setTimeout(()=>{document.body.removeChild(ghost);ar.classList.add('dragging')},0)}}
-function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-drop').forEach(el=>{el.classList.remove('dz','drop-target');el.style.background=''})}
+function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-zone').forEach(el=>{el.classList.remove('dz','drop-target','drop-hi')})}
 function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
 function aDL(e){e.currentTarget.classList.remove('dot','dob')}
 function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
@@ -453,9 +457,9 @@ function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=
 function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
 function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
 /* Drop action on task header */
-function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";e.currentTarget.style.background='rgba(92,184,240,.12)'}
-function tgActDL(e){e.currentTarget.style.background=''}
-function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.style.background='';if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
+function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.dataTransfer.dropEffect="move";const zone=e.currentTarget;zone.classList.add('drop-hi')}
+function tgActDL(e){/* Only remove if truly leaving the zone */const zone=e.currentTarget;const related=e.relatedTarget;if(!related||!zone.contains(related)){zone.classList.remove('drop-hi')}}
+function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('drop-hi');if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a&&a.taskId!==tid){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
 /* Task drag */
 let tdPid=null,tdTid=null;
 function tDS(e,pid,tid){tdPid=pid;tdTid=tid;e.dataTransfer.effectAllowed="move";setTimeout(()=>e.currentTarget.classList.add('dragging'),0)}
@@ -586,8 +590,10 @@ function rGT(){
       p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
         const tkActs=pActs.filter(a=>a.taskId===tk.id);
         tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
-        h+=`<div class="tk-drop" style="padding:4px 8px;display:flex;align-items:center;gap:4px;border-radius:4px;transition:background .15s;cursor:default" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
+        h+=`<div class="tk-zone" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')">`;
+        h+=`<div class="tk-hd"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
         tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
+        h+=`</div>`;
       });
     });
   }else{
