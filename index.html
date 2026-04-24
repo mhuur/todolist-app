@@ -71,6 +71,8 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#2A6A80}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
+/* During drag, disable pointer events on task header children so drop works */
+body.dragging-active .tk-drop *{pointer-events:none}
 /* Flash feedback */
 .ar.flash-done{animation:flashDone .4s ease}
 .ar.flash-wt{animation:flashWt .4s ease}
@@ -86,10 +88,16 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .a-tk{font-size:9px;color:#5CB8F0;font-weight:700;white-space:nowrap;flex-shrink:0}
 .a-sub{font-size:7.5px;color:#4B6480;font-weight:600;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
 /* Filters */
-.filters{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
-.chip{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#4B6480;transition:all .12s}
-.chip:hover{border-color:#5CB8F0;color:#94A3B8}
-.chip.on{background:rgba(92,184,240,.1);border-color:#5CB8F0;color:#5CB8F0}
+.flt-wrap{position:relative;display:inline-flex}
+.flt-btn{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#5CB8F0;transition:all .12s;display:flex;align-items:center;gap:3px}
+.flt-btn:hover{border-color:#5CB8F0;background:rgba(92,184,240,.05)}
+.flt-btn svg{width:8px;height:8px}
+.flt-dd{display:none;position:absolute;top:100%;right:0;margin-top:3px;background:#152236;border:1px solid #1E3050;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:90;min-width:110px;overflow:hidden}
+.flt-wrap.open .flt-dd{display:block}
+.flt-opt{padding:5px 10px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s;display:flex;align-items:center;gap:5px}
+.flt-opt:hover{background:#1A2D47;color:#E2E8F0}
+.flt-opt.on{color:#5CB8F0;font-weight:700}
+.flt-opt.on::before{content:"✓";font-size:8px}
 /* Sort buttons */
 .sort-row{display:flex;gap:3px;margin-bottom:6px;align-items:center}
 .sort-lbl{font-size:8px;color:#334155;margin-right:2px}
@@ -405,21 +413,19 @@ function pDE(){dT=null;dI=null;document.querySelectorAll('.pc').forEach(el=>el.c
 function pDO(e,pid){if(dT==="project"&&dI!==pid){e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}else if(dT==="action"&&dP!==pid){e.preventDefault();e.currentTarget.classList.add('dob')}}
 function pDL(e){e.currentTarget.classList.remove('dot','dob')}
 function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
-function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";const ar=e.currentTarget;if(ar)setTimeout(()=>ar.classList.add('dragging'),0)}
-function aDE(){dT=null;dI=null;dP=null;document.querySelectorAll('.ar').forEach(el=>{el.classList.remove('dragging','dot','dob')});document.querySelectorAll('.ug,.tg').forEach(el=>el.classList.remove('dz','drop-target'))}
-function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
+function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",aid);document.body.classList.add('dragging-active');const ar=e.target.closest('.ar');if(ar){const ghost=ar.cloneNode(true);ghost.style.cssText="position:fixed;top:-999px;opacity:.7;width:"+ar.offsetWidth+"px;pointer-events:none";document.body.appendChild(ghost);e.dataTransfer.setDragImage(ghost,20,15);setTimeout(()=>{document.body.removeChild(ghost);ar.classList.add('dragging')},0)}}
+function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-drop').forEach(el=>{el.classList.remove('dz','drop-target');el.style.background=''})}
+function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
 function aDL(e){e.currentTarget.classList.remove('dot','dob')}
-function aDD(e,pid,tid){e.preventDefault();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
+function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
   if(dT!=="action"||!dI||dI===tid)return;
   if(S.tab==="global"){
-    /* Reorder in globalOrder only */
     const fi=S.globalOrder.indexOf(dI);if(fi===-1)return;
     S.globalOrder.splice(fi,1);
     let ti=S.globalOrder.indexOf(tid);if(ti===-1)return;
     if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti++;
     S.globalOrder.splice(ti,0,dI);save();render();return;
   }
-  /* In Projects tab: move action between tasks/projects */
   let sP=null,si=-1;S.projects.forEach(p=>{const i=p.actions.findIndex(a=>a.id===dI);if(i!==-1){sP=p;si=i}});if(!sP||si===-1)return;
   const[m]=sP.actions.splice(si,1);const tp2=fp(pid);if(!tp2)return;
   let ti3=tp2.actions.findIndex(a=>a.id===tid);
@@ -447,9 +453,9 @@ function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=
 function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
 function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
 /* Drop action on task header */
-function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background='rgba(92,184,240,.08)'}
-function tgActDL(e){const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background=''}
-function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background='';if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
+function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";e.currentTarget.style.background='rgba(92,184,240,.12)'}
+function tgActDL(e){e.currentTarget.style.background=''}
+function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.style.background='';if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
 /* Task drag */
 let tdPid=null,tdTid=null;
 function tDS(e,pid,tid){tdPid=pid;tdTid=tid;e.dataTransfer.effectAllowed="move";setTimeout(()=>e.currentTarget.classList.add('dragging'),0)}
@@ -553,7 +559,7 @@ function rGT(){
   /* Inline add with autocomplete */
   let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
   /* View toggle + filters */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button><button class="chip ${S.gFilter==="prio"?"on":""}" onclick="S.gFilter=S.gFilter==='prio'?'all':'prio';render()" style="font-weight:900">!</button></div></div>`;
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
@@ -580,7 +586,7 @@ function rGT(){
       p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
         const tkActs=pActs.filter(a=>a.taskId===tk.id);
         tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
-        h+=`<div style="padding:3px 0 1px 8px;display:flex;align-items:center;gap:4px;border-radius:4px;transition:background .15s" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
+        h+=`<div class="tk-drop" style="padding:4px 8px;display:flex;align-items:center;gap:4px;border-radius:4px;transition:background .15s;cursor:default" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
         tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
       });
     });
@@ -623,7 +629,7 @@ function acCreate(type,name){
   else{const p=fp(_acSel.projId);if(p){const t={id:gid(),title:name};p.tasks.push(t);S.openTasks[t.id]=true;_acSel.taskId=t.id;_acSel.task=name;save();const inp=document.getElementById('ga-task-q');if(inp)inp.value=name}}
   acClose();
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose()});
+document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}});
 
 function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
 function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
@@ -711,7 +717,7 @@ function rTM(){
   h+=`<td style="text-align:right">${gt.toFixed(2)}h</td></tr></table></div>`;return h}
 
 /* ── Trash ── */
-function rTR(){if(!S.trash.length)return`<div class="es">Corbeille vide.</div>`;let h=`<div class="bar"><div></div><button class="bs" style="border-color:#F87171;color:#F87171" onclick="if(confirm('Vider ?'))emptyT()">Vider</button></div>`;S.trash.slice().reverse().forEach((it,ri)=>{const i=S.trash.length-1-ri;const m=Math.round((Date.now()-it.date)/60000);const t=m<1?"maintenant":m<60?m+"min":Math.round(m/60)+"h";h+=`<div class="tri"><div class="tii"><b>${it.type==="project"?"Projet":"Action"}</b> ${esc(it.type==="project"?it.data.name:it.pn)||"?"} · ${t}</div><button class="brs" onclick="restT(${i})">↩</button><button class="bpu" onclick="purgeT(${i})">✕</button></div>`});return h}
+function rTR(){if(!S.trash.length)return`<div class="es">Corbeille vide.</div>`;let h=`<div class="bar"><div></div><button class="bs" style="border-color:#F87171;color:#F87171" onclick="if(confirm('Vider ?'))emptyT()">Vider</button></div>`;S.trash.slice().reverse().forEach((it,ri)=>{const i=S.trash.length-1-ri;const m=Math.round((Date.now()-it.date)/60000);const t=m<1?"maintenant":m<60?m+"min":Math.round(m/60)+"h";const label=it.type==="project"?it.data.name:(it.data.title||"Sans titre");const sub=it.type==="project"?"Projet":"Action · "+esc(it.pn||"");h+=`<div class="tri"><div class="tii"><b>${esc(label)}</b> <span style="font-size:9px;color:#4B6480">${sub}</span> · ${t}</div><button class="brs" onclick="restT(${i})">↩</button><button class="bpu" onclick="purgeT(${i})">✕</button></div>`});return h}
 
 /* ── Mutations ── */
 function sT(t){S.tab=t;render()}
