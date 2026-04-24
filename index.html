@@ -62,11 +62,12 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .tg.tg-dot{box-shadow:0 -2px 0 0 #38BDF8}.tg.tg-dob{box-shadow:0 2px 0 0 #38BDF8}
 
 /* Action row */
-.ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:3px;position:relative;border:1px solid transparent;transition:all .2s ease;animation:fadeSlideIn .25s ease}
+.ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:6px;margin-bottom:3px;position:relative;border:1px solid transparent;transition:all .2s ease;animation:fadeSlideIn .25s ease}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .ar:hover{background:rgba(92,184,240,.04)}
 .ar.ec{background:rgba(92,184,240,.05);border-color:rgba(92,184,240,.1)}
 .ar.ec .as{color:#E2E8F0}
+.ar.prio{border-left:3px solid #F59E0B;border-radius:0 6px 6px 0}.ar.prio .as{color:#FBBF24}
 .ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#2A6A80}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
@@ -130,6 +131,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .bi{border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
 .bdn{background:#22C55E;color:#fff}.bdn:hover{background:#16A34A}
 .bwt{background:transparent;color:#4B6480;border:1px solid #1E3050}.bwt:hover{color:#64B5D0}.bwt.active{color:#64B5D0;border-color:#64B5D0;background:rgba(100,181,208,.1)}
+.bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}
 .bud{background:#334155;color:#94A3B8}
 .btr{background:transparent;color:#334155;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
 
@@ -340,7 +342,7 @@ async function loadFromCloud(){
         if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title="";
         if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||"h";a.timeH=tu==="m"?tv/60:tu==="j"?tv*8:tv;delete a.timeVal;delete a.timeUnit}
         if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate="";if(a.taskId===undefined)a.taskId="";
-        delete a.blockedBy;delete a.indent;if(a.paused===undefined)a.paused=a.status==='waiting';
+        delete a.blockedBy;delete a.indent;if(a.priority===undefined)a.priority=false;if(a.paused===undefined)a.paused=a.status==='waiting';
       });
     });
   }catch(e){
@@ -378,7 +380,7 @@ const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
 
-function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';delete a.indent;delete a.blockedBy})})}
+function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.priority===undefined)a.priority=false;delete a.indent;delete a.blockedBy})})}
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#5CB8F0","#22C55E","#F59E0B","#A78BFA","#F87171","#34D399","#FB923C","#60A5FA","#E879F9","#FBBF24"];
 function pCol(pid){const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
@@ -428,6 +430,7 @@ function aDD(e,pid,tid){e.preventDefault();const dropEl=e.currentTarget;dropEl.c
 function togD(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-done');setTimeout(()=>{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()},300)}else{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()}}
 function togW(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-wt');setTimeout(()=>{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()},250)}else{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()}}
 function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
+function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=!a.priority;save();render()}
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
@@ -444,9 +447,9 @@ function delTask(pid,tid){const p=fp(pid);if(!p)return;p.tasks=p.tasks.filter(t=
 function uTN(pid,tid,v){const p=fp(pid);if(!p)return;const t=p.tasks.find(x=>x.id===tid);if(t){t.title=v;save()}}
 function togTask(tid){S.openTasks[tid]=!S.openTasks[tid];render()}
 /* Drop action on task header */
-function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();e.currentTarget.closest('.tg').classList.add('drop-target')}
-function tgActDL(e){e.currentTarget.closest('.tg').classList.remove('drop-target')}
-function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.closest('.tg').classList.remove('drop-target');if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
+function tgActDO(e,pid,tid){if(dT!=="action")return;e.preventDefault();e.stopPropagation();const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background='rgba(92,184,240,.08)'}
+function tgActDL(e){const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background=''}
+function tgActDD(e,pid,tid){e.preventDefault();e.stopPropagation();const el=e.currentTarget.closest('.tg')||e.currentTarget;el.style.background='';if(dT!=="action"||!dI)return;const a=findActionById(dI);if(a){a.taskId=tid;S.openTasks[tid]=true;save();render()}}
 /* Task drag */
 let tdPid=null,tdTid=null;
 function tDS(e,pid,tid){tdPid=pid;tdTid=tid;e.dataTransfer.effectAllowed="move";setTimeout(()=>e.currentTarget.classList.add('dragging'),0)}
@@ -454,7 +457,7 @@ function tDE(){tdPid=null;tdTid=null;document.querySelectorAll('.tg').forEach(el
 function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefault();e.stopPropagation();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('tg-dot','tg-dob');el.classList.add(e.clientY<r.top+r.height/2?'tg-dot':'tg-dob')}
 function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
 function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
-function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
 
 /* ── Format ── */
 function fC(c,v){document.execCommand(c,false,v||null);sAE()}
@@ -483,10 +486,11 @@ function rA(a,pid,o){
   const pLabel=sp?esc(pN(p)):"";
   const tkBreadcrumb=showTask?tName(pid,a.taskId):"";
   /* Buttons */
+  const prioBtn=d?"":`<button class="bi bprio ${a.priority?"active":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Prioritaire">!</button>`;
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
   const pc=pCol(pid);
-  return`<div id="ar_${a.id}" class="ar ${uc} ${S.ex[a.id]?"ao":""}" style="border-left:3px solid ${pc}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  return`<div id="ar_${a.id}" class="ar ${uc} ${a.priority?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
     <span class="ac">${I.chev}</span>
@@ -495,7 +499,7 @@ function rA(a,pid,o){
     <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
     ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
-    <div class="ari">${pauseBtn}${doneBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
+    <div class="ari">${prioBtn}${pauseBtn}${doneBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
   </div>
   <div class="adl" onclick="event.stopPropagation()">
     <div class="ab">${fmB(pid,a.id)}<div class="atx" contenteditable="true" data-pid="${pid}" data-aid="${a.id}" data-placeholder="Notes…">${a.text||""}</div></div>
@@ -549,7 +553,7 @@ function rGT(){
   /* Inline add with autocomplete */
   let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
   /* View toggle + filters */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button></div></div>`;
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="filters" style="margin:0"><button class="chip ${S.gFilter==="all"?"on":""}" onclick="S.gFilter='all';render()">Toutes</button><button class="chip ${S.gFilter==="ec"?"on":""}" onclick="S.gFilter='ec';render()">En cours</button><button class="chip ${S.gFilter==="wt"?"on":""}" onclick="S.gFilter='wt';render()">Attente</button><button class="chip ${S.gFilter==="prio"?"on":""}" onclick="S.gFilter=S.gFilter==='prio'?'all':'prio';render()" style="font-weight:900">!</button></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
@@ -558,7 +562,7 @@ function rGT(){
   all.forEach(a=>{if(!S.globalOrder.includes(a.id))S.globalOrder.push(a.id)});
   /* Apply status filter */
   let filtered=all;
-  if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
+  if(S.gFilter==="prio"){filtered=all.filter(a=>a.priority)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
   if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
   if(S.gv==="task"){
     /* Group by project, then by task within each project */
@@ -566,7 +570,7 @@ function rGT(){
     projIds.forEach(pid=>{
       const p=fp(pid);if(!p)return;
       const pActs=filtered.filter(a=>a.pId===pid);
-      h+=`<div class="pgl"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${pCol(pid)};margin-right:4px;flex-shrink:0"></span><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
       /* Standalone actions (no task) */
       const standalone=pActs.filter(a=>!a.taskId);
       standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
@@ -576,7 +580,7 @@ function rGT(){
       p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
         const tkActs=pActs.filter(a=>a.taskId===tk.id);
         tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
-        h+=`<div style="padding:3px 0 1px 8px;display:flex;align-items:center;gap:4px"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
+        h+=`<div style="padding:3px 0 1px 8px;display:flex;align-items:center;gap:4px;border-radius:4px;transition:background .15s" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"></div>`;
         tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
       });
     });
@@ -621,8 +625,8 @@ function acCreate(type,name){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose()});
 
-function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
-function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
+function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
 function rDN(){
@@ -649,7 +653,7 @@ function rDN(){
     const byP={};all.forEach(a=>{const k=a.pId||"_archived";if(!byP[k])byP[k]={name:a._pName,items:[]};byP[k].items.push(a)});
     const keys=Object.keys(byP).sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a),bi=S.projects.findIndex(p=>p.id===b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi});
     keys.forEach(k=>{
-      h+=`<div class="pgl" style="padding-top:8px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${pCol(k)};margin-right:4px;flex-shrink:0"></span><span>${esc(byP[k].name)}</span><div class="pgln"></div></div>`;
+      h+=`<div class="pgl" style="padding-top:8px;border-bottom:2px solid ${pCol(k)};padding-bottom:3px"><span>${esc(byP[k].name)}</span><div class="pgln"></div></div>`;
       byP[k].items.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||"")).forEach(a=>{h+=rDoneRow(a)});
     });
   }
@@ -717,7 +721,7 @@ function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:
 function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
 function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
-function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
