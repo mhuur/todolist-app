@@ -282,6 +282,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .crm-card-hd{display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;border-radius:8px;transition:background .12s}
 .crm-card-hd:hover{background:rgba(92,184,240,.04)}
 .crm-card-name{font-size:12px;font-weight:700;color:#E2E8F0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-card-name-input{font-family:inherit;font-size:12px;font-weight:700;color:#E2E8F0;flex:1;min-width:0;background:transparent;border:1px solid transparent;outline:none;padding:2px 6px;border-radius:4px;transition:all .12s}
+.crm-card-hd:hover .crm-card-name-input{border-color:rgba(92,184,240,.15)}
+.crm-card-name-input:focus{background:rgba(11,17,32,.6);border-color:rgba(92,184,240,.35);cursor:text}
 .crm-card-badge{font-size:8px;color:#5CB8F0;background:rgba(92,184,240,.1);padding:2px 7px;border-radius:10px;font-weight:700;flex-shrink:0}
 .crm-card-del{border:none;background:transparent;color:#293548;cursor:pointer;font-size:10px;flex-shrink:0;padding:2px 4px;border-radius:4px;transition:all .12s;opacity:0}
 .crm-card-hd:hover .crm-card-del{opacity:1}
@@ -775,7 +778,7 @@ function rCRM(){
     h+=`<div class="crm-count">${sups.length} fournisseur${sups.length>1?"s":""}</div>`;
     sups.forEach(s=>{
       const open=S.ex["crm_s_"+s.id];
-      h+=`<div class="crm-card ${open?"open":""}"><div class="crm-card-hd" onclick="S.ex['crm_s_${s.id}']=!S.ex['crm_s_${s.id}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><span class="crm-card-name">${esc(s.name)}</span><span class="crm-card-badge">${s.products.length} produit${s.products.length>1?"s":""}</span><button class="crm-card-del" onclick="event.stopPropagation();crmDelSup('${s.id}')" title="Supprimer">✕</button></div>`;
+      h+=`<div class="crm-card ${open?"open":""}"><div class="crm-card-hd" onclick="S.ex['crm_s_${s.id}']=!S.ex['crm_s_${s.id}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="crm-card-name-input" value="${esc(s.name)}" placeholder="Nom du fournisseur…" onclick="event.stopPropagation()" oninput="crmRenSup('${s.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><span class="crm-card-badge">${s.products.length} produit${s.products.length>1?"s":""}</span><button class="crm-card-del" onclick="event.stopPropagation();crmDelSup('${s.id}')" title="Supprimer">✕</button></div>`;
       if(open){
         h+=`<div class="crm-card-body">`;
         h+=`<div class="crm-card-add"><div class="ac-wrap" id="acw-cs-${s.id}" style="width:100%"><input placeholder="Ajouter un produit…" onfocus="acOpen('acw-cs-${s.id}')" oninput="crmProdFilter('${s.id}',this.value)" onclick="event.stopPropagation()"><div class="ac-list" id="acl-cs-${s.id}"></div></div></div>`;
@@ -795,7 +798,7 @@ function rCRM(){
       const pid="p_"+p.replace(/\W/g,"_");
       const sups=S.crm.suppliers.filter(s=>s.products.includes(p));
       const open=S.ex["crm_"+pid];
-      h+=`<div class="crm-card ${open?"open":""}"><div class="crm-card-hd" onclick="S.ex['crm_${pid}']=!S.ex['crm_${pid}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><span class="crm-card-name">${esc(p)}</span><span class="crm-card-badge">${sups.length} fourn.</span><button class="crm-card-del" onclick="event.stopPropagation();crmDelProd('${esc(p)}')" title="Supprimer">✕</button></div>`;
+      h+=`<div class="crm-card ${open?"open":""}"><div class="crm-card-hd" onclick="S.ex['crm_${pid}']=!S.ex['crm_${pid}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="crm-card-name-input" value="${esc(p)}" placeholder="Nom du produit…" onclick="event.stopPropagation()" onchange="crmRenProd('${esc(p)}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value='${esc(p)}';this.blur()}"><span class="crm-card-badge">${sups.length} fourn.</span><button class="crm-card-del" onclick="event.stopPropagation();crmDelProd('${esc(p)}')" title="Supprimer">✕</button></div>`;
       if(open){
         h+=`<div class="crm-card-body">`;
         h+=`<div class="crm-card-add"><div class="ac-wrap" id="acw-cp-${pid}" style="width:100%"><input placeholder="Ajouter un fournisseur…" onfocus="acOpen('acw-cp-${pid}')" oninput="crmSupFilter('${esc(p)}','${pid}',this.value)" onclick="event.stopPropagation()"><div class="ac-list" id="acl-cp-${pid}"></div></div></div>`;
@@ -815,6 +818,8 @@ function crmAddProd(name){if(!S.crm.products.includes(name)){S.crm.products.push
 function crmDelProd(name){S.crm.products=S.crm.products.filter(p=>p!==name);S.crm.suppliers.forEach(s=>{s.products=s.products.filter(p=>p!==name)});save();render()}
 function crmAddSup(name){if(S.crm.suppliers.some(s=>s.name.toLowerCase()===name.toLowerCase()))return;S.crm.suppliers.push({id:gid(),name:name,products:[]});save();S.crmQ="";render()}
 function crmDelSup(id){S.crm.suppliers=S.crm.suppliers.filter(s=>s.id!==id);save();render()}
+function crmRenSup(id,v){const s=S.crm.suppliers.find(x=>x.id===id);if(!s)return;s.name=v;save()}
+function crmRenProd(oldName,newName){newName=(newName||"").trim();if(!newName||newName===oldName)return render();if(S.crm.products.some(p=>p!==oldName&&p.toLowerCase()===newName.toLowerCase()))return render();const idx=S.crm.products.indexOf(oldName);if(idx!==-1)S.crm.products[idx]=newName;S.crm.suppliers.forEach(s=>{const i=s.products.indexOf(oldName);if(i!==-1)s.products[i]=newName});if(S.crm.preferred&&S.crm.preferred[oldName]){S.crm.preferred[newName]=S.crm.preferred[oldName];delete S.crm.preferred[oldName]}const oldKey="crm_p_"+oldName.replace(/\W/g,"_"),newKey="crm_p_"+newName.replace(/\W/g,"_");if(S.ex[oldKey]){S.ex[newKey]=S.ex[oldKey];delete S.ex[oldKey]}save();render()}
 function crmAddProdToSup(sid,pname){const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;if(!s.products.includes(pname)){s.products.push(pname);if(!S.crm.products.includes(pname))S.crm.products.push(pname);save();render()}}
 function crmRemProdFromSup(sid,pname){const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;s.products=s.products.filter(p=>p!==pname);save();render()}
 function crmAddSupToProd(sid,pname){const s=S.crm.suppliers.find(x=>x.id===sid);if(!s)return;if(!s.products.includes(pname)){s.products.push(pname);save();render()}}
