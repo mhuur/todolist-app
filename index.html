@@ -419,8 +419,8 @@ function pDL(e){e.currentTarget.classList.remove('dot','dob')}
 function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
 function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",aid);document.body.classList.add('dragging-active');const ar=e.target.closest('.ar');if(ar){const ghost=ar.cloneNode(true);ghost.style.cssText="position:fixed;top:-999px;opacity:.7;width:"+ar.offsetWidth+"px;pointer-events:none";document.body.appendChild(ghost);e.dataTransfer.setDragImage(ghost,20,15);setTimeout(()=>{document.body.removeChild(ghost);ar.classList.add('dragging')},0)}}
 function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-zone').forEach(el=>{el.classList.remove('dz','drop-target','drop-hi')})}
-function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
-function aDL(e){e.currentTarget.classList.remove('dot','dob')}
+function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob');/* Highlight parent task zone */if(S.gv==="task"){const zone=el.closest('.tk-zone');if(zone)zone.classList.add('drop-hi')}}
+function aDL(e){e.currentTarget.classList.remove('dot','dob');if(S.gv==="task"){const zone=e.currentTarget.closest('.tk-zone');if(zone){const rel=e.relatedTarget;if(!rel||!zone.contains(rel))zone.classList.remove('drop-hi')}}}
 function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
   if(dT!=="action"||!dI||dI===tid)return;
   if(S.tab==="global"){
@@ -428,7 +428,10 @@ function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.cu
     S.globalOrder.splice(fi,1);
     let ti=S.globalOrder.indexOf(tid);if(ti===-1)return;
     if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti++;
-    S.globalOrder.splice(ti,0,dI);save();render();return;
+    S.globalOrder.splice(ti,0,dI);
+    /* In task view, also move to same task as target */
+    if(S.gv==="task"){const src=findActionById(dI),tgt=findActionById(tid);if(src&&tgt)src.taskId=tgt.taskId}
+    save();render();return;
   }
   let sP=null,si=-1;S.projects.forEach(p=>{const i=p.actions.findIndex(a=>a.id===dI);if(i!==-1){sP=p;si=i}});if(!sP||si===-1)return;
   const[m]=sP.actions.splice(si,1);const tp2=fp(pid);if(!tp2)return;
