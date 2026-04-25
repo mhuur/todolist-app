@@ -301,6 +301,36 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .crm-pref:hover{color:#F59E0B}
 .crm-pref.on{color:#F59E0B;text-shadow:0 0 4px rgba(245,158,11,.3)}
 .crm-item.pref span{font-weight:700;color:#E2E8F0}
+/* Feedback */
+.fb-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.fb-title{color:#5CB8F0;font-size:13px;font-weight:800}
+.fb-subtitle{color:#4B6480;font-size:10px;margin-bottom:8px}
+.fb-card{background:#162032;border:1px solid #2A3A52;border-radius:8px;padding:8px 10px;margin-bottom:6px;animation:fadeSlideIn .2s ease;transition:opacity .15s}
+.fb-card.fb-done{opacity:.55;background:#111B2C}
+.fb-card.fb-done .fb-text{text-decoration:line-through;color:#64748B}
+.fb-card.fb-done .fb-step-text{text-decoration:line-through;color:#475569}
+.fb-hd{display:flex;align-items:center;gap:6px}
+.fb-check{border:1.5px solid #2A3A52;background:transparent;color:transparent;width:18px;height:18px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;padding:0}
+.fb-check:hover{border-color:#22C55E}
+.fb-check.on{background:#22C55E;border-color:#22C55E;color:#fff}
+.fb-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:#E2E8F0;outline:none;padding:3px 6px;border-radius:4px;min-width:0}
+.fb-text:hover{background:rgba(92,184,240,.04)}
+.fb-text:focus{background:rgba(92,184,240,.08)}
+.fb-del{border:none;background:transparent;color:#334155;cursor:pointer;flex-shrink:0;padding:3px 5px;border-radius:4px;transition:all .12s;display:flex;align-items:center}
+.fb-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
+.fb-step{display:flex;align-items:center;gap:5px;padding:2px 0 2px 24px;margin-top:2px}
+.fb-step-bul{color:#475569;font-size:11px;flex-shrink:0;font-weight:700}
+.fb-step-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:11px;color:#CBD5E1;outline:none;padding:2px 5px;border-radius:3px;min-width:0}
+.fb-step-text:hover{background:rgba(92,184,240,.04)}
+.fb-step-text:focus{background:rgba(92,184,240,.08)}
+.fb-step-del{border:none;background:transparent;color:#334155;cursor:pointer;font-size:10px;flex-shrink:0;padding:1px 4px;border-radius:3px;opacity:0;transition:all .12s}
+.fb-step:hover .fb-step-del{opacity:1}
+.fb-step-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
+.fb-add-step{margin:4px 0 0 24px;border:none;background:transparent;color:#5CB8F0;font-family:inherit;font-size:10px;cursor:pointer;padding:3px 8px;border-radius:4px;font-weight:600;transition:all .12s}
+.fb-add-step:hover{background:rgba(92,184,240,.08)}
+.fb-copy-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:1px solid #2A3A52;background:#162032;color:#94A3B8;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.fb-copy-btn:hover{border-color:#5CB8F0;color:#5CB8F0;background:rgba(92,184,240,.05)}
+.fb-copy-btn.copied{border-color:#22C55E;color:#22C55E;background:rgba(34,197,94,.08)}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -364,8 +394,9 @@ async function loadFromCloud(){
       const d=doc.data();
       S.projects=d.projects||[];S.trash=d.trash||[];S.archive=d.archive||[];S.globalOrder=d.globalOrder||[];
       if(d.crm){S.crm=d.crm}else{initCRM()}
+      S.feedback=d.feedback&&Array.isArray(d.feedback.items)?d.feedback:{items:[]};
       /* Also cache locally */
-      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm}));
+      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback}));
     }else{
       /* First login: check if localStorage has data to migrate */
       const local=localStorage.getItem(SK);
@@ -373,6 +404,7 @@ async function loadFromCloud(){
         const p=JSON.parse(local);
         S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];
         if(p.crm){S.crm=p.crm}else{initCRM()}
+        S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
         await saveToCloudNow();
       }
     }
@@ -393,13 +425,14 @@ async function loadFromCloud(){
     /* Fallback to localStorage */
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
+    S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
 async function saveToCloudNow(){
   if(!currentUser)return;
-  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm};
+  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback};
   const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
   try{
     await db.collection('users').doc(currentUser.uid).set(stripped);
@@ -418,7 +451,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:""};
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:""};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -427,7 +460,7 @@ function load(){/* Data loaded from cloud in onAuthStateChanged */}function migr
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#5CB8F0","#22C55E","#F59E0B","#A78BFA","#F87171","#34D399","#FB923C","#60A5FA","#E879F9","#FBBF24"];
 function pCol(pid){const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
-function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm}))}catch{};saveToCloud()}
+function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
@@ -550,10 +583,10 @@ function rA(a,pid,o){
   </div></div>`}
 
 /* ── Render ── */
-const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`};
+const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`};
 function render(){
   /* Sidebar */
-  const tabs=[{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"global",l:"Global",i:SB_ICONS.global},{k:"done",l:"Terminé",i:SB_ICONS.done},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar">`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -562,7 +595,7 @@ function render(){
   /* Main */
   let h="";
   if(S.tab==="projects")S.tab="global";
-  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else h+=rTR();
+  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="feedback")h+=rFB();else h+=rTR();
   document.getElementById("app").innerHTML=sb+`<div class="main">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
 
 /* ── Projects tab ── */
@@ -847,6 +880,40 @@ function crmSupFilter(pname,pid,rawQ){
 }
 function crmCreateSupForProd(pname,sname){const s={id:gid(),name:sname,products:[pname]};S.crm.suppliers.push(s);save();render()}
 function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.preferred[pname])S.crm.preferred[pname]=[];const i=S.crm.preferred[pname].indexOf(sid);if(i===-1)S.crm.preferred[pname].push(sid);else S.crm.preferred[pname].splice(i,1);save();render()}
+
+/* ── Feedback / Notes ── */
+function rFB(){
+  if(!S.feedback||!Array.isArray(S.feedback.items))S.feedback={items:[]};
+  let h=`<div class="fb-bar"><div class="fb-title">Notes & Remarques</div><button class="fb-copy-btn" onclick="fbCopy()" id="fb-copy-btn">📋 Copier les actions en cours</button></div>`;
+  h+=`<div class="fb-subtitle">Note ici les remarques ou bugs à transmettre à Claude. Chaque action peut recevoir des étapes complémentaires, être validée ou supprimée.</div>`;
+  h+=`<div class="add-row" style="position:static"><input id="fb-input" placeholder="Nouvelle action / remarque…" value="${esc(S.fbQ||"")}" oninput="S.fbQ=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();fbAdd()}"><button onclick="fbAdd()">＋</button></div>`;
+  const items=[...S.feedback.items].sort((a,b)=>{if(!!a.validated!==!!b.validated)return a.validated?1:-1;return (b.createdAt||0)-(a.createdAt||0)});
+  if(!items.length)h+=`<div class="es">Aucune note pour l'instant.</div>`;
+  items.forEach(it=>{
+    h+=`<div class="fb-card ${it.validated?"fb-done":""}">`;
+    h+=`<div class="fb-hd">`;
+    h+=`<button class="fb-check ${it.validated?"on":""}" onclick="fbToggleValid('${it.id}')" title="${it.validated?"Marquer en cours":"Valider"}">${I.check}</button>`;
+    h+=`<input class="fb-text" value="${esc(it.text||"")}" placeholder="Note…" oninput="fbUpdateText('${it.id}',this.value)">`;
+    h+=`<button class="fb-del" onclick="fbDel('${it.id}')" title="Supprimer">${I.trash}</button>`;
+    h+=`</div>`;
+    (it.steps||[]).forEach((st,idx)=>{
+      h+=`<div class="fb-step"><span class="fb-step-bul">↳</span><input class="fb-step-text" data-fb-step="${it.id}-${idx}" value="${esc(st||"")}" placeholder="Étape complémentaire…" oninput="fbUpdateStep('${it.id}',${idx},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();fbAddStep('${it.id}')}"><button class="fb-step-del" onclick="fbDelStep('${it.id}',${idx})" title="Supprimer étape">✕</button></div>`;
+    });
+    h+=`<button class="fb-add-step" onclick="fbAddStep('${it.id}')">＋ étape</button>`;
+    h+=`</div>`;
+  });
+  return h;
+}
+function fbAdd(){const t=(S.fbQ||"").trim();if(!t)return;if(!S.feedback||!Array.isArray(S.feedback.items))S.feedback={items:[]};S.feedback.items.unshift({id:gid(),text:t,steps:[],validated:false,createdAt:Date.now()});S.fbQ="";save();render();requestAnimationFrame(()=>{const el=document.getElementById('fb-input');if(el)el.focus()})}
+function fbDel(id){S.feedback.items=S.feedback.items.filter(x=>x.id!==id);save();render()}
+function fbToggleValid(id){const it=S.feedback.items.find(x=>x.id===id);if(!it)return;it.validated=!it.validated;save();render()}
+function fbUpdateText(id,v){const it=S.feedback.items.find(x=>x.id===id);if(!it)return;it.text=v;save()}
+function fbAddStep(id){const it=S.feedback.items.find(x=>x.id===id);if(!it)return;if(!it.steps)it.steps=[];it.steps.push("");save();render();requestAnimationFrame(()=>{const els=document.querySelectorAll(`[data-fb-step^="${id}-"]`);if(els.length)els[els.length-1].focus()})}
+function fbUpdateStep(id,idx,v){const it=S.feedback.items.find(x=>x.id===id);if(!it||!it.steps)return;it.steps[idx]=v;save()}
+function fbDelStep(id,idx){const it=S.feedback.items.find(x=>x.id===id);if(!it||!it.steps)return;it.steps.splice(idx,1);save();render()}
+function fbBuildText(){const items=(S.feedback.items||[]).filter(it=>!it.validated&&(it.text||"").trim());if(!items.length)return"";let txt="";items.forEach((it,i)=>{txt+=`${i+1}. ${(it.text||"").trim()}\n`;(it.steps||[]).forEach(s=>{const st=(s||"").trim();if(st)txt+=`   - ${st}\n`})});return txt.trimEnd()}
+function fbCopy(){const txt=fbBuildText();const btn=document.getElementById('fb-copy-btn');if(!txt){if(btn){const old=btn.textContent;btn.textContent="Aucune action en cours";setTimeout(()=>{btn.textContent=old},1500)}return}const done=()=>{if(btn){const old=btn.textContent;btn.textContent="✓ Copié !";btn.classList.add("copied");setTimeout(()=>{btn.textContent=old;btn.classList.remove("copied")},1800)}};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>fbCopyFallback(txt,done))}else{fbCopyFallback(txt,done)}}
+function fbCopyFallback(txt,done){try{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done()}catch(e){prompt("Copie manuellement :",txt)}}
 
 function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;save();render()}
 function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
