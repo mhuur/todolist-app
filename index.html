@@ -420,6 +420,17 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-act-btn:hover{background:rgba(56,189,248,.08);color:#5CB8F0}
 .pl-act-btn.pl-act-del:hover{background:rgba(248,113,113,.08);color:#F87171}
 .pl-empty-table{padding:30px 16px;text-align:center;color:#475569;font-size:11px;font-style:italic}
+.pl-ref-wrap{display:inline-flex;align-items:center;gap:5px}
+.pl-copy-btn{opacity:0;border:none;background:transparent;color:#475569;cursor:pointer;padding:1px 4px;border-radius:3px;transition:all .12s;font-family:inherit;display:inline-flex;align-items:center}
+.pl-table tbody tr:hover .pl-copy-btn{opacity:1}
+.pl-copy-btn:hover{color:#5CB8F0;background:rgba(56,189,248,.08)}
+.pl-copy-btn.copied{color:#22C55E;opacity:1}
+.pl-cell-clickable{cursor:text;transition:box-shadow .1s}
+.pl-cell-clickable:hover{background:rgba(56,189,248,.05);box-shadow:inset 0 0 0 1px rgba(56,189,248,.18)}
+.pl-cell-editing{padding:2px 4px !important}
+.pl-cell-input{width:100%;background:#0E1A2E;border:1px solid #38BDF8;border-radius:3px;padding:4px 6px;color:#E2E8F0;font-family:inherit;font-size:11px;outline:none}
+.pl-cell-input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+.pl-cell-input[type="number"]::-webkit-inner-spin-button,.pl-cell-input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* Bibliothèque de prix — gestion des champs */
 .pl-sch-modal{max-width:680px}
 .pl-sch-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
@@ -593,7 +604,7 @@ function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.act
 function pN(p){return p?p.name||"Sans nom":"?"}
 function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`};
+const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`};
 
 /* ── Drag ── */
 let dT=null,dI=null,dP=null;
@@ -1195,6 +1206,22 @@ function plDeleteQuote(id){
   save();render();
 }
 
+// ▼ plEditingCell — état transient pour l'édition inline d'une cellule (NON persisté)
+let plEditingCell=null;
+function plStartCellEdit(quoteId,col){if(plEditingCell&&plEditingCell.quoteId===quoteId&&plEditingCell.col===col)return;plEditingCell={quoteId:quoteId,col:col};plRenderTable()}
+function plCancelCellEdit(){plEditingCell=null;plRenderTable()}
+function plCommitCellEdit(quoteId,col,value){
+  plEnsure();
+  const q=S.priceLib.quotes.find(x=>x.id===quoteId);
+  if(!q){plEditingCell=null;plRenderTable();return}
+  if(col==='date')q.date=value;
+  else{if(!q.values)q.values={};q.values[col]=value}
+  q.updatedAt=Date.now();
+  save();
+  plEditingCell=null;
+  plRenderTable();
+}
+
 // ▼ plSetFilterSup / plSetFilterProd / plResetFilters / plSetSort / plSetSearch — UI table
 function plSetFilterSup(v){S.plFilterSup=v||"";S.plFilterProd="";S.plSearch={};save();render()}
 function plSetFilterProd(v){S.plFilterProd=v||"";S.plSearch={};save();render()}
@@ -1282,22 +1309,44 @@ function plRenderTable(){
     const ncols=commonCols.length+dynFields.length+1;
     h+=`<tr><td colspan="${ncols}"><div class="pl-empty-table">Aucun devis ne correspond aux filtres / recherches.</div></td></tr>`;
   }else{
+    const isEditing=(qid,col)=>plEditingCell&&plEditingCell.quoteId===qid&&plEditingCell.col===col;
     rows.forEach(q=>{
       const sup=supById[q.supplierId];
       h+=`<tr>`;
-      h+=`<td class="pl-td-ref">${esc(q.ref||"")}</td>`;
-      h+=`<td class="pl-td-date">${esc(plDateFR(q.date))}</td>`;
+      /* Ref + bouton copy au survol (ref figée, non éditable) */
+      h+=`<td class="pl-td-ref"><span class="pl-ref-wrap"><span>${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
+      /* Date éditable inline */
+      if(isEditing(q.id,'date')){
+        h+=`<td class="pl-td-date pl-cell-editing"><input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(q.date||"")}" onchange="plCommitCellEdit('${q.id}','date',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}" onblur="if(plEditingCell)plCommitCellEdit('${q.id}','date',this.value)"></td>`;
+      }else{
+        h+=`<td class="pl-td-date pl-cell-clickable" onclick="plStartCellEdit('${q.id}','date')">${esc(plDateFR(q.date))}</td>`;
+      }
       h+=`<td class="pl-td-sup">${esc(sup?sup.name:"?")}</td>`;
       if(showProdCol)h+=`<td class="pl-td-prod">${esc(q.product||"")}</td>`;
+      /* Valeurs dynamiques éditables inline */
       dynFields.forEach(f=>{
         const v=(q.values||{})[f.id];
-        if(v===undefined||v===""||v===null){h+=`<td class="pl-td-empty">—</td>`;return}
-        if(f.type==='number'&&f.unit){h+=`<td>${esc(String(v))} <span style="color:#64748B">${esc(f.unit)}</span></td>`}
-        else if(f.type==='date'){h+=`<td>${esc(plDateFR(v))}</td>`}
-        else{h+=`<td>${esc(String(v))}</td>`}
+        if(isEditing(q.id,f.id)){
+          let inputHtml="";
+          if(f.type==='number')inputHtml=`<input id="pl-edit-cell" type="number" step="any" class="pl-cell-input" value="${esc(v==null?"":String(v))}">`;
+          else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}">`;
+          else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input">${opts}</select>`}
+          else inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}">`;
+          /* onchange pour les date/select (au pick), onblur+Enter pour les autres */
+          const evt=(f.type==='date'||f.type==='select')?`onchange="plCommitCellEdit('${q.id}','${f.id}',this.value)"`:'';
+          inputHtml=inputHtml.replace('class="pl-cell-input"',`class="pl-cell-input" ${evt} onblur="if(plEditingCell)plCommitCellEdit('${q.id}','${f.id}',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}"`);
+          h+=`<td class="pl-cell-editing">${inputHtml}</td>`;
+          return;
+        }
+        if(v===undefined||v===""||v===null){h+=`<td class="pl-cell-clickable pl-td-empty" onclick="plStartCellEdit('${q.id}','${f.id}')">—</td>`;return}
+        let display="";
+        if(f.type==='number'){display=plFormatNumber(v);if(f.unit)display+=` <span style="color:#64748B">${esc(f.unit)}</span>`}
+        else if(f.type==='date')display=esc(plDateFR(v));
+        else display=esc(String(v));
+        h+=`<td class="pl-cell-clickable" onclick="plStartCellEdit('${q.id}','${f.id}')">${display}</td>`;
       });
       h+=`<td><div class="pl-row-actions">`;
-      h+=`<button class="pl-act-btn" onclick="plOpenEditQuote('${q.id}')" title="Éditer">${I.chev}</button>`;
+      h+=`<button class="pl-act-btn" onclick="plOpenEditQuote('${q.id}')" title="Éditer (modal complet)">${I.chev}</button>`;
       h+=`<button class="pl-act-btn pl-act-del" onclick="plDeleteQuote('${q.id}')" title="Supprimer">${I.trash}</button>`;
       h+=`</div></td>`;
       h+=`</tr>`;
@@ -1306,10 +1355,25 @@ function plRenderTable(){
   h+=`</tbody></table>`;
   host.innerHTML=h;
   if(focusId){const el=document.getElementById(focusId);if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}}
+  else if(plEditingCell){const el=document.getElementById('pl-edit-cell');if(el){el.focus();if(typeof el.select==='function')try{el.select()}catch(e){}}}
 }
 
 // ▼ plDateFR — YYYY-MM-DD → DD/MM/YYYY
 function plDateFR(iso){if(!iso||typeof iso!=='string')return "";const m=iso.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:iso}
+
+// ▼ plFormatNumber — format FR avec séparateur de milliers ; passe-plat si non numérique
+function plFormatNumber(v){if(v===""||v===null||v===undefined)return "";const n=parseFloat(v);if(isNaN(n))return String(v);return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).format(n)}
+
+// ▼ plCopyText — copie dans le presse-papier (avec fallback execCommand)
+function plCopyText(t){
+  if(!t)return;
+  const flash=el=>{if(!el)return;el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),900)};
+  const btn=event&&event.currentTarget;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>flash(btn)).catch(()=>{});return}
+  const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');flash(btn)}catch(e){}
+  document.body.removeChild(ta);
+}
 
 /* ── Gestion des champs par sous-catégorie (form-builder) ── */
 let plSchemaModalState=null;
