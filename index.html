@@ -24,6 +24,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .avatar-menu button{border:none;background:transparent;color:#F87171;cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;padding:2px 0}
 .avatar-menu button:hover{text-decoration:underline}
 .main{margin-left:56px;flex:1;padding:14px 12px 30px;max-width:720px}
+.main.main-wide{max-width:none;padding-right:20px}
 .bar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
 .bar-l{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .bar-r{display:flex;gap:3px;flex-wrap:wrap}
@@ -716,7 +717,8 @@ function render(){
   let h="";
   if(S.tab==="projects")S.tab="global";
   if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else h+=rTR();
-  document.getElementById("app").innerHTML=sb+`<div class="main">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
+  const mainCls=S.tab==="price"?"main main-wide":"main";
+  document.getElementById("app").innerHTML=sb+`<div class="${mainCls}">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
 
 /* ── Projects tab ── */
 function rPT(){let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="addP()">${I.plus} Projet</button><button class="bs" onclick="colAll()">${I.col} Replier</button></div><div class="bar-r"><button class="bs ${S.sortDeadline?"on":""}" onclick="ts('deadline')">Deadline</button><button class="bs ${S.sortAlpha?"on":""}" onclick="ts('alpha')">Z-A</button></div></div>`;
@@ -1236,8 +1238,9 @@ function plRenderTable(){
       return String(va).localeCompare(String(vb))*dir;
     });
   }
-  /* Colonnes dynamiques (uniquement si filterProd actif) */
+  /* Colonnes dynamiques (uniquement si filterProd actif) ; on masque alors la colonne Sous-cat (redondante) */
   const dynFields=filterProd?(S.priceLib.schemas[filterProd]||[]):[];
+  const showProdCol=!filterProd;
   const arrow=col=>{if(S.plSortBy!==col)return '<span class="pl-th-arrow">↕</span>';return '<span class="pl-th-arrow">'+(S.plSortDir==='asc'?'▲':'▼')+'</span>'};
   const sorted=col=>S.plSortBy===col?'sorted':'';
   let h=`<table class="pl-table"><thead>`;
@@ -1245,13 +1248,14 @@ function plRenderTable(){
   h+=`<th class="${sorted('ref')}"><div class="pl-th-inner" onclick="plSetSort('ref')">Ref ${arrow('ref')}</div></th>`;
   h+=`<th class="${sorted('date')}"><div class="pl-th-inner" onclick="plSetSort('date')">Date ${arrow('date')}</div></th>`;
   h+=`<th class="${sorted('supplier')}"><div class="pl-th-inner" onclick="plSetSort('supplier')">Fournisseur ${arrow('supplier')}</div></th>`;
-  h+=`<th class="${sorted('product')}"><div class="pl-th-inner" onclick="plSetSort('product')">Sous-cat. ${arrow('product')}</div></th>`;
+  if(showProdCol)h+=`<th class="${sorted('product')}"><div class="pl-th-inner" onclick="plSetSort('product')">Sous-cat. ${arrow('product')}</div></th>`;
   dynFields.forEach(f=>{const lbl=f.unit?`${esc(f.name)} (${esc(f.unit)})`:esc(f.name);h+=`<th class="${sorted(f.id)}"><div class="pl-th-inner" onclick="plSetSort('${f.id}')">${lbl} ${arrow(f.id)}</div></th>`});
   h+=`<th style="text-align:right">&nbsp;</th>`;
   h+=`</tr>`;
   /* Row de recherche */
   h+=`<tr class="pl-search-row">`;
-  ['ref','date','supplier','product'].forEach(col=>{
+  const commonCols=showProdCol?['ref','date','supplier','product']:['ref','date','supplier'];
+  commonCols.forEach(col=>{
     h+=`<th><input id="pl-search-${col}" type="text" value="${esc(search[col]||"")}" placeholder="Filtrer…" oninput="plSetSearch('${col}',this.value)" autocomplete="off"></th>`;
   });
   dynFields.forEach(f=>{h+=`<th><input id="pl-search-${esc(f.id)}" type="text" value="${esc(search[f.id]||"")}" placeholder="Filtrer…" oninput="plSetSearch('${f.id}',this.value)" autocomplete="off"></th>`});
@@ -1259,7 +1263,7 @@ function plRenderTable(){
   h+=`</tr>`;
   h+=`</thead><tbody>`;
   if(!rows.length){
-    const ncols=4+dynFields.length+1;
+    const ncols=commonCols.length+dynFields.length+1;
     h+=`<tr><td colspan="${ncols}"><div class="pl-empty-table">Aucun devis ne correspond aux filtres / recherches.</div></td></tr>`;
   }else{
     rows.forEach(q=>{
@@ -1268,7 +1272,7 @@ function plRenderTable(){
       h+=`<td class="pl-td-ref">${esc(q.ref||"")}</td>`;
       h+=`<td class="pl-td-date">${esc(plDateFR(q.date))}</td>`;
       h+=`<td class="pl-td-sup">${esc(sup?sup.name:"?")}</td>`;
-      h+=`<td class="pl-td-prod">${esc(q.product||"")}</td>`;
+      if(showProdCol)h+=`<td class="pl-td-prod">${esc(q.product||"")}</td>`;
       dynFields.forEach(f=>{
         const v=(q.values||{})[f.id];
         if(v===undefined||v===""||v===null){h+=`<td class="pl-td-empty">—</td>`;return}
