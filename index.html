@@ -1027,15 +1027,15 @@ function plSlugSupplier(name){
   return (name||"").normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30);
 }
 
-// ▼ plGenerateRef — AAAAMMJJ-X-FOURNISSEUR (X = max+1 sur tuple date+slug, jamais renumérote)
-function plGenerateRef(dateISO,supplierName){
+// ▼ plGenerateRef — AAAAMMJJ-X-FOURNISSEUR (X = max+1 sur tuple date+slug, trous préservés ; excludeId = devis à ignorer en mode édit)
+function plGenerateRef(dateISO,supplierName,excludeId){
   plEnsure();
   const d=(dateISO||"").replace(/-/g,'');
   const slug=plSlugSupplier(supplierName);
   if(!d||!slug)return "";
   const re=new RegExp('^'+d+'-(\\d+)-'+slug.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&')+'$');
   let max=0;
-  S.priceLib.quotes.forEach(q=>{const m=q.ref&&q.ref.match(re);if(m){const x=parseInt(m[1],10);if(x>max)max=x}});
+  S.priceLib.quotes.forEach(q=>{if(excludeId&&q.id===excludeId)return;const m=q.ref&&q.ref.match(re);if(m){const x=parseInt(m[1],10);if(x>max)max=x}});
   return d+'-'+(max+1)+'-'+slug;
 }
 
@@ -1181,10 +1181,12 @@ function plSaveQuote(){
   const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
   if(!sup){st.err="Fournisseur introuvable";plRenderModal();return}
   if(st.editingId){
-    /* Mode édition : mute le devis existant. Ref figé (cf. décision Q4). */
+    /* Mode édition : mute le devis existant + recalcule la ref (cohérence date/fournisseur, excludeId = self) */
     const q=S.priceLib.quotes.find(x=>x.id===st.editingId);
     if(!q){st.err="Devis introuvable";plRenderModal();return}
-    q.date=st.date;q.supplierId=st.supplierId;q.product=st.product;q.values=Object.assign({},st.values);q.updatedAt=Date.now();
+    q.date=st.date;q.supplierId=st.supplierId;q.product=st.product;q.values=Object.assign({},st.values);
+    q.ref=plGenerateRef(q.date,sup.name,q.id);
+    q.updatedAt=Date.now();
   }else{
     /* Mode création */
     const ref=plGenerateRef(st.date,sup.name);
@@ -1214,8 +1216,12 @@ function plCommitCellEdit(quoteId,col,value){
   plEnsure();
   const q=S.priceLib.quotes.find(x=>x.id===quoteId);
   if(!q){plEditingCell=null;plRenderTable();return}
-  if(col==='date')q.date=value;
-  else{if(!q.values)q.values={};q.values[col]=value}
+  if(col==='date'){
+    q.date=value;
+    /* Recalcule la ref pour rester cohérente avec la nouvelle date */
+    const sup=S.crm.suppliers.find(s=>s.id===q.supplierId);
+    if(sup)q.ref=plGenerateRef(q.date,sup.name,q.id);
+  }else{if(!q.values)q.values={};q.values[col]=value}
   q.updatedAt=Date.now();
   save();
   plEditingCell=null;
@@ -1643,11 +1649,11 @@ function plRenderModal(){
   const focusId=(active&&active.id&&active.id.startsWith('pl-'))?active.id:null;
   const focusPos=(focusId&&typeof active.selectionStart==='number')?active.selectionStart:null;
   const st=plModalState;
-  const refPreview=(st.date&&st.supplierId)?(()=>{const s=S.crm.suppliers.find(x=>x.id===st.supplierId);return s?plGenerateRef(st.date,s.name):""})():"";
-  let h=`<div class="pl-overlay" onclick="if(event.target===this)plCloseModal()"><div class="pl-modal">`;
   const isEdit=!!st.editingId;
-  let refToShow=refPreview;
-  if(isEdit){const q=S.priceLib.quotes.find(x=>x.id===st.editingId);if(q&&q.ref)refToShow=q.ref}
+  /* Preview ref : exclut le devis courant en édition pour ne pas auto-incrémenter sur soi-même */
+  const refPreview=(st.date&&st.supplierId)?(()=>{const s=S.crm.suppliers.find(x=>x.id===st.supplierId);return s?plGenerateRef(st.date,s.name,st.editingId||null):""})():"";
+  let h=`<div class="pl-overlay" onclick="if(event.target===this)plCloseModal()"><div class="pl-modal">`;
+  const refToShow=refPreview;
   h+=`<h3>${I.plus} ${isEdit?'Éditer le devis':'Nouveau devis'}${refToShow?`<span class="pl-ref">${esc(refToShow)}</span>`:""}<button class="pl-close" onclick="plCloseModal()" title="Fermer">×</button></h3>`;
   /* Date — onchange (pas oninput) : sinon le widget date est réinitialisé à chaque keystroke et la saisie est impossible */
   h+=`<div class="pl-row"><label class="pl-lbl">Date du devis</label><input id="pl-date" type="date" class="pl-input" value="${esc(st.date||"")}" onchange="plSetField('date',this.value);plRenderModal()"></div>`;
