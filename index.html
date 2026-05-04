@@ -1230,7 +1230,20 @@ function plCommitCellEdit(quoteId,col,value){
 
 // ▼ plSetFilterSup / plSetFilterProd / plResetFilters / plSetSort / plSetSearch — UI table
 function plSetFilterSup(v){S.plFilterSup=v||"";S.plFilterProd="";S.plSearch={};save();render()}
-function plSetFilterProd(v){S.plFilterProd=v||"";S.plSearch={};save();render()}
+function plSetFilterSupByName(name){
+  /* Filter combobox : convertit le nom (saisie utilisateur ou pick datalist) → ID. Inconnu → reset. */
+  name=(name||"").trim();
+  if(!name){plSetFilterSup("");return}
+  const sup=S.crm.suppliers.find(s=>s.name.toLowerCase()===name.toLowerCase());
+  plSetFilterSup(sup?sup.id:"");
+}
+function plSetFilterProd(v){
+  v=(v||"").trim();
+  /* Si la saisie ne matche aucune sous-cat connue, on reset (UX prévisible) */
+  if(v&&!plListAllProducts().some(p=>p.toLowerCase()===v.toLowerCase()))v="";
+  else if(v){const exact=plListAllProducts().find(p=>p.toLowerCase()===v.toLowerCase());if(exact)v=exact}
+  S.plFilterProd=v;S.plSearch={};save();render();
+}
 function plResetFilters(){S.plFilterSup="";S.plFilterProd="";S.plSearch={};S.plSortBy=null;S.plSortDir="asc";save();render()}
 function plSetSort(col){
   if(S.plSortBy===col){S.plSortDir=(S.plSortDir==='asc'?'desc':'asc')}
@@ -1625,13 +1638,18 @@ function rPL(){
   let prodChoices=[];
   if(sup)prodChoices=[...sup.products].sort((a,b)=>a.localeCompare(b));
   else{const set=new Set();S.priceLib.quotes.forEach(q=>{if(q.product)set.add(q.product)});prodChoices=[...set].sort((a,b)=>a.localeCompare(b))}
+  const supName=filterSup?(S.crm.suppliers.find(s=>s.id===filterSup)||{}).name||"":"";
   h+=`<div class="pl-toolbar">`;
-  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Fournisseur</span><select class="pl-tb-select" onchange="plSetFilterSup(this.value)"><option value="">Tous</option>`;
-  sups.forEach(s=>{h+=`<option value="${esc(s.id)}" ${filterSup===s.id?'selected':''}>${esc(s.name)}</option>`});
-  h+=`</select></div>`;
-  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Sous-catégorie</span><select class="pl-tb-select" onchange="plSetFilterProd(this.value)"><option value="">Toutes</option>`;
-  prodChoices.forEach(p=>{h+=`<option value="${esc(p)}" ${filterProd===p?'selected':''}>${esc(p)}</option>`});
-  h+=`</select></div>`;
+  /* Combobox fournisseur : input + datalist (liste + recherche par saisie) */
+  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Fournisseur</span><input type="search" class="pl-tb-select" list="pl-tb-sup-dl" placeholder="Tous" value="${esc(supName)}" onchange="plSetFilterSupByName(this.value)" autocomplete="off">`;
+  h+=`<datalist id="pl-tb-sup-dl">`;
+  sups.forEach(s=>{h+=`<option value="${esc(s.name)}"></option>`});
+  h+=`</datalist></div>`;
+  /* Combobox sous-catégorie */
+  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Sous-catégorie</span><input type="search" class="pl-tb-select" list="pl-tb-prod-dl" placeholder="Toutes" value="${esc(filterProd||"")}" onchange="plSetFilterProd(this.value)" autocomplete="off">`;
+  h+=`<datalist id="pl-tb-prod-dl">`;
+  prodChoices.forEach(p=>{h+=`<option value="${esc(p)}"></option>`});
+  h+=`</datalist></div>`;
   if(filterSup||filterProd||S.plSortBy||(S.plSearch&&Object.keys(S.plSearch).some(k=>S.plSearch[k])))h+=`<button class="pl-tb-reset" onclick="plResetFilters()">Réinitialiser</button>`;
   h+=`<span class="pl-tb-count" id="pl-count">${n} devis</span>`;
   h+=`</div>`;
