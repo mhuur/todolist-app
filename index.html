@@ -1324,6 +1324,44 @@ function plListAllProducts(){
   return [...set].sort((a,b)=>a.localeCompare(b));
 }
 
+// ▼ plListAllFields — agrège les champs distincts de tous les schémas (dédup par nom+type+unit+options)
+function plListAllFields(){
+  plEnsure();
+  const seen=new Map();
+  for(const prod in S.priceLib.schemas){
+    const arr=S.priceLib.schemas[prod];
+    if(!Array.isArray(arr))continue;
+    arr.forEach(f=>{
+      const sig=(f.name||"").toLowerCase()+'|'+(f.type||"text")+'|'+(f.unit||"")+'|'+((f.options||[]).join(','));
+      if(!seen.has(sig))seen.set(sig,{name:f.name,type:f.type||"text",unit:f.unit||"",options:f.options||[],from:[prod]});
+      else seen.get(sig).from.push(prod);
+    });
+  }
+  return [...seen.values()].sort((a,b)=>a.name.localeCompare(b.name));
+}
+
+// ▼ plFieldTypeLabel — libellé court d'un champ pour les suggestions
+function plFieldTypeLabel(f){
+  if(f.type==='number')return f.unit?`Nombre · ${f.unit}`:'Nombre';
+  if(f.type==='date')return 'Date';
+  if(f.type==='select')return `Liste · ${(f.options||[]).join(', ')}`;
+  return 'Texte';
+}
+
+// ▼ plPickExistingField / plSchemaPickExistingField — pré-remplit le draft depuis un champ existant (nouvel id)
+function plPickExistingField(name,type,unit,optsCsv){
+  if(!plModalState||!plModalState.fieldDraft)return;
+  const fd=plModalState.fieldDraft;
+  fd.name=name||"";fd.type=type||"text";fd.unit=unit||"";fd.options=optsCsv||"";
+  plRenderModal();
+}
+function plSchemaPickExistingField(name,type,unit,optsCsv){
+  if(!plSchemaModalState||!plSchemaModalState.draft)return;
+  const fd=plSchemaModalState.draft;
+  fd.name=name||"";fd.type=type||"text";fd.unit=unit||"";fd.options=optsCsv||"";
+  plRenderSchemaModal();
+}
+
 // ▼ plOpenSchemaManager / plCloseSchemaManager
 function plOpenSchemaManager(){
   plEnsure();
@@ -1438,7 +1476,19 @@ function plRenderSchemaModal(){
         if(st.draft&&st.draft.prod===prod){
           const fd=st.draft;
           h+=`<div class="pl-fielddraft" style="margin-top:10px">`;
-          h+=`<div class="pl-fielddraft-row"><input id="pl-sch-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSchemaSetDraft('name',this.value)"><select class="pl-select" onchange="plSchemaSetDraft('type',this.value);plRenderSchemaModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
+          h+=`<div class="pl-fielddraft-row"><input id="pl-sch-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSchemaSetDraft('name',this.value);plRenderSchemaModal()"><select class="pl-select" onchange="plSchemaSetDraft('type',this.value);plRenderSchemaModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
+          /* Suggestions de champs existants */
+          const dQ=(fd.name||"").trim().toLowerCase();
+          const inCurrent=new Set((S.priceLib.schemas[prod]||[]).map(f=>(f.name||"").toLowerCase()));
+          const suggestions=dQ?plListAllFields().filter(f=>!inCurrent.has(f.name.toLowerCase())&&f.name.toLowerCase().includes(dQ)).slice(0,5):[];
+          if(suggestions.length){
+            h+=`<div style="margin:6px 0;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);border-radius:5px;padding:4px 6px">`;
+            h+=`<div style="font-size:9px;color:#5CB8F0;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:2px 4px 4px">${suggestions.length} champ${suggestions.length>1?'s':''} existant${suggestions.length>1?'s':''} — clique pour réutiliser</div>`;
+            suggestions.forEach(f=>{
+              h+=`<div class="pl-search-item" style="font-size:11px;padding:5px 6px;border-radius:4px;border:none" onmousedown="event.preventDefault();plSchemaPickExistingField(${esc(JSON.stringify(f.name))},${esc(JSON.stringify(f.type))},${esc(JSON.stringify(f.unit))},${esc(JSON.stringify((f.options||[]).join(', ')))})"><strong>${esc(f.name)}</strong> <span style="color:#64748B;font-size:9px">— ${esc(plFieldTypeLabel(f))}</span></div>`;
+            });
+            h+=`</div>`;
+          }
           if(fd.type==='number')h+=`<div class="pl-fielddraft-row"><input id="pl-sch-draft-unit" type="text" class="pl-input" placeholder="Unité (ex. €, m³, mg/L)" value="${esc(fd.unit||"")}" oninput="plSchemaSetDraft('unit',this.value)"></div>`;
           if(fd.type==='select')h+=`<div class="pl-fielddraft-row"><input id="pl-sch-draft-opts" type="text" class="pl-input" placeholder="Options séparées par virgules" value="${esc(fd.options||"")}" oninput="plSchemaSetDraft('options',this.value)"></div>`;
           h+=`<div class="pl-fielddraft-row"><button class="pl-mini-btn cancel" onclick="plSchemaCancelDraft()">Annuler</button><button class="pl-mini-btn" onclick="plSchemaConfirmDraft()">Ajouter le champ</button></div>`;
@@ -1606,7 +1656,20 @@ function plRenderModal(){
     if(st.fieldDraft){
       const fd=st.fieldDraft;
       h+=`<div class="pl-fielddraft">`;
-      h+=`<div class="pl-fielddraft-row"><input id="pl-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSetDraftField('name',this.value)"><select class="pl-select" onchange="plSetDraftField('type',this.value);plRenderModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
+      /* Input nom + type — re-render après chaque caractère pour rafraîchir les suggestions */
+      h+=`<div class="pl-fielddraft-row"><input id="pl-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSetDraftField('name',this.value);plRenderModal()"><select class="pl-select" onchange="plSetDraftField('type',this.value);plRenderModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
+      /* Suggestions de champs existants (autres sous-cats) */
+      const dQ=(fd.name||"").trim().toLowerCase();
+      const inCurrent=new Set((S.priceLib.schemas[st.product]||[]).map(f=>(f.name||"").toLowerCase()));
+      const suggestions=dQ?plListAllFields().filter(f=>!inCurrent.has(f.name.toLowerCase())&&f.name.toLowerCase().includes(dQ)).slice(0,5):[];
+      if(suggestions.length){
+        h+=`<div style="margin:6px 0;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);border-radius:5px;padding:4px 6px">`;
+        h+=`<div style="font-size:9px;color:#5CB8F0;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:2px 4px 4px">${suggestions.length} champ${suggestions.length>1?'s':''} existant${suggestions.length>1?'s':''} — clique pour réutiliser</div>`;
+        suggestions.forEach(f=>{
+          h+=`<div class="pl-search-item" style="font-size:11px;padding:5px 6px;border-radius:4px;border:none" onmousedown="event.preventDefault();plPickExistingField(${esc(JSON.stringify(f.name))},${esc(JSON.stringify(f.type))},${esc(JSON.stringify(f.unit))},${esc(JSON.stringify((f.options||[]).join(', ')))})"><strong>${esc(f.name)}</strong> <span style="color:#64748B;font-size:9px">— ${esc(plFieldTypeLabel(f))}</span></div>`;
+        });
+        h+=`</div>`;
+      }
       if(fd.type==='number')h+=`<div class="pl-fielddraft-row"><input id="pl-draft-unit" type="text" class="pl-input" placeholder="Unité (ex. €, m³, mg/L)" value="${esc(fd.unit||"")}" oninput="plSetDraftField('unit',this.value)"></div>`;
       if(fd.type==='select')h+=`<div class="pl-fielddraft-row"><input id="pl-draft-options" type="text" class="pl-input" placeholder="Options séparées par virgules (ex. Standard, Premium)" value="${esc(fd.options||"")}" oninput="plSetDraftField('options',this.value)"></div>`;
       h+=`<div class="pl-fielddraft-row"><button class="pl-mini-btn cancel" onclick="plCancelFieldDraft()">Annuler</button><button class="pl-mini-btn" onclick="plConfirmFieldDraft()">Ajouter le champ</button></div>`;
