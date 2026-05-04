@@ -431,6 +431,19 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-cell-input{width:100%;background:#0E1A2E;border:1px solid #38BDF8;border-radius:3px;padding:4px 6px;color:#E2E8F0;font-family:inherit;font-size:11px;outline:none}
 .pl-cell-input[type="number"]{-moz-appearance:textfield;appearance:textfield}
 .pl-cell-input[type="number"]::-webkit-inner-spin-button,.pl-cell-input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+/* Combobox custom (liste + filtrage par saisie, thème dark) */
+.pl-combo-wrap{position:relative;display:inline-block;min-width:130px}
+.pl-combo-wrap.pl-combo-block{display:block;width:100%;min-width:0}
+.pl-combo-dropdown{position:absolute;top:100%;left:0;right:0;margin-top:2px;background:#162032;border:1px solid #2A3A52;border-radius:6px;max-height:220px;overflow-y:auto;z-index:60;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+.pl-combo-item{padding:7px 10px;font-size:11px;color:#CBD5E1;cursor:pointer;border-top:1px solid #1E3050}
+.pl-combo-item:first-child{border-top:none}
+.pl-combo-item:hover{background:rgba(56,189,248,.08);color:#E2E8F0}
+.pl-combo-item.selected{background:rgba(56,189,248,.12);color:#5CB8F0;font-weight:700}
+.pl-combo-item.reset{color:#5CB8F0;font-style:italic}
+.pl-combo-empty{padding:10px;color:#475569;font-size:11px;text-align:center;font-style:italic}
+.pl-combo-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;color:#475569;cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:3px;opacity:0;transition:all .12s;font-family:inherit}
+.pl-combo-wrap:hover .pl-combo-clear,.pl-combo-wrap input:focus + .pl-combo-clear{opacity:1}
+.pl-combo-clear:hover{color:#F87171;background:rgba(248,113,113,.08)}
 /* Bibliothèque de prix — gestion des champs */
 .pl-sch-modal{max-width:680px}
 .pl-sch-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
@@ -729,7 +742,13 @@ function render(){
   if(S.tab==="projects")S.tab="global";
   if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else h+=rTR();
   const mainCls=S.tab==="price"?"main main-wide":"main";
-  document.getElementById("app").innerHTML=sb+`<div class="${mainCls}">${h}</div>`;syncEl=document.getElementById('sync-ind');requestAnimationFrame(sEd)}
+  /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
+  const _comboActive=document.activeElement;
+  const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
+  const _comboPos=(_comboFocusId&&typeof _comboActive.selectionStart==='number')?_comboActive.selectionStart:null;
+  document.getElementById("app").innerHTML=sb+`<div class="${mainCls}">${h}</div>`;syncEl=document.getElementById('sync-ind');
+  if(_comboFocusId){const el=document.getElementById(_comboFocusId);if(el){el.focus();if(_comboPos!==null&&typeof el.setSelectionRange==='function')try{el.setSelectionRange(_comboPos,_comboPos)}catch(e){}}}
+  requestAnimationFrame(sEd)}
 
 /* ── Projects tab ── */
 function rPT(){let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="addP()">${I.plus} Projet</button><button class="bs" onclick="colAll()">${I.col} Replier</button></div><div class="bar-r"><button class="bs ${S.sortDeadline?"on":""}" onclick="ts('deadline')">Deadline</button><button class="bs ${S.sortAlpha?"on":""}" onclick="ts('alpha')">Z-A</button></div></div>`;
@@ -1208,6 +1227,19 @@ function plDeleteQuote(id){
   save();render();
 }
 
+// ▼ Combobox custom — état transient (NON persisté). key encode le contexte : 'fsup', 'fprod', 'cell-<qid>-<fid>', 'mval-<fid>'
+let plCombo=null;  // { key, query }
+function plComboReRender(){
+  if(!plCombo){render();return}
+  if(plCombo.key.startsWith('cell-'))plRenderTable();
+  else if(plCombo.key.startsWith('mval-'))plRenderModal();
+  else render();
+}
+function plComboOpen(key){if(plCombo&&plCombo.key===key)return;plCombo={key:key,query:""};plComboReRender()}
+function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(k.startsWith('mval-'))plRenderModal();else render()}
+function plComboSetQuery(q){if(!plCombo)return;plCombo.query=q||"";plComboReRender()}
+function plComboBlurClose(key){setTimeout(()=>{if(plCombo&&plCombo.key===key)plComboClose()},180)}
+
 // ▼ plEditingCell — état transient pour l'édition inline d'une cellule (NON persisté)
 let plEditingCell=null;
 function plStartCellEdit(quoteId,col){if(plEditingCell&&plEditingCell.quoteId===quoteId&&plEditingCell.col===col)return;plEditingCell={quoteId:quoteId,col:col};plRenderTable()}
@@ -1347,19 +1379,24 @@ function plRenderTable(){
         const v=(q.values||{})[f.id];
         if(isEditing(q.id,f.id)){
           let inputHtml="";
-          if(f.type==='number')inputHtml=`<input id="pl-edit-cell" type="number" step="any" class="pl-cell-input" value="${esc(v==null?"":String(v))}">`;
-          else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}">`;
-          else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input">${opts}</select>`}
+          const commitJS=`plCommitCellEdit('${q.id}','${f.id}',this.value)`;
+          const kbJS=`if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}`;
+          const blurJS=`if(plEditingCell)plCommitCellEdit('${q.id}','${f.id}',this.value)`;
+          if(f.type==='number')inputHtml=`<input id="pl-edit-cell" type="number" step="any" class="pl-cell-input" value="${esc(v==null?"":String(v))}" onblur="${blurJS}" onkeydown="${kbJS}">`;
+          else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">`;
+          else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">${opts}</select>`}
           else{
-            /* Texte : autocomplete via datalist sur les valeurs déjà saisies pour ce champ + sous-cat */
+            /* Texte : combobox custom thème dark — dropdown des valeurs déjà saisies pour ce champ + sous-cat */
+            const cKey=`cell-${q.id}-${f.id}`;
+            const cOpen=plCombo&&plCombo.key===cKey;
+            const cQ=cOpen?(plCombo.query==null?(v==null?"":String(v)):plCombo.query):(v==null?"":String(v));
             const sugs=plDistinctValues(q.product,f.id);
-            let dl="";
-            if(sugs.length){const dlId=`pl-dl-${f.id}`;dl=`<datalist id="${dlId}">${sugs.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}" list="${dlId}" autocomplete="off">${dl}`}
-            else inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}">`;
+            const filtered=cOpen?sugs.filter(s=>!cQ||s.toLowerCase().includes(cQ.toLowerCase())):[];
+            const ddJS=`onfocus="plComboOpen('${cKey}');this.select&&this.select()" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('${cKey}');${blurJS}" onkeydown="${kbJS}"`;
+            inputHtml=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(cQ)}" autocomplete="off" ${ddJS}>`;
+            if(cOpen&&filtered.length)inputHtml+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plCommitCellEdit('${q.id}','${f.id}',${esc(JSON.stringify(s))})">${esc(s)}</div>`).join('')}</div>`;
+            inputHtml+=`</div>`;
           }
-          /* onchange pour les date/select (au pick), onblur+Enter pour les autres */
-          const evt=(f.type==='date'||f.type==='select')?`onchange="plCommitCellEdit('${q.id}','${f.id}',this.value)"`:'';
-          inputHtml=inputHtml.replace('class="pl-cell-input"',`class="pl-cell-input" ${evt} onblur="if(plEditingCell)plCommitCellEdit('${q.id}','${f.id}',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}"`);
           h+=`<td class="pl-cell-editing">${inputHtml}</td>`;
           return;
         }
@@ -1639,17 +1676,35 @@ function rPL(){
   if(sup)prodChoices=[...sup.products].sort((a,b)=>a.localeCompare(b));
   else{const set=new Set();S.priceLib.quotes.forEach(q=>{if(q.product)set.add(q.product)});prodChoices=[...set].sort((a,b)=>a.localeCompare(b))}
   const supName=filterSup?(S.crm.suppliers.find(s=>s.id===filterSup)||{}).name||"":"";
+  const supComboOpen=plCombo&&plCombo.key==='fsup';
+  const prodComboOpen=plCombo&&plCombo.key==='fprod';
+  const supQ=supComboOpen?(plCombo.query||""):"";
+  const prodQ=prodComboOpen?(plCombo.query||""):"";
+  const supList=supComboOpen?sups.filter(s=>!supQ||s.name.toLowerCase().includes(supQ.toLowerCase())):[];
+  const prodList=prodComboOpen?prodChoices.filter(p=>!prodQ||p.toLowerCase().includes(prodQ.toLowerCase())):[];
   h+=`<div class="pl-toolbar">`;
-  /* Combobox fournisseur : input + datalist (liste + recherche par saisie) */
-  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Fournisseur</span><input type="search" class="pl-tb-select" list="pl-tb-sup-dl" placeholder="Tous" value="${esc(supName)}" onchange="plSetFilterSupByName(this.value)" autocomplete="off">`;
-  h+=`<datalist id="pl-tb-sup-dl">`;
-  sups.forEach(s=>{h+=`<option value="${esc(s.name)}"></option>`});
-  h+=`</datalist></div>`;
+  /* Combobox fournisseur — custom dropdown thème dark */
+  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Fournisseur</span><div class="pl-combo-wrap"><input id="pl-combo-fsup" class="pl-tb-select" placeholder="Tous" value="${esc(supComboOpen?supQ:supName)}" onfocus="plComboOpen('fsup')" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('fsup')" onkeydown="if(event.key==='Escape'){plComboClose()}else if(event.key==='Enter'){event.preventDefault();const i=document.querySelector('#pl-combo-fsup-dd .pl-combo-item:not(.reset)');if(i)i.dispatchEvent(new MouseEvent('mousedown'))}" autocomplete="off">`;
+  if(filterSup&&!supComboOpen)h+=`<button class="pl-combo-clear" onmousedown="event.preventDefault();plSetFilterSup('')" title="Effacer">×</button>`;
+  if(supComboOpen){
+    h+=`<div id="pl-combo-fsup-dd" class="pl-combo-dropdown">`;
+    if(filterSup)h+=`<div class="pl-combo-item reset" onmousedown="event.preventDefault();plSetFilterSup('');plComboClose()">— Tous les fournisseurs —</div>`;
+    if(!supList.length)h+=`<div class="pl-combo-empty">Aucun résultat</div>`;
+    else supList.forEach(s=>{h+=`<div class="pl-combo-item ${filterSup===s.id?'selected':''}" onmousedown="event.preventDefault();plCombo=null;plSetFilterSupByName(${esc(JSON.stringify(s.name))})">${esc(s.name)}</div>`});
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
   /* Combobox sous-catégorie */
-  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Sous-catégorie</span><input type="search" class="pl-tb-select" list="pl-tb-prod-dl" placeholder="Toutes" value="${esc(filterProd||"")}" onchange="plSetFilterProd(this.value)" autocomplete="off">`;
-  h+=`<datalist id="pl-tb-prod-dl">`;
-  prodChoices.forEach(p=>{h+=`<option value="${esc(p)}"></option>`});
-  h+=`</datalist></div>`;
+  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Sous-catégorie</span><div class="pl-combo-wrap"><input id="pl-combo-fprod" class="pl-tb-select" placeholder="Toutes" value="${esc(prodComboOpen?prodQ:(filterProd||""))}" onfocus="plComboOpen('fprod')" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('fprod')" onkeydown="if(event.key==='Escape'){plComboClose()}else if(event.key==='Enter'){event.preventDefault();const i=document.querySelector('#pl-combo-fprod-dd .pl-combo-item:not(.reset)');if(i)i.dispatchEvent(new MouseEvent('mousedown'))}" autocomplete="off">`;
+  if(filterProd&&!prodComboOpen)h+=`<button class="pl-combo-clear" onmousedown="event.preventDefault();plSetFilterProd('')" title="Effacer">×</button>`;
+  if(prodComboOpen){
+    h+=`<div id="pl-combo-fprod-dd" class="pl-combo-dropdown">`;
+    if(filterProd)h+=`<div class="pl-combo-item reset" onmousedown="event.preventDefault();plSetFilterProd('');plComboClose()">— Toutes les sous-catégories —</div>`;
+    if(!prodList.length)h+=`<div class="pl-combo-empty">Aucun résultat</div>`;
+    else prodList.forEach(p=>{h+=`<div class="pl-combo-item ${filterProd===p?'selected':''}" onmousedown="event.preventDefault();plCombo=null;plSetFilterProd(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
   if(filterSup||filterProd||S.plSortBy||(S.plSearch&&Object.keys(S.plSearch).some(k=>S.plSearch[k])))h+=`<button class="pl-tb-reset" onclick="plResetFilters()">Réinitialiser</button>`;
   h+=`<span class="pl-tb-count" id="pl-count">${n} devis</span>`;
   h+=`</div>`;
@@ -1757,11 +1812,15 @@ function plRenderModal(){
         (f.options||[]).forEach(o=>{h+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});
         h+=`</select>`;
       }else{
-        /* Texte : autocomplete via datalist sur les valeurs déjà saisies pour ce champ + sous-cat */
+        /* Texte : combobox custom thème dark sur les valeurs déjà saisies pour ce champ + sous-cat */
+        const mKey=`mval-${f.id}`;
+        const mOpen=plCombo&&plCombo.key===mKey;
+        const mQ=mOpen?(plCombo.query==null?(v||""):plCombo.query):v;
         const sugs=plDistinctValues(st.product,f.id);
-        const dlId=`pl-dl-modal-${f.id}`;
-        h+=`<input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)" ${sugs.length?`list="${dlId}"`:''} autocomplete="off">`;
-        if(sugs.length)h+=`<datalist id="${dlId}">${sugs.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
+        const filtered=mOpen?sugs.filter(s=>!mQ||s.toLowerCase().includes((mQ||"").toLowerCase())):[];
+        h+=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(mQ||"")}" autocomplete="off" onfocus="plComboOpen('${mKey}')" oninput="plComboSetQuery(this.value);plSetValue('${f.id}',this.value)" onblur="plComboBlurClose('${mKey}')">`;
+        if(mOpen&&filtered.length)h+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetValue('${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+        h+=`</div>`;
       }
       h+=`<button class="pl-field-del" onclick="plDelField('${f.id}')" title="Supprimer ce champ">×</button></div>`;
     });
