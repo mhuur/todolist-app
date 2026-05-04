@@ -1034,10 +1034,10 @@ function plToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMon
 /* État du modal — transient (NON persisté) */
 let plModalState=null;
 
-// ▼ plOpenNewQuote — initialise état modal pour création
-function plOpenNewQuote(){
+// ▼ plOpenNewQuote — initialise état modal pour création (presets optionnels depuis les filtres actifs)
+function plOpenNewQuote(presetSupId,presetProduct){
   plEnsure();
-  plModalState={editingId:null,date:plToday(),supplierId:"",supplierQuery:"",product:"",productQuery:"",values:{},fieldDraft:null,err:""};
+  plModalState={editingId:null,date:plToday(),supplierId:presetSupId||"",supplierQuery:"",product:presetProduct||"",productQuery:"",values:{},fieldDraft:null,err:""};
   plRenderModal();
 }
 
@@ -1448,7 +1448,15 @@ function rPL(){
   plEnsure();
   const n=S.priceLib.quotes.length;
   const nProds=plListAllProducts().length;
+  const filterSup=S.plFilterSup||"";
+  const filterProd=S.plFilterProd||"";
+  const sup=filterSup?S.crm.suppliers.find(s=>s.id===filterSup):null;
   let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="plOpenNewQuote()">${I.plus} Nouveau devis</button>`;
+  /* Bouton contextuel : ajouter une ligne du même type qu'affiché */
+  if(filterProd){
+    const ctxLbl=filterSup?`Ajouter ${esc(sup?sup.name:"?")} / ${esc(filterProd)}`:`Ajouter dans « ${esc(filterProd)} »`;
+    h+=`<button class="bp" style="margin-left:6px" onclick="plOpenNewQuote(${esc(JSON.stringify(filterSup||""))},${esc(JSON.stringify(filterProd))})">${I.plus} ${ctxLbl}</button>`;
+  }
   if(nProds)h+=`<button class="bs" onclick="plOpenSchemaManager()" title="Gérer les champs par sous-catégorie">Champs (${nProds})</button>`;
   h+=`</div><div class="bar-r"></div></div>`;
   if(!n){
@@ -1457,9 +1465,6 @@ function rPL(){
   }
   /* Toolbar : filtres */
   const sups=[...S.crm.suppliers].sort((a,b)=>a.name.localeCompare(b.name));
-  const filterSup=S.plFilterSup||"";
-  const filterProd=S.plFilterProd||"";
-  const sup=filterSup?S.crm.suppliers.find(s=>s.id===filterSup):null;
   /* Sous-cats disponibles dans le filtre : si fournisseur sélectionné, ses produits ; sinon toutes les sous-cats existantes dans les devis */
   let prodChoices=[];
   if(sup)prodChoices=[...sup.products].sort((a,b)=>a.localeCompare(b));
