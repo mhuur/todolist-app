@@ -1058,8 +1058,24 @@ function plSetField(k,v){if(!plModalState)return;plModalState[k]=v}
 
 // ▼ Cascade fournisseur — recherche live, création inline si pas de match
 function plSearchSupplier(q){if(!plModalState)return;plModalState.supplierQuery=q;plRenderModal()}
-function plPickSupplier(id){if(!plModalState)return;plModalState.supplierId=id;plModalState.supplierQuery="";plModalState.product="";plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plClearSupplier(){if(!plModalState)return;plModalState.supplierId="";plModalState.supplierQuery="";plModalState.product="";plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plPickSupplier(id){
+  if(!plModalState)return;
+  const st=plModalState;
+  const sup=S.crm.suppliers.find(s=>s.id===id);
+  if(!sup)return;
+  /* Si une sous-cat est déjà choisie (flux preset) et que ce fournisseur ne la propose pas → auto-link CRM */
+  if(st.product&&!sup.products.some(p=>p.toLowerCase()===st.product.toLowerCase())){
+    sup.products.push(st.product);
+    if(!S.crm.products.some(p=>p.toLowerCase()===st.product.toLowerCase()))S.crm.products.push(st.product);
+    save();
+  }
+  st.supplierId=id;st.supplierQuery="";
+  /* Reset product UNIQUEMENT si pas de preset (flux normal supplier-first) */
+  if(!st.product){st.productQuery="";st.values={};st.fieldDraft=null}
+  st.err="";
+  plRenderModal();
+}
+function plClearSupplier(){if(!plModalState)return;plModalState.supplierId="";plModalState.supplierQuery="";plModalState.err="";plRenderModal()}
 function plCreateAndPickSupplier(name){
   if(!plModalState)return;
   name=(name||"").trim();
@@ -1509,14 +1525,36 @@ function plRenderModal(){
   }else{
     const q=(st.supplierQuery||"").trim();
     const ql=q.toLowerCase();
-    const matches=S.crm.suppliers.filter(s=>!ql||s.name.toLowerCase().includes(ql)).sort((a,b)=>a.name.localeCompare(b.name));
+    const presetProd=st.product||"";
+    const presetProdL=presetProd.toLowerCase();
+    /* Si une sous-cat est preset, on sépare en 2 groupes : ceux qui la proposent, et les autres CRM (dont le pick auto-linkera la sous-cat) */
+    let primary=[],secondary=[];
+    S.crm.suppliers.forEach(s=>{
+      if(ql&&!s.name.toLowerCase().includes(ql))return;
+      if(presetProd){
+        if(s.products.some(p=>p.toLowerCase()===presetProdL))primary.push(s);
+        else secondary.push(s);
+      }else primary.push(s);
+    });
+    primary.sort((a,b)=>a.name.localeCompare(b.name));
+    secondary.sort((a,b)=>a.name.localeCompare(b.name));
+    const totalMatches=primary.length+secondary.length;
     const exact=q&&S.crm.suppliers.some(s=>s.name.toLowerCase()===ql);
-    h+=`<input id="pl-sup-search" type="text" class="pl-input" placeholder="Rechercher ou créer un fournisseur…" value="${esc(q)}" oninput="plSearchSupplier(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickSupplierEnter()}" autocomplete="off">`;
+    h+=`<input id="pl-sup-search" type="text" class="pl-input" placeholder="${presetProd?`Fournisseurs qui proposent « ${esc(presetProd)} »…`:'Rechercher ou créer un fournisseur…'}" value="${esc(q)}" oninput="plSearchSupplier(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickSupplierEnter()}" autocomplete="off">`;
     h+=`<div class="pl-search-list">`;
-    if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucun fournisseur. Tape un nom pour en créer un.</div>`;
-    matches.slice(0,8).forEach(s=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickSupplier('${s.id}')">${esc(s.name)}</div>`});
-    if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)… affine ta recherche</div>`;
-    if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickSupplier(${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
+    if(!totalMatches&&!q)h+=`<div class="pl-search-list-empty">Aucun fournisseur. Tape un nom pour en créer un.</div>`;
+    /* Groupe 1 : proposent déjà */
+    let shown=0;
+    primary.slice(0,8).forEach(s=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickSupplier('${s.id}')">${esc(s.name)}</div>`;shown++});
+    if(primary.length>8)h+=`<div class="pl-search-list-empty">+ ${primary.length-8} autre(s) qui proposent « ${esc(presetProd)} »… affine ta recherche</div>`;
+    /* Groupe 2 : CRM mais ne proposent pas encore — afficher avec mention "ajoute la sous-cat" */
+    if(presetProd&&secondary.length){
+      const remaining=Math.max(0,8-shown);
+      if(primary.length)h+=`<div class="pl-search-list-empty" style="text-align:left;padding:6px 10px;font-size:9px;text-transform:uppercase;letter-spacing:.4px">Autres fournisseurs CRM (ajoutera « ${esc(presetProd)} »)</div>`;
+      secondary.slice(0,remaining||4).forEach(s=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickSupplier('${s.id}')"><span>${esc(s.name)}</span> <span style="color:#475569;font-size:9px;font-style:italic">→ ajoute la sous-cat</span></div>`});
+      if(secondary.length>(remaining||4))h+=`<div class="pl-search-list-empty">+ ${secondary.length-(remaining||4)} autre(s)… affine ta recherche</div>`;
+    }
+    if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickSupplier(${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »${presetProd?` (avec « ${esc(presetProd)} »)`:''}</div>`;
     h+=`</div>`;
   }
   h+=`</div>`;
