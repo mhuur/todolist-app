@@ -1331,7 +1331,13 @@ function plRenderTable(){
           if(f.type==='number')inputHtml=`<input id="pl-edit-cell" type="number" step="any" class="pl-cell-input" value="${esc(v==null?"":String(v))}">`;
           else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}">`;
           else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input">${opts}</select>`}
-          else inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}">`;
+          else{
+            /* Texte : autocomplete via datalist sur les valeurs déjà saisies pour ce champ + sous-cat */
+            const sugs=plDistinctValues(q.product,f.id);
+            let dl="";
+            if(sugs.length){const dlId=`pl-dl-${f.id}`;dl=`<datalist id="${dlId}">${sugs.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}" list="${dlId}" autocomplete="off">${dl}`}
+            else inputHtml=`<input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(v||"")}">`;
+          }
           /* onchange pour les date/select (au pick), onblur+Enter pour les autres */
           const evt=(f.type==='date'||f.type==='select')?`onchange="plCommitCellEdit('${q.id}','${f.id}',this.value)"`:'';
           inputHtml=inputHtml.replace('class="pl-cell-input"',`class="pl-cell-input" ${evt} onblur="if(plEditingCell)plCommitCellEdit('${q.id}','${f.id}',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}"`);
@@ -1386,6 +1392,20 @@ function plListAllProducts(){
   S.priceLib.quotes.forEach(q=>{if(q.product)set.add(q.product)});
   (S.crm.products||[]).forEach(p=>set.add(p));
   return [...set].sort((a,b)=>a.localeCompare(b));
+}
+
+// ▼ plDistinctValues — valeurs distinctes saisies pour un champ d'une sous-cat (triées par fréquence puis alpha)
+function plDistinctValues(prod,fieldId){
+  plEnsure();
+  const counts={};
+  S.priceLib.quotes.forEach(q=>{
+    if(q.product!==prod)return;
+    const v=(q.values||{})[fieldId];
+    if(v==null||v==="")return;
+    const sv=String(v);
+    counts[sv]=(counts[sv]||0)+1;
+  });
+  return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]||a.localeCompare(b));
 }
 
 // ▼ plListAllFields — agrège les champs distincts de tous les schémas (dédup par nom+type+unit+options)
@@ -1713,7 +1733,11 @@ function plRenderModal(){
         (f.options||[]).forEach(o=>{h+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});
         h+=`</select>`;
       }else{
-        h+=`<input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)">`;
+        /* Texte : autocomplete via datalist sur les valeurs déjà saisies pour ce champ + sous-cat */
+        const sugs=plDistinctValues(st.product,f.id);
+        const dlId=`pl-dl-modal-${f.id}`;
+        h+=`<input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)" ${sugs.length?`list="${dlId}"`:''} autocomplete="off">`;
+        if(sugs.length)h+=`<datalist id="${dlId}">${sugs.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
       }
       h+=`<button class="pl-field-del" onclick="plDelField('${f.id}')" title="Supprimer ce champ">×</button></div>`;
     });
