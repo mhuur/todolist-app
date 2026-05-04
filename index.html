@@ -395,7 +395,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-tb-count{font-size:10px;color:#64748B;font-weight:600;margin-left:auto}
 .pl-table-wrap{overflow-x:auto;border:1px solid #1E3050;border-radius:8px;background:#101A2E}
 .pl-table{width:100%;border-collapse:collapse;font-size:11px}
-.pl-table th,.pl-table td{padding:7px 10px;text-align:left;border-bottom:1px solid #1A2840;vertical-align:middle}
+.pl-table th,.pl-table td{padding:7px 10px;text-align:left;border-bottom:1px solid #1A2840;vertical-align:middle;white-space:nowrap}
 .pl-table thead th{background:#0E1A2E;font-weight:700;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #2A3A52;position:sticky;top:0;z-index:2}
 .pl-table thead th .pl-th-inner{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
 .pl-table thead th .pl-th-inner:hover{color:#E2E8F0}
@@ -1490,8 +1490,8 @@ function plRenderModal(){
   let refToShow=refPreview;
   if(isEdit){const q=S.priceLib.quotes.find(x=>x.id===st.editingId);if(q&&q.ref)refToShow=q.ref}
   h+=`<h3>${I.plus} ${isEdit?'Éditer le devis':'Nouveau devis'}${refToShow?`<span class="pl-ref">${esc(refToShow)}</span>`:""}<button class="pl-close" onclick="plCloseModal()" title="Fermer">×</button></h3>`;
-  /* Date */
-  h+=`<div class="pl-row"><label class="pl-lbl">Date du devis</label><input id="pl-date" type="date" class="pl-input" value="${esc(st.date||"")}" oninput="plSetField('date',this.value);plRenderModal()"></div>`;
+  /* Date — onchange (pas oninput) : sinon le widget date est réinitialisé à chaque keystroke et la saisie est impossible */
+  h+=`<div class="pl-row"><label class="pl-lbl">Date du devis</label><input id="pl-date" type="date" class="pl-input" value="${esc(st.date||"")}" onchange="plSetField('date',this.value);plRenderModal()"></div>`;
   /* Fournisseur — recherche live + création inline */
   h+=`<div class="pl-row"><label class="pl-lbl">Fournisseur</label>`;
   if(st.supplierId){

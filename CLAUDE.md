@@ -61,6 +61,7 @@ Pour pousser sans clé de signature locale, passer par le MCP GitHub (`push_file
 - **Debounce save 1500 ms sans flush beforeunload** — fenêtre de perte si reload/fermeture < 1.5 s après une modif. À durcir si problème : ajouter un `flushSaveBeforeUnload` (clear `saveTimer` + `saveToCloudNow()` synchrone sur `beforeunload`/`pagehide`).
 - **Renames** : un rename de produit doit aussi mettre à jour `S.crm.suppliers[].products`, `S.crm.preferred`, et les clés d'expansion `S.ex` dérivées du nom.
 - **`JSON.stringify(x)` injecté dans un attribut HTML `onclick="..."`** : les `"` produits par JSON cassent silencieusement l'attribut (handler jamais installé, aucune erreur console). Toujours wrapper : `onclick="fn(${esc(JSON.stringify(x))})"`. `esc()` transforme `"` → `&quot;`, le parseur HTML décode → la string JS arrive intacte.
+- **`<input type="date">` + re-render sur `oninput`** : à chaque keystroke (chiffre du jour/mois/année), `oninput` se déclenche → si on re-render, le widget date du navigateur est réinitialisé entre deux chiffres et la saisie devient impossible. Toujours utiliser `onchange` (déclenché une fois la date complète, au blur). Pareil pour `type="time"` / `type="datetime-local"`.
 - **Firebase v8** (pas v9 modulaire) — garder l'API `firebase.auth()`, `db.collection(...)`. Pas de `import`.
 - Pas de `bundler`, pas de TypeScript : tout reste en JS plain dans la balise `<script>`.
 
