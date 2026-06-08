@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .pc.dragging{opacity:.35}
 .pc.dot{box-shadow:0 -2px 0 0 #38BDF8}.pc.dob{box-shadow:0 2px 0 0 #38BDF8}
 .ph{padding:6px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
-.dh{cursor:grab;color:#4B5563;display:flex;align-items:center;flex-shrink:0;opacity:.5}.dh:hover{opacity:1}
+.dh{cursor:grab;color:#4B5563;display:flex;align-items:center;flex-shrink:0;opacity:0;transition:opacity .12s}.ar:hover .dh{opacity:.4}.dh:hover{opacity:.85}
 .ph input{flex:1;border:none;background:transparent;font-size:12px;font-weight:700;font-family:inherit;color:#E2E8F0;outline:none;min-width:0}
 .ph-right{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .ph-date{border-radius:4px;padding:0 4px;font-size:10px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;background:#1E293B;border:1px solid #2A3A52;color:#94A3B8}
@@ -65,8 +65,8 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 /* Action row */
 .ar{display:flex;flex-direction:column;padding:6px 10px;border-radius:6px;margin-bottom:3px;position:relative;border:1px solid transparent;transition:all .2s ease;animation:fadeSlideIn .25s ease}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.ar:hover{background:rgba(92,184,240,.04)}
-.ar.ec{background:rgba(92,184,240,.05);border-color:rgba(92,184,240,.1)}
+.ar:hover{background:rgba(92,184,240,.06)}
+.ar.ec{background:rgba(148,163,184,.025);border-color:transparent}
 .ar.ec .as{color:#E2E8F0}
 .ar.prio{border-left:3px solid #F59E0B;border-radius:0 6px 6px 0}.ar.prio .as{color:#FBBF24}
 .ar.prio2{border-left:3px solid #F87171;border-radius:0 6px 6px 0}.ar.prio2 .as{color:#FCA5A5}
@@ -91,7 +91,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .a-info{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 5px}
 .as{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:#CBD5E1;outline:none;min-width:60px;padding:0;flex:1}
 .as::placeholder{color:#4B5563;font-weight:400}
-.a-tk{font-size:9px;color:#5CB8F0;font-weight:700;white-space:nowrap;flex-shrink:0}
+.a-tk{font-size:9px;color:#64748B;font-weight:600;white-space:nowrap;flex-shrink:0}
 .a-sub{font-size:7.5px;color:#4B6480;font-weight:500;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
 .a-wait{width:100%;display:flex;align-items:center;gap:3px;margin-top:1px}.a-wait svg{color:#F59E0B;opacity:.85;flex-shrink:0}.a-wait input{flex:1;min-width:0;border:none;background:transparent;font-family:inherit;font-size:8.5px;color:#FBBF24;font-style:italic;outline:none}
 .a-tri{width:100%;margin-top:2px;display:flex;align-items:center;gap:4px}
@@ -139,7 +139,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .done-tbl .dt-date{color:#64748B;font-size:9px;text-align:right;width:80px;white-space:nowrap}
 .done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
 .done-tbl .dt-act{width:44px;text-align:right;white-space:nowrap}
-.ari{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.ari{display:flex;align-items:center;gap:2px;flex-shrink:0;opacity:0;transition:opacity .12s}.ar:hover .ari,.ar:focus-within .ari,.ar.ao .ari{opacity:1}
 .aw-inline{font-size:9px;color:#64B5D0;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#64B5D0;font-style:italic;outline:none;width:80px}
 .adi{border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid #1E3050;color:#64748B;background:#152236}
@@ -177,6 +177,10 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active,.bprio.lvl1{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}.bprio.lvl2{color:#F87171;border-color:#F87171;background:rgba(248,113,113,.14)}
 .bud{background:#334155;color:#94A3B8}
 .btr{background:transparent;color:#334155;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
+.cbx{width:19px;height:19px;border-radius:50%;border:1.6px solid #3A4D68;background:transparent;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;color:transparent;transition:all .15s}
+.cbx:hover{border-color:#22C55E;color:#22C55E;box-shadow:0 0 9px rgba(34,197,94,.45)}
+.cbx svg{width:11px;height:11px}
+.ar.flash-done .cbx{background:#22C55E;border-color:#22C55E;color:#fff;box-shadow:0 0 14px rgba(34,197,94,.7)}
 
 /* Detail */
 .adl{display:none;padding:4px 0 0 20px;animation:slideDown .2s ease}
@@ -761,18 +765,18 @@ function rA(a,pid,o){
   /* Buttons */
   const prioLvl=a.priority||0;
   const prioBtn=d?"":`<button class="bi bprio ${prioLvl>=2?"lvl2":prioLvl>=1?"lvl1":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Priorité — clic pour changer (haute / très haute / aucune)">${prioLvl>=2?"!!":"!"}</button>`;
-  const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
   const pc=pCol(pid);
   return`<div id="ar_${a.id}" class="ar ${uc} ${prioLvl>=2?"prio2":prioLvl>=1?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
+    <button class="cbx" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>
     <span class="ac">${I.chev}</span>
     <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${pc};margin-right:3px;flex-shrink:0"></span>${pLabel}</div>`:""}${w?`<div class="a-wait">${I.pause}<input value="${esc(a.waitReason)}" placeholder="Motif de l'attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></div>`:""}${isInbox?`<div class="a-tri">${triNew===a.id?`<input class="tri-new" placeholder="Nom du nouveau projet…" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();triCreate('${pid}','${a.id}',this.value)}else if(event.key==='Escape'){triNew=null;render()}"><span class="tri-x" onclick="event.stopPropagation();triNew=null;render()" title="Annuler">×</span>`:`<select class="tri-sel" onclick="event.stopPropagation()" onchange="triSel('${pid}','${a.id}',this.value)"><option value="">Classer dans…</option>${S.projects.filter(x=>x.id!=='__inbox').sort((p1,p2)=>pN(p1).localeCompare(pN(p2))).map(x=>`<option value="${x.id}">${esc(pN(x))}</option>`).join('')}<option value="__new">＋ Nouveau projet…</option></select>`}</div>`:""}</div>
     ${!d?`<span class="dchip ${a.scheduledDate?"set":""}" title="Planifier — à faire le" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.scheduledDate||""}" onchange="uaSD('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.scheduledDate?`color:${sdc}`:""}">${I.cal}${a.scheduledDate?`<span class="dchip-lbl">${sdl}</span>`:""}</span></span>`:""}
     <span class="dchip ${a.deadline?"set":""}" title="Échéance" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.deadline?`color:${adc}`:""}">${I.flag}${a.deadline?`<span class="dchip-lbl">${adl}</span>`:""}</span></span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
-    <div class="ari">${prioBtn}${pauseBtn}${doneBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
+    <div class="ari">${prioBtn}${pauseBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
   </div>
   <div class="adl" onclick="event.stopPropagation()">
     <div class="ab">${fmB(pid,a.id)}<div class="atx" contenteditable="true" data-pid="${pid}" data-aid="${a.id}" data-placeholder="Notes…">${a.text||""}</div></div>
