@@ -69,7 +69,8 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar.ec{background:rgba(92,184,240,.05);border-color:rgba(92,184,240,.1)}
 .ar.ec .as{color:#E2E8F0}
 .ar.prio{border-left:3px solid #F59E0B;border-radius:0 6px 6px 0}.ar.prio .as{color:#FBBF24}
-.ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg{color:#2A6A80}
+.ar.prio2{border-left:3px solid #F87171;border-radius:0 6px 6px 0}.ar.prio2 .as{color:#FCA5A5}
+.ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg,.ar.wt .asd,.ar.wt .asdtg{color:#2A6A80}.ar.wt .sdwrap svg{color:#2A6A80;opacity:.5}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
 /* Task drop zones in Par tâche view */
@@ -138,13 +139,26 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .aw-inline{font-size:9px;color:#64B5D0;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#64B5D0;font-style:italic;outline:none;width:80px}
 .adi{border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid #1E3050;color:#64748B;background:#152236}
-.adtg{font-weight:700;font-size:7px;flex-shrink:0}
+.adtg{font-weight:700;font-size:7px;flex-shrink:0;display:inline-block;width:24px;text-align:left;white-space:nowrap;overflow:hidden}
+.sdwrap{display:inline-flex;align-items:center;gap:2px;flex-shrink:0}
+.sdwrap svg{color:#38BDF8;opacity:.7;flex-shrink:0}
+.asd{border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid rgba(56,189,248,.4);color:#38BDF8;background:transparent;box-shadow:inset 0 0 0 1px rgba(56,189,248,.18)}
+.asdtg{font-weight:700;font-size:7px;flex-shrink:0;display:inline-block;width:24px;text-align:left;white-space:nowrap;overflow:hidden}
+.plan-hd{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:8px 0 3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:rgba(148,163,184,.05);border-radius:0 4px 4px 0}
+.plan-hd .plan-ct{font-size:9px;font-weight:600;color:#94A3B8;background:rgba(100,116,139,.18);padding:0 6px;border-radius:8px}
+.tri-sel{font-size:9px;font-family:inherit;background:#152236;color:#F59E0B;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:1px 4px;outline:none;cursor:pointer;max-width:130px;flex-shrink:0}
+.ga-search-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:0 8px;background:#152236;border:1px solid #1E3050;border-radius:6px}
+.ga-search-row svg{color:#475569;flex-shrink:0}
+.ga-search-row:focus-within{border-color:#38BDF8}.ga-search-row:focus-within svg{color:#38BDF8}
+.ga-search{flex:1;background:transparent;border:none;padding:6px 0;font-size:11px;font-family:inherit;color:#CBD5E1;outline:none}
+.ga-search::placeholder{color:#475569}
+.ga-search-clear{cursor:pointer;color:#64748B;font-size:13px;line-height:1;padding:2px 4px;flex-shrink:0}.ga-search-clear:hover{color:#F87171}
 .ati{width:36px;border:1px solid #1E3050;border-radius:3px;padding:1px 2px;font-size:8px;font-family:inherit;font-weight:600;background:#152236;color:#5CB8F0;outline:none;text-align:right}
 .atl{font-size:7px;color:#4B6480}
 .bi{border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
 .bdn{background:#22C55E;color:#fff}.bdn:hover{background:#16A34A}
 .bwt{background:transparent;color:#4B6480;border:1px solid #1E3050}.bwt:hover{color:#64B5D0}.bwt.active{color:#64B5D0;border-color:#64B5D0;background:rgba(100,181,208,.1)}
-.bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}
+.bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active,.bprio.lvl1{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}.bprio.lvl2{color:#F87171;border-color:#F87171;background:rgba(248,113,113,.14)}
 .bud{background:#334155;color:#94A3B8}
 .btr{background:transparent;color:#334155;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
 
@@ -246,7 +260,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
   .at{flex-wrap:wrap;gap:4px}
   .as{font-size:12px}
   .bi{width:26px;height:26px;font-size:13px}
-  .adi{font-size:10px;padding:2px 6px}
+  .adi,.asd{font-size:10px;padding:2px 6px}
   .ati{width:44px;font-size:10px;padding:2px 4px}
   .adl{padding:6px 0 0 12px}
   .atx{font-size:13px;line-height:1.5}
@@ -561,7 +575,7 @@ async function loadFromCloud(){
         if(!a.deadline)a.deadline="";if(!a.waitReason)a.waitReason="";if(!a.title)a.title="";
         if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||"h";a.timeH=tu==="m"?tv/60:tu==="j"?tv*8:tv;delete a.timeVal;delete a.timeUnit}
         if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate="";if(a.taskId===undefined)a.taskId="";
-        delete a.blockedBy;delete a.indent;if(a.priority===undefined)a.priority=false;if(a.paused===undefined)a.paused=a.status==='waiting';
+        delete a.blockedBy;delete a.indent;if(a.priority===undefined||a.priority===false)a.priority=0;else if(a.priority===true)a.priority=2;if(a.paused===undefined)a.paused=a.status==='waiting';
       });
     });
   }catch(e){
@@ -596,20 +610,24 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"list",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"plan",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
 
-function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.priority===undefined)a.priority=false;delete a.indent;delete a.blockedBy})})}
+function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(a.scheduledDate===undefined)a.scheduledDate='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.priority===undefined||a.priority===false)a.priority=0;else if(a.priority===true)a.priority=2;delete a.indent;delete a.blockedBy})})}
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#5CB8F0","#22C55E","#F59E0B","#A78BFA","#F87171","#34D399","#FB923C","#60A5FA","#E879F9","#FBBF24"];
-function pCol(pid){const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
+function pCol(pid){if(pid==="__inbox")return"#F59E0B";const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
 function dll(d){const v=du(d);if(v===null)return"";if(v<0)return Math.abs(v)+"j";if(v===0)return"Auj.";return v+"j"}
+// ▼ scc / scl / schedBucket — date planifiée (scheduledDate), distincte de la deadline. scc=couleur badge, scl=libellé court, schedBucket=tranche pour la future vue Aujourd'hui.
+function scc(d){const v=du(d);return v===null?"#64748B":v<0?"#FBBF24":"#38BDF8"}
+function scl(d){const v=du(d);if(v===null)return"";if(v===0)return"Auj.";if(v===1)return"Dem.";return new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})}
+function schedBucket(a){if(a.status==='done')return'done';if(a.paused)return'waiting';const v=du(a.scheduledDate);if(v===null)return'none';if(v<0)return'overdue';if(v===0)return'today';if(v===1)return'tomorrow';if(v<=7)return'week';return'later'}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function fp(id){return S.projects.find(p=>p.id===id)}
 function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
@@ -617,7 +635,7 @@ function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.act
 function pN(p){return p?p.name||"Sans nom":"?"}
 function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-const I={plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`};
+const I={search:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,cal:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="3" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 6.5h11M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`};
 
 /* ── Drag ── */
 let dT=null,dI=null,dP=null;
@@ -652,9 +670,13 @@ function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.cu
 function togD(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-done');setTimeout(()=>{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()},300)}else{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()}}
 function togW(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-wt');setTimeout(()=>{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()},250)}else{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()}}
 function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
-function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=!a.priority;save();render()}
+function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=((a.priority||0)+1)%3;save();render()}
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
+function uaSD(pid,aid,v){const a=fa(pid,aid);if(a){a.scheduledDate=v;save();render()}}
+// ▼ getInbox / moveActToProject — capture sans projet : projet réservé "__inbox" (À trier), créé à la volée, auto-purgé quand vide (cf. rGT). moveActToProject = triage d'une action vers un vrai projet.
+function getInbox(){let p=fp("__inbox");if(!p){p={id:"__inbox",number:0,name:"À trier",deadline:"",actions:[],tasks:[]};S.projects.unshift(p)}return p}
+function moveActToProject(curPid,aid,newPid){if(!newPid)return;const src=fp(curPid),dst=fp(newPid);if(!src||!dst)return;const i=src.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=src.actions.splice(i,1);m.taskId="";dst.actions.push(m);save();render()}
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
 function delP(id){const p=fp(id);if(!p)return;/* Archive done actions with project name */p.actions.filter(a=>a.status==="done").forEach(a=>{S.archive.push({...a,pId:id,pName:pN(p)})});S.trash.push({type:"project",data:JSON.parse(JSON.stringify(p)),date:Date.now()});S.projects=S.projects.filter(x=>x.id!==id);save();render()}
 function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.id===aid);if(!a)return;S.trash.push({type:"action",data:JSON.parse(JSON.stringify(a)),pid,pn:pN(p),date:Date.now()});p.actions=p.actions.filter(x=>x.id!==aid);save();render()}
@@ -679,7 +701,7 @@ function tDE(){tdPid=null;tdTid=null;document.querySelectorAll('.tg').forEach(el
 function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefault();e.stopPropagation();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('tg-dot','tg-dob');el.classList.add(e.clientY<r.top+r.height/2?'tg-dot':'tg-dob')}
 function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
 function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
-function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.ex[n.id]=true;save();render()}
 
 /* ── Format ── */
 function fC(c,v){document.execCommand(c,false,v||null);sAE()}
@@ -703,24 +725,28 @@ function fmB(pid,aid){let fo=FN.map(f=>`<option value="${f.v}">${f.n}</option>`)
 function rA(a,pid,o){
   const st=getStatus(a);const d=st==="done",w=st==="wt",ec=st==="ec";
   const uc=d?"dn":w?"wt":"ec";
-  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;const showTask=o&&o.stk;
+  const p=fp(pid);const sp=o&&o.sp;const nd=o&&o.nd;const showTask=o&&o.stk;const isInbox=pid==="__inbox";
   const adc=dcc(a.deadline),adl=dll(a.deadline);
+  const sdc=scc(a.scheduledDate),sdl=scl(a.scheduledDate);
   const pLabel=sp?esc(pN(p)):"";
   const tkBreadcrumb=showTask?tName(pid,a.taskId):"";
   /* Buttons */
-  const prioBtn=d?"":`<button class="bi bprio ${a.priority?"active":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Prioritaire">!</button>`;
+  const prioLvl=a.priority||0;
+  const prioBtn=d?"":`<button class="bi bprio ${prioLvl>=2?"lvl2":prioLvl>=1?"lvl1":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Priorité — clic pour changer (haute / très haute / aucune)">${prioLvl>=2?"!!":"!"}</button>`;
   const doneBtn=d?`<button class="bi bud" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Rouvrir">${I.undo}</button>`:`<button class="bi bdn" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
   const pc=pCol(pid);
-  return`<div id="ar_${a.id}" class="ar ${uc} ${a.priority?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  return`<div id="ar_${a.id}" class="ar ${uc} ${prioLvl>=2?"prio2":prioLvl>=1?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
     <span class="ac">${I.chev}</span>
     <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${pc};margin-right:3px;flex-shrink:0"></span>${pLabel}</div>`:""}</div>
+    ${isInbox?`<select class="tri-sel" onclick="event.stopPropagation()" onchange="moveActToProject('${pid}','${a.id}',this.value)"><option value="">Classer dans…</option>${S.projects.filter(x=>x.id!=='__inbox').map(x=>`<option value="${x.id}">${esc(pN(x))}</option>`).join('')}</select>`:""}
     ${w?`<span class="aw-inline"><input value="${esc(a.waitReason)}" placeholder="Motif attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></span>`:""}
-    <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}">
-    ${adl?`<span class="adtg" style="color:${adc}">${adl}</span>`:""}
-    <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
+    ${!d?`<span class="sdwrap" title="Planifier — à faire le" onclick="event.stopPropagation()">${I.cal}<input type="date" class="asd" value="${a.scheduledDate||""}" onchange="uaSD('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${sdc}"><span class="asdtg" style="color:${sdc}">${sdl||""}</span></span>`:""}
+    <input type="date" class="adi" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" style="color:${adc}" title="Échéance">
+    <span class="adtg" style="color:${adc}">${adl||""}</span>
+    <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
     <div class="ari">${prioBtn}${pauseBtn}${doneBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
   </div>
   <div class="adl" onclick="event.stopPropagation()">
@@ -779,10 +805,13 @@ return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)
 
 /* ── Global tab ── */
 function rGT(){
+  /* Auto-purge de l'inbox vide */
+  const _ib=fp("__inbox");if(_ib&&!_ib.actions.length)S.projects=S.projects.filter(p=>p.id!=="__inbox");
   /* Inline add with autocomplete */
   let h=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
   /* View toggle + filters */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv==="list"?"on":""}" onclick="S.gv='list';render()">Liste</button><button class="vtb ${S.gv==="plan"?"on":""}" onclick="S.gv='plan';render()">Planning</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
+  h+=`<div class="ga-search-row">${I.search}<input id="ga-search" class="ga-search" placeholder="Rechercher (action, note, projet)…" value="${esc(S.gQ||"")}" oninput="S.gQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('ga-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})">${S.gQ?`<span class="ga-search-clear" onclick="S.gQ='';render()" title="Effacer">×</span>`:""}</div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
@@ -792,7 +821,8 @@ function rGT(){
   /* Apply status filter */
   let filtered=all;
   if(S.gFilter==="prio"){filtered=all.filter(a=>a.priority)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
-  if(!filtered.length){h+=`<div class="es">Aucune action avec ce filtre.</div>`;return h}
+  const _gq=(S.gQ||"").toLowerCase().trim();if(_gq){filtered=filtered.filter(a=>(a.title||"").toLowerCase().includes(_gq)||(a.text||"").replace(/<[^>]*>/g," ").toLowerCase().includes(_gq)||pN(fp(a.pId)).toLowerCase().includes(_gq))}
+  if(!filtered.length){h+=`<div class="es">${_gq?"Aucun résultat pour cette recherche.":"Aucune action avec ce filtre."}</div>`;return h}
   if(S.gv==="task"){
     /* Group by project, then by task within each project */
     const projIds=[...new Set(filtered.map(a=>a.pId))].sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b));
@@ -815,12 +845,18 @@ function rGT(){
         h+=`</div>`;
       });
     });
+  }else if(S.gv==="plan"){
+    /* Plan view: group by scheduled-date bucket (schedBucket) */
+    const BK=[{k:'overdue',l:'En retard',c:'#F87171'},{k:'today',l:"Aujourd'hui",c:'#38BDF8'},{k:'tomorrow',l:'Demain',c:'#22C55E'},{k:'week',l:'Cette semaine',c:'#A78BFA'},{k:'later',l:'Plus tard',c:'#64748B'},{k:'waiting',l:'En attente',c:'#F59E0B'},{k:'none',l:'Non planifié',c:'#475569'}];
+    const grp={};filtered.forEach(a=>{const b=schedBucket(a);(grp[b]=grp[b]||[]).push(a)});
+    BK.forEach(bk=>{const items=grp[bk.k];if(!items||!items.length)return;items.sort((a,b)=>{const da=a.scheduledDate||"",db=b.scheduledDate||"";if(da!==db){if(!da)return 1;if(!db)return -1;return da.localeCompare(db)}return S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id)});h+=`<div class="plan-hd" style="border-left:3px solid ${bk.c}"><span style="color:${bk.c}">${bk.l}</span><span class="plan-ct">${items.length}</span></div>`;items.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true,nd:true})})});
   }else{
-    h+=`<div class="sort-row"><span class="sort-lbl">Tri :</span><button class="sort-btn ${S.gSort==="deadline"?"on":""}" onclick="S.gSort=S.gSort==='deadline'?'':'deadline';render()">Deadline</button><button class="sort-btn ${S.gSort==="project"?"on":""}" onclick="S.gSort=S.gSort==='project'?'':'project';render()">Projet</button></div>`;
+    h+=`<div class="sort-row"><span class="sort-lbl">Tri :</span><button class="sort-btn ${S.gSort==="smart"?"on":""}" onclick="S.gSort='smart';render()">Intelligent</button><button class="sort-btn ${S.gSort==="deadline"?"on":""}" onclick="S.gSort='deadline';render()">Deadline</button><button class="sort-btn ${S.gSort==="project"?"on":""}" onclick="S.gSort='project';render()">Projet</button><button class="sort-btn ${S.gSort===""?"on":""}" onclick="S.gSort='';render()" title="Ordre manuel (glisser-déposer)">Manuel</button></div>`;
     let ordered=[];S.globalOrder.forEach(id=>{const a=filtered.find(x=>x.id===id);if(a)ordered.push(a)});
-    if(S.gSort==="deadline"){ordered.sort((a,b)=>{if(!a.deadline&&!b.deadline)return 0;if(!a.deadline)return 1;if(!b.deadline)return -1;return a.deadline.localeCompare(b.deadline)})}
+    if(S.gSort==="smart"){const dv=a=>a.deadline||a.scheduledDate||"9999-99-99";ordered.sort((a,b)=>{if(!!a.paused!==!!b.paused)return a.paused?1:-1;const pa=a.priority||0,pb=b.priority||0;if(pa!==pb)return pb-pa;const da=dv(a),db=dv(b);if(da!==db)return da.localeCompare(db);return S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id)})}
+    else if(S.gSort==="deadline"){ordered.sort((a,b)=>{if(!a.deadline&&!b.deadline)return 0;if(!a.deadline)return 1;if(!b.deadline)return -1;return a.deadline.localeCompare(b.deadline)})}
     else if(S.gSort==="project"){ordered.sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a.pId),bi=S.projects.findIndex(p=>p.id===b.pId);return ai-bi})}
-    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true})});
+    ordered.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true,nd:S.gSort!==""})});
   }
   return h}
 
@@ -832,7 +868,7 @@ function acFilter(wid,rawQ,type){
   const list=document.querySelector('#'+wid+' .ac-list');if(!list)return;
   const q=rawQ.toLowerCase().trim();let html="";
   if(type==='proj'){
-    S.projects.filter(p=>!q||pN(p).toLowerCase().includes(q)).forEach(p=>{
+    S.projects.filter(p=>p.id!=='__inbox'&&(!q||pN(p).toLowerCase().includes(q))).forEach(p=>{
       html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
     if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
   }else{
@@ -856,8 +892,8 @@ function acCreate(type,name){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}});
 
-function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:false};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
-function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:false};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
+function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=getInbox()}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
 function rDN(){
@@ -1905,7 +1941,7 @@ function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:
 function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
 function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
-function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false,priority:false};p.actions.push(n);S.ex[n.id]=true;save();render()}
+function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.ex[n.id]=true;save();render()}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
