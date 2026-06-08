@@ -214,6 +214,8 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ug.dz{background:rgba(56,189,248,.05);border-radius:6px}
 .pgl{font-size:9px;font-weight:700;color:#38BDF8;padding:4px 0 1px;display:flex;align-items:center;gap:4px}
 .pgl .pgln{flex:1;height:1px;background:#2A3A52}
+.pgl-name{border:1px solid transparent;background:transparent;font-size:9px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none;padding:1px 4px;border-radius:4px;width:240px;max-width:65%}.pgl-name:hover,.pgl-name:focus{border-color:#1E3050;background:#152236}.pgl-name::placeholder{color:#334155}
+.dn-date{border:1px solid transparent;background:transparent;border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:700;color:#64748B;outline:none;cursor:pointer;flex-shrink:0}.dn-date:hover,.dn-date:focus{border-color:#1E3050;background:#152236}
 .cv{transition:transform .15s;display:inline-flex}.cv.op{transform:rotate(90deg)}
 
 /* Sub-views */
@@ -697,6 +699,7 @@ function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=((a.priori
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
 function uaSD(pid,aid,v){const a=fa(pid,aid);if(a){a.scheduledDate=v;save();render()}}
+function uaDD(pid,aid,v){const a=fa(pid,aid);if(a){a.doneDate=v;save();render()}}
 // ▼ getInbox / moveActToProject — capture sans projet : projet réservé "__inbox" (À trier), créé à la volée, auto-purgé quand vide (cf. rGT). moveActToProject = triage d'une action vers un vrai projet.
 function getInbox(){let p=fp("__inbox");if(!p){p={id:"__inbox",number:0,name:"À trier",deadline:"",actions:[],tasks:[]};S.projects.unshift(p)}return p}
 function moveActToProject(curPid,aid,newPid){if(!newPid)return;const src=fp(curPid),dst=fp(newPid);if(!src||!dst)return;const i=src.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=src.actions.splice(i,1);m.taskId="";dst.actions.push(m);save();render()}
@@ -835,7 +838,7 @@ function rGT(){
   if(S.gSection==='done')return h+rDN();
   if(S.gSection==='time')return h+rTM();
   /* Inline add with autocomplete */
-  h+=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
+  h+=`<div class="add-row"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><button onclick="qaGlobal()">＋</button></div>`;
   /* Filtre statut */
   h+=`<div style="display:flex;gap:4px;margin-bottom:6px;justify-content:flex-end;align-items:center"><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
   h+=`<div class="ga-search-row">${I.search}<input id="ga-search" class="ga-search" placeholder="Rechercher (action, note, projet)…" value="${esc(S.gQ||"")}" oninput="S.gQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('ga-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})">${S.gQ?`<span class="ga-search-clear" onclick="S.gQ='';render()" title="Effacer">×</span>`:""}</div>`;
@@ -856,7 +859,7 @@ function rGT(){
     projIds.forEach(pid=>{
       const p=fp(pid);if(!p)return;
       const pActs=filtered.filter(a=>a.pId===pid);
-      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px"><span>${esc(pN(p))}</span><div class="pgln"></div></div>`;
+      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px">${pid==='__inbox'?`<span>${esc(pN(p))}</span>`:`<input class="pgl-name" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<div class="pgln"></div></div>`;
       /* Standalone actions (no task) */
       const standalone=pActs.filter(a=>!a.taskId);
       standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
@@ -961,7 +964,7 @@ function rDoneRow(a){
     <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
     ${S.doneView==="date"?`<span class="a-tk" style="color:#4B6480">${esc(pName)} ›</span>`:""}
     <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
-    <span class="adtg" style="color:#64748B">${a.doneDate||""}</span>
+    ${isArchived?`<span class="adtg" style="color:#64748B">${a.doneDate||""}</span>`:`<input type="date" class="dn-date" value="${a.doneDate||""}" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" onchange="uaDD('${a.pId}','${a.id}',this.value)" title="Date de validation">`}
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
     <div class="ari">${delBtn}</div>
   </div>
