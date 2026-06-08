@@ -94,7 +94,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .a-tk{font-size:9px;color:#5CB8F0;font-weight:700;white-space:nowrap;flex-shrink:0}
 .a-sub{font-size:7.5px;color:#4B6480;font-weight:500;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
 .a-wait{width:100%;display:flex;align-items:center;gap:3px;margin-top:1px}.a-wait svg{color:#F59E0B;opacity:.85;flex-shrink:0}.a-wait input{flex:1;min-width:0;border:none;background:transparent;font-family:inherit;font-size:8.5px;color:#FBBF24;font-style:italic;outline:none}
-.a-tri{width:100%;margin-top:2px}
+.a-tri{width:100%;margin-top:2px;display:flex;align-items:center;gap:4px}
+.tri-new{font-size:9px;font-family:inherit;background:#152236;color:#38BDF8;border:1px solid rgba(56,189,248,.5);border-radius:4px;padding:2px 6px;outline:none;max-width:160px}.tri-new::placeholder{color:#475569}
+.tri-x{cursor:pointer;color:#64748B;font-size:12px;line-height:1}.tri-x:hover{color:#F87171}
 /* Filters */
 .flt-wrap{position:relative;display:inline-flex}
 .flt-btn{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #1E3050;background:transparent;color:#5CB8F0;transition:all .12s;display:flex;align-items:center;gap:3px}
@@ -624,7 +626,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},gv:"plan",wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"todo",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -660,8 +662,8 @@ function pDL(e){e.currentTarget.classList.remove('dot','dob')}
 function pDD(e,tid){e.preventDefault();e.currentTarget.classList.remove('dot','dob');if(dT==="project"&&dI&&dI!==tid){const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;S.projects.splice(ti,0,m);save();render()}else if(dT==="action"&&dI&&dP!==tid){mvAP(dP,dI,tid)}}
 function aDS(e,pid,aid){dT="action";dI=aid;dP=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",aid);document.body.classList.add('dragging-active');const ar=e.target.closest('.ar');if(ar){const ghost=ar.cloneNode(true);ghost.style.cssText="position:fixed;top:-999px;opacity:.7;width:"+ar.offsetWidth+"px;pointer-events:none";document.body.appendChild(ghost);e.dataTransfer.setDragImage(ghost,20,15);setTimeout(()=>{document.body.removeChild(ghost);ar.classList.add('dragging')},0)}}
 function aDE(){dT=null;dI=null;dP=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.ar').forEach(el=>el.classList.remove('dragging','dot','dob'));document.querySelectorAll('.tg,.tk-zone,.plan-bucket').forEach(el=>{el.classList.remove('dz','drop-target','drop-hi')})}
-function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob');/* Highlight parent task zone */if(S.gv==="task"){const zone=el.closest('.tk-zone');if(zone)zone.classList.add('drop-hi')}}
-function aDL(e){e.currentTarget.classList.remove('dot','dob');if(S.gv==="task"){const zone=e.currentTarget.closest('.tk-zone');if(zone){const rel=e.relatedTarget;if(!rel||!zone.contains(rel))zone.classList.remove('drop-hi')}}}
+function aDO(e,pid,aid){if(dT!=="action"||dI===aid)return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob');/* Highlight parent task zone */if(S.gSection==="task"){const zone=el.closest('.tk-zone');if(zone)zone.classList.add('drop-hi')}}
+function aDL(e){e.currentTarget.classList.remove('dot','dob');if(S.gSection==="task"){const zone=e.currentTarget.closest('.tk-zone');if(zone){const rel=e.relatedTarget;if(!rel||!zone.contains(rel))zone.classList.remove('drop-hi')}}}
 function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.currentTarget;dropEl.classList.remove('dot','dob');
   if(dT!=="action"||!dI||dI===tid)return;
   if(S.tab==="global"){
@@ -671,7 +673,7 @@ function aDD(e,pid,tid){e.preventDefault();e.stopPropagation();const dropEl=e.cu
     if(e.clientY>=dropEl.getBoundingClientRect().top+dropEl.getBoundingClientRect().height/2)ti++;
     S.globalOrder.splice(ti,0,dI);
     /* In task view, also move to same task as target */
-    if(S.gv==="task"){const src=findActionById(dI),tgt=findActionById(tid);if(src&&tgt)src.taskId=tgt.taskId}
+    if(S.gSection==="task"){const src=findActionById(dI),tgt=findActionById(tid);if(src&&tgt)src.taskId=tgt.taskId}
     /* In plan view, adopt the target action's day + paused state (reschedule onto its bucket) */
     else{const src=findActionById(dI),tgt=findActionById(tid);if(src&&tgt){src.scheduledDate=tgt.scheduledDate||"";src.paused=!!tgt.paused}}
     save();render();return;
@@ -698,6 +700,8 @@ function uaSD(pid,aid,v){const a=fa(pid,aid);if(a){a.scheduledDate=v;save();rend
 // ▼ getInbox / moveActToProject — capture sans projet : projet réservé "__inbox" (À trier), créé à la volée, auto-purgé quand vide (cf. rGT). moveActToProject = triage d'une action vers un vrai projet.
 function getInbox(){let p=fp("__inbox");if(!p){p={id:"__inbox",number:0,name:"À trier",deadline:"",actions:[],tasks:[]};S.projects.unshift(p)}return p}
 function moveActToProject(curPid,aid,newPid){if(!newPid)return;const src=fp(curPid),dst=fp(newPid);if(!src||!dst)return;const i=src.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=src.actions.splice(i,1);m.taskId="";dst.actions.push(m);save();render()}
+function triSel(curPid,aid,val){if(val==='__new'){triNew=aid;render();requestAnimationFrame(()=>{const el=document.querySelector('.tri-new');if(el)el.focus()})}else{triNew=null;moveActToProject(curPid,aid,val)}}
+function triCreate(curPid,aid,name){const n=(name||"").trim();if(!n){triNew=null;render();return}const p={id:gid(),number:1,name:n,deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;triNew=null;moveActToProject(curPid,aid,p.id)}
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
 function delP(id){const p=fp(id);if(!p)return;/* Archive done actions with project name */p.actions.filter(a=>a.status==="done").forEach(a=>{S.archive.push({...a,pId:id,pName:pN(p)})});S.trash.push({type:"project",data:JSON.parse(JSON.stringify(p)),date:Date.now()});S.projects=S.projects.filter(x=>x.id!==id);save();render()}
 function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.id===aid);if(!a)return;S.trash.push({type:"action",data:JSON.parse(JSON.stringify(a)),pid,pn:pN(p),date:Date.now()});p.actions=p.actions.filter(x=>x.id!==aid);save();render()}
@@ -761,7 +765,7 @@ function rA(a,pid,o){
   <div class="at" onclick="togX('${a.id}')">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
     <span class="ac">${I.chev}</span>
-    <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${pc};margin-right:3px;flex-shrink:0"></span>${pLabel}</div>`:""}${w?`<div class="a-wait">${I.pause}<input value="${esc(a.waitReason)}" placeholder="Motif de l'attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></div>`:""}${isInbox?`<div class="a-tri"><select class="tri-sel" onclick="event.stopPropagation()" onchange="moveActToProject('${pid}','${a.id}',this.value)"><option value="">Classer dans…</option>${S.projects.filter(x=>x.id!=='__inbox').map(x=>`<option value="${x.id}">${esc(pN(x))}</option>`).join('')}</select></div>`:""}</div>
+    <div class="a-info">${tkBreadcrumb?`<span class="a-tk">${esc(tkBreadcrumb)} ›</span>`:""}<input class="as" value="${esc(a.title)}" placeholder="Action…" onclick="event.stopPropagation()" oninput="uaT('${pid}','${a.id}',this.value)">${pLabel?`<div class="a-sub"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${pc};margin-right:3px;flex-shrink:0"></span>${pLabel}</div>`:""}${w?`<div class="a-wait">${I.pause}<input value="${esc(a.waitReason)}" placeholder="Motif de l'attente…" oninput="uWR('${pid}','${a.id}',this.value)" onclick="event.stopPropagation()"></div>`:""}${isInbox?`<div class="a-tri">${triNew===a.id?`<input class="tri-new" placeholder="Nom du nouveau projet…" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();triCreate('${pid}','${a.id}',this.value)}else if(event.key==='Escape'){triNew=null;render()}"><span class="tri-x" onclick="event.stopPropagation();triNew=null;render()" title="Annuler">×</span>`:`<select class="tri-sel" onclick="event.stopPropagation()" onchange="triSel('${pid}','${a.id}',this.value)"><option value="">Classer dans…</option>${S.projects.filter(x=>x.id!=='__inbox').sort((p1,p2)=>pN(p1).localeCompare(pN(p2))).map(x=>`<option value="${x.id}">${esc(pN(x))}</option>`).join('')}<option value="__new">＋ Nouveau projet…</option></select>`}</div>`:""}</div>
     ${!d?`<span class="dchip ${a.scheduledDate?"set":""}" title="Planifier — à faire le" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.scheduledDate||""}" onchange="uaSD('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.scheduledDate?`color:${sdc}`:""}">${I.cal}${a.scheduledDate?`<span class="dchip-lbl">${sdl}</span>`:""}</span></span>`:""}
     <span class="dchip ${a.deadline?"set":""}" title="Échéance" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.deadline?`color:${adc}`:""}">${I.flag}${a.deadline?`<span class="dchip-lbl">${adl}</span>`:""}</span></span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
@@ -825,14 +829,15 @@ return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)
 function rGT(){
   /* Auto-purge de l'inbox vide */
   const _ib=fp("__inbox");if(_ib&&!_ib.actions.length)S.projects=S.projects.filter(p=>p.id!=="__inbox");
-  /* Sous-onglets : À faire / Terminé / Temps */
-  let h=`<div class="subtab-bar"><div class="subtab ${(S.gSection||'todo')==='todo'?'on':''}" onclick="S.gSection='todo';render()">À faire</div><div class="subtab ${S.gSection==='done'?'on':''}" onclick="S.gSection='done';render()">Terminé</div><div class="subtab ${S.gSection==='time'?'on':''}" onclick="S.gSection='time';render()">Temps</div></div>`;
+  /* Sous-onglets : Planning / Projets / Terminé / Temps */
+  const sect=S.gSection||'plan';
+  let h=`<div class="subtab-bar"><div class="subtab ${sect==='plan'?'on':''}" onclick="S.gSection='plan';render()">Planning</div><div class="subtab ${sect==='task'?'on':''}" onclick="S.gSection='task';render()">Projets</div><div class="subtab ${sect==='done'?'on':''}" onclick="S.gSection='done';render()">Terminé</div><div class="subtab ${sect==='time'?'on':''}" onclick="S.gSection='time';render()">Temps</div></div>`;
   if(S.gSection==='done')return h+rDN();
   if(S.gSection==='time')return h+rTM();
   /* Inline add with autocomplete */
   h+=`<div class="add-row"><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><button onclick="qaGlobal()">＋</button></div>`;
-  /* View toggle + filters */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;align-items:center"><div class="vt" style="margin:0;flex:1"><button class="vtb ${S.gv!=="task"?"on":""}" onclick="S.gv='plan';render()">Planning</button><button class="vtb ${S.gv==="task"?"on":""}" onclick="S.gv='task';render()">Par tâche</button></div><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
+  /* Filtre statut */
+  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;justify-content:flex-end;align-items:center"><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
   h+=`<div class="ga-search-row">${I.search}<input id="ga-search" class="ga-search" placeholder="Rechercher (action, note, projet)…" value="${esc(S.gQ||"")}" oninput="S.gQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('ga-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})">${S.gQ?`<span class="ga-search-clear" onclick="S.gQ='';render()" title="Effacer">×</span>`:""}</div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
@@ -845,7 +850,7 @@ function rGT(){
   if(S.gFilter==="prio"){filtered=all.filter(a=>a.priority)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
   const _gq=(S.gQ||"").toLowerCase().trim();if(_gq){filtered=filtered.filter(a=>(a.title||"").toLowerCase().includes(_gq)||(a.text||"").replace(/<[^>]*>/g," ").toLowerCase().includes(_gq)||pN(fp(a.pId)).toLowerCase().includes(_gq))}
   if(!filtered.length){h+=`<div class="es">${_gq?"Aucun résultat pour cette recherche.":"Aucune action avec ce filtre."}</div>`;return h}
-  if(S.gv==="task"){
+  if(S.gSection==="task"){
     /* Group by project, then by task within each project */
     const projIds=[...new Set(filtered.map(a=>a.pId))].sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b));
     projIds.forEach(pid=>{
@@ -882,6 +887,7 @@ function rGT(){
 
 /* ── Autocomplete engine ── */
 let _acSel={proj:"",projId:"",task:"",taskId:""};
+let triNew=null; // aid d'une action "À trier" en cours de création de projet (transient)
 function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
 function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}
 function acFilter(wid,rawQ,type){
