@@ -1272,8 +1272,9 @@ function plPickSupplierEnter(){
 
 // ▼ Cascade sous-catégorie — recherche live filtrée par fournisseur, création inline. Scopée par ligne (lineId).
 function plSearchProduct(lineId,q){const l=plGetLine(lineId);if(!l)return;l.productQuery=q;plRenderModal()}
-function plPickProduct(lineId,name){const l=plGetLine(lineId);if(!l)return;l.product=name;l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plClearProduct(lineId){const l=plGetLine(lineId);if(!l)return;l.product="";l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+/* Changer/effacer la sous-cat NE vide PLUS les valeurs : les valeurs sont clé→id de champ ; si on re-choisit la même sous-cat elles réapparaissent (sinon elles restent inertes, non affichées). */
+function plPickProduct(lineId,name){const l=plGetLine(lineId);if(!l)return;l.product=name;l.productQuery="";if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plClearProduct(lineId){const l=plGetLine(lineId);if(!l)return;l.product="";l.productQuery="";if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
 function plCreateAndPickProduct(lineId,name){
   if(!plModalState||!plModalState.supplierId)return;
   name=(name||"").trim();
