@@ -51,6 +51,7 @@ Pour pousser sans clé de signature locale, passer par le MCP GitHub (`push_file
 
 ## Pièges spécifiques
 
+- **Modèle `S.priceLib.quotes[]`** : un devis porte `lines:[{id,product,values}]` (N équipements sous 1 réf/dossier) + `projet` (texte). Les champs legacy `product`/`values` au niveau devis sont un **miroir de la 1re ligne** (compat tableau, pas encore retirés). Migration additive idempotente via `plMigrateLines` (appelée par `plEnsure`). Champs texte de saisie : `oninput` ne re-render JAMAIS (suggestions via combobox `.pl-combo-static` + CSS `:focus-within`).
 - **Persistance à 6 endroits** : tout nouveau champ ajouté à `S` doit être propagé dans **toutes** ces zones, sinon perte au reload ou à la sync :
   1. `loadFromCloud` (lecture Firestore)
   2. Écriture cache localStorage juste après le load cloud
