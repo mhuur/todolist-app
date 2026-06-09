@@ -378,8 +378,8 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-modal h3 .pl-close:hover{color:#F87171}
 .pl-row{margin-bottom:11px}
 .pl-row label.pl-lbl{display:block;font-size:9px;font-weight:700;color:#94A3B8;margin-bottom:3px;letter-spacing:.4px;text-transform:uppercase}
-.pl-input,.pl-select{width:100%;background:#162032;border:1px solid #2A3A52;border-radius:6px;padding:6px 10px;color:#E2E8F0;font-family:inherit;font-size:12px;outline:none;transition:border-color .12s}
-.pl-input:focus,.pl-select:focus{border-color:#38BDF8}
+.pl-input,.pl-select{width:100%;background:#162032;border:1px solid #2A3A52;border-radius:6px;padding:6px 10px;color:#E2E8F0;font-family:inherit;font-size:12px;outline:none;transition:border-color .12s,box-shadow .12s}
+.pl-input:focus,.pl-select:focus{border-color:#38BDF8;box-shadow:0 0 0 1px rgba(56,189,248,.25),0 0 10px rgba(56,189,248,.15)}
 .pl-input::placeholder{color:#475569}
 .pl-input[type="number"]{-moz-appearance:textfield;appearance:textfield}
 .pl-input[type="number"]::-webkit-inner-spin-button,.pl-input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -406,7 +406,8 @@ body.dragging-active .tk-hd *{pointer-events:none}
 /* Lignes d'équipement (devis multi-lignes) */
 .pl-lines{margin-top:6px}
 .pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
-.pl-line-card{border:1px solid #243650;border-radius:8px;padding:10px 12px;margin-bottom:9px;background:rgba(255,255,255,.012)}
+.pl-line-card{border:1px solid #2A3A52;border-radius:8px;padding:10px 12px;margin-bottom:9px;background:rgba(255,255,255,.015);transition:border-color .12s,box-shadow .12s}
+.pl-line-card:focus-within{border-color:rgba(56,189,248,.45);box-shadow:0 0 0 1px rgba(56,189,248,.12)}
 .pl-line-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .pl-line-num{font-size:9px;font-weight:800;color:#5CB8F0;letter-spacing:.6px;text-transform:uppercase}
 .pl-line-del{cursor:pointer;color:#475569;font-size:16px;line-height:1;border:none;background:transparent;padding:0 4px;border-radius:4px;font-family:inherit;transition:all .12s}
