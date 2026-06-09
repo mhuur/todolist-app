@@ -464,10 +464,13 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-table .pl-td-prod{color:#94A3B8;font-size:10px}
 .pl-table .pl-td-projet{color:#94A3B8;font-size:10px}
 .pl-table .pl-td-empty{color:#334155;font-style:italic}
-/* Groupement par devis : la 1re ligne d'un groupe a un filet supérieur ; les cellules niveau-devis des lignes de continuation sont vides */
-.pl-table tbody tr.pl-grp-first td{border-top:1px solid #243650}
+/* Groupement par devis : pas de filet entre les lignes d'un même devis ; séparation seulement entre devis (filet supérieur) + liseré néon latéral alterné (bleu/violet) faisant office de « tranche » de bloc */
+.pl-table tbody td{border-bottom:none}
+.pl-table tbody tr.pl-grp-first td{border-top:1px solid #2A3A52}
 .pl-table tbody tr.pl-grp-first:first-child td{border-top:none}
-.pl-table .pl-td-cont{background:rgba(255,255,255,.012)}
+.pl-table tbody tr.pl-grp-a td.pl-td-ref{box-shadow:inset 3px 0 0 rgba(56,189,248,.55)}
+.pl-table tbody tr.pl-grp-b td.pl-td-ref{box-shadow:inset 3px 0 0 rgba(192,38,211,.5)}
+.pl-table .pl-td-cont{background:transparent}
 .pl-merge-cb{accent-color:#38BDF8;cursor:pointer;vertical-align:middle;margin-right:2px}
 .pl-merge-hint{font-size:10px;color:#94A3B8;margin-right:8px;align-self:center}
 .pl-row-actions{display:flex;gap:4px;justify-content:flex-end;white-space:nowrap}
@@ -1544,12 +1547,16 @@ function plRenderTable(){
     h+=`<tr><td colspan="${ncols}"><div class="pl-empty-table">Aucun devis ne correspond aux filtres / recherches.</div></td></tr>`;
   }else{
     const isEditing=(qid,lid,col)=>plEditingCell&&plEditingCell.quoteId===qid&&plEditingCell.lineId===lid&&plEditingCell.col===col;
+    let groupIdx=-1;
     rows.forEach((row,i)=>{
       const q=row.q,l=row.l;
       const sup=supById[q.supplierId];
       /* 1re ligne du groupe-devis (les lignes d'un même devis sont adjacentes sauf tri par valeur) → on n'affiche les cellules niveau-devis que là, dé-emphase sinon */
       const firstOfGroup=(i===0||rows[i-1].q.id!==q.id);
-      h+=`<tr class="pl-line-row${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
+      if(firstOfGroup)groupIdx++;
+      /* liseré néon alterné (bleu / violet) par devis → blocs distincts */
+      const grpCls=(groupIdx%2===0)?'pl-grp-a':'pl-grp-b';
+      h+=`<tr class="pl-line-row ${grpCls}${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
       if(firstOfGroup){
         /* Ref + bouton copy (figée) + case de sélection en mode fusion */
         h+=`<td class="pl-td-ref">${merging?`<input type="checkbox" class="pl-merge-cb" ${plMergeSel.indexOf(q.id)>=0?'checked':''} onclick="event.stopPropagation();plMergeToggle('${q.id}')"> `:''}<span class="pl-ref-wrap"><span class="pl-ref-chip">${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
