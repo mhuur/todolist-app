@@ -1778,7 +1778,7 @@ function plLineColVal(line,kind){
   let f=null;
   if(kind==='prix')f=pick(['prix'],['prix']);
   else if(kind==='qte')f=pick(['quantite','qte'],['quantite']);
-  else if(kind==='ref')f=pick(['reference','ref','modele','code'],['reference','modele']);
+  else if(kind==='ref')f=pick(['reference','ref','modele','code'],['reference','modele','ref']);
   if(!f)return null;
   return {f:f,v:(line.values||{})[f.id]};
 }
