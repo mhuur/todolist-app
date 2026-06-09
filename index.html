@@ -1540,14 +1540,17 @@ let plCombo=null;  // { key, query }
 const plComboIsModal=k=>k.startsWith('mval-')||k==='pprojet';
 function plComboReRender(){
   if(!plCombo){render();return}
-  if(plCombo.key.startsWith('cell-'))plRenderTable();
-  else if(plComboIsModal(plCombo.key))plRenderModal();
-  else render();
+  const k=plCombo.key;
+  if(k.startsWith('cell-')){plRenderTable();return}
+  if(plComboIsModal(k)){plRenderModal();return}
+  /* Filtres toolbar (fsup/fprod/fprojet) : render() complet → on restaure le focus + curseur sur l'input, sinon la saisie est impossible */
+  render();
+  requestAnimationFrame(()=>{const el=document.getElementById('pl-combo-'+k);if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}}});
 }
 function plComboOpen(key){if(plCombo&&plCombo.key===key)return;plCombo={key:key,query:""};plComboReRender()}
 function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(plComboIsModal(k))plRenderModal();else render()}
 function plComboSetQuery(q){if(!plCombo)return;plCombo.query=q||"";plComboReRender()}
-function plComboBlurClose(key){setTimeout(()=>{if(plCombo&&plCombo.key===key)plComboClose()},180)}
+function plComboBlurClose(key){setTimeout(()=>{if(!plCombo||plCombo.key!==key)return;const el=document.getElementById('pl-combo-'+key);if(el&&document.activeElement===el)return;/* re-render a re-focusé l'input → faux blur, ne pas fermer */ plComboClose()},180)}
 
 // ▼ plEditingCell — état transient pour l'édition inline d'une cellule (NON persisté). lineId="" pour les colonnes niveau devis (date).
 let plEditingCell=null;
