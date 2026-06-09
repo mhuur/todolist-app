@@ -29,6 +29,7 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .bar-l{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .bar-r{display:flex;gap:3px;flex-wrap:wrap}
 .bp{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:6px;border:none;background:linear-gradient(135deg,#0284C7,#0EA5E9);color:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(14,165,233,.2);transition:all .15s}
+.bp:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 .bp:hover{box-shadow:0 2px 8px rgba(14,165,233,.3)}
 .bs{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid #2A3A52;background:#162032;color:#64748B;transition:all .15s}
 .bs:hover{border-color:#38BDF8;color:#38BDF8}
@@ -402,6 +403,16 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-fielddraft-row:last-child{margin-bottom:0;justify-content:flex-end}
 .pl-fielddraft .pl-input,.pl-fielddraft .pl-select{flex:1;min-width:120px;width:auto}
 .pl-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #1E3050}
+/* Lignes d'équipement (devis multi-lignes) */
+.pl-lines{margin-top:6px}
+.pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.pl-line-card{border:1px solid #243650;border-radius:8px;padding:10px 12px;margin-bottom:9px;background:rgba(255,255,255,.012)}
+.pl-line-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pl-line-num{font-size:9px;font-weight:800;color:#5CB8F0;letter-spacing:.6px;text-transform:uppercase}
+.pl-line-del{cursor:pointer;color:#475569;font-size:16px;line-height:1;border:none;background:transparent;padding:0 4px;border-radius:4px;font-family:inherit;transition:all .12s}
+.pl-line-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
+.pl-add-line{width:100%;padding:7px 10px;font-size:11px;font-weight:700;border-radius:7px;border:1px dashed rgba(92,184,240,.4);background:transparent;color:#5CB8F0;cursor:pointer;font-family:inherit;transition:all .12s}
+.pl-add-line:hover{background:rgba(92,184,240,.08);border-color:#5CB8F0;border-style:solid}
 .pl-btn{padding:7px 16px;font-size:12px;font-weight:700;font-family:inherit;border-radius:6px;cursor:pointer;transition:all .15s;border:none}
 .pl-btn-secondary{background:transparent;color:#64748B;border:1px solid #2A3A52}
 .pl-btn-secondary:hover{color:#E2E8F0;border-color:#475569}
@@ -450,7 +461,14 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-table .pl-td-date{white-space:nowrap;color:#94A3B8}
 .pl-table .pl-td-sup{font-weight:600}
 .pl-table .pl-td-prod{color:#94A3B8;font-size:10px}
+.pl-table .pl-td-projet{color:#94A3B8;font-size:10px}
 .pl-table .pl-td-empty{color:#334155;font-style:italic}
+/* Groupement par devis : la 1re ligne d'un groupe a un filet supérieur ; les cellules niveau-devis des lignes de continuation sont vides */
+.pl-table tbody tr.pl-grp-first td{border-top:1px solid #243650}
+.pl-table tbody tr.pl-grp-first:first-child td{border-top:none}
+.pl-table .pl-td-cont{background:rgba(255,255,255,.012)}
+.pl-merge-cb{accent-color:#38BDF8;cursor:pointer;vertical-align:middle;margin-right:2px}
+.pl-merge-hint{font-size:10px;color:#94A3B8;margin-right:8px;align-self:center}
 .pl-row-actions{display:flex;gap:4px;justify-content:flex-end;white-space:nowrap}
 .pl-act-btn{border:none;background:transparent;color:#475569;cursor:pointer;font-size:11px;font-family:inherit;padding:3px 6px;border-radius:4px;transition:all .12s;display:inline-flex;align-items:center;gap:3px}
 .pl-act-btn:hover{background:rgba(56,189,248,.08);color:#5CB8F0}
@@ -471,6 +489,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-combo-wrap{position:relative;display:inline-block;min-width:130px}
 .pl-combo-wrap.pl-combo-block{display:block;width:100%;min-width:0}
 .pl-combo-dropdown{position:absolute;top:100%;left:0;right:0;margin-top:2px;background:#162032;border:1px solid #2A3A52;border-radius:6px;max-height:220px;overflow-y:auto;z-index:60;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+/* Combobox "statique" : suggestions affichées uniquement au focus, via CSS (aucun re-render JS au clavier → saisie native fiable) */
+.pl-combo-static .pl-combo-dropdown{display:none}
+.pl-combo-static:focus-within .pl-combo-dropdown{display:block}
 .pl-combo-item{padding:7px 10px;font-size:11px;color:#CBD5E1;cursor:pointer;border-top:1px solid #1E3050}
 .pl-combo-item:first-child{border-top:none}
 .pl-combo-item:hover{background:rgba(56,189,248,.08);color:#E2E8F0}
@@ -632,7 +653,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"global",sortDeadline:false,sortAlpha:false,groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -1103,11 +1124,21 @@ function crmCreateSupForProd(pname,sname){const s={id:gid(),name:sname,products:
 function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.preferred[pname])S.crm.preferred[pname]=[];const i=S.crm.preferred[pname].indexOf(sid);if(i===-1)S.crm.preferred[pname].push(sid);else S.crm.preferred[pname].splice(i,1);save();render()}
 
 /* ── Bibliothèque de prix ── */
-// ▼ plEnsure — garde anti-corruption sur S.priceLib
+// ▼ plEnsure — garde anti-corruption sur S.priceLib + migration vers le modèle devis→lignes (un devis porte N lignes d'équipement, cf. plMigrateLines)
 function plEnsure(){
   if(!S.priceLib||typeof S.priceLib!=='object')S.priceLib={schemas:{},quotes:[]};
   if(!S.priceLib.schemas||typeof S.priceLib.schemas!=='object')S.priceLib.schemas={};
   if(!Array.isArray(S.priceLib.quotes))S.priceLib.quotes=[];
+  S.priceLib.quotes.forEach(plMigrateLines);
+}
+
+// ▼ plMigrateLines — migration idempotente d'un devis vers le modèle à lignes. ADDITIF en étape 1 : on crée q.lines[] + q.projet sans supprimer q.product/q.values (legacy, lus encore par le modal/table jusqu'à l'étape 3). Une ligne = {id, product, values:{}}.
+function plMigrateLines(q){
+  if(!q||typeof q!=='object')return;
+  if(typeof q.projet!=='string')q.projet="";
+  if(!Array.isArray(q.lines)){
+    q.lines=[{id:gid(),product:q.product||"",values:(q.values&&typeof q.values==='object')?q.values:{}}];
+  }
 }
 
 // ▼ plSlugSupplier — nom fournisseur → slug ASCII uppercase tirets, max 30
@@ -1133,10 +1164,13 @@ function plToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMon
 /* État du modal — transient (NON persisté) */
 let plModalState=null;
 
-// ▼ plOpenNewQuote — initialise état modal pour création (presets optionnels depuis les filtres actifs)
+// ▼ plNewLine — fabrique une ligne d'équipement vierge pour le modal (product optionnel)
+function plNewLine(product){return {id:gid(),product:product||"",productQuery:"",values:{}}}
+
+// ▼ plOpenNewQuote — initialise état modal pour création (presets optionnels depuis les filtres actifs). Un devis = N lignes (cf. plMigrateLines).
 function plOpenNewQuote(presetSupId,presetProduct){
   plEnsure();
-  plModalState={editingId:null,date:plToday(),supplierId:presetSupId||"",supplierQuery:"",product:presetProduct||"",productQuery:"",values:{},fieldDraft:null,err:""};
+  plModalState={editingId:null,date:plToday(),supplierId:presetSupId||"",supplierQuery:"",projet:"",lines:[plNewLine(presetProduct||"")],fieldDraft:null,err:""};
   plRenderModal();
 }
 
@@ -1145,7 +1179,9 @@ function plOpenEditQuote(id){
   plEnsure();
   const q=S.priceLib.quotes.find(x=>x.id===id);
   if(!q)return;
-  plModalState={editingId:q.id,date:q.date||plToday(),supplierId:q.supplierId||"",supplierQuery:"",product:q.product||"",productQuery:"",values:Object.assign({},q.values||{}),fieldDraft:null,err:""};
+  const srcLines=(Array.isArray(q.lines)&&q.lines.length)?q.lines:[{id:gid(),product:q.product||"",values:q.values||{}}];
+  const lines=srcLines.map(l=>({id:l.id||gid(),product:l.product||"",productQuery:"",values:Object.assign({},l.values||{})}));
+  plModalState={editingId:q.id,date:q.date||plToday(),supplierId:q.supplierId||"",supplierQuery:"",projet:q.projet||"",lines:lines,fieldDraft:null,err:""};
   plRenderModal();
 }
 
@@ -1155,6 +1191,17 @@ function plCloseModal(){plModalState=null;document.getElementById('pl-host').inn
 // ▼ plSetField — mute state sans re-render (oninput texte/date)
 function plSetField(k,v){if(!plModalState)return;plModalState[k]=v}
 
+// ▼ Lignes du devis — helpers
+function plGetLine(lineId){if(!plModalState)return null;return (plModalState.lines||[]).find(l=>l.id===lineId)||null}
+function plAddLine(){if(!plModalState)return;plModalState.lines.push(plNewLine(""));plModalState.err="";plRenderModal()}
+function plRemoveLine(lineId){
+  if(!plModalState)return;
+  if(plModalState.lines.length<=1)return; /* toujours ≥ 1 ligne */
+  plModalState.lines=plModalState.lines.filter(l=>l.id!==lineId);
+  if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;
+  plRenderModal();
+}
+
 // ▼ Cascade fournisseur — recherche live, création inline si pas de match
 function plSearchSupplier(q){if(!plModalState)return;plModalState.supplierQuery=q;plRenderModal()}
 function plPickSupplier(id){
@@ -1162,16 +1209,15 @@ function plPickSupplier(id){
   const st=plModalState;
   const sup=S.crm.suppliers.find(s=>s.id===id);
   if(!sup)return;
-  /* Si une sous-cat est déjà choisie (flux preset) et que ce fournisseur ne la propose pas → auto-link CRM */
-  if(st.product&&!sup.products.some(p=>p.toLowerCase()===st.product.toLowerCase())){
-    sup.products.push(st.product);
-    if(!S.crm.products.some(p=>p.toLowerCase()===st.product.toLowerCase()))S.crm.products.push(st.product);
-    save();
-  }
-  st.supplierId=id;st.supplierQuery="";
-  /* Reset product UNIQUEMENT si pas de preset (flux normal supplier-first) */
-  if(!st.product){st.productQuery="";st.values={};st.fieldDraft=null}
-  st.err="";
+  /* Auto-link CRM : toute sous-cat déjà présente sur une ligne (flux preset) que ce fournisseur ne propose pas encore */
+  let dirty=false;
+  (st.lines||[]).forEach(l=>{
+    const p=(l.product||"").trim();if(!p)return;
+    if(!sup.products.some(x=>x.toLowerCase()===p.toLowerCase())){sup.products.push(p);dirty=true}
+    if(!S.crm.products.some(x=>x.toLowerCase()===p.toLowerCase())){S.crm.products.push(p);dirty=true}
+  });
+  if(dirty)save();
+  st.supplierId=id;st.supplierQuery="";st.err="";
   plRenderModal();
 }
 function plClearSupplier(){if(!plModalState)return;plModalState.supplierId="";plModalState.supplierQuery="";plModalState.err="";plRenderModal()}
@@ -1196,46 +1242,49 @@ function plPickSupplierEnter(){
   plCreateAndPickSupplier(q);
 }
 
-// ▼ Cascade sous-catégorie — recherche live filtrée par fournisseur, création inline
-function plSearchProduct(q){if(!plModalState)return;plModalState.productQuery=q;plRenderModal()}
-function plPickProduct(name){if(!plModalState)return;plModalState.product=name;plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plClearProduct(){if(!plModalState)return;plModalState.product="";plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plCreateAndPickProduct(name){
+// ▼ Cascade sous-catégorie — recherche live filtrée par fournisseur, création inline. Scopée par ligne (lineId).
+function plSearchProduct(lineId,q){const l=plGetLine(lineId);if(!l)return;l.productQuery=q;plRenderModal()}
+function plPickProduct(lineId,name){const l=plGetLine(lineId);if(!l)return;l.product=name;l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plClearProduct(lineId){const l=plGetLine(lineId);if(!l)return;l.product="";l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plCreateAndPickProduct(lineId,name){
   if(!plModalState||!plModalState.supplierId)return;
   name=(name||"").trim();
   if(!name)return;
   const sup=S.crm.suppliers.find(s=>s.id===plModalState.supplierId);
   if(!sup)return;
   const existing=sup.products.find(p=>p.toLowerCase()===name.toLowerCase());
-  if(existing){plPickProduct(existing);return}
+  if(existing){plPickProduct(lineId,existing);return}
   sup.products.push(name);
   if(!S.crm.products.some(p=>p.toLowerCase()===name.toLowerCase()))S.crm.products.push(name);
   save();
-  plPickProduct(name);
+  plPickProduct(lineId,name);
 }
-function plPickProductEnter(){
+function plPickProductEnter(lineId){
   if(!plModalState||!plModalState.supplierId)return;
-  const q=(plModalState.productQuery||"").trim();if(!q)return;
+  const l=plGetLine(lineId);if(!l)return;
+  const q=(l.productQuery||"").trim();if(!q)return;
   const sup=S.crm.suppliers.find(s=>s.id===plModalState.supplierId);if(!sup)return;
   const ql=q.toLowerCase();
   const exact=sup.products.find(p=>p.toLowerCase()===ql);
-  if(exact){plPickProduct(exact);return}
+  if(exact){plPickProduct(lineId,exact);return}
   const matches=sup.products.filter(p=>p.toLowerCase().includes(ql));
-  if(matches.length===1){plPickProduct(matches[0]);return}
-  plCreateAndPickProduct(q);
+  if(matches.length===1){plPickProduct(lineId,matches[0]);return}
+  plCreateAndPickProduct(lineId,q);
 }
 
-// ▼ plOpenFieldDraft / plCancelFieldDraft / plConfirmFieldDraft — mini form-builder
-function plOpenFieldDraft(){if(!plModalState)return;plModalState.fieldDraft={name:"",type:"number",unit:"",options:""};plRenderModal()}
+// ▼ plOpenFieldDraft / plCancelFieldDraft / plConfirmFieldDraft — mini form-builder, ciblé sur la sous-cat d'une ligne (lineId)
+function plOpenFieldDraft(lineId){if(!plModalState)return;plModalState.fieldDraft={lineId:lineId,name:"",type:"number",unit:"",options:""};plRenderModal()}
 function plCancelFieldDraft(){if(!plModalState)return;plModalState.fieldDraft=null;plRenderModal()}
 function plSetDraftField(k,v){if(!plModalState||!plModalState.fieldDraft)return;plModalState.fieldDraft[k]=v}
 function plConfirmFieldDraft(){
-  if(!plModalState||!plModalState.fieldDraft||!plModalState.product)return;
+  if(!plModalState||!plModalState.fieldDraft)return;
+  const line=plGetLine(plModalState.fieldDraft.lineId);
+  if(!line||!line.product)return;
   plEnsure();
   const fd=plModalState.fieldDraft;
   const name=(fd.name||"").trim();
   if(!name){plModalState.err="Nom de champ requis";plRenderModal();return}
-  const prod=plModalState.product;
+  const prod=line.product;
   if(!Array.isArray(S.priceLib.schemas[prod]))S.priceLib.schemas[prod]=[];
   if(S.priceLib.schemas[prod].some(f=>f.name.toLowerCase()===name.toLowerCase())){plModalState.err="Ce champ existe déjà pour cette sous-catégorie";plRenderModal();return}
   const f={id:gid(),name:name,type:fd.type||"text"};
@@ -1247,17 +1296,22 @@ function plConfirmFieldDraft(){
   plRenderModal();
 }
 
-function plDelField(fieldId){
-  if(!plModalState||!plModalState.product)return;
+function plDelField(lineId,fieldId){
+  const line=plGetLine(lineId);
+  if(!line||!line.product)return;
   plEnsure();
-  const prod=plModalState.product;
+  const prod=line.product;
   if(!Array.isArray(S.priceLib.schemas[prod]))return;
   S.priceLib.schemas[prod]=S.priceLib.schemas[prod].filter(f=>f.id!==fieldId);
-  delete plModalState.values[fieldId];
+  /* purge la valeur sur toutes les lignes du devis qui portent cette sous-cat (le champ disparaît du schéma partagé) */
+  (plModalState.lines||[]).forEach(l=>{if(l.product===prod)delete l.values[fieldId]});
   save();plRenderModal();
 }
 
-function plSetValue(fieldId,v){if(!plModalState)return;plModalState.values[fieldId]=v}
+function plSetValue(lineId,fieldId,v){const l=plGetLine(lineId);if(!l)return;l.values[fieldId]=v}
+
+// ▼ plSetProjet — mute le projet du devis (oninput, sans re-render pour préserver le focus ; combo géré via plCombo 'pprojet')
+function plSetProjet(v){if(!plModalState)return;plModalState.projet=v}
 
 function plSaveQuote(){
   plEnsure();
@@ -1265,20 +1319,25 @@ function plSaveQuote(){
   const st=plModalState;
   if(!st.date){st.err="Date requise";plRenderModal();return}
   if(!st.supplierId){st.err="Fournisseur requis";plRenderModal();return}
-  if(!st.product){st.err="Sous-catégorie requise";plRenderModal();return}
   const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
   if(!sup){st.err="Fournisseur introuvable";plRenderModal();return}
+  /* Lignes valides = celles avec une sous-cat ; au moins une requise */
+  const lines=(st.lines||[]).filter(l=>(l.product||"").trim()).map(l=>({id:l.id||gid(),product:l.product,values:Object.assign({},l.values||{})}));
+  if(!lines.length){st.err="Ajoute au moins une ligne avec une sous-catégorie";plRenderModal();return}
+  const projet=(st.projet||"").trim();
   if(st.editingId){
     /* Mode édition : mute le devis existant + recalcule la ref (cohérence date/fournisseur, excludeId = self) */
     const q=S.priceLib.quotes.find(x=>x.id===st.editingId);
     if(!q){st.err="Devis introuvable";plRenderModal();return}
-    q.date=st.date;q.supplierId=st.supplierId;q.product=st.product;q.values=Object.assign({},st.values);
+    q.date=st.date;q.supplierId=st.supplierId;q.projet=projet;q.lines=lines;
+    /* legacy (lu par le tableau jusqu'à l'étape 3) = 1re ligne */
+    q.product=lines[0].product;q.values=Object.assign({},lines[0].values);
     q.ref=plGenerateRef(q.date,sup.name,q.id);
     q.updatedAt=Date.now();
   }else{
     /* Mode création */
     const ref=plGenerateRef(st.date,sup.name);
-    const quote={id:gid(),ref:ref,date:st.date,supplierId:st.supplierId,product:st.product,values:Object.assign({},st.values),createdAt:Date.now()};
+    const quote={id:gid(),ref:ref,date:st.date,supplierId:st.supplierId,projet:projet,lines:lines,product:lines[0].product,values:Object.assign({},lines[0].values),createdAt:Date.now()};
     S.priceLib.quotes.push(quote);
   }
   save();
@@ -1296,24 +1355,61 @@ function plDeleteQuote(id){
   save();render();
 }
 
+// ▼ Fusion de devis — état transient (NON persisté). null=off, []=mode actif avec ids sélectionnés.
+let plMergeSel=null;
+function plToggleMergeMode(){plMergeSel=plMergeSel?null:[];render()}
+function plMergeCancel(){plMergeSel=null;render()}
+function plMergeToggle(qid){if(!plMergeSel)return;const i=plMergeSel.indexOf(qid);if(i>=0)plMergeSel.splice(i,1);else plMergeSel.push(qid);render()}
+// ▼ plMergeSameSup — les devis sélectionnés partagent-ils le même fournisseur (≥2) ? (condition de fusion)
+function plMergeSameSup(){
+  if(!plMergeSel||plMergeSel.length<2)return false;
+  const ids=plMergeSel.map(id=>(S.priceLib.quotes.find(q=>q.id===id)||{}).supplierId);
+  return ids.every(x=>x&&x===ids[0]);
+}
+// ▼ plMergeConfirm — fusionne les devis sélectionnés en 1 (cible = ref la plus petite). Lignes concaténées, date = la plus ancienne, projet = cible sinon 1er non vide. Les autres devis sont supprimés.
+function plMergeConfirm(){
+  plEnsure();
+  if(!plMergeSameSup())return;
+  const sel=plMergeSel.map(id=>S.priceLib.quotes.find(q=>q.id===id)).filter(Boolean);
+  if(sel.length<2)return;
+  sel.sort((a,b)=>(a.ref||"").localeCompare(b.ref||""));
+  const target=sel[0],others=sel.slice(1);
+  const totalLines=sel.reduce((n,q)=>n+((q.lines||[]).length),0);
+  if(!confirm(`Fusionner ${sel.length} devis en un seul (${totalLines} équipements regroupés sous une réf unique) ?\nLes autres références seront supprimées. Action irréversible.`))return;
+  const dates=sel.map(q=>q.date).filter(Boolean).sort();
+  if(dates.length)target.date=dates[0];
+  if(!(target.projet||"").trim()){const p=sel.map(q=>(q.projet||"").trim()).find(Boolean);if(p)target.projet=p}
+  if(!Array.isArray(target.lines))target.lines=[];
+  others.forEach(o=>{(o.lines||[]).forEach(l=>target.lines.push(l))});
+  const sup=S.crm.suppliers.find(s=>s.id===target.supplierId);
+  if(sup)target.ref=plGenerateRef(target.date,sup.name,target.id);
+  if(target.lines[0]){target.product=target.lines[0].product;target.values=Object.assign({},target.lines[0].values)}
+  target.updatedAt=Date.now();
+  const delIds=new Set(others.map(o=>o.id));
+  S.priceLib.quotes=S.priceLib.quotes.filter(q=>!delIds.has(q.id));
+  plMergeSel=null;
+  save();render();
+}
+
 // ▼ Combobox custom — état transient (NON persisté). key encode le contexte : 'fsup', 'fprod', 'cell-<qid>-<fid>', 'mval-<fid>'
 let plCombo=null;  // { key, query }
+const plComboIsModal=k=>k.startsWith('mval-')||k==='pprojet';
 function plComboReRender(){
   if(!plCombo){render();return}
   if(plCombo.key.startsWith('cell-'))plRenderTable();
-  else if(plCombo.key.startsWith('mval-'))plRenderModal();
+  else if(plComboIsModal(plCombo.key))plRenderModal();
   else render();
 }
 function plComboOpen(key){if(plCombo&&plCombo.key===key)return;plCombo={key:key,query:""};plComboReRender()}
-function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(k.startsWith('mval-'))plRenderModal();else render()}
+function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(plComboIsModal(k))plRenderModal();else render()}
 function plComboSetQuery(q){if(!plCombo)return;plCombo.query=q||"";plComboReRender()}
 function plComboBlurClose(key){setTimeout(()=>{if(plCombo&&plCombo.key===key)plComboClose()},180)}
 
-// ▼ plEditingCell — état transient pour l'édition inline d'une cellule (NON persisté)
+// ▼ plEditingCell — état transient pour l'édition inline d'une cellule (NON persisté). lineId="" pour les colonnes niveau devis (date).
 let plEditingCell=null;
-function plStartCellEdit(quoteId,col){if(plEditingCell&&plEditingCell.quoteId===quoteId&&plEditingCell.col===col)return;plEditingCell={quoteId:quoteId,col:col};plRenderTable()}
+function plStartCellEdit(quoteId,lineId,col){if(plEditingCell&&plEditingCell.quoteId===quoteId&&plEditingCell.lineId===lineId&&plEditingCell.col===col)return;plEditingCell={quoteId:quoteId,lineId:lineId||"",col:col};plRenderTable()}
 function plCancelCellEdit(){plEditingCell=null;plRenderTable()}
-function plCommitCellEdit(quoteId,col,value){
+function plCommitCellEdit(quoteId,lineId,col,value){
   plEnsure();
   const q=S.priceLib.quotes.find(x=>x.id===quoteId);
   if(!q){plEditingCell=null;plRenderTable();return}
@@ -1322,7 +1418,12 @@ function plCommitCellEdit(quoteId,col,value){
     /* Recalcule la ref pour rester cohérente avec la nouvelle date */
     const sup=S.crm.suppliers.find(s=>s.id===q.supplierId);
     if(sup)q.ref=plGenerateRef(q.date,sup.name,q.id);
-  }else{if(!q.values)q.values={};q.values[col]=value}
+  }else{
+    const line=(q.lines||[]).find(l=>l.id===lineId);
+    if(line){if(!line.values)line.values={};line.values[col]=value}
+    /* sync legacy (lu encore par d'éventuels chemins) = 1re ligne */
+    if(q.lines&&q.lines[0]){q.product=q.lines[0].product;q.values=Object.assign({},q.lines[0].values)}
+  }
   q.updatedAt=Date.now();
   save();
   plEditingCell=null;
@@ -1345,7 +1446,8 @@ function plSetFilterProd(v){
   else if(v){const exact=plListAllProducts().find(p=>p.toLowerCase()===v.toLowerCase());if(exact)v=exact}
   S.plFilterProd=v;S.plSearch={};save();render();
 }
-function plResetFilters(){S.plFilterSup="";S.plFilterProd="";S.plSearch={};S.plSortBy=null;S.plSortDir="asc";save();render()}
+function plSetFilterProjet(v){S.plFilterProjet=(v||"").trim();S.plSearch={};save();render()}
+function plResetFilters(){S.plFilterSup="";S.plFilterProd="";S.plFilterProjet="";S.plSearch={};S.plSortBy=null;S.plSortDir="asc";save();render()}
 function plSetSort(col){
   if(S.plSortBy===col){S.plSortDir=(S.plSortDir==='asc'?'desc':'asc')}
   else{S.plSortBy=col;S.plSortDir='asc'}
@@ -1364,15 +1466,22 @@ function plRenderTable(){
   const supById={};S.crm.suppliers.forEach(s=>{supById[s.id]=s});
   const filterSup=S.plFilterSup||"";
   const filterProd=S.plFilterProd||"";
+  const filterProjet=S.plFilterProjet||"";
   const search=S.plSearch||{};
-  /* Filtrage */
-  let rows=S.priceLib.quotes.filter(q=>{
-    if(filterSup&&q.supplierId!==filterSup)return false;
-    if(filterProd&&q.product!==filterProd)return false;
-    return true;
+  const merging=!!plMergeSel;
+  /* Aplatissement devis → 1 ligne d'affichage par équipement. Filtrage : sup/projet au niveau devis, sous-cat au niveau ligne. */
+  let rows=[];
+  S.priceLib.quotes.forEach(q=>{
+    if(filterSup&&q.supplierId!==filterSup)return;
+    if(filterProjet&&(q.projet||"")!==filterProjet)return;
+    const lines=(Array.isArray(q.lines)&&q.lines.length)?q.lines:[{id:"_legacy",product:q.product||"",values:q.values||{}}];
+    lines.forEach(l=>{
+      if(filterProd&&l.product!==filterProd)return;
+      rows.push({q:q,l:l});
+    });
   });
   /* Recherche par colonne (case-insensitive contains) */
-  rows=rows.filter(q=>{
+  rows=rows.filter(({q,l})=>{
     for(const col in search){
       const sq=(search[col]||"").toLowerCase().trim();
       if(!sq)continue;
@@ -1380,8 +1489,9 @@ function plRenderTable(){
       if(col==='ref')v=(q.ref||"").toLowerCase();
       else if(col==='date')v=(q.date||"").toLowerCase();
       else if(col==='supplier')v=((supById[q.supplierId]&&supById[q.supplierId].name)||"").toLowerCase();
-      else if(col==='product')v=(q.product||"").toLowerCase();
-      else v=String((q.values||{})[col]||"").toLowerCase();
+      else if(col==='projet')v=(q.projet||"").toLowerCase();
+      else if(col==='product')v=(l.product||"").toLowerCase();
+      else v=String((l.values||{})[col]||"").toLowerCase();
       if(v.indexOf(sq)===-1)return false;
     }
     return true;
@@ -1389,13 +1499,15 @@ function plRenderTable(){
   /* Tri */
   const sortBy=S.plSortBy;const dir=S.plSortDir==='desc'?-1:1;
   if(sortBy){
-    rows.sort((a,b)=>{
+    rows.sort((A,B)=>{
+      const a=A.q,b=B.q;
       let va="",vb="";
       if(sortBy==='ref'){va=a.ref||"";vb=b.ref||""}
       else if(sortBy==='date'){va=a.date||"";vb=b.date||""}
       else if(sortBy==='supplier'){va=(supById[a.supplierId]&&supById[a.supplierId].name)||"";vb=(supById[b.supplierId]&&supById[b.supplierId].name)||""}
-      else if(sortBy==='product'){va=a.product||"";vb=b.product||""}
-      else{va=(a.values||{})[sortBy]||"";vb=(b.values||{})[sortBy]||""}
+      else if(sortBy==='projet'){va=a.projet||"";vb=b.projet||""}
+      else if(sortBy==='product'){va=A.l.product||"";vb=B.l.product||""}
+      else{va=(A.l.values||{})[sortBy]||"";vb=(B.l.values||{})[sortBy]||""}
       const na=parseFloat(va),nb=parseFloat(vb);
       if(!isNaN(na)&&!isNaN(nb)&&va!==""&&vb!=="")return (na-nb)*dir;
       return String(va).localeCompare(String(vb))*dir;
@@ -1411,13 +1523,14 @@ function plRenderTable(){
   h+=`<th class="${sorted('ref')}"><div class="pl-th-inner" onclick="plSetSort('ref')">Ref ${arrow('ref')}</div></th>`;
   h+=`<th class="${sorted('date')}"><div class="pl-th-inner" onclick="plSetSort('date')">Date ${arrow('date')}</div></th>`;
   h+=`<th class="${sorted('supplier')}"><div class="pl-th-inner" onclick="plSetSort('supplier')">Fournisseur ${arrow('supplier')}</div></th>`;
+  h+=`<th class="${sorted('projet')}"><div class="pl-th-inner" onclick="plSetSort('projet')">Projet ${arrow('projet')}</div></th>`;
   if(showProdCol)h+=`<th class="${sorted('product')}"><div class="pl-th-inner" onclick="plSetSort('product')">Sous-cat. ${arrow('product')}</div></th>`;
   dynFields.forEach(f=>{const lbl=f.unit?`${esc(f.name)} (${esc(f.unit)})`:esc(f.name);h+=`<th class="${sorted(f.id)}"><div class="pl-th-inner" onclick="plSetSort('${f.id}')">${lbl} ${arrow(f.id)}</div></th>`});
   h+=`<th style="text-align:right">&nbsp;</th>`;
   h+=`</tr>`;
   /* Row de recherche */
   h+=`<tr class="pl-search-row">`;
-  const commonCols=showProdCol?['ref','date','supplier','product']:['ref','date','supplier'];
+  const commonCols=showProdCol?['ref','date','supplier','projet','product']:['ref','date','supplier','projet'];
   commonCols.forEach(col=>{
     h+=`<th><input id="pl-search-${col}" type="text" value="${esc(search[col]||"")}" placeholder="Filtrer…" oninput="plSetSearch('${col}',this.value)" autocomplete="off"></th>`;
   });
@@ -1429,57 +1542,66 @@ function plRenderTable(){
     const ncols=commonCols.length+dynFields.length+1;
     h+=`<tr><td colspan="${ncols}"><div class="pl-empty-table">Aucun devis ne correspond aux filtres / recherches.</div></td></tr>`;
   }else{
-    const isEditing=(qid,col)=>plEditingCell&&plEditingCell.quoteId===qid&&plEditingCell.col===col;
-    rows.forEach(q=>{
+    const isEditing=(qid,lid,col)=>plEditingCell&&plEditingCell.quoteId===qid&&plEditingCell.lineId===lid&&plEditingCell.col===col;
+    rows.forEach((row,i)=>{
+      const q=row.q,l=row.l;
       const sup=supById[q.supplierId];
-      h+=`<tr>`;
-      /* Ref + bouton copy au survol (ref figée, non éditable) */
-      h+=`<td class="pl-td-ref"><span class="pl-ref-wrap"><span>${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
-      /* Date éditable inline */
-      if(isEditing(q.id,'date')){
-        h+=`<td class="pl-td-date pl-cell-editing"><input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(q.date||"")}" onchange="plCommitCellEdit('${q.id}','date',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}" onblur="if(plEditingCell)plCommitCellEdit('${q.id}','date',this.value)"></td>`;
+      /* 1re ligne du groupe-devis (les lignes d'un même devis sont adjacentes sauf tri par valeur) → on n'affiche les cellules niveau-devis que là, dé-emphase sinon */
+      const firstOfGroup=(i===0||rows[i-1].q.id!==q.id);
+      h+=`<tr class="pl-line-row${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
+      if(firstOfGroup){
+        /* Ref + bouton copy (figée) + case de sélection en mode fusion */
+        h+=`<td class="pl-td-ref">${merging?`<input type="checkbox" class="pl-merge-cb" ${plMergeSel.indexOf(q.id)>=0?'checked':''} onclick="event.stopPropagation();plMergeToggle('${q.id}')"> `:''}<span class="pl-ref-wrap"><span>${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
+        /* Date éditable inline (niveau devis, lineId="") */
+        if(isEditing(q.id,"",'date')){
+          h+=`<td class="pl-td-date pl-cell-editing"><input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(q.date||"")}" onchange="plCommitCellEdit('${q.id}','','date',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}" onblur="if(plEditingCell)plCommitCellEdit('${q.id}','','date',this.value)"></td>`;
+        }else{
+          h+=`<td class="pl-td-date pl-cell-clickable" onclick="plStartCellEdit('${q.id}','','date')">${esc(plDateFR(q.date))}</td>`;
+        }
+        h+=`<td class="pl-td-sup">${esc(sup?sup.name:"?")}</td>`;
+        h+=`<td class="pl-td-projet">${esc(q.projet||"")}</td>`;
       }else{
-        h+=`<td class="pl-td-date pl-cell-clickable" onclick="plStartCellEdit('${q.id}','date')">${esc(plDateFR(q.date))}</td>`;
+        h+=`<td class="pl-td-ref pl-td-cont"></td><td class="pl-td-date pl-td-cont"></td><td class="pl-td-sup pl-td-cont"></td><td class="pl-td-projet pl-td-cont"></td>`;
       }
-      h+=`<td class="pl-td-sup">${esc(sup?sup.name:"?")}</td>`;
-      if(showProdCol)h+=`<td class="pl-td-prod">${esc(q.product||"")}</td>`;
-      /* Valeurs dynamiques éditables inline */
+      if(showProdCol)h+=`<td class="pl-td-prod">${esc(l.product||"")}</td>`;
+      /* Valeurs dynamiques éditables inline (niveau ligne) */
       dynFields.forEach(f=>{
-        const v=(q.values||{})[f.id];
-        if(isEditing(q.id,f.id)){
+        const v=(l.values||{})[f.id];
+        if(isEditing(q.id,l.id,f.id)){
           let inputHtml="";
-          const commitJS=`plCommitCellEdit('${q.id}','${f.id}',this.value)`;
+          const commitJS=`plCommitCellEdit('${q.id}','${l.id}','${f.id}',this.value)`;
           const kbJS=`if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}`;
-          const blurJS=`if(plEditingCell)plCommitCellEdit('${q.id}','${f.id}',this.value)`;
+          const blurJS=`if(plEditingCell)plCommitCellEdit('${q.id}','${l.id}','${f.id}',this.value)`;
           if(f.type==='number')inputHtml=`<input id="pl-edit-cell" type="number" step="any" class="pl-cell-input" value="${esc(v==null?"":String(v))}" onblur="${blurJS}" onkeydown="${kbJS}">`;
           else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">`;
           else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">${opts}</select>`}
           else{
-            /* Texte : combobox custom thème dark — dropdown des valeurs déjà saisies pour ce champ + sous-cat */
-            const cKey=`cell-${q.id}-${f.id}`;
-            const cOpen=plCombo&&plCombo.key===cKey;
-            const cQ=cOpen?(plCombo.query==null?(v==null?"":String(v)):plCombo.query):(v==null?"":String(v));
-            const sugs=plDistinctValues(q.product,f.id);
-            const filtered=cOpen?sugs.filter(s=>!cQ||s.toLowerCase().includes(cQ.toLowerCase())):[];
-            const ddJS=`onfocus="plComboOpen('${cKey}');this.select&&this.select()" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('${cKey}');${blurJS}" onkeydown="${kbJS}"`;
-            inputHtml=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(cQ)}" autocomplete="off" ${ddJS}>`;
-            if(cOpen&&filtered.length)inputHtml+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plCommitCellEdit('${q.id}','${f.id}',${esc(JSON.stringify(s))})">${esc(s)}</div>`).join('')}</div>`;
+            /* Texte : saisie native (aucun re-render au clavier) ; commit au blur ; suggestions au focus via CSS :focus-within */
+            const cur=(v==null?"":String(v));
+            const sg=plDistinctValues(l.product,f.id).filter(s=>s.toLowerCase()!==cur.toLowerCase()).slice(0,8);
+            const ddJS=`onfocus="this.select&&this.select()" onblur="${blurJS}" onkeydown="${kbJS}"`;
+            inputHtml=`<div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(cur)}" autocomplete="off" ${ddJS}>`;
+            if(sg.length)inputHtml+=`<div class="pl-combo-dropdown">${sg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCommitCellEdit('${q.id}','${l.id}','${f.id}',${esc(JSON.stringify(s))})">${esc(s)}</div>`).join('')}</div>`;
             inputHtml+=`</div>`;
           }
           h+=`<td class="pl-cell-editing">${inputHtml}</td>`;
           return;
         }
-        if(v===undefined||v===""||v===null){h+=`<td class="pl-cell-clickable pl-td-empty" onclick="plStartCellEdit('${q.id}','${f.id}')">—</td>`;return}
+        if(v===undefined||v===""||v===null){h+=`<td class="pl-cell-clickable pl-td-empty" onclick="plStartCellEdit('${q.id}','${l.id}','${f.id}')">—</td>`;return}
         let display="";
         if(f.type==='number'){display=plFormatNumber(v);if(f.unit)display+=` <span style="color:#64748B">${esc(f.unit)}</span>`}
         else if(f.type==='date')display=esc(plDateFR(v));
         else display=esc(String(v));
-        h+=`<td class="pl-cell-clickable" onclick="plStartCellEdit('${q.id}','${f.id}')">${display}</td>`;
+        h+=`<td class="pl-cell-clickable" onclick="plStartCellEdit('${q.id}','${l.id}','${f.id}')">${display}</td>`;
       });
-      h+=`<td><div class="pl-row-actions">`;
-      h+=`<button class="pl-act-btn" onclick="plOpenEditQuote('${q.id}')" title="Éditer (modal complet)">${I.chev}</button>`;
-      h+=`<button class="pl-act-btn pl-act-del" onclick="plDeleteQuote('${q.id}')" title="Supprimer">${I.trash}</button>`;
-      h+=`</div></td>`;
+      if(firstOfGroup){
+        h+=`<td><div class="pl-row-actions">`;
+        h+=`<button class="pl-act-btn" onclick="plOpenEditQuote('${q.id}')" title="Éditer (modal complet)">${I.chev}</button>`;
+        h+=`<button class="pl-act-btn pl-act-del" onclick="plDeleteQuote('${q.id}')" title="Supprimer le devis">${I.trash}</button>`;
+        h+=`</div></td>`;
+      }else{
+        h+=`<td class="pl-td-cont"></td>`;
+      }
       h+=`</tr>`;
     });
   }
@@ -1514,8 +1636,16 @@ function plListAllProducts(){
   plEnsure();
   const set=new Set();
   Object.keys(S.priceLib.schemas).forEach(k=>set.add(k));
-  S.priceLib.quotes.forEach(q=>{if(q.product)set.add(q.product)});
+  S.priceLib.quotes.forEach(q=>{(q.lines||[]).forEach(l=>{if(l.product)set.add(l.product)});if(q.product)set.add(q.product)});
   (S.crm.products||[]).forEach(p=>set.add(p));
+  return [...set].sort((a,b)=>a.localeCompare(b));
+}
+
+// ▼ plListProjets — noms de projet distincts déjà saisis sur les devis (tri alpha ; pour l'autocomplétion de saisie)
+function plListProjets(){
+  plEnsure();
+  const set=new Set();
+  S.priceLib.quotes.forEach(q=>{const p=(q.projet||"").trim();if(p)set.add(p)});
   return [...set].sort((a,b)=>a.localeCompare(b));
 }
 
@@ -1524,11 +1654,13 @@ function plDistinctValues(prod,fieldId){
   plEnsure();
   const counts={};
   S.priceLib.quotes.forEach(q=>{
-    if(q.product!==prod)return;
-    const v=(q.values||{})[fieldId];
-    if(v==null||v==="")return;
-    const sv=String(v);
-    counts[sv]=(counts[sv]||0)+1;
+    (q.lines||[]).forEach(l=>{
+      if(l.product!==prod)return;
+      const v=(l.values||{})[fieldId];
+      if(v==null||v==="")return;
+      const sv=String(v);
+      counts[sv]=(counts[sv]||0)+1;
+    });
   });
   return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]||a.localeCompare(b));
 }
@@ -1725,6 +1857,7 @@ function rPL(){
   const nProds=plListAllProducts().length;
   const filterSup=S.plFilterSup||"";
   const filterProd=S.plFilterProd||"";
+  const filterProjet=S.plFilterProjet||"";
   const sup=filterSup?S.crm.suppliers.find(s=>s.id===filterSup):null;
   let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="plOpenNewQuote()">${I.plus} Nouveau devis</button>`;
   /* Bouton contextuel : ajouter une ligne du même type qu'affiché */
@@ -1733,7 +1866,19 @@ function rPL(){
     h+=`<button class="bp" style="margin-left:6px" onclick="plOpenNewQuote(${esc(JSON.stringify(filterSup||""))},${esc(JSON.stringify(filterProd))})">${I.plus} ${ctxLbl}</button>`;
   }
   if(nProds)h+=`<button class="bs" onclick="plOpenSchemaManager()" title="Gérer les champs par sous-catégorie">Champs (${nProds})</button>`;
-  h+=`</div><div class="bar-r"></div></div>`;
+  /* Contrôles de fusion de devis (≥ 2 devis) */
+  let barR='';
+  if(n>=2){
+    if(plMergeSel){
+      const cnt=plMergeSel.length;const ok=plMergeSameSup();
+      barR+=`<span class="pl-merge-hint">Coche les devis à fusionner — ${cnt} sélectionné(s)${cnt>=2&&!ok?' · même fournisseur requis':''}</span>`;
+      barR+=`<button class="bp" ${ok?'':'disabled'} onclick="plMergeConfirm()">Fusionner (${cnt})</button>`;
+      barR+=`<button class="bs" onclick="plMergeCancel()">Annuler</button>`;
+    }else{
+      barR+=`<button class="bs" onclick="plToggleMergeMode()" title="Regrouper plusieurs devis (même fournisseur) en une seule référence">Fusionner des devis</button>`;
+    }
+  }
+  h+=`</div><div class="bar-r">${barR}</div></div>`;
   if(!n){
     h+=`<div class="es">Aucun devis enregistré. Clique sur « ＋ Nouveau devis » pour commencer.</div>`;
     return h;
@@ -1751,6 +1896,10 @@ function rPL(){
   const prodQ=prodComboOpen?(plCombo.query||""):"";
   const supList=supComboOpen?sups.filter(s=>!supQ||s.name.toLowerCase().includes(supQ.toLowerCase())):[];
   const prodList=prodComboOpen?prodChoices.filter(p=>!prodQ||p.toLowerCase().includes(prodQ.toLowerCase())):[];
+  const projetChoices=plListProjets();
+  const projetComboOpen=plCombo&&plCombo.key==='fprojet';
+  const projetQ=projetComboOpen?(plCombo.query||""):"";
+  const projetList=projetComboOpen?projetChoices.filter(p=>!projetQ||p.toLowerCase().includes(projetQ.toLowerCase())):[];
   h+=`<div class="pl-toolbar">`;
   /* Combobox fournisseur — custom dropdown thème dark */
   h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Fournisseur</span><div class="pl-combo-wrap"><input id="pl-combo-fsup" class="pl-tb-select" placeholder="Tous" value="${esc(supComboOpen?supQ:supName)}" onfocus="plComboOpen('fsup')" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('fsup')" onkeydown="if(event.key==='Escape'){plComboClose()}else if(event.key==='Enter'){event.preventDefault();const i=document.querySelector('#pl-combo-fsup-dd .pl-combo-item:not(.reset)');if(i)i.dispatchEvent(new MouseEvent('mousedown'))}" autocomplete="off">`;
@@ -1774,7 +1923,18 @@ function rPL(){
     h+=`</div>`;
   }
   h+=`</div></div>`;
-  if(filterSup||filterProd||S.plSortBy||(S.plSearch&&Object.keys(S.plSearch).some(k=>S.plSearch[k])))h+=`<button class="pl-tb-reset" onclick="plResetFilters()">Réinitialiser</button>`;
+  /* Combobox projet */
+  h+=`<div class="pl-tb-grp"><span class="pl-tb-label">Projet</span><div class="pl-combo-wrap"><input id="pl-combo-fprojet" class="pl-tb-select" placeholder="Tous" value="${esc(projetComboOpen?projetQ:(filterProjet||""))}" onfocus="plComboOpen('fprojet')" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('fprojet')" onkeydown="if(event.key==='Escape'){plComboClose()}else if(event.key==='Enter'){event.preventDefault();const i=document.querySelector('#pl-combo-fprojet-dd .pl-combo-item:not(.reset)');if(i)i.dispatchEvent(new MouseEvent('mousedown'))}" autocomplete="off">`;
+  if(filterProjet&&!projetComboOpen)h+=`<button class="pl-combo-clear" onmousedown="event.preventDefault();plSetFilterProjet('')" title="Effacer">×</button>`;
+  if(projetComboOpen){
+    h+=`<div id="pl-combo-fprojet-dd" class="pl-combo-dropdown">`;
+    if(filterProjet)h+=`<div class="pl-combo-item reset" onmousedown="event.preventDefault();plSetFilterProjet('');plComboClose()">— Tous les projets —</div>`;
+    if(!projetList.length)h+=`<div class="pl-combo-empty">Aucun projet saisi</div>`;
+    else projetList.forEach(p=>{h+=`<div class="pl-combo-item ${filterProjet===p?'selected':''}" onmousedown="event.preventDefault();plCombo=null;plSetFilterProjet(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
+  if(filterSup||filterProd||filterProjet||S.plSortBy||(S.plSearch&&Object.keys(S.plSearch).some(k=>S.plSearch[k])))h+=`<button class="pl-tb-reset" onclick="plResetFilters()">Réinitialiser</button>`;
   h+=`<span class="pl-tb-count" id="pl-count">${n} devis</span>`;
   h+=`</div>`;
   h+=`<div class="pl-table-wrap"><div id="pl-table-host"></div></div>`;
@@ -1807,7 +1967,7 @@ function plRenderModal(){
   }else{
     const q=(st.supplierQuery||"").trim();
     const ql=q.toLowerCase();
-    const presetProd=st.product||"";
+    const presetProd=((st.lines||[]).find(l=>(l.product||"").trim())||{}).product||"";
     const presetProdL=presetProd.toLowerCase();
     /* Si une sous-cat est preset, on sépare en 2 groupes : ceux qui la proposent, et les autres CRM (dont le pick auto-linkera la sous-cat) */
     let primary=[],secondary=[];
@@ -1840,67 +2000,98 @@ function plRenderModal(){
     h+=`</div>`;
   }
   h+=`</div>`;
-  /* Sous-catégorie — recherche live filtrée par fournisseur, création inline */
+  /* Projet (niveau devis) — combobox autocomplété sur les projets déjà saisis */
+  {
+    const pj=st.projet||"";
+    const psg=plListProjets().filter(s=>s.toLowerCase()!==pj.toLowerCase()).slice(0,8);
+    h+=`<div class="pl-row"><label class="pl-lbl">Projet</label><div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-projet" type="text" class="pl-input" placeholder="Projet associé (optionnel)…" value="${esc(pj)}" autocomplete="off" oninput="plSetProjet(this.value)">`;
+    if(psg.length)h+=`<div class="pl-combo-dropdown">${psg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plSetProjet(${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+    h+=`</div></div>`;
+  }
+  /* Lignes d'équipement — un devis = N lignes (sous-cat + champs). Visible une fois le fournisseur choisi. */
   if(st.supplierId){
-    const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
-    h+=`<div class="pl-row"><label class="pl-lbl">Sous-catégorie</label>`;
-    if(st.product){
-      h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(st.product)}</span><button class="pl-pill-clear" onclick="plClearProduct()" title="Changer">×</button></span></div>`;
-    }else{
-      const q=(st.productQuery||"").trim();
-      const ql=q.toLowerCase();
-      const prods=sup?sup.products:[];
-      const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql)).sort((a,b)=>a.localeCompare(b));
-      const exact=q&&prods.some(p=>p.toLowerCase()===ql);
-      h+=`<input id="pl-prod-search" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(q)}" oninput="plSearchProduct(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter()}" autocomplete="off">`;
-      h+=`<div class="pl-search-list">`;
-      if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucune sous-catégorie pour ce fournisseur. Tape un nom pour en créer une.</div>`;
-      matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickProduct(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
-      if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)… affine ta recherche</div>`;
-      if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickProduct(${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
-      h+=`</div>`;
-    }
+    h+=`<div class="pl-lines"><div class="pl-lines-hd">Équipements du devis</div>`;
+    (st.lines||[]).forEach((line,idx)=>{h+=plRenderLineCard(line,idx,st)});
+    h+=`<button class="pl-add-line" onclick="plAddLine()">＋ Ajouter un équipement</button>`;
     h+=`</div>`;
   }
-  /* Formulaire dynamique */
-  if(st.product){
+  if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
+  /* Actions */
+  const canSave=st.date&&st.supplierId&&(st.lines||[]).some(l=>(l.product||"").trim());
+  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseModal()">Annuler</button><button class="pl-btn pl-btn-primary" ${canSave?'':'disabled'} onclick="plSaveQuote()">Enregistrer</button></div>`;
+  h+=`</div></div>`;
+  host.innerHTML=h;
+  /* Focus restore après re-render */
+  if(focusId){
+    const el=document.getElementById(focusId);
+    if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}
+  }else{
+    /* Auto-focus sur la première search visible si rien n'est focused */
+    const auto=document.getElementById('pl-sup-search')||document.querySelector('[id^="pl-prod-search-"]')||document.getElementById('pl-draft-name');
+    if(auto)auto.focus();
+  }
+}
+
+// ▼ plRenderLineCard — rend une ligne d'équipement du devis (sous-cat scopée + champs dynamiques). lineId encode tous les handlers.
+function plRenderLineCard(line,idx,st){
+  const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
+  const multi=(st.lines||[]).length>1;
+  let h=`<div class="pl-line-card">`;
+  h+=`<div class="pl-line-hd"><span class="pl-line-num">Équipement ${idx+1}</span>${multi?`<button class="pl-line-del" onclick="plRemoveLine('${line.id}')" title="Retirer cette ligne">×</button>`:''}</div>`;
+  /* Sous-catégorie */
+  h+=`<div class="pl-row"><label class="pl-lbl">Sous-catégorie</label>`;
+  if(line.product){
+    h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(line.product)}</span><button class="pl-pill-clear" onclick="plClearProduct('${line.id}')" title="Changer">×</button></span></div>`;
+  }else{
+    const q=(line.productQuery||"").trim();
+    const ql=q.toLowerCase();
+    const prods=sup?sup.products:[];
+    const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql)).sort((a,b)=>a.localeCompare(b));
+    const exact=q&&prods.some(p=>p.toLowerCase()===ql);
+    h+=`<input id="pl-prod-search-${line.id}" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(q)}" oninput="plSearchProduct('${line.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter('${line.id}')}" autocomplete="off">`;
+    h+=`<div class="pl-search-list">`;
+    if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucune sous-catégorie pour ce fournisseur. Tape un nom pour en créer une.</div>`;
+    matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickProduct('${line.id}',${esc(JSON.stringify(p))})">${esc(p)}</div>`});
+    if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)… affine ta recherche</div>`;
+    if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickProduct('${line.id}',${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+  /* Formulaire dynamique de la sous-cat */
+  if(line.product){
     plEnsure();
-    const schema=S.priceLib.schemas[st.product]||[];
-    h+=`<div class="pl-fields"><div class="pl-fields-hd">Champs « ${esc(st.product)} »</div>`;
-    if(!schema.length&&!st.fieldDraft)h+=`<div class="pl-fields-empty">Aucun champ défini. Ajoute un premier champ ci-dessous.</div>`;
+    const schema=S.priceLib.schemas[line.product]||[];
+    const draftHere=st.fieldDraft&&st.fieldDraft.lineId===line.id;
+    h+=`<div class="pl-fields"><div class="pl-fields-hd">Champs « ${esc(line.product)} »</div>`;
+    if(!schema.length&&!draftHere)h+=`<div class="pl-fields-empty">Aucun champ défini. Ajoute un premier champ ci-dessous.</div>`;
     schema.forEach(f=>{
-      const v=st.values[f.id]||"";
+      const v=line.values[f.id]||"";
       h+=`<div class="pl-field-row"><label>${esc(f.name)}</label>`;
       if(f.type==='number'){
-        h+=`<input id="pl-val-${esc(f.id)}" type="number" step="any" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)">`;
+        h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="number" step="any" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
         if(f.unit)h+=`<span class="pl-unit">${esc(f.unit)}</span>`;
       }else if(f.type==='date'){
-        h+=`<input id="pl-val-${esc(f.id)}" type="date" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)">`;
+        h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="date" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
       }else if(f.type==='select'){
-        h+=`<select id="pl-val-${esc(f.id)}" class="pl-select" onchange="plSetValue('${f.id}',this.value)"><option value="">—</option>`;
+        h+=`<select id="pl-val-${line.id}-${esc(f.id)}" class="pl-select" onchange="plSetValue('${line.id}','${f.id}',this.value)"><option value="">—</option>`;
         (f.options||[]).forEach(o=>{h+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});
         h+=`</select>`;
       }else{
-        /* Texte : combobox custom thème dark sur les valeurs déjà saisies pour ce champ + sous-cat */
-        const mKey=`mval-${f.id}`;
-        const mOpen=plCombo&&plCombo.key===mKey;
-        const mQ=mOpen?(plCombo.query==null?(v||""):plCombo.query):v;
-        const sugs=plDistinctValues(st.product,f.id);
-        const filtered=mOpen?sugs.filter(s=>!mQ||s.toLowerCase().includes((mQ||"").toLowerCase())):[];
-        h+=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(mQ||"")}" autocomplete="off" onfocus="plComboOpen('${mKey}')" oninput="plComboSetQuery(this.value);plSetValue('${f.id}',this.value)" onblur="plComboBlurClose('${mKey}')">`;
-        if(mOpen&&filtered.length)h+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetValue('${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+        /* Texte : saisie 100% native (aucun re-render au focus/clavier) ; suggestions affichées au focus via CSS :focus-within */
+        const cur=(v==null?"":String(v));
+        const sg=plDistinctValues(line.product,f.id).filter(s=>s.toLowerCase()!==cur.toLowerCase()).slice(0,8);
+        h+=`<div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-val-${line.id}-${esc(f.id)}" type="text" class="pl-input" value="${esc(cur)}" autocomplete="off" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
+        if(sg.length)h+=`<div class="pl-combo-dropdown">${sg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plSetValue('${line.id}','${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
         h+=`</div>`;
       }
-      h+=`<button class="pl-field-del" onclick="plDelField('${f.id}')" title="Supprimer ce champ">×</button></div>`;
+      h+=`<button class="pl-field-del" onclick="plDelField('${line.id}','${f.id}')" title="Supprimer ce champ">×</button></div>`;
     });
-    if(st.fieldDraft){
+    if(draftHere){
       const fd=st.fieldDraft;
       h+=`<div class="pl-fielddraft">`;
-      /* Input nom + type — re-render après chaque caractère pour rafraîchir les suggestions */
       h+=`<div class="pl-fielddraft-row"><input id="pl-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSetDraftField('name',this.value);plRenderModal()"><select class="pl-select" onchange="plSetDraftField('type',this.value);plRenderModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
-      /* Suggestions de champs existants (autres sous-cats) */
       const dQ=(fd.name||"").trim().toLowerCase();
-      const inCurrent=new Set((S.priceLib.schemas[st.product]||[]).map(f=>(f.name||"").toLowerCase()));
+      const inCurrent=new Set((S.priceLib.schemas[line.product]||[]).map(f=>(f.name||"").toLowerCase()));
       const suggestions=dQ?plListAllFields().filter(f=>!inCurrent.has(f.name.toLowerCase())&&f.name.toLowerCase().includes(dQ)).slice(0,5):[];
       if(suggestions.length){
         h+=`<div style="margin:6px 0;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);border-radius:5px;padding:4px 6px">`;
@@ -1915,25 +2106,12 @@ function plRenderModal(){
       h+=`<div class="pl-fielddraft-row"><button class="pl-mini-btn cancel" onclick="plCancelFieldDraft()">Annuler</button><button class="pl-mini-btn" onclick="plConfirmFieldDraft()">Ajouter le champ</button></div>`;
       h+=`</div>`;
     }else{
-      h+=`<div style="margin-top:8px"><button class="pl-mini-btn" onclick="plOpenFieldDraft()">＋ Ajouter un champ</button></div>`;
+      h+=`<div style="margin-top:8px"><button class="pl-mini-btn" onclick="plOpenFieldDraft('${line.id}')">＋ Ajouter un champ</button></div>`;
     }
     h+=`</div>`;
   }
-  if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
-  /* Actions */
-  const canSave=st.date&&st.supplierId&&st.product;
-  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseModal()">Annuler</button><button class="pl-btn pl-btn-primary" ${canSave?'':'disabled'} onclick="plSaveQuote()">Enregistrer</button></div>`;
-  h+=`</div></div>`;
-  host.innerHTML=h;
-  /* Focus restore après re-render */
-  if(focusId){
-    const el=document.getElementById(focusId);
-    if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}
-  }else{
-    /* Auto-focus sur la première search visible si rien n'est focused */
-    const auto=document.getElementById('pl-sup-search')||document.getElementById('pl-prod-search')||document.getElementById('pl-draft-name');
-    if(auto)auto.focus();
-  }
+  h+=`</div>`; /* .pl-line-card */
+  return h;
 }
 
 /* ── Feedback / Notes ── */
