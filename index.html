@@ -396,6 +396,11 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-field-row label{font-size:11px;color:#CBD5E1;min-width:140px;flex-shrink:0;font-weight:600}
 .pl-field-row .pl-input,.pl-field-row .pl-select{flex:1}
 .pl-field-row .pl-unit{color:#64748B;font-size:11px;flex-shrink:0;font-weight:600;min-width:auto;padding-left:2px}
+/* Champ nombre : unité en suffixe intégré + alignement à droite (style ERP) */
+.pl-num-wrap{position:relative;flex:1;min-width:0}
+.pl-num-wrap .pl-num{width:100%;text-align:right;font-variant-numeric:tabular-nums}
+.pl-num-wrap.has-unit .pl-num{padding-right:40px}
+.pl-num-unit{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;color:#64748B;pointer-events:none;letter-spacing:.2px}
 .pl-field-del{cursor:pointer;color:#334155;font-size:12px;flex-shrink:0;padding:2px 5px;border-radius:3px;border:none;background:transparent;transition:all .12s;font-family:inherit;line-height:1}
 .pl-field-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
 .pl-fielddraft{padding:10px;background:rgba(0,0,0,.25);border:1px dashed #2A3A52;border-radius:6px;margin-top:8px}
@@ -1613,6 +1618,9 @@ function plDateFR(iso){if(!iso||typeof iso!=='string')return "";const m=iso.matc
 // ▼ plFormatNumber — format FR avec séparateur de milliers ; passe-plat si non numérique
 function plFormatNumber(v){if(v===""||v===null||v===undefined)return "";const n=parseFloat(v);if(isNaN(n))return String(v);return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).format(n)}
 
+// ▼ plNumClean — string saisie (espaces/virgule) → chaîne numérique canonique pour stockage (point décimal, sans espaces). "" si vide.
+function plNumClean(s){if(s==null)return "";return String(s).replace(/\s| | /g,'').replace(',','.').replace(/[^0-9.\-]/g,'')}
+
 // ▼ plCopyText — copie dans le presse-papier (avec fallback execCommand)
 function plCopyText(t){
   if(!t)return;
@@ -2067,8 +2075,10 @@ function plRenderLineCard(line,idx,st){
       const v=line.values[f.id]||"";
       h+=`<div class="pl-field-row"><label>${esc(f.name)}</label>`;
       if(f.type==='number'){
-        h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="number" step="any" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
-        if(f.unit)h+=`<span class="pl-unit">${esc(f.unit)}</span>`;
+        /* Texte formaté : affiché « 69 563 » au repos, brut à l'édition (format au blur → pas de saut de curseur). Stocke le nombre brut. */
+        h+=`<div class="pl-num-wrap${f.unit?' has-unit':''}"><input id="pl-val-${line.id}-${esc(f.id)}" type="text" inputmode="decimal" class="pl-input pl-num" value="${esc(plFormatNumber(v))}" placeholder="0" autocomplete="off" onfocus="this.value=plNumClean(this.value)" oninput="plSetValue('${line.id}','${f.id}',plNumClean(this.value))" onblur="var n=plNumClean(this.value);plSetValue('${line.id}','${f.id}',n);this.value=plFormatNumber(n)">`;
+        if(f.unit)h+=`<span class="pl-num-unit">${esc(f.unit)}</span>`;
+        h+=`</div>`;
       }else if(f.type==='date'){
         h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="date" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
       }else if(f.type==='select'){
