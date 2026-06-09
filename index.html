@@ -489,6 +489,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-combo-wrap{position:relative;display:inline-block;min-width:130px}
 .pl-combo-wrap.pl-combo-block{display:block;width:100%;min-width:0}
 .pl-combo-dropdown{position:absolute;top:100%;left:0;right:0;margin-top:2px;background:#162032;border:1px solid #2A3A52;border-radius:6px;max-height:220px;overflow-y:auto;z-index:60;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+/* Combobox "statique" : suggestions affichées uniquement au focus, via CSS (aucun re-render JS au clavier → saisie native fiable) */
+.pl-combo-static .pl-combo-dropdown{display:none}
+.pl-combo-static:focus-within .pl-combo-dropdown{display:block}
 .pl-combo-item{padding:7px 10px;font-size:11px;color:#CBD5E1;cursor:pointer;border-top:1px solid #1E3050}
 .pl-combo-item:first-child{border-top:none}
 .pl-combo-item:hover{background:rgba(56,189,248,.08);color:#E2E8F0}
@@ -1356,7 +1359,7 @@ function plDeleteQuote(id){
 let plMergeSel=null;
 function plToggleMergeMode(){plMergeSel=plMergeSel?null:[];render()}
 function plMergeCancel(){plMergeSel=null;render()}
-function plMergeToggle(qid){if(!plMergeSel)return;const i=plMergeSel.indexOf(qid);if(i>=0)plMergeSel.splice(i,1);else plMergeSel.push(qid);plRenderTable()}
+function plMergeToggle(qid){if(!plMergeSel)return;const i=plMergeSel.indexOf(qid);if(i>=0)plMergeSel.splice(i,1);else plMergeSel.push(qid);render()}
 // ▼ plMergeSameSup — les devis sélectionnés partagent-ils le même fournisseur (≥2) ? (condition de fusion)
 function plMergeSameSup(){
   if(!plMergeSel||plMergeSel.length<2)return false;
@@ -1573,15 +1576,12 @@ function plRenderTable(){
           else if(f.type==='date')inputHtml=`<input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(v||"")}" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">`;
           else if(f.type==='select'){let opts=`<option value="">—</option>`;(f.options||[]).forEach(o=>{opts+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});inputHtml=`<select id="pl-edit-cell" class="pl-cell-input" onchange="${commitJS}" onblur="${blurJS}" onkeydown="${kbJS}">${opts}</select>`}
           else{
-            /* Texte : combobox custom thème dark — dropdown des valeurs déjà saisies pour ce champ + sous-cat */
-            const cKey=`cell-${q.id}-${l.id}-${f.id}`;
-            const cOpen=plCombo&&plCombo.key===cKey;
-            const cQ=cOpen?(plCombo.query==null?(v==null?"":String(v)):plCombo.query):(v==null?"":String(v));
-            const sugs=plDistinctValues(l.product,f.id);
-            const filtered=cOpen?sugs.filter(s=>!cQ||s.toLowerCase().includes(cQ.toLowerCase())):[];
-            const ddJS=`onfocus="plComboOpen('${cKey}');this.select&&this.select()" oninput="plComboSetQuery(this.value)" onblur="plComboBlurClose('${cKey}');${blurJS}" onkeydown="${kbJS}"`;
-            inputHtml=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(cQ)}" autocomplete="off" ${ddJS}>`;
-            if(cOpen&&filtered.length)inputHtml+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plCommitCellEdit('${q.id}','${l.id}','${f.id}',${esc(JSON.stringify(s))})">${esc(s)}</div>`).join('')}</div>`;
+            /* Texte : saisie native (aucun re-render au clavier) ; commit au blur ; suggestions au focus via CSS :focus-within */
+            const cur=(v==null?"":String(v));
+            const sg=plDistinctValues(l.product,f.id).filter(s=>s.toLowerCase()!==cur.toLowerCase()).slice(0,8);
+            const ddJS=`onfocus="this.select&&this.select()" onblur="${blurJS}" onkeydown="${kbJS}"`;
+            inputHtml=`<div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-edit-cell" type="text" class="pl-cell-input" value="${esc(cur)}" autocomplete="off" ${ddJS}>`;
+            if(sg.length)inputHtml+=`<div class="pl-combo-dropdown">${sg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCommitCellEdit('${q.id}','${l.id}','${f.id}',${esc(JSON.stringify(s))})">${esc(s)}</div>`).join('')}</div>`;
             inputHtml+=`</div>`;
           }
           h+=`<td class="pl-cell-editing">${inputHtml}</td>`;
@@ -2003,13 +2003,9 @@ function plRenderModal(){
   /* Projet (niveau devis) — combobox autocomplété sur les projets déjà saisis */
   {
     const pj=st.projet||"";
-    const pKey='pprojet';
-    const pOpen=plCombo&&plCombo.key===pKey;
-    const pQ=pOpen?(plCombo.query==null?pj:plCombo.query):pj;
-    const psug=plListProjets();
-    const pfiltered=pOpen?psug.filter(s=>!pQ||s.toLowerCase().includes(pQ.toLowerCase())):[];
-    h+=`<div class="pl-row"><label class="pl-lbl">Projet</label><div class="pl-combo-wrap pl-combo-block"><input id="pl-projet" type="text" class="pl-input" placeholder="Projet associé (optionnel)…" value="${esc(pQ)}" autocomplete="off" onfocus="plComboOpen('${pKey}')" oninput="plComboSetQuery(this.value);plSetProjet(this.value)" onblur="plComboBlurClose('${pKey}')">`;
-    if(pOpen&&pfiltered.length)h+=`<div class="pl-combo-dropdown">${pfiltered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetProjet(${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+    const psg=plListProjets().filter(s=>s.toLowerCase()!==pj.toLowerCase()).slice(0,8);
+    h+=`<div class="pl-row"><label class="pl-lbl">Projet</label><div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-projet" type="text" class="pl-input" placeholder="Projet associé (optionnel)…" value="${esc(pj)}" autocomplete="off" oninput="plSetProjet(this.value)">`;
+    if(psg.length)h+=`<div class="pl-combo-dropdown">${psg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plSetProjet(${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
     h+=`</div></div>`;
   }
   /* Lignes d'équipement — un devis = N lignes (sous-cat + champs). Visible une fois le fournisseur choisi. */
@@ -2081,14 +2077,11 @@ function plRenderLineCard(line,idx,st){
         (f.options||[]).forEach(o=>{h+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});
         h+=`</select>`;
       }else{
-        /* Texte : combobox custom thème dark sur les valeurs déjà saisies pour ce champ + sous-cat */
-        const mKey=`mval-${line.id}-${f.id}`;
-        const mOpen=plCombo&&plCombo.key===mKey;
-        const mQ=mOpen?(plCombo.query==null?(v||""):plCombo.query):v;
-        const sugs=plDistinctValues(line.product,f.id);
-        const filtered=mOpen?sugs.filter(s=>!mQ||s.toLowerCase().includes((mQ||"").toLowerCase())):[];
-        h+=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-val-${line.id}-${esc(f.id)}" type="text" class="pl-input" value="${esc(mQ||"")}" autocomplete="off" onfocus="plComboOpen('${mKey}')" oninput="plComboSetQuery(this.value);plSetValue('${line.id}','${f.id}',this.value)" onblur="plComboBlurClose('${mKey}')">`;
-        if(mOpen&&filtered.length)h+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetValue('${line.id}','${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+        /* Texte : saisie 100% native (aucun re-render au focus/clavier) ; suggestions affichées au focus via CSS :focus-within */
+        const cur=(v==null?"":String(v));
+        const sg=plDistinctValues(line.product,f.id).filter(s=>s.toLowerCase()!==cur.toLowerCase()).slice(0,8);
+        h+=`<div class="pl-combo-wrap pl-combo-block pl-combo-static"><input id="pl-val-${line.id}-${esc(f.id)}" type="text" class="pl-input" value="${esc(cur)}" autocomplete="off" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
+        if(sg.length)h+=`<div class="pl-combo-dropdown">${sg.map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plSetValue('${line.id}','${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
         h+=`</div>`;
       }
       h+=`<button class="pl-field-del" onclick="plDelField('${line.id}','${f.id}')" title="Supprimer ce champ">×</button></div>`;
