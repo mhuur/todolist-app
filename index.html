@@ -1712,8 +1712,8 @@ function plRenderTable(){
         const cr=plLineColVal(l,'ref'),cq=plLineColVal(l,'qte'),cp=plLineColVal(l,'prix');
         const refTxt=(cr&&cr.v!=null&&cr.v!=="")?String(cr.v):"";
         h+=`<td class="pl-td-eqref" title="${esc(refTxt)}">${esc(refTxt||"—")}</td>`;
-        const qteTxt=(cq&&cq.v!=null&&cq.v!=="")?(cq.f.type==='number'?plFormatNumber(cq.v):String(cq.v)):"";
-        h+=`<td class="pl-td-qte">${esc(qteTxt||"—")}</td>`;
+        const qteTxt=(cq&&cq.v!=null&&cq.v!=="")?(cq.f.type==='number'?plFormatNumber(cq.v):String(cq.v)):"1"; /* Qté = 1 par défaut si non précisée */
+        h+=`<td class="pl-td-qte">${esc(qteTxt)}</td>`;
         let prixTxt="";if(cp&&cp.v!=null&&cp.v!==""){prixTxt=plFormatNumber(cp.v)+(cp.f.unit?" "+cp.f.unit:" €")}
         h+=`<td class="pl-td-prix">${prixTxt?esc(prixTxt):"—"}</td>`;
       }
@@ -1774,10 +1774,11 @@ function plFormatNumber(v){if(v===""||v===null||v===undefined)return "";const n=
 function plLineColVal(line,kind){
   const schema=S.priceLib.schemas[line&&line.product]||[];
   const norm=s=>(s||"").toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const pick=(exacts,contains)=>{for(const c of exacts){const f=schema.find(x=>norm(x.name)===c);if(f)return f}if(contains)for(const c of contains){const f=schema.find(x=>norm(x.name).indexOf(c)>=0);if(f)return f}return null};
   let f=null;
-  if(kind==='prix')f=schema.find(x=>norm(x.name)==='prix')||schema.find(x=>norm(x.name).indexOf('prix')>=0);
-  else if(kind==='qte')f=schema.find(x=>{const n=norm(x.name);return n==='quantite'||n==='qte'})||schema.find(x=>norm(x.name).indexOf('quantite')>=0);
-  else if(kind==='ref')f=schema.find(x=>norm(x.name)==='reference')||schema.find(x=>norm(x.name)==='ref');
+  if(kind==='prix')f=pick(['prix'],['prix']);
+  else if(kind==='qte')f=pick(['quantite','qte'],['quantite']);
+  else if(kind==='ref')f=pick(['reference','ref','modele','code'],['reference','modele']);
   if(!f)return null;
   return {f:f,v:(line.values||{})[f.id]};
 }
