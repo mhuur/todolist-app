@@ -402,6 +402,16 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-fielddraft-row:last-child{margin-bottom:0;justify-content:flex-end}
 .pl-fielddraft .pl-input,.pl-fielddraft .pl-select{flex:1;min-width:120px;width:auto}
 .pl-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #1E3050}
+/* Lignes d'équipement (devis multi-lignes) */
+.pl-lines{margin-top:6px}
+.pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.pl-line-card{border:1px solid #243650;border-radius:8px;padding:10px 12px;margin-bottom:9px;background:rgba(255,255,255,.012)}
+.pl-line-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pl-line-num{font-size:9px;font-weight:800;color:#5CB8F0;letter-spacing:.6px;text-transform:uppercase}
+.pl-line-del{cursor:pointer;color:#475569;font-size:16px;line-height:1;border:none;background:transparent;padding:0 4px;border-radius:4px;font-family:inherit;transition:all .12s}
+.pl-line-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
+.pl-add-line{width:100%;padding:7px 10px;font-size:11px;font-weight:700;border-radius:7px;border:1px dashed rgba(92,184,240,.4);background:transparent;color:#5CB8F0;cursor:pointer;font-family:inherit;transition:all .12s}
+.pl-add-line:hover{background:rgba(92,184,240,.08);border-color:#5CB8F0;border-style:solid}
 .pl-btn{padding:7px 16px;font-size:12px;font-weight:700;font-family:inherit;border-radius:6px;cursor:pointer;transition:all .15s;border:none}
 .pl-btn-secondary{background:transparent;color:#64748B;border:1px solid #2A3A52}
 .pl-btn-secondary:hover{color:#E2E8F0;border-color:#475569}
@@ -1103,11 +1113,21 @@ function crmCreateSupForProd(pname,sname){const s={id:gid(),name:sname,products:
 function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.preferred[pname])S.crm.preferred[pname]=[];const i=S.crm.preferred[pname].indexOf(sid);if(i===-1)S.crm.preferred[pname].push(sid);else S.crm.preferred[pname].splice(i,1);save();render()}
 
 /* ── Bibliothèque de prix ── */
-// ▼ plEnsure — garde anti-corruption sur S.priceLib
+// ▼ plEnsure — garde anti-corruption sur S.priceLib + migration vers le modèle devis→lignes (un devis porte N lignes d'équipement, cf. plMigrateLines)
 function plEnsure(){
   if(!S.priceLib||typeof S.priceLib!=='object')S.priceLib={schemas:{},quotes:[]};
   if(!S.priceLib.schemas||typeof S.priceLib.schemas!=='object')S.priceLib.schemas={};
   if(!Array.isArray(S.priceLib.quotes))S.priceLib.quotes=[];
+  S.priceLib.quotes.forEach(plMigrateLines);
+}
+
+// ▼ plMigrateLines — migration idempotente d'un devis vers le modèle à lignes. ADDITIF en étape 1 : on crée q.lines[] + q.projet sans supprimer q.product/q.values (legacy, lus encore par le modal/table jusqu'à l'étape 3). Une ligne = {id, product, values:{}}.
+function plMigrateLines(q){
+  if(!q||typeof q!=='object')return;
+  if(typeof q.projet!=='string')q.projet="";
+  if(!Array.isArray(q.lines)){
+    q.lines=[{id:gid(),product:q.product||"",values:(q.values&&typeof q.values==='object')?q.values:{}}];
+  }
 }
 
 // ▼ plSlugSupplier — nom fournisseur → slug ASCII uppercase tirets, max 30
@@ -1133,10 +1153,13 @@ function plToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMon
 /* État du modal — transient (NON persisté) */
 let plModalState=null;
 
-// ▼ plOpenNewQuote — initialise état modal pour création (presets optionnels depuis les filtres actifs)
+// ▼ plNewLine — fabrique une ligne d'équipement vierge pour le modal (product optionnel)
+function plNewLine(product){return {id:gid(),product:product||"",productQuery:"",values:{}}}
+
+// ▼ plOpenNewQuote — initialise état modal pour création (presets optionnels depuis les filtres actifs). Un devis = N lignes (cf. plMigrateLines).
 function plOpenNewQuote(presetSupId,presetProduct){
   plEnsure();
-  plModalState={editingId:null,date:plToday(),supplierId:presetSupId||"",supplierQuery:"",product:presetProduct||"",productQuery:"",values:{},fieldDraft:null,err:""};
+  plModalState={editingId:null,date:plToday(),supplierId:presetSupId||"",supplierQuery:"",projet:"",lines:[plNewLine(presetProduct||"")],fieldDraft:null,err:""};
   plRenderModal();
 }
 
@@ -1145,7 +1168,9 @@ function plOpenEditQuote(id){
   plEnsure();
   const q=S.priceLib.quotes.find(x=>x.id===id);
   if(!q)return;
-  plModalState={editingId:q.id,date:q.date||plToday(),supplierId:q.supplierId||"",supplierQuery:"",product:q.product||"",productQuery:"",values:Object.assign({},q.values||{}),fieldDraft:null,err:""};
+  const srcLines=(Array.isArray(q.lines)&&q.lines.length)?q.lines:[{id:gid(),product:q.product||"",values:q.values||{}}];
+  const lines=srcLines.map(l=>({id:l.id||gid(),product:l.product||"",productQuery:"",values:Object.assign({},l.values||{})}));
+  plModalState={editingId:q.id,date:q.date||plToday(),supplierId:q.supplierId||"",supplierQuery:"",projet:q.projet||"",lines:lines,fieldDraft:null,err:""};
   plRenderModal();
 }
 
@@ -1155,6 +1180,17 @@ function plCloseModal(){plModalState=null;document.getElementById('pl-host').inn
 // ▼ plSetField — mute state sans re-render (oninput texte/date)
 function plSetField(k,v){if(!plModalState)return;plModalState[k]=v}
 
+// ▼ Lignes du devis — helpers
+function plGetLine(lineId){if(!plModalState)return null;return (plModalState.lines||[]).find(l=>l.id===lineId)||null}
+function plAddLine(){if(!plModalState)return;plModalState.lines.push(plNewLine(""));plModalState.err="";plRenderModal()}
+function plRemoveLine(lineId){
+  if(!plModalState)return;
+  if(plModalState.lines.length<=1)return; /* toujours ≥ 1 ligne */
+  plModalState.lines=plModalState.lines.filter(l=>l.id!==lineId);
+  if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;
+  plRenderModal();
+}
+
 // ▼ Cascade fournisseur — recherche live, création inline si pas de match
 function plSearchSupplier(q){if(!plModalState)return;plModalState.supplierQuery=q;plRenderModal()}
 function plPickSupplier(id){
@@ -1162,16 +1198,15 @@ function plPickSupplier(id){
   const st=plModalState;
   const sup=S.crm.suppliers.find(s=>s.id===id);
   if(!sup)return;
-  /* Si une sous-cat est déjà choisie (flux preset) et que ce fournisseur ne la propose pas → auto-link CRM */
-  if(st.product&&!sup.products.some(p=>p.toLowerCase()===st.product.toLowerCase())){
-    sup.products.push(st.product);
-    if(!S.crm.products.some(p=>p.toLowerCase()===st.product.toLowerCase()))S.crm.products.push(st.product);
-    save();
-  }
-  st.supplierId=id;st.supplierQuery="";
-  /* Reset product UNIQUEMENT si pas de preset (flux normal supplier-first) */
-  if(!st.product){st.productQuery="";st.values={};st.fieldDraft=null}
-  st.err="";
+  /* Auto-link CRM : toute sous-cat déjà présente sur une ligne (flux preset) que ce fournisseur ne propose pas encore */
+  let dirty=false;
+  (st.lines||[]).forEach(l=>{
+    const p=(l.product||"").trim();if(!p)return;
+    if(!sup.products.some(x=>x.toLowerCase()===p.toLowerCase())){sup.products.push(p);dirty=true}
+    if(!S.crm.products.some(x=>x.toLowerCase()===p.toLowerCase())){S.crm.products.push(p);dirty=true}
+  });
+  if(dirty)save();
+  st.supplierId=id;st.supplierQuery="";st.err="";
   plRenderModal();
 }
 function plClearSupplier(){if(!plModalState)return;plModalState.supplierId="";plModalState.supplierQuery="";plModalState.err="";plRenderModal()}
@@ -1196,46 +1231,49 @@ function plPickSupplierEnter(){
   plCreateAndPickSupplier(q);
 }
 
-// ▼ Cascade sous-catégorie — recherche live filtrée par fournisseur, création inline
-function plSearchProduct(q){if(!plModalState)return;plModalState.productQuery=q;plRenderModal()}
-function plPickProduct(name){if(!plModalState)return;plModalState.product=name;plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plClearProduct(){if(!plModalState)return;plModalState.product="";plModalState.productQuery="";plModalState.values={};plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
-function plCreateAndPickProduct(name){
+// ▼ Cascade sous-catégorie — recherche live filtrée par fournisseur, création inline. Scopée par ligne (lineId).
+function plSearchProduct(lineId,q){const l=plGetLine(lineId);if(!l)return;l.productQuery=q;plRenderModal()}
+function plPickProduct(lineId,name){const l=plGetLine(lineId);if(!l)return;l.product=name;l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plClearProduct(lineId){const l=plGetLine(lineId);if(!l)return;l.product="";l.productQuery="";l.values={};if(plModalState.fieldDraft&&plModalState.fieldDraft.lineId===lineId)plModalState.fieldDraft=null;plModalState.err="";plRenderModal()}
+function plCreateAndPickProduct(lineId,name){
   if(!plModalState||!plModalState.supplierId)return;
   name=(name||"").trim();
   if(!name)return;
   const sup=S.crm.suppliers.find(s=>s.id===plModalState.supplierId);
   if(!sup)return;
   const existing=sup.products.find(p=>p.toLowerCase()===name.toLowerCase());
-  if(existing){plPickProduct(existing);return}
+  if(existing){plPickProduct(lineId,existing);return}
   sup.products.push(name);
   if(!S.crm.products.some(p=>p.toLowerCase()===name.toLowerCase()))S.crm.products.push(name);
   save();
-  plPickProduct(name);
+  plPickProduct(lineId,name);
 }
-function plPickProductEnter(){
+function plPickProductEnter(lineId){
   if(!plModalState||!plModalState.supplierId)return;
-  const q=(plModalState.productQuery||"").trim();if(!q)return;
+  const l=plGetLine(lineId);if(!l)return;
+  const q=(l.productQuery||"").trim();if(!q)return;
   const sup=S.crm.suppliers.find(s=>s.id===plModalState.supplierId);if(!sup)return;
   const ql=q.toLowerCase();
   const exact=sup.products.find(p=>p.toLowerCase()===ql);
-  if(exact){plPickProduct(exact);return}
+  if(exact){plPickProduct(lineId,exact);return}
   const matches=sup.products.filter(p=>p.toLowerCase().includes(ql));
-  if(matches.length===1){plPickProduct(matches[0]);return}
-  plCreateAndPickProduct(q);
+  if(matches.length===1){plPickProduct(lineId,matches[0]);return}
+  plCreateAndPickProduct(lineId,q);
 }
 
-// ▼ plOpenFieldDraft / plCancelFieldDraft / plConfirmFieldDraft — mini form-builder
-function plOpenFieldDraft(){if(!plModalState)return;plModalState.fieldDraft={name:"",type:"number",unit:"",options:""};plRenderModal()}
+// ▼ plOpenFieldDraft / plCancelFieldDraft / plConfirmFieldDraft — mini form-builder, ciblé sur la sous-cat d'une ligne (lineId)
+function plOpenFieldDraft(lineId){if(!plModalState)return;plModalState.fieldDraft={lineId:lineId,name:"",type:"number",unit:"",options:""};plRenderModal()}
 function plCancelFieldDraft(){if(!plModalState)return;plModalState.fieldDraft=null;plRenderModal()}
 function plSetDraftField(k,v){if(!plModalState||!plModalState.fieldDraft)return;plModalState.fieldDraft[k]=v}
 function plConfirmFieldDraft(){
-  if(!plModalState||!plModalState.fieldDraft||!plModalState.product)return;
+  if(!plModalState||!plModalState.fieldDraft)return;
+  const line=plGetLine(plModalState.fieldDraft.lineId);
+  if(!line||!line.product)return;
   plEnsure();
   const fd=plModalState.fieldDraft;
   const name=(fd.name||"").trim();
   if(!name){plModalState.err="Nom de champ requis";plRenderModal();return}
-  const prod=plModalState.product;
+  const prod=line.product;
   if(!Array.isArray(S.priceLib.schemas[prod]))S.priceLib.schemas[prod]=[];
   if(S.priceLib.schemas[prod].some(f=>f.name.toLowerCase()===name.toLowerCase())){plModalState.err="Ce champ existe déjà pour cette sous-catégorie";plRenderModal();return}
   const f={id:gid(),name:name,type:fd.type||"text"};
@@ -1247,17 +1285,22 @@ function plConfirmFieldDraft(){
   plRenderModal();
 }
 
-function plDelField(fieldId){
-  if(!plModalState||!plModalState.product)return;
+function plDelField(lineId,fieldId){
+  const line=plGetLine(lineId);
+  if(!line||!line.product)return;
   plEnsure();
-  const prod=plModalState.product;
+  const prod=line.product;
   if(!Array.isArray(S.priceLib.schemas[prod]))return;
   S.priceLib.schemas[prod]=S.priceLib.schemas[prod].filter(f=>f.id!==fieldId);
-  delete plModalState.values[fieldId];
+  /* purge la valeur sur toutes les lignes du devis qui portent cette sous-cat (le champ disparaît du schéma partagé) */
+  (plModalState.lines||[]).forEach(l=>{if(l.product===prod)delete l.values[fieldId]});
   save();plRenderModal();
 }
 
-function plSetValue(fieldId,v){if(!plModalState)return;plModalState.values[fieldId]=v}
+function plSetValue(lineId,fieldId,v){const l=plGetLine(lineId);if(!l)return;l.values[fieldId]=v}
+
+// ▼ plSetProjet — mute le projet du devis (oninput, sans re-render pour préserver le focus ; combo géré via plCombo 'pprojet')
+function plSetProjet(v){if(!plModalState)return;plModalState.projet=v}
 
 function plSaveQuote(){
   plEnsure();
@@ -1265,20 +1308,25 @@ function plSaveQuote(){
   const st=plModalState;
   if(!st.date){st.err="Date requise";plRenderModal();return}
   if(!st.supplierId){st.err="Fournisseur requis";plRenderModal();return}
-  if(!st.product){st.err="Sous-catégorie requise";plRenderModal();return}
   const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
   if(!sup){st.err="Fournisseur introuvable";plRenderModal();return}
+  /* Lignes valides = celles avec une sous-cat ; au moins une requise */
+  const lines=(st.lines||[]).filter(l=>(l.product||"").trim()).map(l=>({id:l.id||gid(),product:l.product,values:Object.assign({},l.values||{})}));
+  if(!lines.length){st.err="Ajoute au moins une ligne avec une sous-catégorie";plRenderModal();return}
+  const projet=(st.projet||"").trim();
   if(st.editingId){
     /* Mode édition : mute le devis existant + recalcule la ref (cohérence date/fournisseur, excludeId = self) */
     const q=S.priceLib.quotes.find(x=>x.id===st.editingId);
     if(!q){st.err="Devis introuvable";plRenderModal();return}
-    q.date=st.date;q.supplierId=st.supplierId;q.product=st.product;q.values=Object.assign({},st.values);
+    q.date=st.date;q.supplierId=st.supplierId;q.projet=projet;q.lines=lines;
+    /* legacy (lu par le tableau jusqu'à l'étape 3) = 1re ligne */
+    q.product=lines[0].product;q.values=Object.assign({},lines[0].values);
     q.ref=plGenerateRef(q.date,sup.name,q.id);
     q.updatedAt=Date.now();
   }else{
     /* Mode création */
     const ref=plGenerateRef(st.date,sup.name);
-    const quote={id:gid(),ref:ref,date:st.date,supplierId:st.supplierId,product:st.product,values:Object.assign({},st.values),createdAt:Date.now()};
+    const quote={id:gid(),ref:ref,date:st.date,supplierId:st.supplierId,projet:projet,lines:lines,product:lines[0].product,values:Object.assign({},lines[0].values),createdAt:Date.now()};
     S.priceLib.quotes.push(quote);
   }
   save();
@@ -1298,14 +1346,15 @@ function plDeleteQuote(id){
 
 // ▼ Combobox custom — état transient (NON persisté). key encode le contexte : 'fsup', 'fprod', 'cell-<qid>-<fid>', 'mval-<fid>'
 let plCombo=null;  // { key, query }
+const plComboIsModal=k=>k.startsWith('mval-')||k==='pprojet';
 function plComboReRender(){
   if(!plCombo){render();return}
   if(plCombo.key.startsWith('cell-'))plRenderTable();
-  else if(plCombo.key.startsWith('mval-'))plRenderModal();
+  else if(plComboIsModal(plCombo.key))plRenderModal();
   else render();
 }
 function plComboOpen(key){if(plCombo&&plCombo.key===key)return;plCombo={key:key,query:""};plComboReRender()}
-function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(k.startsWith('mval-'))plRenderModal();else render()}
+function plComboClose(){if(!plCombo)return;const k=plCombo.key;plCombo=null;if(k.startsWith('cell-'))plRenderTable();else if(plComboIsModal(k))plRenderModal();else render()}
 function plComboSetQuery(q){if(!plCombo)return;plCombo.query=q||"";plComboReRender()}
 function plComboBlurClose(key){setTimeout(()=>{if(plCombo&&plCombo.key===key)plComboClose()},180)}
 
@@ -1516,6 +1565,14 @@ function plListAllProducts(){
   Object.keys(S.priceLib.schemas).forEach(k=>set.add(k));
   S.priceLib.quotes.forEach(q=>{if(q.product)set.add(q.product)});
   (S.crm.products||[]).forEach(p=>set.add(p));
+  return [...set].sort((a,b)=>a.localeCompare(b));
+}
+
+// ▼ plListProjets — noms de projet distincts déjà saisis sur les devis (tri alpha ; pour l'autocomplétion de saisie)
+function plListProjets(){
+  plEnsure();
+  const set=new Set();
+  S.priceLib.quotes.forEach(q=>{const p=(q.projet||"").trim();if(p)set.add(p)});
   return [...set].sort((a,b)=>a.localeCompare(b));
 }
 
@@ -1807,7 +1864,7 @@ function plRenderModal(){
   }else{
     const q=(st.supplierQuery||"").trim();
     const ql=q.toLowerCase();
-    const presetProd=st.product||"";
+    const presetProd=((st.lines||[]).find(l=>(l.product||"").trim())||{}).product||"";
     const presetProdL=presetProd.toLowerCase();
     /* Si une sous-cat est preset, on sépare en 2 groupes : ceux qui la proposent, et les autres CRM (dont le pick auto-linkera la sous-cat) */
     let primary=[],secondary=[];
@@ -1840,67 +1897,105 @@ function plRenderModal(){
     h+=`</div>`;
   }
   h+=`</div>`;
-  /* Sous-catégorie — recherche live filtrée par fournisseur, création inline */
+  /* Projet (niveau devis) — combobox autocomplété sur les projets déjà saisis */
+  {
+    const pj=st.projet||"";
+    const pKey='pprojet';
+    const pOpen=plCombo&&plCombo.key===pKey;
+    const pQ=pOpen?(plCombo.query==null?pj:plCombo.query):pj;
+    const psug=plListProjets();
+    const pfiltered=pOpen?psug.filter(s=>!pQ||s.toLowerCase().includes(pQ.toLowerCase())):[];
+    h+=`<div class="pl-row"><label class="pl-lbl">Projet</label><div class="pl-combo-wrap pl-combo-block"><input id="pl-projet" type="text" class="pl-input" placeholder="Projet associé (optionnel)…" value="${esc(pQ)}" autocomplete="off" onfocus="plComboOpen('${pKey}')" oninput="plComboSetQuery(this.value);plSetProjet(this.value)" onblur="plComboBlurClose('${pKey}')">`;
+    if(pOpen&&pfiltered.length)h+=`<div class="pl-combo-dropdown">${pfiltered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetProjet(${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+    h+=`</div></div>`;
+  }
+  /* Lignes d'équipement — un devis = N lignes (sous-cat + champs). Visible une fois le fournisseur choisi. */
   if(st.supplierId){
-    const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
-    h+=`<div class="pl-row"><label class="pl-lbl">Sous-catégorie</label>`;
-    if(st.product){
-      h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(st.product)}</span><button class="pl-pill-clear" onclick="plClearProduct()" title="Changer">×</button></span></div>`;
-    }else{
-      const q=(st.productQuery||"").trim();
-      const ql=q.toLowerCase();
-      const prods=sup?sup.products:[];
-      const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql)).sort((a,b)=>a.localeCompare(b));
-      const exact=q&&prods.some(p=>p.toLowerCase()===ql);
-      h+=`<input id="pl-prod-search" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(q)}" oninput="plSearchProduct(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter()}" autocomplete="off">`;
-      h+=`<div class="pl-search-list">`;
-      if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucune sous-catégorie pour ce fournisseur. Tape un nom pour en créer une.</div>`;
-      matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickProduct(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
-      if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)… affine ta recherche</div>`;
-      if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickProduct(${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
-      h+=`</div>`;
-    }
+    h+=`<div class="pl-lines"><div class="pl-lines-hd">Équipements du devis</div>`;
+    (st.lines||[]).forEach((line,idx)=>{h+=plRenderLineCard(line,idx,st)});
+    h+=`<button class="pl-add-line" onclick="plAddLine()">＋ Ajouter un équipement</button>`;
     h+=`</div>`;
   }
-  /* Formulaire dynamique */
-  if(st.product){
+  if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
+  /* Actions */
+  const canSave=st.date&&st.supplierId&&(st.lines||[]).some(l=>(l.product||"").trim());
+  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseModal()">Annuler</button><button class="pl-btn pl-btn-primary" ${canSave?'':'disabled'} onclick="plSaveQuote()">Enregistrer</button></div>`;
+  h+=`</div></div>`;
+  host.innerHTML=h;
+  /* Focus restore après re-render */
+  if(focusId){
+    const el=document.getElementById(focusId);
+    if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}
+  }else{
+    /* Auto-focus sur la première search visible si rien n'est focused */
+    const auto=document.getElementById('pl-sup-search')||document.querySelector('[id^="pl-prod-search-"]')||document.getElementById('pl-draft-name');
+    if(auto)auto.focus();
+  }
+}
+
+// ▼ plRenderLineCard — rend une ligne d'équipement du devis (sous-cat scopée + champs dynamiques). lineId encode tous les handlers.
+function plRenderLineCard(line,idx,st){
+  const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
+  const multi=(st.lines||[]).length>1;
+  let h=`<div class="pl-line-card">`;
+  h+=`<div class="pl-line-hd"><span class="pl-line-num">Équipement ${idx+1}</span>${multi?`<button class="pl-line-del" onclick="plRemoveLine('${line.id}')" title="Retirer cette ligne">×</button>`:''}</div>`;
+  /* Sous-catégorie */
+  h+=`<div class="pl-row"><label class="pl-lbl">Sous-catégorie</label>`;
+  if(line.product){
+    h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(line.product)}</span><button class="pl-pill-clear" onclick="plClearProduct('${line.id}')" title="Changer">×</button></span></div>`;
+  }else{
+    const q=(line.productQuery||"").trim();
+    const ql=q.toLowerCase();
+    const prods=sup?sup.products:[];
+    const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql)).sort((a,b)=>a.localeCompare(b));
+    const exact=q&&prods.some(p=>p.toLowerCase()===ql);
+    h+=`<input id="pl-prod-search-${line.id}" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(q)}" oninput="plSearchProduct('${line.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter('${line.id}')}" autocomplete="off">`;
+    h+=`<div class="pl-search-list">`;
+    if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucune sous-catégorie pour ce fournisseur. Tape un nom pour en créer une.</div>`;
+    matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickProduct('${line.id}',${esc(JSON.stringify(p))})">${esc(p)}</div>`});
+    if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)… affine ta recherche</div>`;
+    if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plCreateAndPickProduct('${line.id}',${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+  /* Formulaire dynamique de la sous-cat */
+  if(line.product){
     plEnsure();
-    const schema=S.priceLib.schemas[st.product]||[];
-    h+=`<div class="pl-fields"><div class="pl-fields-hd">Champs « ${esc(st.product)} »</div>`;
-    if(!schema.length&&!st.fieldDraft)h+=`<div class="pl-fields-empty">Aucun champ défini. Ajoute un premier champ ci-dessous.</div>`;
+    const schema=S.priceLib.schemas[line.product]||[];
+    const draftHere=st.fieldDraft&&st.fieldDraft.lineId===line.id;
+    h+=`<div class="pl-fields"><div class="pl-fields-hd">Champs « ${esc(line.product)} »</div>`;
+    if(!schema.length&&!draftHere)h+=`<div class="pl-fields-empty">Aucun champ défini. Ajoute un premier champ ci-dessous.</div>`;
     schema.forEach(f=>{
-      const v=st.values[f.id]||"";
+      const v=line.values[f.id]||"";
       h+=`<div class="pl-field-row"><label>${esc(f.name)}</label>`;
       if(f.type==='number'){
-        h+=`<input id="pl-val-${esc(f.id)}" type="number" step="any" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)">`;
+        h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="number" step="any" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
         if(f.unit)h+=`<span class="pl-unit">${esc(f.unit)}</span>`;
       }else if(f.type==='date'){
-        h+=`<input id="pl-val-${esc(f.id)}" type="date" class="pl-input" value="${esc(v)}" oninput="plSetValue('${f.id}',this.value)">`;
+        h+=`<input id="pl-val-${line.id}-${esc(f.id)}" type="date" class="pl-input" value="${esc(v)}" oninput="plSetValue('${line.id}','${f.id}',this.value)">`;
       }else if(f.type==='select'){
-        h+=`<select id="pl-val-${esc(f.id)}" class="pl-select" onchange="plSetValue('${f.id}',this.value)"><option value="">—</option>`;
+        h+=`<select id="pl-val-${line.id}-${esc(f.id)}" class="pl-select" onchange="plSetValue('${line.id}','${f.id}',this.value)"><option value="">—</option>`;
         (f.options||[]).forEach(o=>{h+=`<option value="${esc(o)}" ${v===o?'selected':''}>${esc(o)}</option>`});
         h+=`</select>`;
       }else{
         /* Texte : combobox custom thème dark sur les valeurs déjà saisies pour ce champ + sous-cat */
-        const mKey=`mval-${f.id}`;
+        const mKey=`mval-${line.id}-${f.id}`;
         const mOpen=plCombo&&plCombo.key===mKey;
         const mQ=mOpen?(plCombo.query==null?(v||""):plCombo.query):v;
-        const sugs=plDistinctValues(st.product,f.id);
+        const sugs=plDistinctValues(line.product,f.id);
         const filtered=mOpen?sugs.filter(s=>!mQ||s.toLowerCase().includes((mQ||"").toLowerCase())):[];
-        h+=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-val-${esc(f.id)}" type="text" class="pl-input" value="${esc(mQ||"")}" autocomplete="off" onfocus="plComboOpen('${mKey}')" oninput="plComboSetQuery(this.value);plSetValue('${f.id}',this.value)" onblur="plComboBlurClose('${mKey}')">`;
-        if(mOpen&&filtered.length)h+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetValue('${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
+        h+=`<div class="pl-combo-wrap pl-combo-block"><input id="pl-val-${line.id}-${esc(f.id)}" type="text" class="pl-input" value="${esc(mQ||"")}" autocomplete="off" onfocus="plComboOpen('${mKey}')" oninput="plComboSetQuery(this.value);plSetValue('${line.id}','${f.id}',this.value)" onblur="plComboBlurClose('${mKey}')">`;
+        if(mOpen&&filtered.length)h+=`<div class="pl-combo-dropdown">${filtered.slice(0,8).map(s=>`<div class="pl-combo-item" onmousedown="event.preventDefault();plCombo=null;plSetValue('${line.id}','${f.id}',${esc(JSON.stringify(s))});plRenderModal()">${esc(s)}</div>`).join('')}</div>`;
         h+=`</div>`;
       }
-      h+=`<button class="pl-field-del" onclick="plDelField('${f.id}')" title="Supprimer ce champ">×</button></div>`;
+      h+=`<button class="pl-field-del" onclick="plDelField('${line.id}','${f.id}')" title="Supprimer ce champ">×</button></div>`;
     });
-    if(st.fieldDraft){
+    if(draftHere){
       const fd=st.fieldDraft;
       h+=`<div class="pl-fielddraft">`;
-      /* Input nom + type — re-render après chaque caractère pour rafraîchir les suggestions */
       h+=`<div class="pl-fielddraft-row"><input id="pl-draft-name" type="text" class="pl-input" placeholder="Nom du champ (ex. Prix unitaire)" value="${esc(fd.name||"")}" oninput="plSetDraftField('name',this.value);plRenderModal()"><select class="pl-select" onchange="plSetDraftField('type',this.value);plRenderModal()"><option value="number" ${fd.type==='number'?'selected':''}>Nombre</option><option value="text" ${fd.type==='text'?'selected':''}>Texte</option><option value="date" ${fd.type==='date'?'selected':''}>Date</option><option value="select" ${fd.type==='select'?'selected':''}>Liste déroulante</option></select></div>`;
-      /* Suggestions de champs existants (autres sous-cats) */
       const dQ=(fd.name||"").trim().toLowerCase();
-      const inCurrent=new Set((S.priceLib.schemas[st.product]||[]).map(f=>(f.name||"").toLowerCase()));
+      const inCurrent=new Set((S.priceLib.schemas[line.product]||[]).map(f=>(f.name||"").toLowerCase()));
       const suggestions=dQ?plListAllFields().filter(f=>!inCurrent.has(f.name.toLowerCase())&&f.name.toLowerCase().includes(dQ)).slice(0,5):[];
       if(suggestions.length){
         h+=`<div style="margin:6px 0;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);border-radius:5px;padding:4px 6px">`;
@@ -1915,25 +2010,12 @@ function plRenderModal(){
       h+=`<div class="pl-fielddraft-row"><button class="pl-mini-btn cancel" onclick="plCancelFieldDraft()">Annuler</button><button class="pl-mini-btn" onclick="plConfirmFieldDraft()">Ajouter le champ</button></div>`;
       h+=`</div>`;
     }else{
-      h+=`<div style="margin-top:8px"><button class="pl-mini-btn" onclick="plOpenFieldDraft()">＋ Ajouter un champ</button></div>`;
+      h+=`<div style="margin-top:8px"><button class="pl-mini-btn" onclick="plOpenFieldDraft('${line.id}')">＋ Ajouter un champ</button></div>`;
     }
     h+=`</div>`;
   }
-  if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
-  /* Actions */
-  const canSave=st.date&&st.supplierId&&st.product;
-  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseModal()">Annuler</button><button class="pl-btn pl-btn-primary" ${canSave?'':'disabled'} onclick="plSaveQuote()">Enregistrer</button></div>`;
-  h+=`</div></div>`;
-  host.innerHTML=h;
-  /* Focus restore après re-render */
-  if(focusId){
-    const el=document.getElementById(focusId);
-    if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}
-  }else{
-    /* Auto-focus sur la première search visible si rien n'est focused */
-    const auto=document.getElementById('pl-sup-search')||document.getElementById('pl-prod-search')||document.getElementById('pl-draft-name');
-    if(auto)auto.focus();
-  }
+  h+=`</div>`; /* .pl-line-card */
+  return h;
 }
 
 /* ── Feedback / Notes ── */
