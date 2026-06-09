@@ -437,7 +437,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-toolbar .pl-tb-grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .pl-tb-label{font-size:9px;color:#64748B;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
 .pl-tb-select{background:#162032;border:1px solid #2A3A52;border-radius:6px;padding:5px 10px;color:#E2E8F0;font-family:inherit;font-size:11px;outline:none;cursor:pointer;transition:border-color .12s;min-width:130px}
-.pl-tb-select:focus{border-color:#38BDF8}
+.pl-tb-select:focus{border-color:#38BDF8;box-shadow:0 0 0 1px rgba(56,189,248,.25),0 0 10px rgba(56,189,248,.15)}
 .pl-tb-reset{padding:5px 10px;font-size:10px;font-weight:600;border-radius:5px;border:1px solid #2A3A52;background:transparent;color:#64748B;cursor:pointer;font-family:inherit;transition:all .12s}
 .pl-tb-reset:hover{color:#E2E8F0;border-color:#475569}
 .pl-tb-count{font-size:10px;color:#64748B;font-weight:600;margin-left:auto}
@@ -464,12 +464,10 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-table .pl-td-prod{color:#94A3B8;font-size:10px}
 .pl-table .pl-td-projet{color:#94A3B8;font-size:10px}
 .pl-table .pl-td-empty{color:#334155;font-style:italic}
-/* Groupement par devis : pas de filet entre les lignes d'un même devis ; séparation seulement entre devis (filet supérieur) + liseré néon latéral alterné (bleu/violet) faisant office de « tranche » de bloc */
+/* Groupement par devis : pas de filet entre les lignes d'un même devis ; séparation seulement entre devis (filet supérieur). Cellules niveau-devis vides sur les lignes de continuation. */
 .pl-table tbody td{border-bottom:none}
 .pl-table tbody tr.pl-grp-first td{border-top:1px solid #2A3A52}
 .pl-table tbody tr.pl-grp-first:first-child td{border-top:none}
-.pl-table tbody tr.pl-grp-a td.pl-td-ref{box-shadow:inset 3px 0 0 rgba(56,189,248,.55)}
-.pl-table tbody tr.pl-grp-b td.pl-td-ref{box-shadow:inset 3px 0 0 rgba(192,38,211,.5)}
 .pl-table .pl-td-cont{background:transparent}
 .pl-merge-cb{accent-color:#38BDF8;cursor:pointer;vertical-align:middle;margin-right:2px}
 .pl-merge-hint{font-size:10px;color:#94A3B8;margin-right:8px;align-self:center}
@@ -1532,31 +1530,20 @@ function plRenderTable(){
   dynFields.forEach(f=>{const lbl=f.unit?`${esc(f.name)} (${esc(f.unit)})`:esc(f.name);h+=`<th class="${sorted(f.id)}"><div class="pl-th-inner" onclick="plSetSort('${f.id}')">${lbl} ${arrow(f.id)}</div></th>`});
   h+=`<th style="text-align:right">&nbsp;</th>`;
   h+=`</tr>`;
-  /* Row de recherche */
-  h+=`<tr class="pl-search-row">`;
+  /* Ligne de filtres par colonne retirée (redondante avec les filtres du haut) ; commonCols conservé pour le colspan de l'état vide */
   const commonCols=showProdCol?['ref','date','supplier','projet','product']:['ref','date','supplier','projet'];
-  commonCols.forEach(col=>{
-    h+=`<th><input id="pl-search-${col}" type="text" value="${esc(search[col]||"")}" placeholder="Filtrer…" oninput="plSetSearch('${col}',this.value)" autocomplete="off"></th>`;
-  });
-  dynFields.forEach(f=>{h+=`<th><input id="pl-search-${esc(f.id)}" type="text" value="${esc(search[f.id]||"")}" placeholder="Filtrer…" oninput="plSetSearch('${f.id}',this.value)" autocomplete="off"></th>`});
-  h+=`<th></th>`;
-  h+=`</tr>`;
   h+=`</thead><tbody>`;
   if(!rows.length){
     const ncols=commonCols.length+dynFields.length+1;
     h+=`<tr><td colspan="${ncols}"><div class="pl-empty-table">Aucun devis ne correspond aux filtres / recherches.</div></td></tr>`;
   }else{
     const isEditing=(qid,lid,col)=>plEditingCell&&plEditingCell.quoteId===qid&&plEditingCell.lineId===lid&&plEditingCell.col===col;
-    let groupIdx=-1;
     rows.forEach((row,i)=>{
       const q=row.q,l=row.l;
       const sup=supById[q.supplierId];
-      /* 1re ligne du groupe-devis (les lignes d'un même devis sont adjacentes sauf tri par valeur) → on n'affiche les cellules niveau-devis que là, dé-emphase sinon */
+      /* 1re ligne du groupe-devis (les lignes d'un même devis sont adjacentes sauf tri par valeur) → on n'affiche les cellules niveau-devis que là, vide sinon */
       const firstOfGroup=(i===0||rows[i-1].q.id!==q.id);
-      if(firstOfGroup)groupIdx++;
-      /* liseré néon alterné (bleu / violet) par devis → blocs distincts */
-      const grpCls=(groupIdx%2===0)?'pl-grp-a':'pl-grp-b';
-      h+=`<tr class="pl-line-row ${grpCls}${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
+      h+=`<tr class="pl-line-row${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
       if(firstOfGroup){
         /* Ref + bouton copy (figée) + case de sélection en mode fusion */
         h+=`<td class="pl-td-ref">${merging?`<input type="checkbox" class="pl-merge-cb" ${plMergeSel.indexOf(q.id)>=0?'checked':''} onclick="event.stopPropagation();plMergeToggle('${q.id}')"> `:''}<span class="pl-ref-wrap"><span class="pl-ref-chip">${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
@@ -1944,7 +1931,8 @@ function rPL(){
   }
   h+=`</div></div>`;
   if(filterSup||filterProd||filterProjet||S.plSortBy||(S.plSearch&&Object.keys(S.plSearch).some(k=>S.plSearch[k])))h+=`<button class="pl-tb-reset" onclick="plResetFilters()">Réinitialiser</button>`;
-  h+=`<span class="pl-tb-count" id="pl-count">${n} devis</span>`;
+  const nLines=S.priceLib.quotes.reduce((s,q)=>s+((q.lines&&q.lines.length)||1),0);
+  h+=`<span class="pl-tb-count" id="pl-count">${n} devis · ${nLines} équipement${nLines>1?'s':''}</span>`;
   h+=`</div>`;
   h+=`<div class="pl-table-wrap"><div id="pl-table-host"></div></div>`;
   requestAnimationFrame(plRenderTable);
