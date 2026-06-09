@@ -1778,7 +1778,8 @@ function plRenderSchemaModal(){
   /* Stats par sous-cat */
   const stats={};
   S.priceLib.quotes.forEach(q=>{if(!q.product)return;if(!stats[q.product])stats[q.product]={n:0};stats[q.product].n++});
-  let h=`<div class="pl-overlay" onclick="if(event.target===this)plCloseSchemaManager()"><div class="pl-modal pl-sch-modal">`;
+  /* Idem : pas de fermeture au clic sur le fond */
+  let h=`<div class="pl-overlay"><div class="pl-modal pl-sch-modal">`;
   h+=`<h3>${I.plus} Gérer les champs par sous-catégorie<button class="pl-close" onclick="plCloseSchemaManager()" title="Fermer">×</button></h3>`;
   if(!products.length){
     h+=`<div class="pl-sch-empty">Aucune sous-catégorie. Crées-en une depuis « ＋ Nouveau devis » ou depuis l'onglet CRM.</div>`;
@@ -1954,7 +1955,8 @@ function plRenderModal(){
   const isEdit=!!st.editingId;
   /* Preview ref : exclut le devis courant en édition pour ne pas auto-incrémenter sur soi-même */
   const refPreview=(st.date&&st.supplierId)?(()=>{const s=S.crm.suppliers.find(x=>x.id===st.supplierId);return s?plGenerateRef(st.date,s.name,st.editingId||null):""})():"";
-  let h=`<div class="pl-overlay" onclick="if(event.target===this)plCloseModal()"><div class="pl-modal">`;
+  /* Pas de fermeture au clic sur le fond : seuls « Annuler » et la croix ferment (évite de perdre la saisie par mégarde) */
+  let h=`<div class="pl-overlay"><div class="pl-modal">`;
   const refToShow=refPreview;
   h+=`<h3>${I.plus} ${isEdit?'Éditer le devis':'Nouveau devis'}${refToShow?`<span class="pl-ref">${esc(refToShow)}</span>`:""}<button class="pl-close" onclick="plCloseModal()" title="Fermer">×</button></h3>`;
   /* Date — onchange (pas oninput) : sinon le widget date est réinitialisé à chaque keystroke et la saisie est impossible */
