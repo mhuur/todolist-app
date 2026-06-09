@@ -441,23 +441,24 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-tb-reset{padding:5px 10px;font-size:10px;font-weight:600;border-radius:5px;border:1px solid #2A3A52;background:transparent;color:#64748B;cursor:pointer;font-family:inherit;transition:all .12s}
 .pl-tb-reset:hover{color:#E2E8F0;border-color:#475569}
 .pl-tb-count{font-size:10px;color:#64748B;font-weight:600;margin-left:auto}
-.pl-table-wrap{overflow-x:auto;border:1px solid #1E3050;border-radius:8px;background:#101A2E}
+.pl-table-wrap{overflow-x:auto;border:1px solid #1E3050;border-radius:10px;background:#101A2E;box-shadow:0 6px 22px rgba(0,0,0,.28)}
 .pl-table{width:100%;border-collapse:collapse;font-size:11px}
-.pl-table th,.pl-table td{padding:7px 10px;text-align:left;border-bottom:1px solid #1A2840;vertical-align:middle;white-space:nowrap}
+.pl-table th,.pl-table td{padding:10px 14px;text-align:left;border-bottom:1px solid #18253C;vertical-align:middle;white-space:nowrap}
 .pl-table thead th{background:#0E1A2E;font-weight:700;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #2A3A52;position:sticky;top:0;z-index:2}
 .pl-table thead th .pl-th-inner{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
 .pl-table thead th .pl-th-inner:hover{color:#E2E8F0}
 .pl-table thead th.sorted .pl-th-inner{color:#5CB8F0}
 .pl-th-arrow{font-size:9px;opacity:.5;transition:opacity .12s}
 .pl-table thead th.sorted .pl-th-arrow{opacity:1}
-.pl-table thead tr.pl-search-row th{padding:4px 10px 8px;background:#0E1A2E;border-bottom:1px solid #2A3A52;position:sticky;top:30px;z-index:1}
+.pl-table thead tr.pl-search-row th{padding:4px 14px 8px;background:#0E1A2E;border-bottom:1px solid #2A3A52;position:sticky;top:37px;z-index:1}
 .pl-table thead tr.pl-search-row input{width:100%;background:#162032;border:1px solid #1E3050;border-radius:4px;padding:3px 6px;color:#CBD5E1;font-family:inherit;font-size:10px;outline:none;transition:border-color .12s}
 .pl-table thead tr.pl-search-row input:focus{border-color:#38BDF8}
 .pl-table thead tr.pl-search-row input::placeholder{color:#334155}
 .pl-table tbody tr{transition:background .1s}
-.pl-table tbody tr:hover{background:rgba(56,189,248,.04)}
+.pl-table tbody tr:hover{background:rgba(56,189,248,.06)}
 .pl-table tbody td{color:#CBD5E1}
-.pl-table .pl-td-ref{font-family:'Courier New',monospace;font-size:10px;color:#5CB8F0;white-space:nowrap;font-weight:700}
+.pl-table .pl-td-ref{white-space:nowrap}
+.pl-ref-chip{font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:#7DD3FC;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);border-radius:5px;padding:2px 7px;white-space:nowrap}
 .pl-table .pl-td-date{white-space:nowrap;color:#94A3B8}
 .pl-table .pl-td-sup{font-weight:600}
 .pl-table .pl-td-prod{color:#94A3B8;font-size:10px}
@@ -1551,7 +1552,7 @@ function plRenderTable(){
       h+=`<tr class="pl-line-row${firstOfGroup?' pl-grp-first':' pl-grp-cont'}">`;
       if(firstOfGroup){
         /* Ref + bouton copy (figée) + case de sélection en mode fusion */
-        h+=`<td class="pl-td-ref">${merging?`<input type="checkbox" class="pl-merge-cb" ${plMergeSel.indexOf(q.id)>=0?'checked':''} onclick="event.stopPropagation();plMergeToggle('${q.id}')"> `:''}<span class="pl-ref-wrap"><span>${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
+        h+=`<td class="pl-td-ref">${merging?`<input type="checkbox" class="pl-merge-cb" ${plMergeSel.indexOf(q.id)>=0?'checked':''} onclick="event.stopPropagation();plMergeToggle('${q.id}')"> `:''}<span class="pl-ref-wrap"><span class="pl-ref-chip">${esc(q.ref||"")}</span><button class="pl-copy-btn" onclick="event.stopPropagation();plCopyText('${esc(q.ref||"")}')" title="Copier la référence">${I.copy}</button></span></td>`;
         /* Date éditable inline (niveau devis, lineId="") */
         if(isEditing(q.id,"",'date')){
           h+=`<td class="pl-td-date pl-cell-editing"><input id="pl-edit-cell" type="date" class="pl-cell-input" value="${esc(q.date||"")}" onchange="plCommitCellEdit('${q.id}','','date',this.value)" onkeydown="if(event.key==='Escape'){plCancelCellEdit()}else if(event.key==='Enter'){this.blur()}" onblur="if(plEditingCell)plCommitCellEdit('${q.id}','','date',this.value)"></td>`;
