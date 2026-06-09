@@ -422,6 +422,12 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-import-text{width:100%;min-height:230px;background:#0E1A2E;border:1px solid #2A3A52;border-radius:8px;padding:10px 12px;color:#E2E8F0;font-family:'Courier New',monospace;font-size:11px;line-height:1.5;outline:none;resize:vertical;transition:border-color .12s,box-shadow .12s;white-space:pre}
 .pl-import-text:focus{border-color:#38BDF8;box-shadow:0 0 0 1px rgba(56,189,248,.25),0 0 10px rgba(56,189,248,.15)}
 .pl-import-text::placeholder{color:#334155}
+.pl-import-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.pl-import-stepn{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.4);color:#5CB8F0;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.pl-import-steptxt{font-size:11px;color:#94A3B8;line-height:1.5}
+.pl-import-stepbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pl-claude-link{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid rgba(92,184,240,.4);background:rgba(92,184,240,.08);color:#5CB8F0;cursor:pointer;text-decoration:none;transition:all .12s}
+.pl-claude-link:hover{background:rgba(92,184,240,.16);border-color:#5CB8F0;color:#7DD3FC}
 /* Lignes d'équipement (devis multi-lignes) */
 .pl-lines{margin-top:6px}
 .pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
@@ -1414,6 +1420,30 @@ function plMergeConfirm(){
 }
 
 // ▼ Import d'un devis depuis un bloc structuré (JSON produit par Claude à partir d'un devis uploadé)
+const PL_IMPORT_PROMPT=`Tu m'aides à intégrer un devis dans ma base de prix d'équipements (traitement de l'eau).
+
+À partir du devis que je joins (PDF ou photo), réponds UNIQUEMENT par un bloc JSON (aucun texte autour), au format exact suivant, prêt à coller dans ma fonction « Importer un devis » :
+
+{
+  "date": "AAAA-MM-JJ",
+  "supplier": "Nom du fournisseur",
+  "projet": "",
+  "lines": [
+    { "product": "SOUS-CATEGORIE EN MAJUSCULES", "fields": [
+      { "name": "Nom du champ", "value": valeur, "unit": "unité si nombre", "type": "number" }
+    ] }
+  ]
+}
+
+Règles :
+- Un devis pour UN équipement composé de plusieurs références = UNE seule ligne (prix = total net) ; liste les composants dans un champ texte "Composition".
+- Plusieurs équipements réellement distincts = plusieurs lignes.
+- Nombres = valeur numérique pure (ex. 13600.5), unité dans "unit", "type":"number". Texte = "type":"text".
+- Inclure toujours un champ "Prix" en €, et si pertinent : Modèle, Débit, Pression, Puissance, Délai, Réf. fournisseur.
+- "product" en MAJUSCULES (ex. POMPE HAUTE PRESSION, FILTRE A SABLE).
+- Date au format AAAA-MM-JJ.
+
+Voici le devis :`;
 let plImportState=null; // {text, err}
 function plOpenImport(){plEnsure();plImportState={text:"",err:""};plRenderImportModal()}
 function plCloseImport(){plImportState=null;const h=document.getElementById('pl-host');if(h)h.innerHTML=""}
@@ -1475,7 +1505,9 @@ function plRenderImportModal(){
   const st=plImportState;
   let h=`<div class="pl-overlay"><div class="pl-modal">`;
   h+=`<h3>${I.plus} Importer un devis<button class="pl-close" onclick="plCloseImport()" title="Fermer">×</button></h3>`;
-  h+=`<div class="pl-import-help">Colle le bloc structuré (JSON) fourni par Claude à partir de ton devis. L'app crée le devis et retrouve/crée le fournisseur, la sous-catégorie et les champs (par nom). Tu pourras relire/corriger juste après.</div>`;
+  const claudeUrl="https://claude.ai/new?q="+encodeURIComponent(PL_IMPORT_PROMPT);
+  h+=`<div class="pl-import-step"><span class="pl-import-stepn">1</span><div><div class="pl-import-steptxt">Analyse ton devis avec Claude (les instructions sont déjà prêtes), puis joins le PDF/photo.</div><div class="pl-import-stepbtns"><a class="pl-claude-link" href="${esc(claudeUrl)}" target="_blank" rel="noopener">↗ Ouvrir Claude (prompt prêt)</a><button class="pl-mini-btn" onclick="plCopyText(PL_IMPORT_PROMPT)" title="Copier le prompt pour le coller dans n'importe quel Claude">⧉ Copier le prompt</button></div></div></div>`;
+  h+=`<div class="pl-import-step"><span class="pl-import-stepn">2</span><div class="pl-import-steptxt">Colle ici le bloc JSON que Claude te renvoie. L'app crée le devis (fournisseur, sous-catégorie et champs retrouvés ou créés par nom) et l'ouvre en édition pour relecture.</div></div>`;
   h+=`<textarea id="pl-import-text" class="pl-import-text" spellcheck="false" placeholder='{\n  "date": "2026-02-05",\n  "supplier": "Triange-Industrie",\n  "projet": "",\n  "lines": [\n    { "product": "FILTRE A SABLE", "fields": [\n      { "name": "Diamètre", "value": 3500, "unit": "mm", "type": "number" },\n      { "name": "Prix", "value": 84632, "unit": "€", "type": "number" }\n    ] }\n  ]\n}' oninput="plImportSetText(this.value)">${esc(st.text||"")}</textarea>`;
   if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
   h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseImport()">Annuler</button><button class="pl-btn pl-btn-primary" onclick="plDoImport()">Importer</button></div>`;
