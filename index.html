@@ -417,6 +417,11 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-fielddraft-row:last-child{margin-bottom:0;justify-content:flex-end}
 .pl-fielddraft .pl-input,.pl-fielddraft .pl-select{flex:1;min-width:120px;width:auto}
 .pl-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #1E3050}
+/* Import d'un devis */
+.pl-import-help{font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5}
+.pl-import-text{width:100%;min-height:230px;background:#0E1A2E;border:1px solid #2A3A52;border-radius:8px;padding:10px 12px;color:#E2E8F0;font-family:'Courier New',monospace;font-size:11px;line-height:1.5;outline:none;resize:vertical;transition:border-color .12s,box-shadow .12s;white-space:pre}
+.pl-import-text:focus{border-color:#38BDF8;box-shadow:0 0 0 1px rgba(56,189,248,.25),0 0 10px rgba(56,189,248,.15)}
+.pl-import-text::placeholder{color:#334155}
 /* Lignes d'équipement (devis multi-lignes) */
 .pl-lines{margin-top:6px}
 .pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
@@ -1408,6 +1413,77 @@ function plMergeConfirm(){
   save();render();
 }
 
+// ▼ Import d'un devis depuis un bloc structuré (JSON produit par Claude à partir d'un devis uploadé)
+let plImportState=null; // {text, err}
+function plOpenImport(){plEnsure();plImportState={text:"",err:""};plRenderImportModal()}
+function plCloseImport(){plImportState=null;const h=document.getElementById('pl-host');if(h)h.innerHTML=""}
+function plImportSetText(v){if(plImportState)plImportState.text=v} /* pas de re-render (textarea) */
+// ▼ plParseDateISO — accepte AAAA-MM-JJ ou JJ/MM/AAAA (./- aussi) → AAAA-MM-JJ, "" si invalide
+function plParseDateISO(s){s=(s==null?"":String(s)).trim();if(!s)return "";let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return `${m[1]}-${m[2]}-${m[3]}`;m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return ""}
+function plDoImport(){
+  if(!plImportState)return;
+  plEnsure();
+  let data;
+  try{data=JSON.parse(plImportState.text)}catch(e){plImportState.err="JSON invalide : "+e.message;plRenderImportModal();return}
+  if(!data||typeof data!=='object'||Array.isArray(data)){plImportState.err="Format attendu : un objet JSON { date, supplier, lines[] }.";plRenderImportModal();return}
+  const dateISO=plParseDateISO(data.date);
+  if(!dateISO){plImportState.err="Date manquante ou invalide (AAAA-MM-JJ ou JJ/MM/AAAA).";plRenderImportModal();return}
+  const supName=(data.supplier||"").trim();
+  if(!supName){plImportState.err="Fournisseur manquant.";plRenderImportModal();return}
+  const inLines=Array.isArray(data.lines)?data.lines.filter(l=>l&&(l.product||"").trim()):[];
+  if(!inLines.length){plImportState.err="Aucune ligne avec une sous-catégorie (champ \"product\").";plRenderImportModal();return}
+  /* Fournisseur : retrouve ou crée */
+  let sup=S.crm.suppliers.find(s=>s.name.toLowerCase()===supName.toLowerCase());
+  if(!sup){sup={id:gid(),name:supName,products:[]};S.crm.suppliers.push(sup)}
+  /* Lignes : crée sous-cat + champs (par nom) au besoin */
+  const outLines=inLines.map(l=>{
+    const prod=(l.product||"").trim();
+    if(!sup.products.some(p=>p.toLowerCase()===prod.toLowerCase()))sup.products.push(prod);
+    if(!S.crm.products.some(p=>p.toLowerCase()===prod.toLowerCase()))S.crm.products.push(prod);
+    if(!Array.isArray(S.priceLib.schemas[prod]))S.priceLib.schemas[prod]=[];
+    const schema=S.priceLib.schemas[prod];
+    const values={};
+    (Array.isArray(l.fields)?l.fields:[]).forEach(fl=>{
+      const fname=((fl&&fl.name)||"").trim();if(!fname)return;
+      let f=schema.find(x=>x.name.toLowerCase()===fname.toLowerCase());
+      if(!f){
+        let type=fl.type;
+        if(type!=='number'&&type!=='date'&&type!=='select'){const val=fl.value;type=(val!==""&&val!=null&&isFinite(parseFloat(val)))?'number':'text'}
+        f={id:gid(),name:fname,type:type};
+        if(type==='number'&&fl.unit)f.unit=String(fl.unit).trim();
+        if(type==='select'&&Array.isArray(fl.options))f.options=fl.options;
+        schema.push(f);
+      }
+      let v=fl.value;
+      v=(f.type==='number')?plNumClean(String(v==null?"":v)):(v==null?"":String(v));
+      values[f.id]=v;
+    });
+    return {id:gid(),product:prod,values:values};
+  });
+  const quote={id:gid(),ref:plGenerateRef(dateISO,sup.name),date:dateISO,supplierId:sup.id,projet:(data.projet||"").trim(),lines:outLines,product:outLines[0].product,values:Object.assign({},outLines[0].values),createdAt:Date.now()};
+  S.priceLib.quotes.push(quote);
+  save();
+  plImportState=null;
+  render();
+  plOpenEditQuote(quote.id); /* ouvre en édition pour relecture/correction */
+}
+// ▼ plRenderImportModal — fenêtre de collage du bloc structuré
+function plRenderImportModal(){
+  const host=document.getElementById('pl-host');if(!host)return;
+  if(!plImportState){host.innerHTML="";return}
+  const keep=document.activeElement&&document.activeElement.id==='pl-import-text';
+  const st=plImportState;
+  let h=`<div class="pl-overlay"><div class="pl-modal">`;
+  h+=`<h3>${I.plus} Importer un devis<button class="pl-close" onclick="plCloseImport()" title="Fermer">×</button></h3>`;
+  h+=`<div class="pl-import-help">Colle le bloc structuré (JSON) fourni par Claude à partir de ton devis. L'app crée le devis et retrouve/crée le fournisseur, la sous-catégorie et les champs (par nom). Tu pourras relire/corriger juste après.</div>`;
+  h+=`<textarea id="pl-import-text" class="pl-import-text" spellcheck="false" placeholder='{\n  "date": "2026-02-05",\n  "supplier": "Triange-Industrie",\n  "projet": "",\n  "lines": [\n    { "product": "FILTRE A SABLE", "fields": [\n      { "name": "Diamètre", "value": 3500, "unit": "mm", "type": "number" },\n      { "name": "Prix", "value": 84632, "unit": "€", "type": "number" }\n    ] }\n  ]\n}' oninput="plImportSetText(this.value)">${esc(st.text||"")}</textarea>`;
+  if(st.err)h+=`<div class="pl-err">${esc(st.err)}</div>`;
+  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseImport()">Annuler</button><button class="pl-btn pl-btn-primary" onclick="plDoImport()">Importer</button></div>`;
+  h+=`</div></div>`;
+  host.innerHTML=h;
+  if(keep){const el=document.getElementById('pl-import-text');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}}}
+}
+
 // ▼ Combobox custom — état transient (NON persisté). key encode le contexte : 'fsup', 'fprod', 'cell-<qid>-<fid>', 'mval-<fid>'
 let plCombo=null;  // { key, query }
 const plComboIsModal=k=>k.startsWith('mval-')||k==='pprojet';
@@ -1885,6 +1961,7 @@ function rPL(){
   const filterProjet=S.plFilterProjet||"";
   const sup=filterSup?S.crm.suppliers.find(s=>s.id===filterSup):null;
   let h=`<div class="bar"><div class="bar-l"><button class="bp" onclick="plOpenNewQuote()">${I.plus} Nouveau devis</button>`;
+  h+=`<button class="bs" onclick="plOpenImport()" title="Importer un devis depuis un bloc structuré (extrait par Claude à partir d'un PDF/photo)">↧ Importer</button>`;
   /* Bouton contextuel : ajouter une ligne du même type qu'affiché */
   if(filterProd){
     const ctxLbl=filterSup?`Ajouter ${esc(sup?sup.name:"?")} / ${esc(filterProd)}`:`Ajouter dans « ${esc(filterProd)} »`;
