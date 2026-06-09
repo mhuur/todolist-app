@@ -428,6 +428,24 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-import-stepbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .pl-claude-link{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid rgba(92,184,240,.4);background:rgba(92,184,240,.08);color:#5CB8F0;cursor:pointer;text-decoration:none;transition:all .12s}
 .pl-claude-link:hover{background:rgba(92,184,240,.16);border-color:#5CB8F0;color:#7DD3FC}
+/* Reclassement (2 panneaux) */
+.pl-reclass-modal{max-width:760px}
+.pl-rcl-cols{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.pl-rcl-col{flex:1;min-width:240px}
+.pl-rcl-coltitle{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:5px}
+.pl-rcl-cat{font-size:12px;font-weight:700;color:#7DD3FC;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:6px;padding:5px 10px;margin-bottom:8px}
+.pl-rcl-help{font-size:10px;color:#64748B;margin-bottom:6px}
+.pl-rcl-fields{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.pl-rcl-field{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid #1E3050;border-radius:6px;cursor:pointer;background:rgba(0,0,0,.15);transition:border-color .12s,background .12s}
+.pl-rcl-field.on{border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.06)}
+.pl-rcl-field input{accent-color:#38BDF8;cursor:pointer;flex-shrink:0}
+.pl-rcl-fname{font-size:11px;font-weight:600;color:#CBD5E1;flex-shrink:0}
+.pl-rcl-fval{font-size:11px;color:#64748B;flex:1;min-width:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-rcl-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.pl-rcl-tag.map{color:#22C55E;background:rgba(34,197,94,.12)}
+.pl-rcl-tag.add{color:#F59E0B;background:rgba(245,158,11,.12)}
+.pl-rcl-arrow{align-self:center;color:#475569;font-size:18px;flex-shrink:0}
+.pl-rcl-existing{font-size:10px;color:#94A3B8;padding:3px 8px;border-bottom:1px solid #18253C}
 /* Lignes d'équipement (devis multi-lignes) */
 .pl-lines{margin-top:6px}
 .pl-lines-hd{font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
@@ -2194,6 +2212,102 @@ function plFieldDrop(lineId,targetFieldId){
   save();plRenderModal();
 }
 
+// ▼ Reclasser une ligne dans une autre sous-catégorie en transférant les champs choisis (transfert par nom ; crée les champs absents dans la catégorie cible)
+let plReclass=null; // {lineId, fromProduct, toQuery, toProduct, keep:{fieldId:bool}}
+function plOpenReclass(lineId){
+  const line=plGetLine(lineId);if(!line||!line.product)return;
+  plEnsure();
+  const fromSchema=S.priceLib.schemas[line.product]||[];
+  const keep={};
+  fromSchema.forEach(f=>{const v=line.values[f.id];keep[f.id]=(v!==undefined&&v!==null&&v!=="")});
+  plReclass={lineId:lineId,fromProduct:line.product,toQuery:"",toProduct:"",keep:keep};
+  plRenderReclass();
+}
+function plCloseReclass(){plReclass=null;plRenderModal()}
+function plReclassSetQuery(v){if(plReclass){plReclass.toQuery=v;plRenderReclass()}}
+function plReclassPickTarget(name){if(!plReclass)return;plReclass.toProduct=(name||"").trim();plReclass.toQuery="";plRenderReclass()}
+function plReclassClearTarget(){if(!plReclass)return;plReclass.toProduct="";plReclass.toQuery="";plRenderReclass()}
+function plReclassToggleKeep(fieldId){if(!plReclass)return;plReclass.keep[fieldId]=!plReclass.keep[fieldId];plRenderReclass()}
+function plReclassConfirm(){
+  if(!plReclass||!plModalState)return;
+  const st=plReclass;const line=plGetLine(st.lineId);if(!line)return;
+  const toProd=(st.toProduct||"").trim();if(!toProd)return;
+  plEnsure();
+  const sup=S.crm.suppliers.find(s=>s.id===plModalState.supplierId);
+  if(sup&&!sup.products.some(p=>p.toLowerCase()===toProd.toLowerCase()))sup.products.push(toProd);
+  if(!S.crm.products.some(p=>p.toLowerCase()===toProd.toLowerCase()))S.crm.products.push(toProd);
+  if(!Array.isArray(S.priceLib.schemas[toProd]))S.priceLib.schemas[toProd]=[];
+  const fromSchema=S.priceLib.schemas[st.fromProduct]||[];
+  const toSchema=S.priceLib.schemas[toProd];
+  const newValues={};
+  fromSchema.forEach(f=>{
+    if(!st.keep[f.id])return;
+    let g=toSchema.find(x=>x.name.toLowerCase()===f.name.toLowerCase());
+    if(!g){g={id:gid(),name:f.name,type:f.type||'text'};if(f.unit)g.unit=f.unit;if(Array.isArray(f.options))g.options=f.options.slice();toSchema.push(g)}
+    const val=line.values[f.id];
+    if(val!==undefined)newValues[g.id]=val;
+  });
+  line.product=toProd;line.values=newValues;
+  save();plReclass=null;plRenderModal();
+}
+// ▼ plRenderReclass — fenêtre 2 panneaux (catégorie actuelle ↔ nouvelle) avec sélection des champs à conserver
+function plRenderReclass(){
+  const host=document.getElementById('pl-host');if(!host)return;
+  if(!plReclass){host.innerHTML="";return}
+  const active=document.activeElement;const focusId=(active&&active.id&&active.id.indexOf('pl-rcl')===0)?active.id:null;
+  const focusPos=(focusId&&typeof active.selectionStart==='number')?active.selectionStart:null;
+  plEnsure();
+  const st=plReclass;
+  const fromSchema=S.priceLib.schemas[st.fromProduct]||[];
+  const line=plGetLine(st.lineId)||{values:{}};
+  const toProd=st.toProduct;
+  const toSchema=toProd?(S.priceLib.schemas[toProd]||[]):[];
+  const toNames=new Set(toSchema.map(f=>(f.name||"").toLowerCase()));
+  const fmt=f=>{const v=line.values[f.id];if(v===undefined||v===null||v==="")return "—";if(f.type==='number'){let d=plFormatNumber(v);if(f.unit)d+=' '+f.unit;return d}if(f.type==='date')return plDateFR(v);return String(v)};
+  let h=`<div class="pl-overlay"><div class="pl-modal pl-reclass-modal">`;
+  h+=`<h3>↪ Reclasser l'équipement<button class="pl-close" onclick="plCloseReclass()" title="Fermer">×</button></h3>`;
+  h+=`<div class="pl-rcl-cols">`;
+  /* Gauche : catégorie actuelle */
+  h+=`<div class="pl-rcl-col"><div class="pl-rcl-coltitle">Catégorie actuelle</div><div class="pl-rcl-cat">${esc(st.fromProduct)}</div>`;
+  h+=`<div class="pl-rcl-help">Coche les champs à conserver.</div><div class="pl-rcl-fields">`;
+  if(!fromSchema.length)h+=`<div class="pl-fields-empty">Aucun champ.</div>`;
+  fromSchema.forEach(f=>{
+    const on=!!st.keep[f.id];const exists=toProd&&toNames.has((f.name||"").toLowerCase());
+    h+=`<label class="pl-rcl-field${on?' on':''}"><input type="checkbox" ${on?'checked':''} onchange="plReclassToggleKeep('${f.id}')"><span class="pl-rcl-fname">${esc(f.name)}</span><span class="pl-rcl-fval">${esc(fmt(f))}</span>`;
+    if(on&&toProd)h+=`<span class="pl-rcl-tag ${exists?'map':'add'}">${exists?'déjà présent':'sera ajouté'}</span>`;
+    h+=`</label>`;
+  });
+  h+=`</div></div>`;
+  h+=`<div class="pl-rcl-arrow">→</div>`;
+  /* Droite : nouvelle catégorie */
+  h+=`<div class="pl-rcl-col"><div class="pl-rcl-coltitle">Nouvelle catégorie</div>`;
+  if(toProd){
+    h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(toProd)}</span><button class="pl-pill-clear" onclick="plReclassClearTarget()" title="Changer">×</button></span></div>`;
+    h+=`<div class="pl-rcl-help">Champs déjà dans cette catégorie :</div><div class="pl-rcl-fields">`;
+    if(!toSchema.length)h+=`<div class="pl-fields-empty">Catégorie vide ou nouvelle.</div>`;
+    toSchema.forEach(f=>{h+=`<div class="pl-rcl-existing">${esc(f.name)}${f.unit?` <span style="color:#475569">(${esc(f.unit)})</span>`:''}</div>`});
+    h+=`</div>`;
+  }else{
+    const q=(st.toQuery||"").trim();const ql=q.toLowerCase();
+    const prods=plListAllProducts().filter(p=>p.toLowerCase()!==st.fromProduct.toLowerCase());
+    const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql));
+    const exact=q&&prods.some(p=>p.toLowerCase()===ql);
+    h+=`<input id="pl-rcl-search" type="text" class="pl-input" placeholder="Choisir ou créer une sous-catégorie…" value="${esc(q)}" oninput="plReclassSetQuery(this.value)" autocomplete="off">`;
+    h+=`<div class="pl-search-list">`;
+    if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Tape un nom pour créer une catégorie.</div>`;
+    matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plReclassPickTarget(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
+    if(matches.length>8)h+=`<div class="pl-search-list-empty">+ ${matches.length-8} autre(s)…</div>`;
+    if(q&&!exact)h+=`<div class="pl-search-item create" onmousedown="event.preventDefault();plReclassPickTarget(${esc(JSON.stringify(q))})">＋ Créer « ${esc(q)} »</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
+  const nKeep=fromSchema.filter(f=>st.keep[f.id]).length;
+  h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseReclass()">Annuler</button><button class="pl-btn pl-btn-primary" ${toProd?'':'disabled'} onclick="plReclassConfirm()">Reclasser${toProd?` (${nKeep})`:''}</button></div>`;
+  h+=`</div></div>`;
+  host.innerHTML=h;
+  if(focusId){const el=document.getElementById(focusId);if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}}
+}
+
 // ▼ plRenderLineCard — rend une ligne d'équipement du devis (sous-cat scopée + champs dynamiques). lineId encode tous les handlers.
 function plRenderLineCard(line,idx,st){
   const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
@@ -2203,7 +2317,7 @@ function plRenderLineCard(line,idx,st){
   /* Sous-catégorie */
   h+=`<div class="pl-row"><label class="pl-lbl">Sous-catégorie</label>`;
   if(line.product){
-    h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(line.product)}</span><button class="pl-pill-clear" onclick="plClearProduct('${line.id}')" title="Changer">×</button></span></div>`;
+    h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(line.product)}</span><button class="pl-pill-clear" onclick="plClearProduct('${line.id}')" title="Changer (les valeurs sont conservées)">×</button></span><button class="pl-mini-btn" onclick="plOpenReclass('${line.id}')" title="Reclasser dans une autre sous-catégorie en transférant les champs choisis">↪ Reclasser</button></div>`;
   }else{
     const q=(line.productQuery||"").trim();
     const ql=q.toLowerCase();
