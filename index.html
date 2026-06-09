@@ -405,12 +405,12 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pl-field-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
 /* Champ éditable : poignée de drag + intitulé renommable inline */
 .pl-field-grip{cursor:grab;color:#334155;display:inline-flex;align-items:center;flex-shrink:0;padding:0 1px;transition:color .12s}
-.pl-field-row:hover .pl-field-grip{color:#5CB8F0}
+.pl-field-row:hover .pl-field-grip,.pl-sch-field:hover .pl-field-grip{color:#5CB8F0}
 .pl-field-grip:active{cursor:grabbing}
 .pl-field-label{min-width:138px;flex-shrink:0;border:1px solid transparent;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:#CBD5E1;outline:none;padding:3px 5px;border-radius:5px;transition:border-color .12s,background .12s,box-shadow .12s}
 .pl-field-label:hover{border-color:#243650}
 .pl-field-label:focus{border-color:#38BDF8;background:#162032;box-shadow:0 0 0 1px rgba(56,189,248,.2)}
-.pl-field-row.pl-fdrag-over{box-shadow:inset 0 2px 0 #38BDF8}
+.pl-fdrag-over{box-shadow:inset 0 2px 0 #38BDF8}
 .pl-fields-hint{font-size:8px;font-weight:500;color:#475569;text-transform:none;letter-spacing:0;margin-left:8px;font-style:italic}
 .pl-fielddraft{padding:10px;background:rgba(0,0,0,.25);border:1px dashed #2A3A52;border-radius:6px;margin-top:8px}
 .pl-fielddraft-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
@@ -1765,6 +1765,20 @@ function plSchemaMoveField(prod,fieldId,dir){
   const j=i+(dir<0?-1:1);if(j<0||j>=arr.length)return;
   const tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;save();plRenderSchemaModal();
 }
+// ▼ Réordonnancement par drag dans le gestionnaire « Champs »
+let plSchemaDrag=null; // {prod, fieldId}
+function plSchemaFieldDragStart(e,prod,fieldId){plSchemaDrag={prod:prod,fieldId:fieldId};try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',fieldId)}catch(_){}}
+function plSchemaFieldDragEnd(){plSchemaDrag=null}
+function plSchemaFieldDrop(prod,targetFieldId){
+  const drag=plSchemaDrag;plSchemaDrag=null;
+  if(!drag||drag.prod!==prod)return;
+  plEnsure();const arr=S.priceLib.schemas[prod];if(!Array.isArray(arr))return;
+  const from=arr.findIndex(x=>x.id===drag.fieldId);
+  const to=arr.findIndex(x=>x.id===targetFieldId);
+  if(from<0||to<0||from===to)return;
+  const m=arr.splice(from,1)[0];arr.splice(to,0,m);
+  save();plRenderSchemaModal();
+}
 function plSchemaDelField(prod,fieldId){
   plEnsure();const arr=S.priceLib.schemas[prod];if(!arr)return;
   const f=arr.find(x=>x.id===fieldId);if(!f)return;
@@ -1815,16 +1829,13 @@ function plRenderSchemaModal(){
         h+=`<div class="pl-sch-body">`;
         if(!fields.length)h+=`<div class="pl-fields-empty" style="margin-bottom:8px">Aucun champ. Ajoute le premier ci-dessous.</div>`;
         fields.forEach((f,idx)=>{
-          h+=`<div class="pl-sch-field">`;
+          h+=`<div class="pl-sch-field" ondragover="event.preventDefault();this.classList.add('pl-fdrag-over')" ondragleave="this.classList.remove('pl-fdrag-over')" ondrop="this.classList.remove('pl-fdrag-over');plSchemaFieldDrop(${esc(JSON.stringify(prod))},'${f.id}')">`;
+          h+=`<span class="pl-field-grip" draggable="true" ondragstart="plSchemaFieldDragStart(event,${esc(JSON.stringify(prod))},'${f.id}')" ondragend="plSchemaFieldDragEnd()" title="Glisser pour réordonner">${I.grip}</span>`;
           h+=`<input id="pl-sch-name-${esc(f.id)}" type="text" class="pl-sch-fname" value="${esc(f.name)}" onchange="plSchemaRenameField(${esc(JSON.stringify(prod))},'${f.id}',this.value)" placeholder="Nom du champ">`;
           h+=`<span class="pl-sch-ftype">${esc(f.type==='number'?'Nombre':f.type==='date'?'Date':f.type==='select'?'Liste':'Texte')}</span>`;
           if(f.type==='number')h+=`<input id="pl-sch-unit-${esc(f.id)}" type="text" class="pl-sch-funit" value="${esc(f.unit||"")}" onchange="plSchemaSetFieldUnit(${esc(JSON.stringify(prod))},'${f.id}',this.value)" placeholder="Unité">`;
           if(f.type==='select')h+=`<input id="pl-sch-opts-${esc(f.id)}" type="text" class="pl-sch-fopts" value="${esc((f.options||[]).join(', '))}" onchange="plSchemaSetFieldOptions(${esc(JSON.stringify(prod))},'${f.id}',this.value)" placeholder="Options, virgule">`;
-          h+=`<div class="pl-sch-actions">`;
-          h+=`<button class="pl-sch-act" onclick="plSchemaMoveField(${esc(JSON.stringify(prod))},'${f.id}',-1)" ${idx===0?'disabled':''} title="Monter">▲</button>`;
-          h+=`<button class="pl-sch-act" onclick="plSchemaMoveField(${esc(JSON.stringify(prod))},'${f.id}',1)" ${idx===fields.length-1?'disabled':''} title="Descendre">▼</button>`;
           h+=`<button class="pl-sch-act del" onclick="plSchemaDelField(${esc(JSON.stringify(prod))},'${f.id}')" title="Supprimer">×</button>`;
-          h+=`</div>`;
           h+=`</div>`;
         });
         /* Form-builder draft */
