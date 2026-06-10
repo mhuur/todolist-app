@@ -110,10 +110,4 @@ L'utilisateur ne lit pas le code, donc ne peut pas valider ligne par ligne. Sans
 - **Format** : phrases courtes, listes à puces, code en `backticks`. Pas de « il est important de noter que », « par ailleurs », « en effet ».
 - **Délégation** : si l'info est dans le code et triviale à grep → ne pas dupliquer, référencer l'emplacement.
 
-## Fin de session
 
-Mot-clé : **« Kenavo ! »**. Quand l'utilisateur l'écrit, répondre **avant** toute autre chose par :
-
-> Au vu de ce qu'on vient de faire, qu'est-ce qui mériterait d'être ajouté au CLAUDE.md pour qu'une prochaine session démarre mieux ? Propose des ajouts précis avec leur emplacement dans le fichier.
-
-Précis = nouveau bullet, sous-section ou modif d'une règle, avec emplacement exact (section + position). Une fois validé/refusé, l'user fait `/clear`.
