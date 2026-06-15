@@ -127,7 +127,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .add-row button{border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#22C55E;color:#fff;flex-shrink:0}
 .add-row button:hover{background:#16A34A}
 /* ── Quick-add card (style "todo" Google Tasks, néon) ── */
-.qa-bar{padding:4px 8px 6px;margin-bottom:4px;position:sticky;top:0;z-index:30;background:rgba(14,27,46,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex}
+.qa-bar{padding:4px 8px 6px;margin-bottom:4px;position:sticky;top:0;z-index:30;background:rgba(14,27,46,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}
+.qa-stack-hd{display:flex;align-items:center;gap:8px}
+.qa-stack-hd .qa-trigger-open{flex:1}
 .qa-trigger{flex:1;display:inline-flex;align-items:center;gap:7px;justify-content:flex-start;padding:5px 4px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;color:#5CB8F0;background:transparent;border:none;transition:color .12s}
 .qa-trigger:hover{color:#7DD3FC}
 .qa-trigger b{font-size:16px;font-weight:400;line-height:0}
@@ -191,7 +193,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .dchip-lbl{font-size:8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dchip:hover{background:rgba(148,163,184,.10)}.dchip.set{background:rgba(148,163,184,.05)}
 .plan-hd{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:8px 0 3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:rgba(148,163,184,.05);border-radius:0 4px 4px 0}
-.plan-hd .plan-ct{font-size:9px;font-weight:600;color:#94A3B8;background:rgba(100,116,139,.18);padding:0 6px;border-radius:8px}
+.plan-ct{font-size:9px;font-weight:600;color:#94A3B8;background:rgba(100,116,139,.18);padding:0 6px;border-radius:8px;flex-shrink:0}
 .plan-bucket{border-radius:0 6px 6px 0;transition:background .1s}
 .plan-bucket.drop-hi{background:rgba(56,189,248,.07);box-shadow:inset 0 0 0 1px rgba(56,189,248,.35)}
 .plan-empty{font-size:9px;color:#3A4D68;font-style:italic;padding:3px 10px 6px}
@@ -252,7 +254,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ugt .ln{flex:1;height:1px}
 .ug{min-height:4px;padding-bottom:3px}
 .ug.dz{background:rgba(56,189,248,.05);border-radius:6px}
-.pgl{font-size:9px;font-weight:700;color:#38BDF8;padding:4px 0 1px;display:flex;align-items:center;gap:4px}
+.pgl{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:10px 0 3px;background:rgba(148,163,184,.05);border-radius:0 4px 4px 0;border-left:3px solid transparent}
 .pgl-del{border:none;background:transparent;color:#475569;cursor:pointer;padding:1px 4px;border-radius:3px;display:inline-flex;align-items:center;flex-shrink:0;transition:color .12s}
 .pgl-del:hover{color:#F87171}
 .pgl-del svg{width:11px;height:11px}
@@ -260,8 +262,9 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .pgl-del-ok,.pgl-del-no{border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:700;line-height:1;padding:0 4px;border-radius:3px;flex-shrink:0;font-family:inherit}
 .pgl-del-ok{color:#F87171}.pgl-del-ok:hover{color:#FCA5A5;text-shadow:0 0 8px #F87171}
 .pgl-del-no{color:#64748B}.pgl-del-no:hover{color:#94A3B8}
-.pgl .pgln{flex:1;height:1px;background:#2A3A52}
-.pgl-name{border:1px solid transparent;background:transparent;font-size:9px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none;padding:1px 4px;border-radius:4px;width:240px;max-width:65%}.pgl-name:hover,.pgl-name:focus{border-color:#1E3050;background:#152236}.pgl-name::placeholder{color:#334155}
+.pgl-name,.pgl-lbl{flex:1;min-width:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:inherit;color:#38BDF8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pgl-name{border:1px solid transparent;background:transparent;outline:none;padding:1px 4px;border-radius:4px}
+.pgl-name:hover,.pgl-name:focus{border-color:#1E3050;background:#152236}.pgl-name::placeholder{color:#334155;text-transform:none}
 .dn-date{border:1px solid #2A3A52;background:#152236;border-radius:4px;padding:1px 5px;font-size:10px;font-family:inherit;font-weight:700;color:#94A3B8;outline:none;cursor:pointer;flex-shrink:0}.dn-date:hover,.dn-date:focus{border-color:#38BDF8;color:#E2E8F0}
 .cv{transition:transform .15s;display:inline-flex}.cv.op{transform:rotate(90deg)}
 
@@ -959,14 +962,13 @@ function rGT(){
   let h=`<div class="subtab-bar"><div class="subtab ${sect==='plan'?'on':''}" onclick="S.gSection='plan';render()">Planning</div><div class="subtab ${sect==='task'?'on':''}" onclick="S.gSection='task';render()">Projets</div><div class="subtab ${sect==='done'?'on':''}" onclick="S.gSection='done';render()">Terminé</div><div class="subtab ${sect==='time'?'on':''}" onclick="S.gSection='time';render()">Temps</div></div>`;
   if(S.gSection==='done')return h+rDN();
   if(S.gSection==='time')return h+rTM();
-  /* Inline add with autocomplete */
+  /* Inline add + filtre statut sur la même ligne (alignés) */
+  const fltHTML=`<div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div>`;
   if(addCard.open&&addCard.at==='top'){
-    h+=`<div class="qa-bar"><div class="qa-stack"><div class="qa-trigger-open" onclick="var _t=document.getElementById('ga-title');if(_t)_t.focus()"><b>＋</b> Ajouter une action</div>${qaCardHTML(true,true)}</div></div>`;
+    h+=`<div class="qa-bar"><div class="qa-stack"><div class="qa-stack-hd"><div class="qa-trigger-open" onclick="var _t=document.getElementById('ga-title');if(_t)_t.focus()"><b>＋</b> Ajouter une action</div>${fltHTML}</div>${qaCardHTML(true,true)}</div></div>`;
   }else{
-    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button></div>`;
+    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button>${fltHTML}</div>`;
   }
-  /* Filtre statut */
-  h+=`<div style="display:flex;gap:4px;margin-bottom:6px;justify-content:flex-end;align-items:center"><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
   /* Sync globalOrder */
@@ -984,7 +986,7 @@ function rGT(){
     projIds.forEach(pid=>{
       const p=fp(pid);if(!p)return;
       const pActs=filtered.filter(a=>a.pId===pid);
-      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px">${pid==='__inbox'?`<span>${esc(pN(p))}</span>`:`<input class="pgl-name" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<div class="pgln"></div>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">Supprimer + ${p.actions.length} action${p.actions.length>1?'s':''} ?</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
+      h+=`<div class="pgl" style="border-left-color:${pCol(pid)}">${pid==='__inbox'?`<span class="pgl-lbl" style="color:${pCol(pid)}">${esc(pN(p))}</span>`:`<input class="pgl-name" style="color:${pCol(pid)}" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<span class="plan-ct">${pActs.length}</span>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">Supprimer + ${p.actions.length} action${p.actions.length>1?'s':''} ?</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
       /* Standalone actions (no task) */
       const standalone=pActs.filter(a=>!a.taskId);
       standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
@@ -1053,6 +1055,12 @@ function acCreate(type,name){
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}
   /* Carte de création : clic dehors + rien saisi → referme (style Google Tasks) */
   if(addCard.open&&!e.target.closest('.qa-card,.qa-trigger-open,.qa-trigger,.pa-add,.tg-add-btn')){if((addCard.title||"").trim())qaAdd(false);else if(!(addCard.text||"").trim())qaCancel();}});
+// ▼ Auto-scroll de la fenêtre pendant le drag&drop quand le curseur approche du haut/bas (rAF : continue même curseur immobile)
+let _dragY=null,_dragRAF=null;
+function _dragScrollTick(){if(_dragY==null){_dragRAF=null;return}const edge=80,h=window.innerHeight;let dy=0;if(_dragY<edge)dy=-Math.ceil((edge-_dragY)/3);else if(_dragY>h-edge)dy=Math.ceil((_dragY-(h-edge))/3);if(dy)window.scrollBy(0,Math.max(-18,Math.min(18,dy)));_dragRAF=requestAnimationFrame(_dragScrollTick)}
+document.addEventListener('dragover',e=>{_dragY=e.clientY;if(_dragRAF==null)_dragRAF=requestAnimationFrame(_dragScrollTick)});
+document.addEventListener('dragend',()=>{_dragY=null});
+document.addEventListener('drop',()=>{_dragY=null});
 
 // ▼ Carte de création (style Google Tasks) : qaCardHTML rend la carte (réutilisée en haut + inline projet/tâche) ; qaOpen ouvre (at='top'|'proj:id'|'task:id:tid'), qaAdd crée, qaCancel referme. État transient addCard ; projet/tâche via _acSel.
 function qaCardHTML(showProj,showTask){let pick="";if(showProj)pick+=`<div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" value="${esc(_acSel.proj)}" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div>`;if(showTask)pick+=`<div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" value="${esc(_acSel.task)}" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div>`;const det=addCard.showDetails?`<textarea id="ga-details" class="qa-details" rows="1" placeholder="Détails…" oninput="addCard.text=this.value" onkeydown="qaKey(event)">${esc(addCard.text)}</textarea>`:`<span class="qa-det-toggle" onclick="addCard.showDetails=true;render();requestAnimationFrame(()=>{const d=document.getElementById('ga-details');if(d)d.focus()})">＋ détails</span>`;const today=lDS(new Date()),_tm=new Date();_tm.setDate(_tm.getDate()+1);const tmrw=lDS(_tm),sd=addCard.sched||"",custom=!!sd&&sd!==today&&sd!==tmrw;const chips=`<div class="qa-chips"><button class="qa-chip ${sd===today?'on':''}" onclick="qaSched('today')">Aujourd'hui</button><button class="qa-chip ${sd===tmrw?'on':''}" onclick="qaSched('tomorrow')">Demain</button><span class="qa-chip qa-chip-cal ${custom?'on':''}" title="Choisir une date"><input type="date" value="${sd}" onchange="addCard.sched=this.value;render()" onclick="event.stopPropagation();this.showPicker&&this.showPicker()">${I.cal}${custom?`<span>${scl(sd)}</span>`:""}</span></div>`;return`<div class="qa-card"><div class="qa-arow"><span class="qa-cbx"></span><input id="ga-title" class="qa-as" type="text" placeholder="Titre de l'action…" value="${esc(addCard.title)}" oninput="addCard.title=this.value" onkeydown="qaKey(event)"></div><div class="qa-body">${pick?`<div class="qa-pickers">${pick}</div>`:""}${chips}${det}</div></div>`}
@@ -1088,7 +1096,7 @@ function rDN(){
     const byP={};all.forEach(a=>{const k=a.pId||"_archived";if(!byP[k])byP[k]={name:a._pName,items:[]};byP[k].items.push(a)});
     const keys=Object.keys(byP).sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a),bi=S.projects.findIndex(p=>p.id===b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi});
     keys.forEach(k=>{
-      h+=`<div class="pgl" style="padding-top:8px;border-bottom:2px solid ${pCol(k)};padding-bottom:3px"><span>${esc(byP[k].name)}</span><div class="pgln"></div></div>`;
+      h+=`<div class="pgl" style="border-left-color:${pCol(k)}"><span class="pgl-lbl" style="color:${pCol(k)}">${esc(byP[k].name)}</span><span class="plan-ct">${byP[k].items.length}</span></div>`;
       byP[k].items.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||"")).forEach(a=>{h+=rDoneRow(a)});
     });
   }
