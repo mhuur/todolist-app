@@ -18,7 +18,7 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
    - **Projets** (`task`) — actions groupées par projet, puis par tâche.
    - **Terminé** (`done` → `rDN` L1044) — actions terminées (avec heures passées).
    - **Temps** (`time` → `rTM` L1092) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
-   - Barre commune : ajout inline + autocomplete projet/tâche (`qaGlobal`, moteur `ac*`), filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
+   - Barre commune : **carte de création dépliable** style Google Tasks (`.qa-bar`/`.qa-card` ; `qaOpen`/`qaAdd`/`qaCancel`/`qaKey`, état transient `addCard`). Champs : titre, détails (→ `a.text`, stocké en HTML), projet/tâche via combobox `ac*` **filtré aux projets en cours** (`pEnCours`). Même carte ouvrable depuis un projet (lien `.pa-add` en bas du projet) ou une tâche (`qaOpen(pid,tid)`, pré-rempli). Pas de date à la création (planif via drag&drop Planning). Filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
 2. **CRM** (`tab:"crm"` → `rCRM` L1176) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`).
 3. **Prix** (`tab:"price"` → `rPL` L2148) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
 4. **Notes** (`tab:"feedback"` → `rFB` L2540) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
@@ -67,7 +67,7 @@ Pour pousser sans clé de signature locale, passer par le MCP GitHub (`push_file
   - **Variante `.violet`** pour toggles **neutres** sans sémantique (vue Fournisseurs/Produits, list/board) : fond `rgba(192,38,211,.18)` translucide + inset shadow `rgba(232,121,249,.5)` + glow serré 14 px + texte `#fdf4ff`.
   - **Bouton `+ Ajouter`** : classe générique `.btn-add-neon` (compact ~30 px, bordure néon primary + glow). Toujours préférer cette classe pour les boutons d'ajout.
   - **Bouton d'action primary** : `.btn-neon` (version "lourde", padding 9×16, font-size 13). Pour les boutons d'action principale d'un écran. État `:disabled` (opacité 45 %, glow off).
-  - **Propagation** : la première zone migrée au pattern néon (à choisir lors d'une refonte) devient la référence vivante. Dès qu'un toggle/bouton non conforme apparaît ailleurs, **proposer la conversion**.
+  - **Propagation** : la première zone migrée au pattern néon devient la référence vivante. **Référence actuelle : la carte de création** — `.qa-trigger` (bleu primary repos+glow), `.qa-add` (vert succès), `.pa-add` (lien pointillé bleu). S'en inspirer pour les prochaines migrations. ⚠️ `.btn-add-neon`/`.btn-neon` cités ci-dessus **ne sont pas encore implémentés** dans le CSS. Dès qu'un toggle/bouton non conforme apparaît ailleurs, **proposer la conversion**.
 
 ## Pièges spécifiques
 
