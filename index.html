@@ -241,6 +241,13 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ug{min-height:4px;padding-bottom:3px}
 .ug.dz{background:rgba(56,189,248,.05);border-radius:6px}
 .pgl{font-size:9px;font-weight:700;color:#38BDF8;padding:4px 0 1px;display:flex;align-items:center;gap:4px}
+.pgl-del{border:none;background:transparent;color:#475569;cursor:pointer;padding:1px 4px;border-radius:3px;display:inline-flex;align-items:center;flex-shrink:0;transition:color .12s}
+.pgl-del:hover{color:#F87171}
+.pgl-del svg{width:11px;height:11px}
+.pgl-confirm{font-size:9px;font-weight:700;color:#F87171;flex-shrink:0;text-shadow:0 0 6px rgba(248,113,113,.5)}
+.pgl-del-ok,.pgl-del-no{border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:700;line-height:1;padding:0 4px;border-radius:3px;flex-shrink:0;font-family:inherit}
+.pgl-del-ok{color:#F87171}.pgl-del-ok:hover{color:#FCA5A5;text-shadow:0 0 8px #F87171}
+.pgl-del-no{color:#64748B}.pgl-del-no:hover{color:#94A3B8}
 .pgl .pgln{flex:1;height:1px;background:#2A3A52}
 .pgl-name{border:1px solid transparent;background:transparent;font-size:9px;font-weight:700;color:#38BDF8;font-family:inherit;outline:none;padding:1px 4px;border-radius:4px;width:240px;max-width:65%}.pgl-name:hover,.pgl-name:focus{border-color:#1E3050;background:#152236}.pgl-name::placeholder{color:#334155}
 .dn-date{border:1px solid #2A3A52;background:#152236;border-radius:4px;padding:1px 5px;font-size:10px;font-family:inherit;font-weight:700;color:#94A3B8;outline:none;cursor:pointer;flex-shrink:0}.dn-date:hover,.dn-date:focus{border-color:#38BDF8;color:#E2E8F0}
@@ -843,6 +850,7 @@ function triSel(curPid,aid,val){if(val==='__new'){triNew=aid;render();requestAni
 function triCreate(curPid,aid,name){const n=(name||"").trim();if(!n){triNew=null;render();return}const p={id:gid(),number:1,name:n,deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;triNew=null;moveActToProject(curPid,aid,p.id)}
 function togX(id){const el=document.getElementById('ar_'+id);if(el){el.classList.toggle('ao');S.ex[id]=el.classList.contains('ao')}}
 function delP(id){const p=fp(id);if(!p)return;/* Archive done actions with project name */p.actions.filter(a=>a.status==="done").forEach(a=>{S.archive.push({...a,pId:id,pName:pN(p)})});S.trash.push({type:"project",data:JSON.parse(JSON.stringify(p)),date:Date.now()});S.projects=S.projects.filter(x=>x.id!==id);save();render()}
+function delPGo(pid){delConfirmPid=null;delP(pid)} // suppression projet confirmée (vue Projets)
 function delA(pid,aid){const p=fp(pid);if(!p)return;const a=p.actions.find(x=>x.id===aid);if(!a)return;S.trash.push({type:"action",data:JSON.parse(JSON.stringify(a)),pid,pn:pN(p),date:Date.now()});p.actions=p.actions.filter(x=>x.id!==aid);save();render()}
 function delArchived(aid){S.archive=S.archive.filter(a=>a.id!==aid);save();render()}
 function restT(i){const it=S.trash[i];if(!it)return;if(it.type==="project"){S.projects.push(it.data);S.openProjects[it.data.id]=true}else{const p=fp(it.pid);if(p)p.actions.push(it.data)}S.trash.splice(i,1);save();render()}
@@ -961,7 +969,7 @@ function rGT(){
     projIds.forEach(pid=>{
       const p=fp(pid);if(!p)return;
       const pActs=filtered.filter(a=>a.pId===pid);
-      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px">${pid==='__inbox'?`<span>${esc(pN(p))}</span>`:`<input class="pgl-name" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<div class="pgln"></div></div>`;
+      h+=`<div class="pgl" style="border-bottom:2px solid ${pCol(pid)};padding-bottom:3px">${pid==='__inbox'?`<span>${esc(pN(p))}</span>`:`<input class="pgl-name" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<div class="pgln"></div>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">Supprimer + ${p.actions.length} action${p.actions.length>1?'s':''} ?</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
       /* Standalone actions (no task) */
       const standalone=pActs.filter(a=>!a.taskId);
       standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
@@ -996,6 +1004,7 @@ function rGT(){
 /* ── Autocomplete engine ── */
 let _acSel={proj:"",projId:"",task:"",taskId:""};
 let addCard={open:false,at:'top',title:"",text:"",showDetails:false}; // état transient de la carte de création ; at = 'top' | 'proj:<pid>' | 'task:<pid>:<tid>'
+let delConfirmPid=null; // projet en attente de confirmation de suppression (transient, vue Projets)
 let triNew=null; // aid d'une action "À trier" en cours de création de projet (transient)
 function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
 function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}

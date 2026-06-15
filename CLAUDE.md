@@ -15,7 +15,7 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
 
 1. **Tâches** (`tab:"global"` → `rGT` L948) — cœur de l'app. 4 sous-onglets via `S.gSection` :
    - **Planning** (`plan`, défaut) — actions groupées par tranche de date planifiée (`scheduledDate` → `schedBucket`) : En retard / Aujourd'hui / Demain / Cette semaine / Plus tard / En attente / Non planifié. Drag&drop = replanifier (drop sur tranche) ou réordonner.
-   - **Projets** (`task`) — actions groupées par projet, puis par tâche.
+   - **Projets** (`task`) — actions groupées par projet, puis par tâche. **Rendu inline dans `rGT`** (branche `S.gSection==='task'`), PAS via une fonction projet dédiée : `rP`/`rPT` (ancien onglet « Projets ») ont été **supprimés** (code mort, jamais dispatché). Conséquence : `delP()` (suppression projet → corbeille) existe encore mais **n'a plus de bouton** dans cette vue.
    - **Terminé** (`done` → `rDN` L1044) — actions terminées (avec heures passées).
    - **Temps** (`time` → `rTM` L1092) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
    - Barre commune : **carte de création dépliable** style Google Tasks (`.qa-bar`/`.qa-card` ; `qaOpen`/`qaAdd`/`qaCancel`/`qaKey`, état transient `addCard`). Champs : titre, détails (→ `a.text`, stocké en HTML), projet/tâche via combobox `ac*` **filtré aux projets en cours** (`pEnCours`). Même carte ouvrable depuis un projet (lien `.pa-add` en bas du projet) ou une tâche (`qaOpen(pid,tid)`, pré-rempli). Pas de date à la création (planif via drag&drop Planning). Filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
