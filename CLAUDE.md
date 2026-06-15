@@ -9,6 +9,26 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
 - **Cache local** : `localStorage["todolist-data-v3"]` (constante `SK`). Changer le suffixe casse tous les caches.
 - Fichiers : `index.html`, `README.md`, `LICENSE`, `.gitignore`. Rien d'autre.
 
+## Carte de l'app — menu & fonctionnalités
+
+**Sidebar = 5 onglets** (tableau `tabs` ~ligne 901, dispatch `S.tab` → renderer ~ligne 910). `sT(k)` change d'onglet.
+
+1. **Tâches** (`tab:"global"` → `rGT` L948) — cœur de l'app. 4 sous-onglets via `S.gSection` :
+   - **Planning** (`plan`, défaut) — actions groupées par tranche de date planifiée (`scheduledDate` → `schedBucket`) : En retard / Aujourd'hui / Demain / Cette semaine / Plus tard / En attente / Non planifié. Drag&drop = replanifier (drop sur tranche) ou réordonner.
+   - **Projets** (`task`) — actions groupées par projet, puis par tâche.
+   - **Terminé** (`done` → `rDN` L1044) — actions terminées (avec heures passées).
+   - **Temps** (`time` → `rTM` L1092) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
+   - Barre commune : ajout inline + autocomplete projet/tâche (`qaGlobal`, moteur `ac*`), filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
+2. **CRM** (`tab:"crm"` → `rCRM` L1176) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`).
+3. **Prix** (`tab:"price"` → `rPL` L2148) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
+4. **Notes** (`tab:"feedback"` → `rFB` L2540) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
+5. **Corbeille** (`tab:"trash"` → `rTR` L1126) — éléments supprimés (`S.trash[]`), restaurer / vider.
+
+**Modèle de données** (état global `S`, init ~ligne 747 ; persisté : `projects, trash, archive, globalOrder, crm, feedback, priceLib`) :
+- **Action** : `{id, title, text, urgency, status:"todo"|"done", deadline, scheduledDate, waitReason, timeH, doneDate, taskId, paused, priority}`.
+- **Projet** : `{id, number, name, deadline, actions[], tasks:[{id,title}]}`. Inbox réservée `__inbox` (« À trier »), créée à la volée, auto-purgée quand vide.
+- `globalOrder[]` = ordre manuel transverse des actions ; `openProjects`/`openTasks`/`ex` = états d'expansion UI.
+
 ## Commandes utiles
 
 ```bash
