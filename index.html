@@ -122,20 +122,35 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .add-row input::placeholder{color:#334155}
 .add-row button{border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;background:#22C55E;color:#fff;flex-shrink:0}
 .add-row button:hover{background:#16A34A}
+/* ── Quick-add card (style "todo" Google Tasks, néon) ── */
+.qa-bar{padding:6px 8px;margin-bottom:6px;position:sticky;top:0;z-index:30;background:rgba(14,27,46,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid #1E3050;border-radius:0 0 6px 6px;display:flex}
+.qa-trigger{flex:1;display:inline-flex;align-items:center;gap:8px;justify-content:flex-start;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;color:#38BDF8;background:transparent;border:1px solid #38BDF8;box-shadow:inset 0 0 0 1px rgba(56,189,248,.32),0 0 12px rgba(56,189,248,.22);transition:all .15s}
+.qa-trigger:hover{color:#7DD3FC;background:rgba(56,189,248,.08);box-shadow:inset 0 0 12px rgba(56,189,248,.22),0 0 18px rgba(56,189,248,.5),0 0 32px rgba(56,189,248,.22)}
+.qa-trigger b{font-size:15px;font-weight:700}
+.qa-card{flex:1;display:flex;flex-direction:column;gap:6px;padding:9px 11px;border-radius:8px;background:#0F1D32;border:1px solid #1E3050;box-shadow:inset 0 0 0 1px rgba(56,189,248,.18),0 0 18px rgba(56,189,248,.12)}
+.qa-card input[type="text"],.qa-card textarea{width:100%;border:none;background:transparent;color:#E2E8F0;font-family:inherit;outline:none;padding:2px}
+.qa-card .qa-title{font-size:13px;font-weight:700}
+.qa-card .qa-details{font-size:11px;resize:vertical;min-height:34px;line-height:1.45;border-top:1px solid #16263F;padding-top:6px}
+.qa-card input::placeholder,.qa-card textarea::placeholder{color:#475569}
+.qa-pickers{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.qa-spacer{flex:1}
+.qa-cancel{border:none;background:transparent;color:#64748B;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;padding:5px 10px;border-radius:6px;transition:all .12s}
+.qa-cancel:hover{color:#94A3B8;background:rgba(148,163,184,.1)}
+.qa-add{display:inline-flex;align-items:center;gap:5px;padding:6px 16px;border-radius:7px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;color:#22C55E;background:transparent;border:1px solid #22C55E;box-shadow:inset 0 0 0 1px rgba(34,197,94,.32),0 0 12px rgba(34,197,94,.22);transition:all .15s}
+.qa-add:hover{color:#86EFAC;background:rgba(34,197,94,.08);box-shadow:inset 0 0 12px rgba(34,197,94,.22),0 0 18px rgba(34,197,94,.5),0 0 32px rgba(34,197,94,.22)}
+.pa-add{display:flex;align-items:center;gap:6px;margin:5px 2px 2px;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:600;color:#5CB8F0;cursor:pointer;border:1px dashed rgba(56,189,248,.35);transition:all .12s}
+.pa-add:hover{color:#7DD3FC;background:rgba(56,189,248,.07);border-color:rgba(56,189,248,.6);box-shadow:0 0 12px rgba(56,189,248,.25)}
+.pa-add b{font-size:13px;font-weight:700}
 /* Autocomplete */
 .ac-wrap{position:relative;flex-shrink:0;width:140px}
 .ac-wrap input{width:100%;border:1px solid #1E3050;border-radius:5px;padding:4px 8px;font-size:10px;font-family:inherit;font-weight:600;background:#152236;color:#94A3B8;outline:none}
 .ac-wrap input:focus{border-color:#5CB8F0;color:#E2E8F0}
 .ac-wrap input::placeholder{color:#334155}
-.ac-list{display:none;position:absolute;top:100%;left:0;right:0;background:#152236;border:1px solid #1E3050;border-top:none;border-radius:0 0 5px 5px;max-height:160px;overflow-y:auto;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.ac-list{display:none;position:absolute;top:100%;left:0;right:auto;width:max-content;min-width:100%;max-width:min(520px,92vw);background:#152236;border:1px solid #1E3050;border-top:none;border-radius:0 0 5px 5px;max-height:160px;overflow-y:auto;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .ac-wrap.open .ac-list{display:block}
-.ac-item{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
+.ac-item{padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
 .ac-item:hover{background:#1A2D47;color:#E2E8F0}
 .ac-item.create{color:#5CB8F0;font-style:italic}
-.ac-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ac-del{flex-shrink:0;opacity:0;color:#F87171;font-size:13px;line-height:1;cursor:pointer;transition:opacity .08s,text-shadow .08s}
-.ac-item:hover .ac-del{opacity:.55}
-.ac-del:hover{opacity:1;text-shadow:0 0 8px #F87171}
 /* Done table view */
 .done-tbl{width:100%;border-collapse:collapse}
 .done-tbl td{padding:3px 6px;font-size:11px;border-bottom:1px solid #152236;vertical-align:middle}
@@ -771,6 +786,8 @@ function fp(id){return S.projects.find(p=>p.id===id)}
 function fa(pid,aid){const p=fp(pid);return p?p.actions.find(a=>a.id===aid):null}
 function findActionById(aid){let found=null;S.projects.forEach(p=>{const a=p.actions.find(x=>x.id===aid);if(a)found=a});return found}
 function pN(p){return p?p.name||"Sans nom":"?"}
+// ▼ pEnCours — projet "en cours" : hors inbox, vide (nouveau) ou avec au moins une action non terminée
+function pEnCours(p){return!!p&&p.id!=='__inbox'&&(!p.actions.length||p.actions.some(a=>a.status!=='done'))}
 function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const I={search:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,flag:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 2v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M4 2.6h8.2l-1.9 2.7 1.9 2.7H4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,cal:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="3" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 6.5h11M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`};
@@ -849,7 +866,6 @@ function tDE(){tdPid=null;tdTid=null;document.querySelectorAll('.tg').forEach(el
 function tDO(e,pid,tid){if(!tdTid||tdTid===tid||tdPid!==pid)return;e.preventDefault();e.stopPropagation();const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('tg-dot','tg-dob');el.classList.add(e.clientY<r.top+r.height/2?'tg-dot':'tg-dob')}
 function tDL(e){e.currentTarget.classList.remove('tg-dot','tg-dob')}
 function tDD(e,pid,tid){e.preventDefault();e.stopPropagation();e.currentTarget.classList.remove('tg-dot','tg-dob');if(!tdTid||tdTid===tid||tdPid!==pid)return;const p=fp(pid);if(!p)return;const fi=p.tasks.findIndex(t=>t.id===tdTid);if(fi===-1)return;const[m]=p.tasks.splice(fi,1);let ti=p.tasks.findIndex(t=>t.id===tid);if(e.clientY>=e.currentTarget.getBoundingClientRect().top+e.currentTarget.getBoundingClientRect().height/2)ti++;p.tasks.splice(ti,0,m);save();render()}
-function addAToTask(pid,tid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:tid,paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.ex[n.id]=true;save();render()}
 
 /* ── Format ── */
 function fC(c,v){document.execCommand(c,false,v||null);sAE()}
@@ -936,7 +952,7 @@ if(o){
     const tkActs=activeActs.filter(a=>a.taskId===tk.id);
     const tkOpen=S.openTasks[tk.id]!==false;
     ah+=`<div class="tg" draggable="true" ondragstart="tDS(event,'${p.id}','${tk.id}')" ondragend="tDE()" ondragover="tDO(event,'${p.id}','${tk.id}')" ondragleave="tDL(event)" ondrop="tDD(event,'${p.id}','${tk.id}')">`;
-    ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom de la tâche…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();addAToTask('${p.id}','${tk.id}')" title="Ajouter action">＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer tâche">${I.trash}</button></div>`;
+    ah+=`<div class="tg-hd" onclick="togTask('${tk.id}')" ondragover="tgActDO(event,'${p.id}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${p.id}','${tk.id}')"><span class="dh" style="margin-right:2px">${I.grip}</span><span class="cv ${tkOpen?"op":""}">${I.chev}</span><input class="tg-title" value="${esc(tk.title)}" placeholder="Nom de la tâche…" onclick="event.stopPropagation()" oninput="uTN('${p.id}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();qaOpen('${p.id}','${tk.id}')" title="Ajouter une action">＋</span><button class="tg-del" onclick="event.stopPropagation();delTask('${p.id}','${tk.id}')" title="Supprimer tâche">${I.trash}</button></div>`;
     if(tkOpen){
       ah+=`<div class="tg-actions">`;
       tkActs.forEach(a=>{ah+=rA(a,p.id,{})});
@@ -944,6 +960,7 @@ if(o){
     }
     ah+=`</div>`;
   });
+  ah+=`<div class="pa-add" onclick="qaOpen('${p.id}')"><b>＋</b> Ajouter une action</div>`;
   ah+=`</div>`;
 }
 return`<div class="pc" ondragover="pDO(event,'${p.id}')" ondragleave="pDL(event)" ondrop="pDD(event,'${p.id}')"><div class="ph"><span class="dh" draggable="true" ondragstart="pDS(event,'${p.id}')" ondragend="pDE()">${I.grip}</span><span class="cv ${o?"op":""}" onclick="tP('${p.id}')">${I.chev}</span><input value="${esc(p.name)}" placeholder="Nom du projet…" oninput="upNm('${p.id}',this.value)"><span class="ph-right"><input type="date" class="ph-date" value="${p.deadline||""}" onchange="upDl('${p.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dt" style="color:${c}">${dll(p.deadline)}</span><span class="ph-btn" onclick="event.stopPropagation();addTask('${p.id}')" title="Ajouter tâche">＋</span><span class="ph-btn ph-del" onclick="event.stopPropagation();delP('${p.id}')" title="Supprimer projet">${I.trash}</span></span></div>${ah}</div>`}
@@ -958,7 +975,11 @@ function rGT(){
   if(S.gSection==='done')return h+rDN();
   if(S.gSection==='time')return h+rTM();
   /* Inline add with autocomplete */
-  h+=`<div class="add-row"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><input id="ga-title" placeholder="Nouvelle action…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaGlobal()}"><button onclick="qaGlobal()">＋</button></div>`;
+  if(addCard.open){
+    h+=`<div class="qa-bar"><div class="qa-card"><input id="ga-title" class="qa-title" type="text" placeholder="Titre de l'action…" value="${esc(addCard.title)}" oninput="addCard.title=this.value" onkeydown="qaKey(event)"><textarea id="ga-details" class="qa-details" rows="2" placeholder="Détails (optionnel)…" oninput="addCard.text=this.value" onkeydown="qaKey(event)">${esc(addCard.text)}</textarea><div class="qa-pickers"><div class="ac-wrap" id="acw-proj"><input id="ga-proj-q" placeholder="Projet…" value="${esc(_acSel.proj)}" onfocus="acOpen('acw-proj')" oninput="acFilter('acw-proj',this.value,'proj')"><div class="ac-list" id="acl-proj"></div></div><div class="ac-wrap" id="acw-task"><input id="ga-task-q" placeholder="Tâche…" value="${esc(_acSel.task)}" onfocus="acOpen('acw-task')" oninput="acFilter('acw-task',this.value,'task')"><div class="ac-list" id="acl-task"></div></div><span class="qa-spacer"></span><button class="qa-cancel" onclick="qaCancel()">Annuler</button><button class="qa-add" onclick="qaAdd()">Ajouter</button></div></div></div>`;
+  }else{
+    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button></div>`;
+  }
   /* Filtre statut */
   h+=`<div style="display:flex;gap:4px;margin-bottom:6px;justify-content:flex-end;align-items:center"><div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div></div>`;
   h+=`<div class="ga-search-row">${I.search}<input id="ga-search" class="ga-search" placeholder="Rechercher (action, note, projet)…" value="${esc(S.gQ||"")}" oninput="S.gQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('ga-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})">${S.gQ?`<span class="ga-search-clear" onclick="S.gQ='';render()" title="Effacer">×</span>`:""}</div>`;
@@ -1010,6 +1031,7 @@ function rGT(){
 
 /* ── Autocomplete engine ── */
 let _acSel={proj:"",projId:"",task:"",taskId:""};
+let addCard={open:false,title:"",text:""}; // état transient de la carte de création inline (Étape 2)
 let triNew=null; // aid d'une action "À trier" en cours de création de projet (transient)
 function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
 function acClose(){document.querySelectorAll('.ac-wrap.open').forEach(w=>w.classList.remove('open'))}
@@ -1017,8 +1039,8 @@ function acFilter(wid,rawQ,type){
   const list=document.querySelector('#'+wid+' .ac-list');if(!list)return;
   const q=rawQ.toLowerCase().trim();let html="";
   if(type==='proj'){
-    S.projects.filter(p=>p.id!=='__inbox'&&(!q||pN(p).toLowerCase().includes(q))).forEach(p=>{
-      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')"><span class="ac-lbl">${esc(pN(p))}</span><span class="ac-del" title="Supprimer ce projet" onmousedown="event.stopPropagation();event.preventDefault();acDelProj('${wid}','${p.id}')">×</span></div>`});
+    S.projects.filter(p=>pEnCours(p)&&(!q||pN(p).toLowerCase().includes(q))).forEach(p=>{
+      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
     if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
   }else{
     const p=fp(_acSel.projId);if(p&&p.tasks){
@@ -1039,21 +1061,13 @@ function acCreate(type,name){
   else{const p=fp(_acSel.projId);if(p){const t={id:gid(),title:name};p.tasks.push(t);S.openTasks[t.id]=true;_acSel.taskId=t.id;_acSel.task=name;save();const inp=document.getElementById('ga-task-q');if(inp)inp.value=name}}
   acClose();
 }
-// ▼ acDelProj — supprime un projet (→ corbeille via delP) depuis la liste d'autocomplete, en préservant la saisie en cours et en gardant le dropdown ouvert
-function acDelProj(wid,id){
-  const wasSel=_acSel.projId===id;if(wasSel)_acSel={proj:"",projId:"",task:"",taskId:""};
-  const tEl=document.getElementById('ga-title')||document.getElementById('da-title'),ttl=tEl?tEl.value:"";
-  const qEl=document.querySelector('#'+wid+' input'),q=wasSel?"":(qEl?qEl.value:"");
-  delP(id); // archive done actions + push trash + save + render
-  requestAnimationFrame(()=>{
-    const t2=document.getElementById('ga-title')||document.getElementById('da-title');if(t2)t2.value=ttl;
-    const q2=document.querySelector('#'+wid+' input');if(q2)q2.value=q;
-    acOpen(wid);
-  });
-}
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}});
 
-function qaGlobal(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=getInbox()}const n={id:gid(),text:"",title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.globalOrder.unshift(n.id);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
+// ▼ Carte de création inline (style Google Tasks) : qaOpen ouvre (avec projet/tâche optionnels pré-remplis), qaAdd crée, qaCancel referme. État transient addCard ; projet/tâche via _acSel.
+function qaOpen(projId,taskId){addCard.open=true;addCard.title="";addCard.text="";if(projId){const p=fp(projId);if(p){_acSel={proj:pN(p),projId:projId,task:taskId?((p.tasks.find(t=>t.id===taskId)||{}).title||""):"",taskId:taskId||""}}}else{_acSel={proj:"",projId:"",task:"",taskId:""}}render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el)el.focus()})}
+function qaCancel(){addCard.open=false;addCard.title="";addCard.text="";_acSel={proj:"",projId:"",task:"",taskId:""};render()}
+function qaAdd(){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title){if(ti)ti.focus();return}const de=document.getElementById('ga-details');const raw=de?de.value.trim():"";const text=raw?esc(raw).replace(/\n/g,'<br>'):"";let p=fp(_acSel.projId);if(!p)p=getInbox();const n={id:gid(),text:text,title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.globalOrder.unshift(n.id);addCard.title="";addCard.text="";save();render();requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}const d=document.getElementById('ga-details');if(d)d.value=""})}
+function qaKey(e){if(e.key==='Escape'){e.preventDefault();qaCancel();return}if(e.key==='Enter'){if(e.target.id==='ga-details'){if(e.ctrlKey||e.metaKey){e.preventDefault();qaAdd()}}else{e.preventDefault();qaAdd()}}}
 function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
 
 /* ── Terminées (colored, two views) ── */
@@ -2590,7 +2604,6 @@ function addP(){const p={id:gid(),number:1,name:"",deadline:"",actions:[],tasks:
 function tP(id){S.openProjects[id]=S.openProjects[id]===false;render()}
 function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function upDl(id,v){const p=fp(id);if(p){p.deadline=v;save();render()}}
-function addA(pid){const p=fp(pid);if(!p)return;const n={id:gid(),text:"",title:"",urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);S.ex[n.id]=true;save();render()}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 function mvAP(from,aid,to){if(from===to)return;const s=fp(from);const t=fp(to);if(!s||!t)return;const i=s.actions.findIndex(a=>a.id===aid);if(i===-1)return;const[m]=s.actions.splice(i,1);m.taskId="";t.actions.push(m);save();render()}
