@@ -129,9 +129,13 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ac-wrap input::placeholder{color:#334155}
 .ac-list{display:none;position:absolute;top:100%;left:0;right:0;background:#152236;border:1px solid #1E3050;border-top:none;border-radius:0 0 5px 5px;max-height:160px;overflow-y:auto;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .ac-wrap.open .ac-list{display:block}
-.ac-item{padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
+.ac-item{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:10px;color:#94A3B8;cursor:pointer;transition:background .08s}
 .ac-item:hover{background:#1A2D47;color:#E2E8F0}
 .ac-item.create{color:#5CB8F0;font-style:italic}
+.ac-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-del{flex-shrink:0;opacity:0;color:#F87171;font-size:13px;line-height:1;cursor:pointer;transition:opacity .08s,text-shadow .08s}
+.ac-item:hover .ac-del{opacity:.55}
+.ac-del:hover{opacity:1;text-shadow:0 0 8px #F87171}
 /* Done table view */
 .done-tbl{width:100%;border-collapse:collapse}
 .done-tbl td{padding:3px 6px;font-size:11px;border-bottom:1px solid #152236;vertical-align:middle}
@@ -1014,7 +1018,7 @@ function acFilter(wid,rawQ,type){
   const q=rawQ.toLowerCase().trim();let html="";
   if(type==='proj'){
     S.projects.filter(p=>p.id!=='__inbox'&&(!q||pN(p).toLowerCase().includes(q))).forEach(p=>{
-      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')">${esc(pN(p))}</div>`});
+      html+=`<div class="ac-item" onmousedown="acPick('proj','${p.id}','${esc(pN(p))}')"><span class="ac-lbl">${esc(pN(p))}</span><span class="ac-del" title="Supprimer ce projet" onmousedown="event.stopPropagation();event.preventDefault();acDelProj('${wid}','${p.id}')">×</span></div>`});
     if(q&&!S.projects.some(p=>pN(p).toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="acCreate('proj','${esc(rawQ.trim())}')">＋ Créer "${esc(rawQ.trim())}"</div>`;
   }else{
     const p=fp(_acSel.projId);if(p&&p.tasks){
@@ -1034,6 +1038,18 @@ function acCreate(type,name){
   if(type==='proj'){const p={id:gid(),number:1,name:name,deadline:"",actions:[],tasks:[]};S.projects.push(p);S.openProjects[p.id]=true;_acSel.projId=p.id;_acSel.proj=name;save();const inp=document.getElementById('ga-proj-q')||document.getElementById('da-proj-q');if(inp)inp.value=name}
   else{const p=fp(_acSel.projId);if(p){const t={id:gid(),title:name};p.tasks.push(t);S.openTasks[t.id]=true;_acSel.taskId=t.id;_acSel.task=name;save();const inp=document.getElementById('ga-task-q');if(inp)inp.value=name}}
   acClose();
+}
+// ▼ acDelProj — supprime un projet (→ corbeille via delP) depuis la liste d'autocomplete, en préservant la saisie en cours et en gardant le dropdown ouvert
+function acDelProj(wid,id){
+  const wasSel=_acSel.projId===id;if(wasSel)_acSel={proj:"",projId:"",task:"",taskId:""};
+  const tEl=document.getElementById('ga-title')||document.getElementById('da-title'),ttl=tEl?tEl.value:"";
+  const qEl=document.querySelector('#'+wid+' input'),q=wasSel?"":(qEl?qEl.value:"");
+  delP(id); // archive done actions + push trash + save + render
+  requestAnimationFrame(()=>{
+    const t2=document.getElementById('ga-title')||document.getElementById('da-title');if(t2)t2.value=ttl;
+    const q2=document.querySelector('#'+wid+' input');if(q2)q2.value=q;
+    acOpen(wid);
+  });
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))acClose();if(!e.target.closest('.flt-wrap')){const fw=document.getElementById('flt-wrap');if(fw)fw.classList.remove('open')}});
 
