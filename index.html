@@ -69,8 +69,8 @@ body{font-family:'Nunito',sans-serif;background:#0E1B2E;min-height:100vh;padding
 .ar:hover{background:rgba(92,184,240,.06)}
 .ar.ec{background:rgba(148,163,184,.025);border-color:transparent}
 .ar.ec .as{color:#E2E8F0}
-.ar.prio{border-left:3px solid #F59E0B;border-radius:0 6px 6px 0}.ar.prio .as{color:#FBBF24}
-.ar.prio2{border-left:3px solid #F87171;border-radius:0 6px 6px 0}.ar.prio2 .as{color:#FCA5A5}
+.ar.rap{background:rgba(34,197,94,.07)}.ar.rap .as{color:#86EFAC}
+.ar.urg{background:rgba(248,113,113,.08)}.ar.urg .as{color:#FCA5A5}
 .ar.wt .as{font-style:italic;color:#64B5D0}.ar.wt .ac{color:#2A6A80}.ar.wt .a-tk{color:#2A6A80}.ar.wt .a-sub{color:#1E5060}.ar.wt .adi,.ar.wt .ati,.ar.wt .atl,.ar.wt .adtg,.ar.wt .asd,.ar.wt .asdtg{color:#2A6A80}.ar.wt .sdwrap svg{color:#2A6A80;opacity:.5}
 .ar.dn .as{text-decoration:line-through;color:#475569}.ar.dn .ac{color:#334155}.ar.dn .a-tk{color:#334155}.ar.dn .a-sub{color:#293548}.ar.dn .adi,.ar.dn .ati,.ar.dn .atl,.ar.dn .adtg{color:#334155}.ar.dn .bi{opacity:.35}
 .ar.dragging{opacity:.15}
@@ -177,7 +177,7 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .done-tbl .dt-date{color:#64748B;font-size:9px;text-align:right;width:80px;white-space:nowrap}
 .done-tbl .dt-hrs{color:#5CB8F0;font-size:9px;text-align:right;width:45px;font-weight:600}
 .done-tbl .dt-act{width:44px;text-align:right;white-space:nowrap}
-.ari{display:flex;align-items:center;gap:2px;flex-shrink:0;opacity:0;transition:opacity .12s}.ar:hover .ari,.ar:focus-within .ari,.ar.ao .ari{opacity:1}
+.ari{display:flex;align-items:center;gap:2px;flex-shrink:0}.ari .bi{visibility:hidden}.ar:hover .ari .bi,.ar:focus-within .ari .bi,.ar.ao .ari .bi,.ari .bi.active{visibility:visible}
 .aw-inline{font-size:9px;color:#64B5D0;font-style:italic;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1}
 .aw-inline input{border:none;background:transparent;font-family:inherit;font-size:9px;color:#64B5D0;font-style:italic;outline:none;width:80px}
 .adi{border-radius:3px;padding:0 3px;font-size:8px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;border:1px solid #1E3050;color:#64748B;background:#152236}
@@ -208,11 +208,14 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ga-search::placeholder{color:#475569}
 .ga-search-clear{cursor:pointer;color:#64748B;font-size:13px;line-height:1;padding:2px 4px;flex-shrink:0}.ga-search-clear:hover{color:#F87171}
 .ati{width:36px;border:1px solid transparent;border-radius:3px;padding:1px 2px;font-size:8px;font-family:inherit;font-weight:600;background:transparent;color:#5CB8F0;outline:none;text-align:right}.ati:hover,.ati:focus{border-color:#1E3050;background:#152236}
+/* Pas de spinner up/down sur les inputs number (charte) */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .atl{font-size:7px;color:#4B6480}
 .bi{border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
 .bdn{background:#22C55E;color:#fff}.bdn:hover{background:#16A34A}
 .bwt{background:transparent;color:#4B6480;border:1px solid #1E3050}.bwt:hover{color:#64B5D0}.bwt.active{color:#64B5D0;border-color:#64B5D0;background:rgba(100,181,208,.1)}
-.bprio{background:transparent;color:#4B6480;border:1px solid #1E3050;font-weight:900;font-size:10px;font-family:inherit}.bprio:hover{color:#F59E0B}.bprio.active,.bprio.lvl1{color:#F59E0B;border-color:#F59E0B;background:rgba(245,158,11,.1)}.bprio.lvl2{color:#F87171;border-color:#F87171;background:rgba(248,113,113,.14)}
+.brap,.burg{background:transparent;color:#4B6480;border:1px solid #1E3050}.brap:hover{color:#22C55E}.brap.active{color:#22C55E;border-color:#22C55E;background:rgba(34,197,94,.12);box-shadow:0 0 8px rgba(34,197,94,.35)}.burg:hover{color:#F87171}.burg.active{color:#F87171;border-color:#F87171;background:rgba(248,113,113,.14);box-shadow:0 0 8px rgba(248,113,113,.4)}
 .bud{background:#334155;color:#94A3B8}
 .btr{background:transparent;color:#334155;opacity:.4}.btr:hover{background:rgba(248,113,113,.12);color:#F87171;opacity:1}
 .cbx{width:19px;height:19px;border-radius:50%;border:1.6px solid #3A4D68;background:transparent;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;color:transparent;transition:all .15s}
@@ -254,7 +257,14 @@ body.dragging-active .tk-hd *{pointer-events:none}
 .ugt .ln{flex:1;height:1px}
 .ug{min-height:4px;padding-bottom:3px}
 .ug.dz{background:rgba(56,189,248,.05);border-radius:6px}
-.pgl{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:10px 0 3px;background:rgba(148,163,184,.05);border-radius:0 4px 4px 0;border-left:3px solid transparent}
+.pgl{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:10px 0 3px;background:rgba(148,163,184,.05);border-radius:0 4px 4px 0;border-left:3px solid transparent;cursor:pointer}
+.pgl:hover{background:rgba(148,163,184,.09)}
+.pgl-chev{flex-shrink:0;display:inline-flex;align-items:center;color:#64748B;transform:rotate(-90deg);transition:transform .15s}
+.pgl.open .pgl-chev{transform:rotate(0)}
+.pgl-chev svg{width:8px;height:5px}
+.pgl-grip{cursor:grab;color:#475569;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px 7px;margin:-6px 1px -6px -4px;opacity:0;transition:opacity .12s,color .12s}
+.pgl:hover .pgl-grip{opacity:.5}.pgl-grip:hover{opacity:1;color:#7DD3FC}
+.pgl.dot{box-shadow:0 -2px 0 0 #5CB8F0}.pgl.dob{box-shadow:0 2px 0 0 #5CB8F0}
 .pgl-del{border:none;background:transparent;color:#475569;cursor:pointer;padding:1px 4px;border-radius:3px;display:inline-flex;align-items:center;flex-shrink:0;transition:color .12s}
 .pgl-del:hover{color:#F87171}
 .pgl-del svg{width:11px;height:11px}
@@ -796,8 +806,8 @@ const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"]
 
 function load(){/* Data loaded from cloud in onAuthStateChanged */}function migrateData(){S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];p.tasks.forEach(t=>{delete t.parentId});p.actions.forEach(a=>{if(!a.deadline)a.deadline='';if(a.scheduledDate===undefined)a.scheduledDate='';if(!a.waitReason)a.waitReason='';if(!a.title)a.title='';if(a.timeVal!==undefined){const tv=a.timeVal||0,tu=a.timeUnit||'h';a.timeH=tu==='m'?tv/60:tu==='j'?tv*8:tv;delete a.timeVal;delete a.timeUnit}if(!a.timeH)a.timeH=0;if(!a.doneDate)a.doneDate='';if(a.taskId===undefined)a.taskId='';if(a.paused===undefined)a.paused=a.status==='waiting';if(a.status==='waiting'){a.paused=true;a.status='todo'}if(a.status==='encours')a.status='todo';if(a.priority===undefined||a.priority===false)a.priority=0;else if(a.priority===true)a.priority=2;delete a.indent;delete a.blockedBy})});crmEnsureContacts()}
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
-const PCOLS=["#5CB8F0","#22C55E","#F59E0B","#A78BFA","#F87171","#34D399","#FB923C","#60A5FA","#E879F9","#FBBF24"];
-function pCol(pid){if(pid==="__inbox")return"#F59E0B";const i=S.projects.findIndex(p=>p.id===pid);return PCOLS[i%PCOLS.length]||PCOLS[0]}
+const PCOLS=["#38BDF8","#F59E0B","#22C55E","#E879F9","#F87171","#2DD4BF","#A78BFA","#FBBF24","#F472B6","#818CF8"];
+function pCol(pid){if(pid==="__inbox")return"#F59E0B";const p=fp(pid);return(p&&p.color)||PCOLS[0]}
 function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
@@ -816,7 +826,7 @@ function pN(p){return p?p.name||"Sans nom":"?"}
 function pEnCours(p){return!!p&&p.id!=='__inbox'&&(!p.actions.length||p.actions.some(a=>a.status!=='done'))}
 function tName(pid,tid){if(!tid)return"";const p=fp(pid);if(!p)return"";const t=p.tasks.find(x=>x.id===tid);return t?t.title||"":""}
 function lDS(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-const I={search:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,flag:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 2v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M4 2.6h8.2l-1.9 2.7 1.9 2.7H4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,cal:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="3" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 6.5h11M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`};
+const I={search:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,flag:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 2v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M4 2.6h8.2l-1.9 2.7 1.9 2.7H4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,cal:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="3" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 6.5h11M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,plus:`<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,trash:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,check:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,undo:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 6h7a3 3 0 110 6H8M3 6l3-3M3 6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,chev:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,grip:`<svg width="8" height="12" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1" fill="currentColor"/><circle cx="7" cy="2" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/></svg>`,col:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,pause:`<svg width="9" height="9" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/></svg>`,clock:`<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,copy:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="5" y="2" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5v8a1 1 0 001 1h6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>`,ff:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M2.5 4l4 4-4 4M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,bang:`<svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 3v6.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="8" cy="12.6" r="1.2" fill="currentColor"/></svg>`};
 
 /* ── Drag ── */
 let dT=null,dI=null,dP=null;
@@ -848,12 +858,19 @@ function planAssign(aid,bk){const a=findActionById(aid);if(!a||bk==='overdue')re
 function plBkDO(e){if(dT!=="action")return;e.preventDefault();e.dataTransfer.dropEffect="move";e.currentTarget.classList.add('drop-hi')}
 function plBkDL(e){const z=e.currentTarget,r=e.relatedTarget;if(!r||!z.contains(r))z.classList.remove('drop-hi')}
 function plBkDD(e,bk){e.preventDefault();e.currentTarget.classList.remove('drop-hi');if(dT!=="action"||!dI)return;planAssign(dI,bk)}
+// ▼ Drag réordonnancement projets (vue Projets) — réordonne S.projects ; couleur stable par projet donc inchangée
+function pDS(e,pid){dT="proj";dI=pid;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",pid);document.body.classList.add('dragging-active')}
+function pDO(e,pid){if(dT!=="proj"||dI===pid||pid==="__inbox")return;e.preventDefault();e.dataTransfer.dropEffect="move";const el=e.currentTarget,r=el.getBoundingClientRect();el.classList.remove('dot','dob');el.classList.add(e.clientY<r.top+r.height/2?'dot':'dob')}
+function pDL(e){e.currentTarget.classList.remove('dot','dob')}
+function pDD(e,pid){e.preventDefault();e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();e.currentTarget.classList.remove('dot','dob');if(dT!=="proj"||!dI||dI===pid||pid==="__inbox")return;const fi=S.projects.findIndex(p=>p.id===dI);if(fi===-1)return;const[m]=S.projects.splice(fi,1);let ti=S.projects.findIndex(p=>p.id===pid);if(ti===-1){S.projects.push(m)}else{if(e.clientY>=r.top+r.height/2)ti++;S.projects.splice(ti,0,m)}save();render()}
+function pDE(){dT=null;dI=null;document.body.classList.remove('dragging-active');document.querySelectorAll('.pgl').forEach(el=>el.classList.remove('dot','dob'))}
 
 /* ── Status ── */
 function togD(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-done');setTimeout(()=>{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()},300)}else{if(a.status==="done"){a.status="todo";a.doneDate=""}else{a.status="done";a.doneDate=lDS(new Date());a.paused=false}save();render()}}
 function togW(pid,aid){const a=fa(pid,aid);if(!a)return;const el=document.getElementById('ar_'+aid);if(el){el.classList.add('flash-wt');setTimeout(()=>{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()},250)}else{a.paused=!a.paused;if(a.paused&&!a.waitReason)a.waitReason="";save();render()}}
 function uWR(pid,aid,v){const a=fa(pid,aid);if(a){a.waitReason=v;save()}}
-function togPrio(pid,aid){const a=fa(pid,aid);if(!a)return;a.priority=((a.priority||0)+1)%3;save();render()}
+function togRap(pid,aid){const a=fa(pid,aid);if(!a)return;a.rapide=!a.rapide;save();render()}
+function togUrg(pid,aid){const a=fa(pid,aid);if(!a)return;a.urgent=!a.urgent;save();render()}
 function uaT(pid,aid,v){const a=fa(pid,aid);if(a){a.title=v;save()}}
 function uaTm(pid,aid,v){const a=fa(pid,aid);if(a){a.timeH=parseFloat(v)||0;save()}}
 function uaSD(pid,aid,v){const a=fa(pid,aid);if(a){a.scheduledDate=v;save();render()}}
@@ -910,11 +927,11 @@ function rA(a,pid,o){
   const pLabel=sp?esc(pN(p)):"";
   const tkBreadcrumb=showTask?tName(pid,a.taskId):"";
   /* Buttons */
-  const prioLvl=a.priority||0;
-  const prioBtn=d?"":`<button class="bi bprio ${prioLvl>=2?"lvl2":prioLvl>=1?"lvl1":""}" onclick="event.stopPropagation();togPrio('${pid}','${a.id}')" title="Priorité — clic pour changer (haute / très haute / aucune)">${prioLvl>=2?"!!":"!"}</button>`;
+  const rapBtn=d?"":`<button class="bi brap ${a.rapide?"active":""}" onclick="event.stopPropagation();togRap('${pid}','${a.id}')" title="Rapide">${I.ff}</button>`;
+  const urgBtn=d?"":`<button class="bi burg ${a.urgent?"active":""}" onclick="event.stopPropagation();togUrg('${pid}','${a.id}')" title="Urgent">${I.bang}</button>`;
   const pauseBtn=d?"":`<button class="bi bwt ${a.paused?"active":""}" onclick="event.stopPropagation();togW('${pid}','${a.id}')" title="En attente">${I.pause}</button>`;
   const pc=pCol(pid);
-  return`<div id="ar_${a.id}" class="ar ${uc} ${prioLvl>=2?"prio2":prioLvl>=1?"prio":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
+  return`<div id="ar_${a.id}" class="ar ${uc} ${a.rapide?"rap":""} ${a.urgent?"urg":""} ${S.ex[a.id]?"ao":""}" ondragover="aDO(event,'${pid}','${a.id}')" ondragleave="aDL(event)" ondrop="aDD(event,'${pid}','${a.id}')">
   <div class="at" onclick="togX('${a.id}')">
     ${!nd?`<span class="dh" draggable="true" ondragstart="aDS(event,'${pid}','${a.id}')" ondragend="aDE()" onclick="event.stopPropagation()">${I.grip}</span>`:""}
     <button class="cbx" onclick="event.stopPropagation();togD('${pid}','${a.id}')" title="Terminer">${I.check}</button>
@@ -923,7 +940,7 @@ function rA(a,pid,o){
     ${!d?`<span class="dchip ${a.scheduledDate?"set":""}" title="Planifier — à faire le" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.scheduledDate||""}" onchange="uaSD('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.scheduledDate?`color:${sdc}`:""}">${I.cal}${a.scheduledDate?`<span class="dchip-lbl">${sdl}</span>`:""}</span></span>`:""}
     <span class="dchip ${a.deadline?"set":""}" title="Échéance" onclick="event.stopPropagation()"><input type="date" class="dchip-input" value="${a.deadline||""}" onchange="uaDL('${pid}','${a.id}',this.value)" onclick="event.stopPropagation();this.showPicker&&this.showPicker()"><span class="dchip-face" style="${a.deadline?`color:${adc}`:""}">${I.flag}${a.deadline?`<span class="dchip-lbl">${adl}</span>`:""}</span></span>
     <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="" onclick="event.stopPropagation()" oninput="uaTm('${pid}','${a.id}',this.value)"><span class="atl">h</span>
-    <div class="ari">${prioBtn}${pauseBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
+    <div class="ari">${rapBtn}${urgBtn}${pauseBtn}<button class="bi btr" onclick="event.stopPropagation();delA('${pid}','${a.id}')">${I.trash}</button></div>
   </div>
   <div class="adl" onclick="event.stopPropagation()">
     <div class="ab">${fmB(pid,a.id)}<div class="atx" contenteditable="true" data-pid="${pid}" data-aid="${a.id}" data-placeholder="Notes…">${a.text||""}</div></div>
@@ -957,17 +974,20 @@ function render(){
 function rGT(){
   /* Auto-purge de l'inbox vide */
   const _ib=fp("__inbox");if(_ib&&!_ib.actions.length)S.projects=S.projects.filter(p=>p.id!=="__inbox");
+  /* Couleur stable par projet (assignée 1× ; le réordonnancement ne la change pas) */
+  let _ca=false;S.projects.forEach(p=>{if(p.id!=="__inbox"&&!p.color){const u=S.projects.map(x=>x.color).filter(Boolean);p.color=PCOLS.find(c=>!u.includes(c))||PCOLS[S.projects.indexOf(p)%PCOLS.length];_ca=true}});if(_ca)save();
   /* Sous-onglets : Planning / Projets / Terminé / Temps */
   const sect=S.gSection||'plan';
   let h=`<div class="subtab-bar"><div class="subtab ${sect==='plan'?'on':''}" onclick="S.gSection='plan';render()">Planning</div><div class="subtab ${sect==='task'?'on':''}" onclick="S.gSection='task';render()">Projets</div><div class="subtab ${sect==='done'?'on':''}" onclick="S.gSection='done';render()">Terminé</div><div class="subtab ${sect==='time'?'on':''}" onclick="S.gSection='time';render()">Temps</div></div>`;
   if(S.gSection==='done')return h+rDN();
   if(S.gSection==='time')return h+rTM();
   /* Inline add + filtre statut sur la même ligne (alignés) */
-  const fltHTML=`<div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","prio":"! Priorité"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='prio'?'on':''}" onclick="S.gFilter='prio';render()">! Priorité</div></div></div>`;
+  const fltHTML=`<div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","urgent":"Urgent","rapide":"Rapide"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='urgent'?'on':''}" onclick="S.gFilter='urgent';render()">Urgent</div><div class="flt-opt ${S.gFilter==='rapide'?'on':''}" onclick="S.gFilter='rapide';render()">Rapide</div></div></div>`;
+  const expandHTML=S.gSection==='task'?`<button class="flt-btn" onclick="togAllProj()" title="Déplier ou replier tous les projets">${allProjOpen?'Tout replier':'Tout déplier'}</button>`:'';
   if(addCard.open&&addCard.at==='top'){
-    h+=`<div class="qa-bar"><div class="qa-stack"><div class="qa-stack-hd"><div class="qa-trigger-open" onclick="var _t=document.getElementById('ga-title');if(_t)_t.focus()"><b>＋</b> Ajouter une action</div>${fltHTML}</div>${qaCardHTML(true,true)}</div></div>`;
+    h+=`<div class="qa-bar"><div class="qa-stack"><div class="qa-stack-hd"><div class="qa-trigger-open" onclick="var _t=document.getElementById('ga-title');if(_t)_t.focus()"><b>＋</b> Ajouter une action</div>${fltHTML}${expandHTML}</div>${qaCardHTML(true,true)}</div></div>`;
   }else{
-    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button>${fltHTML}</div>`;
+    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button>${fltHTML}${expandHTML}</div>`;
   }
   let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
   if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
@@ -977,7 +997,7 @@ function rGT(){
   all.forEach(a=>{if(!S.globalOrder.includes(a.id))S.globalOrder.push(a.id)});
   /* Apply status filter */
   let filtered=all;
-  if(S.gFilter==="prio"){filtered=all.filter(a=>a.priority)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
+  if(S.gFilter==="urgent"){filtered=all.filter(a=>a.urgent)}else if(S.gFilter==="rapide"){filtered=all.filter(a=>a.rapide)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
   const _gq=(S.gQ||"").toLowerCase().trim();if(_gq){filtered=filtered.filter(a=>(a.title||"").toLowerCase().includes(_gq)||(a.text||"").replace(/<[^>]*>/g," ").toLowerCase().includes(_gq)||pN(fp(a.pId)).toLowerCase().includes(_gq))}
   if(!filtered.length){h+=`<div class="es">${_gq?"Aucun résultat pour cette recherche.":"Aucune action avec ce filtre."}</div>`;return h}
   if(S.gSection==="task"){
@@ -986,7 +1006,11 @@ function rGT(){
     projIds.forEach(pid=>{
       const p=fp(pid);if(!p)return;
       const pActs=filtered.filter(a=>a.pId===pid);
-      h+=`<div class="pgl" style="border-left-color:${pCol(pid)}">${pid==='__inbox'?`<span class="pgl-lbl" style="color:${pCol(pid)}">${esc(pN(p))}</span>`:`<input class="pgl-name" style="color:${pCol(pid)}" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<span class="plan-ct">${pActs.length}</span>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">Supprimer + ${p.actions.length} action${p.actions.length>1?'s':''} ?</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
+      const _pOpen=(!!_gq||S.gFilter!=='all')||allProjOpen||openProjId===pid;
+      const _nDone=p.actions.filter(a=>a.status==='done').length, _nTodo=p.actions.length-_nDone;
+      const _delMsg=_nDone?`Supprimer ? ${_nTodo} en cours, ${_nDone} terminée${_nDone>1?'s':''} conservée${_nDone>1?'s':''}`:`Supprimer ${_nTodo} action${_nTodo>1?'s':''} ?`;
+      h+=`<div class="pgl${_pOpen?' open':''}" style="border-left-color:${pCol(pid)}" onclick="togProj('${pid}')" ondragover="pDO(event,'${pid}')" ondragleave="pDL(event)" ondrop="pDD(event,'${pid}')">${pid!=='__inbox'?`<span class="pgl-grip" draggable="true" ondragstart="pDS(event,'${pid}')" ondragend="pDE()" onclick="event.stopPropagation()" title="Glisser pour réordonner">${I.grip}</span>`:''}<span class="pgl-chev"><svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></span>${pid==='__inbox'?`<span class="pgl-lbl" style="color:${pCol(pid)}">${esc(pN(p))}</span>`:`<input class="pgl-name" style="color:${pCol(pid)}" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<span class="plan-ct">${pActs.length}</span>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">${_delMsg}</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
+      if(_pOpen){
       /* Standalone actions (no task) */
       const standalone=pActs.filter(a=>!a.taskId);
       standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
@@ -1004,6 +1028,7 @@ function rGT(){
       });
       if(addCard.open&&addCard.at===`proj:${pid}`)h+=`<div class="qa-inline">${qaCardHTML(false,true)}</div>`;
       else h+=`<div class="pa-add" onclick="qaOpen('${pid}')"><b>＋</b> Ajouter une action</div>`;
+      }
     });
   }else{
     /* Plan view (défaut) : tranches par date de planif + drag&drop (réordonner dans un jour / replanifier d'un jour à l'autre) */
@@ -1022,6 +1047,10 @@ function rGT(){
 let _acSel={proj:"",projId:"",task:"",taskId:""};
 let addCard={open:false,at:'top',title:"",text:"",showDetails:false,sched:""}; // état transient de la carte de création ; at = 'top' | 'proj:<pid>' | 'task:<pid>:<tid>' ; sched = date planifiée pré-choisie
 let delConfirmPid=null; // projet en attente de confirmation de suppression (transient, vue Projets)
+// ▼ togProj / togAllProj — accordéon (1 ouvert) + bascule globale tout déplier/replier (transient)
+let openProjId=null,allProjOpen=false;
+function togProj(pid){if(allProjOpen){allProjOpen=false;openProjId=pid}else openProjId=(openProjId===pid)?null:pid;delConfirmPid=null;render()}
+function togAllProj(){allProjOpen=!allProjOpen;if(!allProjOpen)openProjId=null;render()}
 let triNew=null; // aid d'une action "À trier" en cours de création de projet (transient)
 let taskEditId=null,taskNewId=null; // aid d'une action dont on (ré)assigne la tâche / crée une tâche (transient)
 function acOpen(wid){const w=document.getElementById(wid);if(w)w.classList.add('open');acFilter(wid,document.querySelector('#'+wid+' input').value,wid.includes('proj')?'proj':'task')}
