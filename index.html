@@ -2737,13 +2737,8 @@ class Flux extends React.Component {
   }
 
   defaults() {
-    return {
-      // editor "props" promoted to real, persisted settings
-      theme: 'marine',
-      accent: '#3a8ff0',
-      density: 'compact',
-      groupBy: 'cat',
-      view: 'table',
+    const demo = {
+      id:'p_demo', name:'Projet exemple',
       categories: [
         { id:'mkt', name:'Marketing' },
         { id:'des', name:'Design' },
@@ -2773,7 +2768,16 @@ class Flux extends React.Component {
       ],
       collapsed: {},
       filters: { status:{}, cat:{}, person:{} },
-      addingCat: false,
+    };
+    return {
+      // editor "props" promoted to real, persisted settings (global, not per-project)
+      theme: 'marine',
+      accent: '#3a8ff0',
+      density: 'compact',
+      groupBy: 'cat',
+      view: 'table',
+      projects: [demo],
+      currentProjectId: 'p_demo',
     };
   }
 
@@ -2781,15 +2785,31 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null };
-    if (s && Array.isArray(s.tasks)) {
-      const isISO = v => typeof v==='string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
-      const tasks = s.tasks.map(t=>({ ...t, due: isISO(t.due)?t.due:'', person: typeof t.person==='string'?t.person:'', deps: Array.isArray(t.deps)?t.deps:[] }));
-      const filters = { status:(s.filters&&s.filters.status)||{}, cat:(s.filters&&s.filters.cat)||{}, person:(s.filters&&s.filters.person)||{} };
-      const people = (Array.isArray(s.people) && s.people.length) ? s.people : base.people;
-      return { ...base, ...s, tasks, filters, people, ...runtime };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null };
+    const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
+    const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
+      categories: Array.isArray(p.categories)?p.categories:[],
+      people: Array.isArray(p.people)?p.people:[],
+      tasks: this.normTasks(p.tasks),
+      collapsed: (p.collapsed&&typeof p.collapsed==='object')?p.collapsed:{},
+      filters: normFilters(p.filters) });
+    const ui = { theme:(s&&s.theme)||base.theme, accent:(s&&s.accent)||base.accent, density:(s&&s.density)||base.density, groupBy:(s&&s.groupBy)||base.groupBy, view:(s&&s.view)||base.view };
+    let projects, currentProjectId;
+    if (s && Array.isArray(s.projects) && s.projects.length) {
+      projects = s.projects.map(normProj);
+      currentProjectId = projects.some(p=>p.id===s.currentProjectId) ? s.currentProjectId : projects[0].id;
+    } else if (s && Array.isArray(s.tasks)) {
+      // Migration ancien format à plat → un seul projet (les données existantes ne sont pas perdues).
+      projects = [ normProj({ id:this.uid(), name:'Projet 1', categories:s.categories, people:s.people, tasks:s.tasks, collapsed:s.collapsed, filters:s.filters }) ];
+      currentProjectId = projects[0].id;
+    } else {
+      projects = base.projects.map(normProj);
+      currentProjectId = base.currentProjectId;
     }
-    return { ...base, ...runtime };
+    const cur = projects.find(p=>p.id===currentProjectId) || projects[0] || null;
+    const flat = cur ? { categories:cur.categories, people:cur.people, tasks:cur.tasks, collapsed:cur.collapsed, filters:cur.filters }
+                     : { categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} };
+    return { ...ui, projects, currentProjectId: cur?cur.id:null, ...flat, ...runtime };
   }
 
   componentDidMount(){
@@ -2799,6 +2819,12 @@ class Flux extends React.Component {
       const inPanel = tg && tg.closest && tg.closest('[data-panel]');
       const inCatMenu = tg && tg.closest && tg.closest('[data-catmenu]');
       if(this.state.catMenuId && !inCatMenu){ this.setState({ catMenuId:null }); }
+      const inPersonMenu = tg && tg.closest && tg.closest('[data-personmenu]');
+      if(this.state.personMenuId && !inPersonMenu){ this.setState({ personMenuId:null }); }
+      const inProj = tg && tg.closest && tg.closest('[data-projsel]');
+      if(this.state.projOpen && !inProj){ this.setState({ projOpen:false, projQuery:'', projMenuId:null, projDelId:null }); }
+      const inProjMenu = tg && tg.closest && tg.closest('[data-projmenu]');
+      if(this.state.projMenuId && !inProjMenu){ this.setState({ projMenuId:null, projDelId:null }); }
       const inLabelEdit = tg && tg.closest && tg.closest('[data-labeledit="1"]');
       if(this.state.labelEdit && this.state.labelEdit.type==='cat' && this.state.labelEdit.rail && !inLabelEdit){ const inp=document.querySelector('[data-labeledit="1"]'); this.commitLabelEdit('cat', this.state.labelEdit.id, inp?inp.value:''); }
       if(this.state.editing.id && !inTask){ this.setState({ editing:{id:null,field:null} }); }
@@ -2812,8 +2838,9 @@ class Flux extends React.Component {
 
   componentDidUpdate() {
     try {
-      const { theme, accent, density, groupBy, view, categories, people, tasks, collapsed, filters } = this.state;
-      const _payload = { theme, accent, density, groupBy, view, categories, people, tasks, collapsed, filters };
+      const st = this.state;
+      const projects = this._snapshotCurrent(st);   // réécrit l'état plat de travail dans le projet courant
+      const _payload = { theme:st.theme, accent:st.accent, density:st.density, groupBy:st.groupBy, view:st.view, projects, currentProjectId:st.currentProjectId };
       localStorage.setItem(LS_KEY, JSON.stringify(_payload));
       if (window.__fluxSave) window.__fluxSave(_payload);
     } catch(e) {}
@@ -2822,7 +2849,7 @@ class Flux extends React.Component {
     if (key && key !== this._focusKey) {
       this._focusKey = key;
       const el = document.querySelector('[data-edit="1"]');
-      if (el) { el.focus(); if (el.select) try{el.select();}catch(e){}; if (ed.field==='due' && el.showPicker) try{el.showPicker();}catch(e){} }
+      if (el) { el.focus(); if (el.select) try{el.select();}catch(e){}; if ((ed.field==='due' || ed.field==='dep') && el.showPicker) try{el.showPicker();}catch(e){} }
     }
     if (!key) this._focusKey = '';
     /* Focus fiable du champ de renommage (catégorie via menu ⋮ ou clic sur le nom) : différé pour survivre à la restauration de focus du navigateur après le clic. */
@@ -2836,6 +2863,7 @@ class Flux extends React.Component {
   }
 
   uid() { return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  normTasks(arr){ if(!Array.isArray(arr)) return []; const isISO=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v); return arr.map(t=>({ ...t, due:isISO(t.due)?t.due:'', person:typeof t.person==='string'?t.person:'', deps:Array.isArray(t.deps)?t.deps:[] })); }
   initials(name){ return (name||'').split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
   avatarStyle(color, size){ const s=size||20; return `width:${s}px;height:${s}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(s*0.42)}px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`; }
 
@@ -2849,8 +2877,24 @@ class Flux extends React.Component {
   toggleDone(id){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t) })); }
   setStatus(id,status){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,status}:t), editing:{id:null,field:null} })); }
   toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
-  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; return { filters:{...st.filters,[axis]:ax} }; }); }
-  clearFilters(){ this.setState({ filters:{status:{},cat:{},person:{}} }); }
+  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null }; }); }
+  // Master « Toutes les tâches » : 1er clic = tout cocher/afficher ('all'), 2e clic = tout décocher/masquer ('none').
+  toggleBulk(){ this.setState(st=>({ bulk: st.bulk==='all' ? 'none' : 'all', filters:{status:{},cat:{},person:{}} })); }
+
+  // ---- projects ----
+  // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
+  _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
+  // Réinitialise tout l'état de vue transient en entrant dans un projet.
+  _enterProject(extra){ return { selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, ...extra }; }
+  switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
+  createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
+  renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
+  // Supprime un projet ET toutes ses données (irréversible). Si c'est le projet courant, bascule sur un autre (ou page vierge).
+  deleteProject(id){ this.setState(st=>{ const remaining=st.projects.filter(p=>p.id!==id);
+    if(id===st.currentProjectId){ const next=remaining[0]||null;
+      return next ? this._enterProject({ projOpen:true, projects:remaining, currentProjectId:next.id, categories:next.categories, people:next.people, tasks:next.tasks, collapsed:next.collapsed, filters:next.filters })
+                  : this._enterProject({ projOpen:true, projects:[], currentProjectId:null, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }
+    const projects=this._snapshotCurrent(st).filter(p=>p.id!==id); return { projects, projMenuId:null, projDelId:null }; }); }
 
   addTask(catId,title){
     const t = { id:this.uid(), title, cat:catId||'', status:'todo', due:'', person:'', notes:'', deps:[] };
@@ -2890,14 +2934,17 @@ class Flux extends React.Component {
   addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
   toggleCatMenu(id){ this.setState(st=>({ catMenuId: st.catMenuId===id?null:id })); }
   // Supprime une catégorie sans toucher aux tâches : elles repassent en "Sans catégorie" (cat='').
-  deleteCategory(id){ this.setState(st=>{ const cat={...st.filters.cat}; delete cat[id]; const collapsed={...st.collapsed}; delete collapsed['ca:'+id]; return { categories: st.categories.filter(c=>c.id!==id), tasks: st.tasks.map(t=> (t.cat||'')===id ? {...t, cat:''} : t), filters:{...st.filters, cat}, collapsed, catMenuId:null, labelEdit:{type:null,id:null} }; }); }
+  deleteCategory(id){ this.setState(st=>{ const cat={...st.filters.cat}; delete cat[id]; const collapsed={...st.collapsed}; delete collapsed['ca:'+id]; const catDep='cat:'+id; return { categories: st.categories.filter(c=>c.id!==id), tasks: st.tasks.map(t=>{ const nt=(t.cat||'')===id ? {...t, cat:''} : t; return (nt.deps && nt.deps.indexOf(catDep)>=0) ? {...nt, deps: nt.deps.filter(d=>d!==catDep)} : nt; }), filters:{...st.filters, cat}, collapsed, catMenuId:null, labelEdit:{type:null,id:null} }; }); }
+  togglePersonMenu(id){ this.setState(st=>({ personMenuId: st.personMenuId===id?null:id })); }
+  // Supprime une personne sans toucher aux tâches : elles repassent en "Non assigné" (person='').
+  deletePerson(id){ this.setState(st=>{ const person={...st.filters.person}; delete person[id]; const collapsed={...st.collapsed}; delete collapsed['pe:'+id]; return { people: st.people.filter(p=>p.id!==id), tasks: st.tasks.map(t=> t.person===id ? {...t, person:''} : t), filters:{...st.filters, person}, collapsed, personMenuId:null, labelEdit:{type:null,id:null} }; }); }
 
   // ---- inline rename of category / person labels (sidebar + group headers) ----
   startLabelEdit(type,id,fromRail){ this.setState({ labelEdit:{type,id,rail:!!fromRail} }); }
   stopLabelEdit(){ this.setState({ labelEdit:{type:null,id:null} }); }
   renameCategory(id,name){ const n=(name||'').trim(); this.setState(st=>({ categories: n ? st.categories.map(c=> c.id===id?{...c,name:n}:c) : st.categories })); }
   renamePerson(id,name){ const n=(name||'').trim(); this.setState(st=>({ people: n ? st.people.map(p=> p.id===id?{...p,name:n}:p) : st.people })); }
-  commitLabelEdit(type,id,value){ if(type==='cat') this.renameCategory(id,value); else if(type==='person') this.renamePerson(id,value); this.stopLabelEdit(); }
+  commitLabelEdit(type,id,value){ if(type==='cat') this.renameCategory(id,value); else if(type==='person') this.renamePerson(id,value); else if(type==='proj') this.renameProject(id,value); this.stopLabelEdit(); }
 
   reorder(dragId, beforeId, catId){
     if(!dragId || dragId===beforeId) { this.setState({dragId:null,dragOverId:null}); return; }
@@ -2952,8 +2999,11 @@ class Flux extends React.Component {
     const f = st.filters; const ed = st.editing;
     const actS = Object.keys(f.status), actC = Object.keys(f.cat), actP = Object.keys(f.person);
     const anyFilter = actS.length || actC.length || actP.length;
+    const allOn = st.bulk==='all';                       // master : toutes les cases cochées
+    const showEmpty = !anyFilter && st.bulk!=='none';     // groupes vides visibles seulement hors filtrage
+    const showingAll = allOn || (st.bulk!=='none' && !anyFilter);
     const match = t => (!actS.length||actS.includes(t.status)) && (!actC.length||actC.includes(t.cat)) && (!actP.length||actP.includes(t.person));
-    const filtered = st.tasks.filter(match);
+    const filtered = st.bulk==='none' ? [] : st.tasks.filter(match);
     const taskById = id => st.tasks.find(t=>t.id===id);
     const stop = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
 
@@ -2970,6 +3020,7 @@ class Flux extends React.Component {
     const groupBy = st.groupBy || 'cat';
     const le = st.labelEdit || {type:null,id:null};
     const labelEditing = (type,id)=> le.type===type && le.id===id;
+    const byName = (a,b)=> (a.name||'').localeCompare(b.name||'', 'fr', {sensitivity:'base'});
 
 
     // Shared pill recipe — Personne & Statut chips share identical geometry & type.
@@ -2984,9 +3035,17 @@ class Flux extends React.Component {
       if(sel) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
       if(isEd('status')) rowStyle += 'z-index:25;';
       if(st.dragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
-      const dep = t.deps[0] ? taskById(t.deps[0]) : null;
+      const depRaw = t.deps[0] || '';
+      const isCatDep = depRaw.slice(0,4)==='cat:';
+      const dep = (!isCatDep && depRaw) ? taskById(depRaw) : null;
+      const depCatName = isCatDep ? this.catName(depRaw.slice(4)) : '';
+      const hasDep = isCatDep || !!dep;
       const du = this.formatDue(t.due);
-      const depOptions = [{id:'',name:'Aucune'}, ...st.tasks.filter(x=>x.id!==t.id).map(x=>({id:x.id,name:x.title}))];
+      /* Options du menu « Bloquée par », groupées par catégorie (triées) : chaque catégorie est sélectionnable (bloque par toute la catégorie), puis ses tâches ; tâches sans catégorie en dernier. */
+      const depGroups = [];
+      st.categories.slice().sort(byName).forEach(c=>{ const tk=st.tasks.filter(x=>x.id!==t.id && (x.cat||'')===c.id).map(x=>({id:x.id,name:x.title})); depGroups.push({ id:c.id, name:c.name, selectable:true, tasks:tk }); });
+      const unTk = st.tasks.filter(x=>x.id!==t.id && !x.cat).map(x=>({id:x.id,name:x.title}));
+      if(unTk.length) depGroups.push({ id:'', name:'Sans catégorie', selectable:false, tasks:unTk });
       const p = this.person(t.person);
       const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
         return { key:k, label:m.label, dot:m.dot,
@@ -3013,8 +3072,8 @@ class Flux extends React.Component {
         checkStyle: this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
         statusStyle: chipBase + `gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`,
         statusLabel:sm.label, statusDot:sm.dot, statusOptions,
-        depId: t.deps[0]||'', depOptions,
-        depText: dep ? '⛓' : '—', depColor: dep ? '#b5651d' : 'var(--cbox)', depTitle: dep ? ('Bloquée par : '+dep.title) : 'Aucune dépendance',
+        depId: depRaw, depGroups,
+        depText: hasDep ? '⛓' : '—', depColor: hasDep ? '#b5651d' : 'var(--cbox)', depTitle: dep ? ('Bloquée par : '+dep.title) : (isCatDep ? ('Bloquée par la catégorie : '+depCatName) : 'Aucune dépendance'),
         edTitle:isEd('title'), showTitle:!isEd('title'),
         edDue:isEd('due'), showDue:!isEd('due'),
         edPerson:isEd('person'), showPerson:!isEd('person'),
@@ -3085,16 +3144,16 @@ class Flux extends React.Component {
       const unc = mkGroup('ca:', '', 'Sans catégorie', t=>!t.cat, {cat:''}, 'var(--cbox)');
       if(unc.count>0) groups.unshift(unc);
     }
-    /* En mode catégorie, toujours afficher les vraies catégories (même vides / sous filtre) pour pouvoir y ajouter une tâche ; "Sans catégorie" (id='') reste affiché seulement s'il contient des tâches. */
-    groups = groups.filter(g=> g.count>0 || (g.id!=='' && (groupBy==='cat' || !anyFilter)));
+    /* Hors filtrage (showEmpty), on garde les vrais groupes vides (id!=='') pour pouvoir y ajouter une tâche ; dès qu'un filtre est actif — ou en mode 'none' — seuls les groupes non vides restent. "Sans catégorie"/"Non assigné" (id='') n'apparaît que s'il contient des tâches. */
+    groups = groups.filter(g=> g.count>0 || (g.id!=='' && showEmpty));
 
     const cnt = (pred)=> st.tasks.filter(pred).length;
     const statusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot,
       active:!!f.status[k], count:cnt(t=>t.status===k),
-      boxStyle:this.facetBox(!!f.status[k], accent), check:f.status[k]?'✓':'',
+      boxStyle:this.facetBox(allOn||!!f.status[k], accent), check:(allOn||!!f.status[k])?'✓':'',
       onToggle:()=>this.toggleFilter('status',k) }));
-    const catFacets = st.categories.map(c=>({ id:c.id, label:c.name, active:!!f.cat[c.id], count:cnt(t=>t.cat===c.id),
-      boxStyle:this.facetBox(!!f.cat[c.id], accent), check:f.cat[c.id]?'✓':'',
+    const catFacets = st.categories.slice().sort(byName).map(c=>({ id:c.id, label:c.name, active:!!f.cat[c.id], count:cnt(t=>t.cat===c.id),
+      boxStyle:this.facetBox(allOn||!!f.cat[c.id], accent), check:(allOn||!!f.cat[c.id])?'✓':'',
       editing: labelEditing('cat', c.id) && le.rail,
       menuOpen: st.catMenuId===c.id,
       onMenuToggle:(e)=>{ stop(e); this.toggleCatMenu(c.id); },
@@ -3104,12 +3163,16 @@ class Flux extends React.Component {
       onLabelClick:(e)=>{ stop(e); this.startLabelEdit('cat', c.id, true); },
       onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('cat', c.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
       onLabelBlur:(e)=>{} }));
-    const personFacets = st.people.map(p=>({ id:p.id, label:p.name,
+    const personFacets = st.people.slice().sort(byName).map(p=>({ id:p.id, label:p.name,
       avatarStyle:`width:9px;height:9px;border-radius:50%;background:${p.color};flex:none;`, active:!!f.person[p.id], count:cnt(t=>t.person===p.id),
-      boxStyle:this.facetBox(!!f.person[p.id], accent), check:f.person[p.id]?'✓':'',
-      editing: labelEditing('person', p.id),
+      boxStyle:this.facetBox(allOn||!!f.person[p.id], accent), check:(allOn||!!f.person[p.id])?'✓':'',
+      editing: labelEditing('person', p.id) && le.rail,
+      menuOpen: st.personMenuId===p.id,
+      onMenuToggle:(e)=>{ stop(e); this.togglePersonMenu(p.id); },
+      onRename:(e)=>{ stop(e); this.setState({ personMenuId:null, labelEdit:{type:'person', id:p.id, rail:true} }); },
+      onDelete:(e)=>{ stop(e); this.deletePerson(p.id); },
       onToggle:()=>this.toggleFilter('person',p.id),
-      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('person', p.id); },
+      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('person', p.id, true); },
       onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('person', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
       onLabelBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='person'&&cur.id===p.id) this.commitLabelEdit('person', p.id, e.target.value); } }));
 
@@ -3122,15 +3185,37 @@ class Flux extends React.Component {
     }
     const confirmTask = st.confirmId ? taskById(st.confirmId) : null;
 
+    // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
+    const curProj = (st.projects||[]).find(p=>p.id===st.currentProjectId) || null;
+    const pq = (st.projQuery||'').trim(); const pql = pq.toLowerCase();
+    const projList = (st.projects||[]).filter(p=> p.name.toLowerCase().indexOf(pql)>=0)
+      .sort(byName).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId,
+        editing: labelEditing('proj', p.id),
+        menuOpen: st.projMenuId===p.id,
+        confirmDel: st.projDelId===p.id,
+        onPick:(e)=>{ stop(e); this.switchProject(p.id); },
+        onMenuToggle:(e)=>{ stop(e); this.setState(s=>({ projMenuId: s.projMenuId===p.id?null:p.id, projDelId:null })); },
+        onRename:(e)=>{ stop(e); this.setState({ projMenuId:null, projDelId:null, labelEdit:{type:'proj', id:p.id} }); },
+        onDelete:(e)=>{ stop(e); if(this.state.projDelId===p.id) this.deleteProject(p.id); else this.setState({ projDelId:p.id }); },
+        onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('proj', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
+        onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }));
+    const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
+
     return {
       theme, accent,
+      projName: curProj?curProj.name:'', hasProject: !!curProj,
+      projOpen: st.projOpen, projQuery: st.projQuery, projList, projCreate: !!pq && !projExact,
+      onProjToggle:()=>this.setState(s=>({ projOpen:!s.projOpen, projQuery:'' })),
+      onProjQuery:(e)=>this.setState({ projQuery:e.target.value }),
+      onProjKey:(e)=>{ if(e.key==='Escape'){ this.setState({projOpen:false,projQuery:''}); } else if(e.key==='Enter'){ const q=(this.state.projQuery||'').trim(); if(!q) return; const ql=q.toLowerCase(); const hit=this.state.projects.find(p=>p.name.toLowerCase()===ql) || this.state.projects.find(p=>p.name.toLowerCase().indexOf(ql)>=0); if(hit) this.switchProject(hit.id); else this.createProject(q); } },
+      onProjCreate:(e)=>{ stop(e); const q=(this.state.projQuery||'').trim(); if(q) this.createProject(q); },
       headerStyle:`position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;height:${D.hdrH}px;padding:0 ${D.padX}px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`,
       onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
       groups, statusFacets, catFacets, personFacets,
       totalCount: st.tasks.length,
-      allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(anyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`),
-      onClearFilters:()=>this.clearFilters(),
+      allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(showingAll?`background:${aTint(fillA)};color:${accent};`:'color:var(--text2);'),
+      onAllTasks:()=>this.toggleBulk(),
       addingCat: st.addingCat,
       onStartAddCat:()=>this.setState({addingCat:true}),
       onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
@@ -3206,7 +3291,12 @@ class Flux extends React.Component {
         <span className="cell" style={css('width:62px;flex:none;text-align:center;padding:3px 4px;')} onClick={t.onDepClick}>
           {t.edDep &&
             <select className="ied" data-edit="1" value={t.depId} onChange={t.onDepChange} onClick={t.stop} style={css('width:100%;font-size:11px;')}>
-              {t.depOptions.map(o=> <option key={o.id||'none'} value={o.id}>{o.name}</option>)}
+              <option value="">Aucune</option>
+              {t.depGroups.map(g=>
+                <optgroup key={g.id||'none'} label={g.name}>
+                  {g.selectable && <option value={'cat:'+g.id}>▸ Toute la catégorie</option>}
+                  {g.tasks.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
+                </optgroup>)}
             </select>}
           {t.showDep && <span title={t.depTitle} style={css("font-size:12px;color:"+t.depColor+";")}>{t.depText}</span>}
         </span>
@@ -3224,6 +3314,42 @@ class Flux extends React.Component {
 
         {/* ===================== TOP BAR ===================== */}
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+          <div data-projsel style={css('position:relative;flex:none;')}>
+            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:9px;height:34px;min-width:160px;max-width:240px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);cursor:pointer;')}>
+              <span style={css("font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
+              <span style={css('font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+(v.hasProject?'var(--text)':'var(--muted)')+';')}>{v.hasProject?v.projName:'Aucun projet'}</span>
+              <span style={css('margin-left:auto;opacity:.55;font-size:9px;flex:none;')}>▾</span>
+            </div>
+            {v.projOpen &&
+              <div style={css('position:absolute;top:40px;left:0;width:264px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 32px rgba(20,22,28,.30);padding:6px;z-index:60;')}>
+                <input autoFocus value={v.projQuery} onChange={v.onProjQuery} onKeyDown={v.onProjKey} placeholder="Rechercher ou créer un projet…" style={css('width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--soft);color:var(--text);margin-bottom:5px;')} />
+                <div>
+                  {v.projList.map(o=>
+                    <div key={o.id} style={css('display:flex;align-items:center;gap:6px;padding:6px 6px 6px 9px;border-radius:7px;font-size:13px;color:var(--text);'+(o.current?'font-weight:600;':''))}>
+                      {o.editing
+                        ? <input data-labeledit="1" onFocus={selectAll} defaultValue={o.name} onKeyDown={o.onNameKey} onBlur={o.onNameBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
+                        : <span className="stopt" onClick={o.onPick} title="Ouvrir ce projet" style={css('flex:1;display:flex;align-items:center;gap:8px;min-width:0;cursor:pointer;')}>
+                            <span style={css('flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
+                            <span style={css('color:'+v.accent+';font-size:11px;flex:none;'+(o.current?'':'visibility:hidden;'))}>✓</span>
+                          </span>}
+                      <span data-projmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
+                        <span onClick={o.onMenuToggle} title="Renommer ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 4px;')}>⋮</span>
+                        {o.menuOpen &&
+                          <div style={css('position:absolute;top:24px;right:0;min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.30);padding:5px;z-index:70;')}>
+                            <div className="stopt" onClick={o.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
+                            <div className="stopt" onClick={o.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;'+(o.confirmDel?'font-weight:600;background:rgba(224,116,109,.12);':''))}>{o.confirmDel?'Confirmer la suppression':'Supprimer'}</div>
+                          </div>}
+                      </span>
+                    </div>)}
+                  {v.projCreate &&
+                    <div className="stopt" onClick={v.onProjCreate} style={css('display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;color:'+v.accent+';font-weight:500;')}>
+                      <span style={css('font-size:14px;')}>＋</span> Créer « {v.projQuery} »
+                    </div>}
+                  {!v.projList.length && !v.projCreate &&
+                    <div style={css('padding:8px 9px;font-size:12.5px;color:var(--muted);')}>Tape un nom pour créer un projet.</div>}
+                </div>
+              </div>}
+          </div>
           <div style={css('flex:1;max-width:300px;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
             <span style={css('color:var(--muted);font-size:14px;')}>＋</span>
             <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
@@ -3237,7 +3363,7 @@ class Flux extends React.Component {
           {/* ---------- LEFT FACET RAIL ---------- */}
           <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
 
-            <div onClick={v.onClearFilters} style={css(v.allViewStyle)}>
+            <div onClick={v.onAllTasks} style={css(v.allViewStyle)}>
               <span style={css('font-size:13px;')}>Toutes les tâches</span>
               <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{v.totalCount}</span>
             </div>
@@ -3278,9 +3404,17 @@ class Flux extends React.Component {
                 <span onClick={f.onToggle} title="Filtrer" style={css(f.boxStyle+'cursor:pointer;')}>{f.check}</span>
                 <span style={css(f.avatarStyle)}></span>
                 {f.editing
-                  ? <input autoFocus onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
+                  ? <input data-labeledit="1" onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
                   : <span onClick={f.onLabelClick} title="Cliquer pour renommer" style={css('flex:1;cursor:text;')}>{f.label}</span>}
                 <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
+                <span data-personmenu style={css('position:relative;display:flex;align-items:center;')}>
+                  <span onClick={f.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
+                  {f.menuOpen &&
+                    <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:50;')}>
+                      <div className="stopt" onClick={f.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
+                      <div className="stopt" onClick={f.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
+                    </div>}
+                </span>
               </div>)}
 
             <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>VUES ENREGISTRÉES</div>
