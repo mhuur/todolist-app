@@ -806,13 +806,18 @@ async function loadFromCloud(){
     const doc=await db.collection('users').doc(currentUser.uid).get();
     if(doc.exists){
       const d=doc.data();
-      S.projects=d.projects||[];S.trash=d.trash||[];S.archive=d.archive||[];S.globalOrder=d.globalOrder||[];
-      if(d.crm){S.crm=d.crm}else{initCRM()}
-      S.feedback=d.feedback&&Array.isArray(d.feedback.items)?d.feedback:{items:[]};
-      S.priceLib=d.priceLib&&typeof d.priceLib==='object'?{schemas:d.priceLib.schemas||{},quotes:Array.isArray(d.priceLib.quotes)?d.priceLib.quotes:[]}:{schemas:{},quotes:[]};
-      S.flux=d.flux||null;S.timesheet=tsNorm(d.timesheet);
-      /* Also cache locally */
-      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet}));
+      /* "Plus récent gagne" : si le cache localStorage est plus récent que le cloud (écriture cloud ratée/raccourcie < 1,5 s), on le récupère au lieu de l'écraser aveuglément. */
+      let p=null;try{const lr=localStorage.getItem(SK);if(lr)p=JSON.parse(lr)}catch(e){}
+      const useLocal=p&&(p._ts||0)>(d._ts||0);
+      const src=useLocal?p:d;
+      S.projects=src.projects||[];S.trash=src.trash||[];S.archive=src.archive||[];S.globalOrder=src.globalOrder||[];
+      if(src.crm){S.crm=src.crm}else{initCRM()}
+      S.feedback=src.feedback&&Array.isArray(src.feedback.items)?src.feedback:{items:[]};
+      S.priceLib=src.priceLib&&typeof src.priceLib==='object'?{schemas:src.priceLib.schemas||{},quotes:Array.isArray(src.priceLib.quotes)?src.priceLib.quotes:[]}:{schemas:{},quotes:[]};
+      S.flux=src.flux||null;S.timesheet=tsNorm(src.timesheet);
+      S._dataTs=src._ts||Date.now();
+      localStorage.setItem(SK,JSON.stringify(dataSnapshot()));
+      if(useLocal&&currentUser){saveToCloudNow();} /* re-pousse la version locale récupérée */
     }else{
       /* First login: check if localStorage has data to migrate */
       const local=localStorage.getItem(SK);
@@ -822,6 +827,7 @@ async function loadFromCloud(){
         if(p.crm){S.crm=p.crm}else{initCRM()}
         S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
         S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);
+        S._dataTs=p._ts||Date.now();
         await saveToCloudNow();
       }
     }
@@ -843,14 +849,16 @@ async function loadFromCloud(){
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
     S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);
+    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S._dataTs=p._ts||Date.now();
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
+// Source unique du payload persisté + horodatage `_ts` (sert au "plus récent gagne" au chargement → localStorage = filet de sécurité si une écriture cloud est ratée/raccourcie).
+function dataSnapshot(){ return {projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet,_ts:S._dataTs||0}; }
 async function saveToCloudNow(){
   if(!currentUser)return;
-  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet};
+  const data=dataSnapshot();
   const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
   try{
     await db.collection('users').doc(currentUser.uid).set(stripped);
@@ -867,6 +875,10 @@ function saveToCloud(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveToCloudNow,1500);
 }
+// Flush la sauvegarde cloud EN ATTENTE avant fermeture/onglet caché (réduit la fenêtre de perte de 1,5 s).
+function flushSave(){ if(!saveTimer)return; clearTimeout(saveTimer); saveTimer=null; if(currentUser){ try{ saveToCloudNow(); }catch(e){} } }
+window.addEventListener('pagehide',flushSave);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden')flushSave(); });
 
 const SK="todolist-data-v3";
 let S={projects:[],tab:"flux",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,timesheet:{projects:[],weeks:{}},tsCol:{},tsAdd:null,tsEdit:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
@@ -878,7 +890,7 @@ function load(){/* Data loaded from cloud in onAuthStateChanged */}function migr
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#38BDF8","#F59E0B","#22C55E","#E879F9","#F87171","#2DD4BF","#A78BFA","#FBBF24","#F472B6","#818CF8"];
 function pCol(pid){if(pid==="__inbox")return"#F59E0B";const p=fp(pid);return(p&&p.color)||PCOLS[0]}
-function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet}))}catch{};saveToCloud()}
+function save(){S._dataTs=Date.now();try{localStorage.setItem(SK,JSON.stringify(dataSnapshot()))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
@@ -1063,78 +1075,6 @@ window.__fluxLoad=function(){return (typeof S!=='undefined'&&S&&S.flux)?S.flux:n
 window.__fluxSave=function(payload){if(typeof S==='undefined'||!S)return;S.flux=payload;save()};
 
 
-/* ── Global tab ── */
-function rGT(){
-  /* Auto-purge de l'inbox vide */
-  const _ib=fp("__inbox");if(_ib&&!_ib.actions.length)S.projects=S.projects.filter(p=>p.id!=="__inbox");
-  /* Couleur stable par projet (assignée 1× ; le réordonnancement ne la change pas) */
-  let _ca=false;S.projects.forEach(p=>{if(p.id!=="__inbox"&&!p.color){const u=S.projects.map(x=>x.color).filter(Boolean);p.color=PCOLS.find(c=>!u.includes(c))||PCOLS[S.projects.indexOf(p)%PCOLS.length];_ca=true}});if(_ca)save();
-  /* Sous-onglets : Planning / Projets / Terminé / Temps */
-  const sect=S.gSection||'plan';
-  let h=`<div class="subtab-bar"><div class="subtab ${sect==='plan'?'on':''}" onclick="S.gSection='plan';render()">Planning</div><div class="subtab ${sect==='task'?'on':''}" onclick="S.gSection='task';render()">Projets</div><div class="subtab ${sect==='done'?'on':''}" onclick="S.gSection='done';render()">Terminé</div><div class="subtab ${sect==='time'?'on':''}" onclick="S.gSection='time';render()">Temps</div></div>`;
-  if(S.gSection==='done')return h+rDN();
-  if(S.gSection==='time')return h+rTM();
-  /* Inline add + filtre statut sur la même ligne (alignés) */
-  const fltHTML=`<div class="flt-wrap" id="flt-wrap"><button class="flt-btn" onclick="event.stopPropagation();document.getElementById('flt-wrap').classList.toggle('open')">${{"all":"Toutes","ec":"En cours","wt":"Attente","urgent":"Urgent","rapide":"Rapide"}[S.gFilter]||"Toutes"} <svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></button><div class="flt-dd"><div class="flt-opt ${S.gFilter==='all'?'on':''}" onclick="S.gFilter='all';render()">Toutes</div><div class="flt-opt ${S.gFilter==='ec'?'on':''}" onclick="S.gFilter='ec';render()">En cours</div><div class="flt-opt ${S.gFilter==='wt'?'on':''}" onclick="S.gFilter='wt';render()">Attente</div><div class="flt-opt ${S.gFilter==='urgent'?'on':''}" onclick="S.gFilter='urgent';render()">Urgent</div><div class="flt-opt ${S.gFilter==='rapide'?'on':''}" onclick="S.gFilter='rapide';render()">Rapide</div></div></div>`;
-  const expandHTML=S.gSection==='task'?`<button class="flt-btn" onclick="togAllProj()" title="Déplier ou replier tous les projets">${allProjOpen?'Tout replier':'Tout déplier'}</button>`:'';
-  if(addCard.open&&addCard.at==='top'){
-    h+=`<div class="qa-bar"><div class="qa-stack"><div class="qa-stack-hd"><div class="qa-trigger-open" onclick="var _t=document.getElementById('ga-title');if(_t)_t.focus()"><b>＋</b> Ajouter une action</div>${fltHTML}${expandHTML}</div>${qaCardHTML(true,true)}</div></div>`;
-  }else{
-    h+=`<div class="qa-bar"><button class="qa-trigger" onclick="qaOpen()"><b>＋</b> Ajouter une action</button>${fltHTML}${expandHTML}</div>`;
-  }
-  let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status!=="done")all.push({...a,pId:p.id})})});
-  if(!all.length){h+=`<div class="es">Aucune action en cours.</div>`;return h}
-  /* Sync globalOrder */
-  const ids=new Set(all.map(a=>a.id));
-  S.globalOrder=S.globalOrder.filter(id=>ids.has(id));
-  all.forEach(a=>{if(!S.globalOrder.includes(a.id))S.globalOrder.push(a.id)});
-  /* Apply status filter */
-  let filtered=all;
-  if(S.gFilter==="urgent"){filtered=all.filter(a=>a.urgent)}else if(S.gFilter==="rapide"){filtered=all.filter(a=>a.rapide)}else if(S.gFilter!=="all"){filtered=all.filter(a=>{const st=getStatus(a);return st===S.gFilter})}
-  const _gq=(S.gQ||"").toLowerCase().trim();if(_gq){filtered=filtered.filter(a=>(a.title||"").toLowerCase().includes(_gq)||(a.text||"").replace(/<[^>]*>/g," ").toLowerCase().includes(_gq)||pN(fp(a.pId)).toLowerCase().includes(_gq))}
-  if(!filtered.length){h+=`<div class="es">${_gq?"Aucun résultat pour cette recherche.":"Aucune action avec ce filtre."}</div>`;return h}
-  if(S.gSection==="task"){
-    /* Group by project, then by task within each project */
-    const projIds=[...new Set(filtered.map(a=>a.pId))].sort((a,b)=>S.projects.findIndex(p=>p.id===a)-S.projects.findIndex(p=>p.id===b));
-    projIds.forEach(pid=>{
-      const p=fp(pid);if(!p)return;
-      const pActs=filtered.filter(a=>a.pId===pid);
-      const _pOpen=(!!_gq||S.gFilter!=='all')||allProjOpen||openProjId===pid;
-      const _nDone=p.actions.filter(a=>a.status==='done').length, _nTodo=p.actions.length-_nDone;
-      const _delMsg=_nDone?`Supprimer ? ${_nTodo} en cours, ${_nDone} terminée${_nDone>1?'s':''} conservée${_nDone>1?'s':''}`:`Supprimer ${_nTodo} action${_nTodo>1?'s':''} ?`;
-      h+=`<div class="pgl${_pOpen?' open':''}" style="border-left-color:${pCol(pid)}" onclick="togProj('${pid}')" ondragover="pDO(event,'${pid}')" ondragleave="pDL(event)" ondrop="pDD(event,'${pid}')">${pid!=='__inbox'?`<span class="pgl-grip" draggable="true" ondragstart="pDS(event,'${pid}')" ondragend="pDE()" onclick="event.stopPropagation()" title="Glisser pour réordonner">${I.grip}</span>`:''}<span class="pgl-chev"><svg viewBox="0 0 8 5"><path d="M0 0l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></span>${pid==='__inbox'?`<span class="pgl-lbl" style="color:${pCol(pid)}">${esc(pN(p))}</span>`:`<input class="pgl-name" style="color:${pCol(pid)}" value="${esc(pN(p))}" placeholder="Nom du projet…" oninput="upNm('${pid}',this.value)" onclick="event.stopPropagation()">`}<span class="plan-ct">${pActs.length}</span>${pid!=='__inbox'?(delConfirmPid===pid?`<span class="pgl-confirm">${_delMsg}</span><button class="pgl-del-ok" onclick="event.stopPropagation();delPGo('${pid}')" title="Confirmer la suppression">✓</button><button class="pgl-del-no" onclick="event.stopPropagation();delConfirmPid=null;render()" title="Annuler">✕</button>`:`<button class="pgl-del" onclick="event.stopPropagation();delConfirmPid='${pid}';render()" title="Supprimer le projet">${I.trash}</button>`):""}</div>`;
-      if(_pOpen){
-      /* Standalone actions (no task) */
-      const standalone=pActs.filter(a=>!a.taskId);
-      standalone.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
-      standalone.forEach(a=>{h+=rA(a,pid,{sp:false})});
-      /* Group by task */
-      const taskIds=[...new Set(pActs.filter(a=>a.taskId).map(a=>a.taskId))];
-      p.tasks.filter(t=>taskIds.includes(t.id)).forEach(tk=>{
-        const tkActs=pActs.filter(a=>a.taskId===tk.id);
-        tkActs.sort((a,b)=>S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id));
-        h+=`<div class="tk-zone" ondragover="tgActDO(event,'${pid}','${tk.id}')" ondragleave="tgActDL(event)" ondrop="tgActDD(event,'${pid}','${tk.id}')">`;
-        h+=`<div class="tk-hd"><input style="border:none;background:transparent;font-size:9px;font-weight:700;color:#5CB8F0;font-family:inherit;outline:none;flex:1" value="${esc(tk.title||'')}" placeholder="Nom tâche…" oninput="uTN('${pid}','${tk.id}',this.value)"><span class="tg-add-btn" onclick="event.stopPropagation();qaOpen('${pid}','${tk.id}')" title="Ajouter une action ici">＋</span></div>`;
-        if(addCard.open&&addCard.at===`task:${pid}:${tk.id}`)h+=`<div class="qa-inline">${qaCardHTML(false,false)}</div>`;
-        tkActs.forEach(a=>{h+=rA(a,pid,{sp:false})});
-        h+=`</div>`;
-      });
-      if(addCard.open&&addCard.at===`proj:${pid}`)h+=`<div class="qa-inline">${qaCardHTML(false,true)}</div>`;
-      else h+=`<div class="pa-add" onclick="qaOpen('${pid}')"><b>＋</b> Ajouter une action</div>`;
-      }
-    });
-  }else{
-    /* Plan view (défaut) : tranches par date de planif + drag&drop (réordonner dans un jour / replanifier d'un jour à l'autre) */
-    const BK=[{k:'overdue',l:'En retard',c:'#F87171',a:false},{k:'today',l:"Aujourd'hui",c:'#38BDF8',a:true},{k:'tomorrow',l:'Demain',c:'#22C55E',a:true},{k:'week',l:'Cette semaine',c:'#A78BFA',a:true},{k:'later',l:'Plus tard',c:'#64748B',a:true},{k:'waiting',l:'En attente',c:'#F59E0B',a:false},{k:'none',l:'Non planifié',c:'#475569',a:true}];
-    const grp={};filtered.forEach(x=>{const b=schedBucket(x);(grp[b]=grp[b]||[]).push(x)});
-    BK.forEach(bk=>{const items=grp[bk.k]||[];if(!items.length&&!bk.a)return;items.sort((a,b)=>{const da=a.scheduledDate||"",db=b.scheduledDate||"";if(da!==db){if(!da)return 1;if(!db)return -1;return da.localeCompare(db)}return S.globalOrder.indexOf(a.id)-S.globalOrder.indexOf(b.id)});
-      h+=`<div class="plan-bucket" ondragover="plBkDO(event)" ondragleave="plBkDL(event)" ondrop="plBkDD(event,'${bk.k}')"><div class="plan-hd" style="border-left:3px solid ${bk.c}"><span style="color:${bk.c}">${bk.l}</span><span class="plan-ct">${items.length}</span></div>`;
-      items.forEach(a=>{h+=rA(a,a.pId,{sp:true,stk:true})});
-      if(!items.length)h+=`<div class="plan-empty">Déposer ici pour planifier</div>`;
-      h+=`</div>`;
-    });
-  }
-  return h}
 
 /* ── Autocomplete engine ── */
 let _acSel={proj:"",projId:"",task:"",taskId:""};
@@ -1192,88 +1132,6 @@ function qaCancel(){addCard.open=false;addCard.at='top';addCard.title="";addCard
 function qaAdd(keepOpen){const ti=document.getElementById('ga-title');const title=(ti?ti.value:"").trim();if(!title){if(ti)ti.focus();return}const de=document.getElementById('ga-details');const raw=de?de.value.trim():"";const text=raw?esc(raw).replace(/\n/g,'<br>'):"";let p=fp(_acSel.projId);if(!p)p=getInbox();const n={id:gid(),text:text,title:title,urgency:"medium",status:"todo",deadline:"",waitReason:"",timeH:0,doneDate:"",taskId:_acSel.taskId||"",paused:false,priority:0,scheduledDate:addCard.sched||""};p.actions.push(n);S.globalOrder.unshift(n.id);addCard.title="";addCard.text="";addCard.sched="";addCard.showDetails=false;if(!keepOpen){addCard.open=false;addCard.at='top';_acSel={proj:"",projId:"",task:"",taskId:""}}save();render();if(keepOpen)requestAnimationFrame(()=>{const el=document.getElementById('ga-title');if(el){el.value="";el.focus()}})}
 function qaKey(e){if(e.key==='Escape'){e.preventDefault();qaCancel();return}if(e.key==='Enter'){if(e.target.id==='ga-details'){if(e.ctrlKey||e.metaKey){e.preventDefault();qaAdd(true)}}else{e.preventDefault();qaAdd(true)}}}
 function qaDone(){const ti=document.getElementById('da-title'),hrs=document.getElementById('da-hours');const title=(ti?ti.value:"").trim();if(!title)return;let p=fp(_acSel.projId);if(!p){p=S.projects[0];if(!p)return}const n={id:gid(),text:"",title:title,urgency:"medium",status:"done",deadline:"",waitReason:"",timeH:parseFloat(hrs?hrs.value:"")||0,doneDate:lDS(new Date()),taskId:"",paused:false,priority:0,scheduledDate:""};p.actions.push(n);save();_acSel={proj:"",projId:"",task:"",taskId:""};render();requestAnimationFrame(()=>{const el=document.getElementById('da-title');if(el){el.value="";el.focus()}})}
-
-/* ── Terminées (colored, two views) ── */
-function rDN(){
-  /* Inline add with autocomplete */
-  let h=`<div class="add-row"><input id="da-title" placeholder="Action terminée…" onkeydown="if(event.key==='Enter'){event.preventDefault();qaDone()}"><div class="ac-wrap" id="acw-dproj"><input id="da-proj-q" placeholder="Projet…" onfocus="acOpen('acw-dproj')" oninput="acFilter('acw-dproj',this.value,'proj')"><div class="ac-list" id="acl-dproj"></div></div><input id="da-hours" type="number" min="0" step="0.25" placeholder="h" style="width:50px;border:1px solid #1E3050;border-radius:5px;padding:4px 6px;font-size:10px;font-family:inherit;background:#152236;color:#5CB8F0;outline:none"><button onclick="qaDone()">＋</button></div>`;
-  let all=[];S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done")all.push({...a,pId:p.id,_pName:pN(p)})})});
-  S.archive.forEach(a=>{all.push({...a,_pName:a.pName||"?",_archived:true})});
-  if(!all.length){h+=`<div class="es">Aucune action terminée.</div>`;return h}
-  if(!S.doneView)S.doneView="project";
-  h+=`<div class="vt"><button class="vtb ${S.doneView==="project"?"on":""}" onclick="S.doneView='project';render()">Par projet</button><button class="vtb ${S.doneView==="date"?"on":""}" onclick="S.doneView='date';render()">Par date</button></div>`;
-  if(S.doneView==="date"){
-    all.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||""));
-    let lastDate="";
-    h+=`<table class="done-tbl">`;
-    all.forEach(a=>{
-      const dd=a.doneDate||"";
-      if(dd!==lastDate){lastDate=dd;const label=!dd?"Date inconnue":new Date(dd+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-        h+=`<tr><td colspan="5" style="padding:10px 6px 4px;font-size:11px;font-weight:700;color:#5CB8F0;text-transform:capitalize;border-bottom:1px solid #1E3050">${label}</td></tr>`}
-      const isA=a._archived;const pName=a._pName||pN(fp(a.pId));
-      h+=`<tr><td class="dt-proj">${esc(pName)}</td><td class="dt-title">${esc(a.title)}</td><td class="dt-hrs">${a.timeH?a.timeH.toFixed(1)+"h":""}</td><td class="dt-act">${!isA?`<span style="cursor:pointer;color:#64748B;font-size:10px" onclick="togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</span>`:""}<span style="cursor:pointer;color:#334155;font-size:10px;margin-left:3px" onclick="${isA?`delArchived('${a.id}')`:`delA('${a.pId}','${a.id}')`}" title="Supprimer">${I.trash}</span></td></tr>`;
-    });
-    h+=`</table>`;
-  }else{
-    const byP={};all.forEach(a=>{const k=a.pId||"_archived";if(!byP[k])byP[k]={name:a._pName,items:[]};byP[k].items.push(a)});
-    const keys=Object.keys(byP).sort((a,b)=>{const ai=S.projects.findIndex(p=>p.id===a),bi=S.projects.findIndex(p=>p.id===b);if(ai===-1&&bi===-1)return 0;if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi});
-    keys.forEach(k=>{
-      h+=`<div class="pgl" style="border-left-color:${pCol(k)}"><span class="pgl-lbl" style="color:${pCol(k)}">${esc(byP[k].name)}</span><span class="plan-ct">${byP[k].items.length}</span></div>`;
-      byP[k].items.sort((a,b)=>(b.doneDate||"").localeCompare(a.doneDate||"")).forEach(a=>{h+=rDoneRow(a)});
-    });
-  }
-  return h}
-
-function rDoneRow(a){
-  const pName=a._pName||pN(fp(a.pId));
-  const isArchived=a._archived;
-  const delBtn=isArchived?`<button class="bi btr" onclick="event.stopPropagation();delArchived('${a.id}')" title="Supprimer">${I.trash}</button>`:`<button class="bi bud" onclick="event.stopPropagation();togD('${a.pId}','${a.id}')" title="Rouvrir">${I.undo}</button><button class="bi btr" onclick="event.stopPropagation();delA('${a.pId}','${a.id}')" title="Supprimer">${I.trash}</button>`;
-  return`<div id="ar_${a.id}" class="ar dn ${S.ex[a.id]?"ao":""}" style="opacity:.7">
-  <div class="at">
-    <span class="ac" onclick="togX('${a.id}')">${I.chev}</span>
-    ${S.doneView==="date"?`<span class="a-tk" style="color:#4B6480">${esc(pName)} ›</span>`:""}
-    <input class="as" value="${esc(a.title)}" placeholder="Résumé…" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaT('${a.pId}','${a.id}',this.value)"`:"disabled"} style="color:#E2E8F0">
-    ${isArchived?`<span class="adtg" style="color:#64748B">${a.doneDate||""}</span>`:`<input type="date" class="dn-date" value="${a.doneDate||""}" onclick="event.stopPropagation();this.showPicker&&this.showPicker()" onchange="uaDD('${a.pId}','${a.id}',this.value)" title="Date de validation">`}
-    <input type="number" class="ati" value="${a.timeH?a.timeH.toFixed(2):""}" min="0" step="0.25" placeholder="h" onclick="event.stopPropagation()" ${!isArchived?`oninput="uaTm('${a.pId}','${a.id}',this.value)"`:"disabled"}><span class="atl">h</span>
-    <div class="ari">${delBtn}</div>
-  </div>
-  <div class="adl">
-    <div class="ab">${!isArchived?fmB(a.pId,a.id):""}<div class="${isArchived?"":"atx"}" ${!isArchived?`contenteditable="true" data-pid="${a.pId}" data-aid="${a.id}" data-placeholder="Détails…" onclick="event.stopPropagation()"`:""} style="font-size:11px;color:#94A3B8">${a.text||""}</div></div>
-  </div></div>`}
-
-/* ── Temps tab ── */
-function rTM(){
-  const now=new Date();const mon=new Date(now);mon.setDate(mon.getDate()-mon.getDay()+1+S.wo*7);mon.setHours(0,0,0,0);
-  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
-  const monS=lDS(mon),sunS=lDS(sun);
-  const label=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" – "+sun.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
-  /* Build day strings */
-  const days=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);days.push(lDS(d))}
-  const dayLabels=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
-  /* Collect: merge by project name */
-  const byN={};let gt=0;const gtD=[0,0,0,0,0,0,0];
-  const allSources=[];
-  S.projects.forEach(p=>{p.actions.forEach(a=>{if(a.status==="done"&&a.doneDate&&a.doneDate>=monS&&a.doneDate<=sunS)allSources.push({pName:pN(p),doneDate:a.doneDate,timeH:a.timeH||0})})});
-  S.archive.forEach(a=>{if(a.doneDate&&a.doneDate>=monS&&a.doneDate<=sunS)allSources.push({pName:a.pName||"?",doneDate:a.doneDate,timeH:a.timeH||0})});
-  allSources.forEach(a=>{
-    if(!byN[a.pName])byN[a.pName]={name:a.pName,total:0,days:[0,0,0,0,0,0,0]};
-    const di=days.indexOf(a.doneDate);
-    if(di!==-1){byN[a.pName].days[di]+=a.timeH;gtD[di]+=a.timeH}
-    byN[a.pName].total+=a.timeH;gt+=a.timeH;
-  });
-  let h=`<div class="wn"><button onclick="S.wo--;render()">◀</button><span>${label}</span><button onclick="S.wo++;render()">▶</button><button onclick="S.wo=0;render()" style="margin-left:4px">Auj.</button></div>`;
-  if(!Object.keys(byN).length){h+=`<div class="es">Aucun temps cette semaine.</div>`;return h}
-  h+=`<div style="overflow-x:auto"><table class="tt"><tr><th>Projet</th>`;
-  dayLabels.forEach(d=>{h+=`<th style="text-align:right;min-width:36px">${d}</th>`});
-  h+=`<th style="text-align:right">Total</th></tr>`;
-  Object.values(byN).sort((a,b)=>b.total-a.total).forEach(p=>{
-    h+=`<tr><td class="pn">${esc(p.name)}</td>`;
-    p.days.forEach(d=>{h+=`<td style="text-align:right">${d?d.toFixed(2):"-"}</td>`});
-    h+=`<td style="text-align:right;font-weight:600">${p.total.toFixed(2)}h</td></tr>`;
-  });
-  h+=`<tr class="ttr"><td>Total</td>`;
-  gtD.forEach(d=>{h+=`<td style="text-align:right">${d?d.toFixed(2):"-"}</td>`});
-  h+=`<td style="text-align:right">${gt.toFixed(2)}h</td></tr></table></div>`;return h}
 
 /* ── Temps (timesheet hebdo indépendant : projets → tâches → heures/jour) ──
    Modèle : S.timesheet={projects:[{id,name,tasks:[{id,name}]}], weeks:{[lundiISO]:[{projId,rows:[{taskId,h:[7]}]}]}}.
@@ -2896,7 +2754,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -3000,7 +2858,7 @@ class Flux extends React.Component {
   // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
   _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
   // Réinitialise tout l'état de vue transient en entrant dans un projet.
-  _enterProject(extra){ return { selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, ...extra }; }
+  _enterProject(extra){ return { selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, ...extra }; }
   switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
   createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
   renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
@@ -3074,6 +2932,18 @@ class Flux extends React.Component {
       if(beforeId){ const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d); }
       else { let last=-1; tasks.forEach((t,i)=>{ if((t.cat||'')===catId) last=i; }); tasks.splice(last+1,0,d); }
       return { tasks, dragId:null, dragOverId:null };
+    });
+  }
+  // Réordonne le tableau st.categories (= ordre des groupes au centre). N'affecte PAS la sidebar (qui re-trie par nom). Drop = insérer avant beforeId.
+  moveCategory(dragId, beforeId){
+    if(!dragId || dragId===beforeId){ this.setState({dragCatId:null,dragOverCatId:null}); return; }
+    this.setState(st=>{
+      const cats=[...st.categories];
+      const di=cats.findIndex(c=>c.id===dragId); if(di<0) return {dragCatId:null,dragOverCatId:null};
+      const [moved]=cats.splice(di,1);
+      const ti=cats.findIndex(c=>c.id===beforeId);
+      if(ti<0) cats.push(moved); else cats.splice(ti,0,moved);
+      return { categories:cats, dragCatId:null, dragOverCatId:null };
     });
   }
   setStatusByDrag(dragId,status){
@@ -3219,7 +3089,7 @@ class Flux extends React.Component {
         onDepChange: (e)=>{ this.updateDep(t.id, e.target.value); this.stopEdit(); },
         onDragStart: (e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
         onDragOver: (e)=>{ e.preventDefault(); },
-        onDragEnter: (e)=>{ e.preventDefault(); if(st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
+        onDragEnter: (e)=>{ e.preventDefault(); if(!st.dragCatId && st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
         onDrop: (e)=>{ e.preventDefault(); e.stopPropagation(); if(groupBy==='cat') this.reorder(st.dragId, t.id, t.cat); else this.reorderAdopt(st.dragId, t.id, groupBy, t); },
         onDragEnd: ()=>this.setState({dragId:null,dragOverId:null}),
       };
@@ -3244,8 +3114,14 @@ class Flux extends React.Component {
         onToggle:()=>this.toggleCollapse(gkey),
         onAddKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
         onAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } },
+        catDraggable: groupBy==='cat' && id!=='',
+        dropMark: (groupBy==='cat' && id!=='' && st.dragCatId && st.dragOverCatId===id && st.dragCatId!==id) ? `box-shadow:inset 0 2px 0 ${accent};` : '',
+        onGroupDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({dragCatId:id}); },
+        onGroupDragEnter:(e)=>{ if(st.dragCatId && groupBy==='cat' && id!=='' && st.dragCatId!==id){ e.preventDefault(); if(st.dragOverCatId!==id) this.setState({dragOverCatId:id}); } },
+        onGroupDragEnd:()=>this.setState({dragCatId:null,dragOverCatId:null}),
         onDragOver:(e)=>{ e.preventDefault(); },
         onDrop:(e)=>{ e.preventDefault();
+          if(st.dragCatId){ if(groupBy==='cat' && id!=='') this.moveCategory(st.dragCatId, id); else this.setState({dragCatId:null,dragOverCatId:null}); return; }
           if(groupBy==='cat') this.reorder(st.dragId,null,id);
           else if(groupBy==='status') this.setStatusByDrag(st.dragId,id);
           else if(groupBy==='person'){ if(st.dragId){ this.updatePerson(st.dragId,id); this.setState({dragId:null,dragOverId:null}); } }
@@ -3556,7 +3432,9 @@ class Flux extends React.Component {
 
               {v.groups.map(g=>
                 <React.Fragment key={g.key}>
-                  <div onClick={g.onToggle} style={css(g.headerStyle)}>
+                  <div onClick={g.onToggle} draggable={g.catDraggable && !g.editing}
+                    onDragStart={g.onGroupDragStart} onDragEnter={g.onGroupDragEnter} onDragOver={g.onDragOver} onDrop={g.onDrop} onDragEnd={g.onGroupDragEnd}
+                    style={css(g.headerStyle + g.dropMark + (g.catDraggable && !g.editing ? 'cursor:grab;' : ''))}>
                     <span style={css('width:3px;align-self:stretch;margin:5px 0;border-radius:2px;background:'+g.marker+';')}></span>
                     <span style={css('font-size:9px;color:var(--text3);width:9px;')}>{g.caret}</span>
                     {g.editing

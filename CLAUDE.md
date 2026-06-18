@@ -4,30 +4,29 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
 
 ## Stack & structure
 
-- **Tout dans `index.html`** (~930 lignes, vanilla JS, monolithique, pas de build, pas de tests, pas de lint).
+- **Tout dans `index.html`** (monolithique, pas de build, pas de tests, pas de lint). Majorité en **vanilla JS** (un gros `<script>`) ; l'onglet **Flux** est un composant **React** dans un `<script type="text/babel" id="flux-src">` compilé en navigateur (React+Babel lazy-loadés).
 - **Firebase v8 compat** chargé via CDN (`firebase.auth()`, `db.collection(...)`). **Ne pas migrer vers v9 modulaire.**
 - **Cache local** : `localStorage["todolist-data-v3"]` (constante `SK`). Changer le suffixe casse tous les caches.
 - Fichiers : `index.html`, `README.md`, `LICENSE`, `.gitignore`. Rien d'autre.
 
 ## Carte de l'app — menu & fonctionnalités
 
-**Sidebar** (tableau `tabs`, dispatch `S.tab` → renderer). `sT(k)` change d'onglet.
+**Sidebar** (tableau `tabs`, dispatch `S.tab` → renderer). `sT(k)` change d'onglet. **Onglet par défaut : Flux.**
 
-1. **Tâches** (`tab:"global"` → `rGT`) — cœur de l'app. 4 sous-onglets via `S.gSection` :
-   - **Planning** (`plan`, défaut) — actions groupées par tranche de date planifiée (`scheduledDate` → `schedBucket`) : En retard / Aujourd'hui / Demain / Cette semaine / Plus tard / En attente / Non planifié. Drag&drop = replanifier (drop sur tranche) ou réordonner.
-   - **Projets** (`task`) — actions groupées par projet, puis par tâche. **Rendu inline dans `rGT`** (branche `S.gSection==='task'`), PAS via une fonction projet dédiée : `rP`/`rPT` (ancien onglet « Projets ») ont été **supprimés** (code mort, jamais dispatché). Conséquence : `delP()` (suppression projet → corbeille) existe encore mais **n'a plus de bouton** dans cette vue.
-   - **Terminé** (`done` → `rDN`) — actions terminées (avec heures passées).
-   - **Temps** (`time` → `rTM`) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
-   - Barre commune : **carte de création dépliable** style Google Tasks (`.qa-bar`/`.qa-card` ; `qaOpen`/`qaAdd`/`qaCancel`/`qaKey`, état transient `addCard`). Champs : titre, détails (→ `a.text`, stocké en HTML), projet/tâche via combobox `ac*` **filtré aux projets en cours** (`pEnCours`). Même carte ouvrable depuis un projet (lien `.pa-add` en bas du projet) ou une tâche (`qaOpen(pid,tid)`, pré-rempli). Pas de date à la création (planif via drag&drop Planning). Filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
-2. **CRM** (`tab:"crm"` → `rCRM`) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`).
-3. **Prix** (`tab:"price"` → `rPL`) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
-4. **Notes** (`tab:"feedback"` → `rFB`) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
-5. **Corbeille** (`tab:"trash"` → `rTR`) — éléments supprimés (`S.trash[]`), restaurer / vider.
+1. **Flux** (`tab:"flux"` → composant React `class Flux`, monté dans `#flux-root` ; React+Babel lazy-loadés au 1er affichage) — **gestionnaire de tâches principal de l'app**. Données = blob `S.flux` (pont `__fluxLoad`/`__fluxSave`, persisté avec le reste ; cache localStorage `flux_proto_v6`). Multi-**projets** : `S.flux={…, projects:[{id,name,categories,people,tasks,collapsed,filters}], currentProjectId}` — catégories/personnes/tâches **par projet** ; sélecteur de projet en haut (recherche + créer-si-absent + menu ⋮ renommer/supprimer). Migration auto de l'ancien format à plat → un projet « Projet 1 ». Table groupée par catégorie/personne/statut ; filtres dans la sidebar gauche (master « Toutes les tâches » tri-état `bulk` : `null`/`'all'`/`'none'`) ; panneau notes à droite ; colonne « Bloquée par » (dépendance vers une tâche **ou** une catégorie entière). Le picker Personne suggère les personnes de **tous** les projets. (Architecture détaillée dans la mémoire `flux-corrective-plan`.)
+2. **Temps** (`tab:"time"` → `rTS`) — **feuille de temps hebdo indépendante**, modèle propre `S.timesheet={projects:[{id,name,tasks[]}], weeks:{[lundiISO]:[{projId,rows:[{taskId,h:[7]}]}]}}`. Projets (repliables) → tâches → heures/jour ; somme par projet ; navigation semaine (`S.wo`) ; reprise (prefill) des projets de la semaine précédente, matérialisée à la 1re édition ; ajout/retrait/renommage projets & tâches (`ts*` helpers). Saisie des heures via `oninput`+recalc DOM ciblé (pas de re-render → focus/tab préservés). **Aucun lien** avec Flux ni le modèle legacy.
+3. **CRM** (`tab:"crm"` → `rCRM`) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`). Autocomplete produits via les helpers partagés `acOpen`/`acFilter` (`ac*`, hérités de l'ancien onglet Tâches — toujours vivants, ne pas casser).
+4. **Prix** (`tab:"price"` → `rPL`) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
+5. **Notes** (`tab:"feedback"` → `rFB`) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
+6. **Corbeille** (`tab:"trash"` → `rTR`) — éléments supprimés (`S.trash[]`), restaurer / vider.
 
-**Modèle de données** (état global `S` ; persisté : `projects, trash, archive, globalOrder, crm, feedback, priceLib`) :
-- **Action** : `{id, title, text, urgency, status:"todo"|"done", deadline, scheduledDate, waitReason, timeH, doneDate, taskId, paused, priority}`.
-- **Projet** : `{id, number, name, deadline, actions[], tasks:[{id,title}]}`. Inbox réservée `__inbox` (« À trier »), créée à la volée, auto-purgée quand vide.
-- `globalOrder[]` = ordre manuel transverse des actions ; `openProjects`/`openTasks`/`ex` = états d'expansion UI.
+> **Ancien onglet « Tâches » supprimé.** Les renderers `rGT`/`rDN`/`rTM` (+ sous-onglets Planning/Projets/Terminé/Temps auto-calculé) ont été retirés du code ; Flux le remplace. Quelques helpers de l'époque survivent (morts mais **entrelacés** avec l'autocomplete `ac*` encore utilisé par le CRM, et des `let` top-level `_acSel`/`addCard` lus par `acFilter`) — ne pas supprimer à l'aveugle. Le modèle legacy `S.projects` (Action/Projet) n'est plus rendu nulle part ; il ne subsiste que via `S.trash`/`S.archive` (Corbeille).
+
+**Modèle de données** (état global `S` ; persisté : `projects, trash, archive, globalOrder, crm, feedback, priceLib, flux, timesheet`) :
+- **`S.flux`** : voir onglet Flux (multi-projets, par-projet). **`S.timesheet`** : voir onglet Temps.
+- **Action** (legacy, plus rendu) : `{id, title, text, urgency, status:"todo"|"done", deadline, scheduledDate, waitReason, timeH, doneDate, taskId, paused, priority}`.
+- **Projet** (legacy) : `{id, number, name, deadline, actions[], tasks:[{id,title}]}`. Inbox réservée `__inbox`. Ne survit que pour `S.trash`/`S.archive`.
+- `globalOrder[]`, `openProjects`/`openTasks`/`ex` = états legacy de l'ancien onglet Tâches (plus utilisés à l'écran).
 
 ## Commandes utiles
 
