@@ -681,6 +681,35 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Onglet Flux (proto React embarqué) : tout est scopé sous #flux-root pour ne rien casser de l'app ── */
+.main-flux{max-width:none;padding:0;height:100vh;overflow:hidden}
+#flux-root{height:100%;--bg:#0f1d33;--rail:#0c1729;--band:#16273f;--soft:#13233c;--line:#243650;--panel:#142540;--text:#e7edf6;--text2:#aebcd0;--text3:#8595ac;--muted:#6c7d96;--divider:#1f3049;--cbox:#3a4a64;--sbThumb:#2a3a55;--sbThumb2:#384a69;}
+#flux-root [data-theme="marine"]{--bg:#0f1d33;--rail:#0c1729;--band:#16273f;--soft:#13233c;--line:#243650;--panel:#142540;--text:#e7edf6;--text2:#aebcd0;--text3:#8595ac;--muted:#6c7d96;--divider:#1f3049;--cbox:#3a4a64;--sbThumb:#2a3a55;--sbThumb2:#384a69;}
+#flux-root [data-theme="indigo"]{--bg:#161433;--rail:#110f28;--band:#221f46;--soft:#1b1840;--line:#302b58;--panel:#1c1941;--text:#ebe7f7;--text2:#bbb4d8;--text3:#928cb4;--muted:#7a749c;--divider:#28244e;--cbox:#433e6a;--sbThumb:#322d57;--sbThumb2:#3f3968;}
+#flux-root [data-theme="ocean"]{--bg:#0c2327;--rail:#091d20;--band:#143036;--soft:#11292e;--line:#20434a;--panel:#112c32;--text:#e2f0f0;--text2:#a6c4c6;--text3:#7ea3a6;--muted:#638a8d;--divider:#1a383e;--cbox:#2f565c;--sbThumb:#244a50;--sbThumb2:#30595f;}
+#flux-root [data-theme="clair"]{--bg:#eceef1;--rail:#f6f7f9;--band:#e7eaee;--soft:#fafbfc;--line:#e3e6ea;--panel:#ffffff;--text:#1b1e23;--text2:#4a5159;--text3:#6b7280;--muted:#9ca1ab;--divider:#eef0f3;--cbox:#c2c6cd;--sbThumb:#d3d7dd;--sbThumb2:#bcc1c9;}
+#flux-root *{box-sizing:border-box;}
+#flux-root ::selection{background:#d8defb;}
+#flux-root input,#flux-root textarea,#flux-root button,#flux-root select{font-family:inherit;}
+#flux-root textarea{resize:none;}
+#flux-root input:focus,#flux-root textarea:focus,#flux-root select:focus{outline:none;}
+#flux-root .fxcol{transform:translateY(10px);animation:fxup .5s cubic-bezier(.2,.7,.3,1) forwards;}
+@keyframes fxup{from{transform:translateY(10px);}to{transform:none;}}
+#flux-root .scrl::-webkit-scrollbar{width:10px;height:10px;}
+#flux-root .scrl::-webkit-scrollbar-thumb{background:var(--sbThumb);border-radius:8px;border:3px solid transparent;background-clip:content-box;}
+#flux-root .scrl::-webkit-scrollbar-thumb:hover{background:var(--sbThumb2);background-clip:content-box;}
+#flux-root .taskrow:hover{background:var(--soft) !important;}
+#flux-root .rowdel{opacity:0;transition:opacity .12s,color .12s;}
+#flux-root .taskrow:hover .rowdel{opacity:1;}
+#flux-root .rowdel:hover{color:#d04a45 !important;}
+#flux-root .cell{cursor:pointer;border-radius:6px;}
+#flux-root .cell:hover{box-shadow:inset 0 0 0 1px var(--line);}
+#flux-root .ied{border:1px solid #aebbf0;border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 7px;}
+#flux-root .stopt:hover{background:var(--soft);}
+#flux-root input::placeholder,#flux-root textarea::placeholder{color:var(--muted);}
+</style>
 </head>
 <body>
 <div id="login-screen" class="login-screen"><div class="login-box"><h1>🌊 Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
@@ -741,8 +770,9 @@ async function loadFromCloud(){
       if(d.crm){S.crm=d.crm}else{initCRM()}
       S.feedback=d.feedback&&Array.isArray(d.feedback.items)?d.feedback:{items:[]};
       S.priceLib=d.priceLib&&typeof d.priceLib==='object'?{schemas:d.priceLib.schemas||{},quotes:Array.isArray(d.priceLib.quotes)?d.priceLib.quotes:[]}:{schemas:{},quotes:[]};
+      S.flux=d.flux||null;
       /* Also cache locally */
-      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib}));
+      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux}));
     }else{
       /* First login: check if localStorage has data to migrate */
       const local=localStorage.getItem(SK);
@@ -751,7 +781,7 @@ async function loadFromCloud(){
         S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];
         if(p.crm){S.crm=p.crm}else{initCRM()}
         S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};
+        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;
         await saveToCloudNow();
       }
     }
@@ -773,14 +803,14 @@ async function loadFromCloud(){
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
     S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};
+    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
 async function saveToCloudNow(){
   if(!currentUser)return;
-  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib};
+  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux};
   const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
   try{
     await db.collection('users').doc(currentUser.uid).set(stripped);
@@ -799,7 +829,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"global",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -808,7 +838,7 @@ function load(){/* Data loaded from cloud in onAuthStateChanged */}function migr
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#38BDF8","#F59E0B","#22C55E","#E879F9","#F87171","#2DD4BF","#A78BFA","#FBBF24","#F472B6","#818CF8"];
 function pCol(pid){if(pid==="__inbox")return"#F59E0B";const p=fp(pid);return(p&&p.color)||PCOLS[0]}
-function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib}))}catch{};saveToCloud()}
+function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
@@ -947,10 +977,10 @@ function rA(a,pid,o){
   </div></div>`}
 
 /* ── Render ── */
-const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,price:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8.5V3a1 1 0 011-1h5.5L14 7.5l-5.5 5.5L2 8.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/></svg>`};
+const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,price:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8.5V3a1 1 0 011-1h5.5L14 7.5l-5.5 5.5L2 8.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/></svg>`,flux:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9 1.5L3 9h4l-1 5.5L13 7H9l1-5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`};
 function render(){
   /* Sidebar */
-  const tabs=[{k:"global",l:"Tâches",i:SB_ICONS.global},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"global",l:"Tâches",i:SB_ICONS.global},{k:"flux",l:"Flux",i:SB_ICONS.flux},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar">`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -959,15 +989,38 @@ function render(){
   /* Main */
   let h="";
   if(S.tab==="projects")S.tab="global";
-  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else h+=rTR();
-  const mainCls=S.tab==="price"?"main main-wide":"main";
+  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux")h+=`<div id="flux-root"></div>`;else h+=rTR();
+  const mainCls=S.tab==="price"?"main main-wide":(S.tab==="flux"?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
   const _comboPos=(_comboFocusId&&typeof _comboActive.selectionStart==='number')?_comboActive.selectionStart:null;
   document.getElementById("app").innerHTML=sb+`<div class="${mainCls}">${h}</div>`;syncEl=document.getElementById('sync-ind');
+  if(S.tab==="flux")mountFlux();else unmountFlux();
   if(_comboFocusId){const el=document.getElementById(_comboFocusId);if(el){el.focus();if(_comboPos!==null&&typeof el.setSelectionRange==='function')try{el.setSelectionRange(_comboPos,_comboPos)}catch(e){}}}
   requestAnimationFrame(sEd)}
+
+// ▼ Onglet Flux — proto React (classe Flux dans <script id="flux-src">) monté à la demande. React+Babel chargés en lazy au 1er affichage pour ne pas ralentir le démarrage. Données propres à Flux (localStorage 'flux_proto_v6'), pas encore synchronisées Firebase.
+let _fluxRoot=null,_fluxNode=null,_fluxLibsLoading=false;
+function _loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function loadFluxLibs(){
+  if(_fluxLibsLoading||window.Flux)return;_fluxLibsLoading=true;
+  _loadScript('https://unpkg.com/react@18.3.1/umd/react.production.min.js')
+    .then(()=>_loadScript('https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js'))
+    .then(()=>_loadScript('https://unpkg.com/@babel/standalone@7.24.7/babel.min.js'))
+    .then(()=>{Babel.transformScriptTags();mountFlux()}) /* compile <script id="flux-src"> → window.Flux, puis monte */
+    .catch(()=>{const el=document.getElementById('flux-root');if(el)el.innerHTML='<div style="padding:40px;color:#f0746d;font-family:sans-serif;font-size:14px">Échec du chargement de Flux. Vérifie ta connexion.</div>'});
+}
+function mountFlux(){
+  const el=document.getElementById('flux-root');if(!el)return;
+  if(!window.Flux){el.innerHTML='<div style="padding:40px;color:#8595ac;font-family:sans-serif;font-size:14px">Chargement de Flux…</div>';loadFluxLibs();return}
+  if(_fluxNode!==el){if(_fluxRoot){try{_fluxRoot.unmount()}catch(e){}}_fluxRoot=ReactDOM.createRoot(el);_fluxNode=el}
+  _fluxRoot.render(React.createElement(window.Flux));
+}
+function unmountFlux(){if(_fluxRoot){try{_fluxRoot.unmount()}catch(e){}_fluxRoot=null;_fluxNode=null}}
+// ▼ Pont de persistance Flux ↔ état app : Flux lit/écrit S.flux (un blob), sauvegardé dans Firestore avec le reste via save(). Le localStorage 'flux_proto_v6' reste un cache local de secours.
+window.__fluxLoad=function(){return (typeof S!=='undefined'&&S&&S.flux)?S.flux:null};
+window.__fluxSave=function(payload){if(typeof S==='undefined'||!S)return;S.flux=payload;save()};
 
 
 /* ── Global tab ── */
@@ -2633,6 +2686,685 @@ function upNm(id,v){const p=fp(id);if(p){p.name=v;save()}}
 function uaU(pid,aid,v){const a=fa(pid,aid);if(a){a.urgency=v;save();render()}}
 function uaDL(pid,aid,v){const a=fa(pid,aid);if(a){a.deadline=v;save();render()}}
 /* Auth onAuthStateChanged handles load + render */
+</script>
+<script type="text/babel" id="flux-src" data-presets="react">
+/* Parse a CSS declaration string ("a:b;c:d") into a React style object.
+   Lets us keep the design's inline-style strings verbatim. */
+function css(str){
+  const o = {};
+  if(!str) return o;
+  str.split(';').forEach(decl=>{
+    const i = decl.indexOf(':');
+    if(i < 0) return;
+    let k = decl.slice(0, i).trim();
+    const v = decl.slice(i+1).trim();
+    if(!k) return;
+    if(k.indexOf('--') === 0){ o[k] = v; }
+    else { k = k.replace(/-([a-z])/g, (_,c)=>c.toUpperCase()); o[k] = v; }
+  });
+  return o;
+}
+
+const STATUS_LIGHT = {
+  todo:  { label:'À faire',    dot:'#9aa1ad', bg:'#eef0f3', fg:'#5b616e' },
+  doing: { label:'En cours',   dot:'#3b5bdb', bg:'#e8edfd', fg:'#314fc7' },
+  wait:  { label:'En attente', dot:'#d39327', bg:'#fbf0df', fg:'#9a6712' },
+  done:  { label:'Terminé',    dot:'#3f9d6a', bg:'#e6f2ec', fg:'#2c764d' },
+};
+const STATUS_DARK = {
+  todo:  { label:'À faire',    dot:'#8a93a6', bg:'rgba(255,255,255,.07)', fg:'#b4bfd0' },
+  doing: { label:'En cours',   dot:'#5b9bff', bg:'rgba(91,155,255,.18)',  fg:'#9cc3ff' },
+  wait:  { label:'En attente', dot:'#e3ab43', bg:'rgba(227,171,67,.18)',  fg:'#f0c578' },
+  done:  { label:'Terminé',    dot:'#4fc08a', bg:'rgba(79,192,138,.18)',  fg:'#86d8ad' },
+};
+const SORDER = ['todo','doing','wait','done'];
+const MONTHS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const DEN = {
+  compact:     { rowH:32, padX:14, titleFs:12.5, chk:14, stPad:'2px 8px', stW:108, grpH:27, grpFs:11.5, addH:30, hdrH:30 },
+  confortable: { rowH:40, padX:18, titleFs:13.5, chk:15, stPad:'3px 9px', stW:118, grpH:32, grpFs:12,   addH:36, hdrH:34 },
+  spacieux:    { rowH:52, padX:22, titleFs:14.5, chk:17, stPad:'5px 11px', stW:126, grpH:40, grpFs:12.5, addH:46, hdrH:38 },
+};
+const LS_KEY = 'flux_proto_v6';
+
+class Flux extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = this.loadState();
+    this._tc = null;
+    this._focusKey = '';
+    this._labelKey = '';
+    this._labelKeyAt = 0;
+  }
+
+  defaults() {
+    return {
+      // editor "props" promoted to real, persisted settings
+      theme: 'marine',
+      accent: '#3a8ff0',
+      density: 'compact',
+      groupBy: 'cat',
+      view: 'table',
+      categories: [
+        { id:'mkt', name:'Marketing' },
+        { id:'des', name:'Design' },
+        { id:'dev', name:'Développement' },
+        { id:'adm', name:'Administratif' },
+        { id:'per', name:'Perso' },
+      ],
+      people: [
+        { id:'me',     name:'Moi',       color:'#3b5bdb' },
+        { id:'marie',  name:'Marie L.',  color:'#d6643f' },
+        { id:'thomas', name:'Thomas R.', color:'#2c9c6a' },
+        { id:'sophie', name:'Sophie K.', color:'#8a5cd6' },
+      ],
+      tasks: [
+        { id:'t1', title:'Rédiger le brief créatif', cat:'mkt', status:'doing', due:'2026-06-19', person:'me', notes:'Cadrer le ton, les cibles et les livrables attendus. Inclure les références visuelles et les contraintes de marque.', deps:[] },
+        { id:'t2', title:'Valider les maquettes v2', cat:'mkt', status:'doing', due:'2026-06-18', person:'me', notes:'', deps:['t1'] },
+        { id:'t3', title:'Programmer la newsletter', cat:'mkt', status:'todo', due:'', person:'marie', notes:'', deps:[] },
+        { id:'t4', title:'Choisir la palette finale', cat:'des', status:'todo', due:'2026-06-20', person:'sophie', notes:'', deps:[] },
+        { id:'t5', title:'Exporter les icônes SVG', cat:'des', status:'wait', due:'', person:'sophie', notes:'En attente du retour de validation.', deps:['t4'] },
+        { id:'t6', title:'Configurer Firebase Auth', cat:'dev', status:'doing', due:'2026-06-18', person:'thomas', notes:'Activer le provider Google dans la console Firebase.', deps:[] },
+        { id:'t7', title:'Brancher la connexion Google', cat:'dev', status:'todo', due:'', person:'thomas', notes:'', deps:['t6'] },
+        { id:'t8', title:'Modéliser la base Firestore', cat:'dev', status:'done', due:'', person:'thomas', notes:'', deps:[] },
+        { id:'t9', title:'Relire le contrat freelance', cat:'adm', status:'wait', due:'', person:'me', notes:'', deps:[] },
+        { id:'t10', title:'Envoyer la facture de mars', cat:'adm', status:'done', due:'', person:'me', notes:'', deps:[] },
+        { id:'t11', title:'Préparer le budget Q3', cat:'adm', status:'todo', due:'2026-06-25', person:'', notes:'', deps:[] },
+        { id:'t12', title:'Réserver les vacances', cat:'per', status:'todo', due:'', person:'me', notes:'', deps:[] },
+      ],
+      collapsed: {},
+      filters: { status:{}, cat:{}, person:{} },
+      addingCat: false,
+    };
+  }
+
+  loadState() {
+    let s = null;
+    try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
+    const base = this.defaults();
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null };
+    if (s && Array.isArray(s.tasks)) {
+      const isISO = v => typeof v==='string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+      const tasks = s.tasks.map(t=>({ ...t, due: isISO(t.due)?t.due:'', person: typeof t.person==='string'?t.person:'', deps: Array.isArray(t.deps)?t.deps:[] }));
+      const filters = { status:(s.filters&&s.filters.status)||{}, cat:(s.filters&&s.filters.cat)||{}, person:(s.filters&&s.filters.person)||{} };
+      const people = (Array.isArray(s.people) && s.people.length) ? s.people : base.people;
+      return { ...base, ...s, tasks, filters, people, ...runtime };
+    }
+    return { ...base, ...runtime };
+  }
+
+  componentDidMount(){
+    this._docClick = (e)=>{
+      const tg = e.target;
+      const inTask = tg && tg.closest && tg.closest('[data-task]');
+      const inPanel = tg && tg.closest && tg.closest('[data-panel]');
+      const inCatMenu = tg && tg.closest && tg.closest('[data-catmenu]');
+      if(this.state.catMenuId && !inCatMenu){ this.setState({ catMenuId:null }); }
+      const inLabelEdit = tg && tg.closest && tg.closest('[data-labeledit="1"]');
+      if(this.state.labelEdit && this.state.labelEdit.type==='cat' && this.state.labelEdit.rail && !inLabelEdit){ const inp=document.querySelector('[data-labeledit="1"]'); this.commitLabelEdit('cat', this.state.labelEdit.id, inp?inp.value:''); }
+      if(this.state.editing.id && !inTask){ this.setState({ editing:{id:null,field:null} }); }
+      if(!this.state.selectedId) return;
+      if(inTask || inPanel) return;
+      this.setState({ selectedId:null });
+    };
+    document.addEventListener('click', this._docClick, true);
+  }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); }
+
+  componentDidUpdate() {
+    try {
+      const { theme, accent, density, groupBy, view, categories, people, tasks, collapsed, filters } = this.state;
+      const _payload = { theme, accent, density, groupBy, view, categories, people, tasks, collapsed, filters };
+      localStorage.setItem(LS_KEY, JSON.stringify(_payload));
+      if (window.__fluxSave) window.__fluxSave(_payload);
+    } catch(e) {}
+    const ed = this.state.editing;
+    const key = ed.id ? ed.id+'|'+ed.field : '';
+    if (key && key !== this._focusKey) {
+      this._focusKey = key;
+      const el = document.querySelector('[data-edit="1"]');
+      if (el) { el.focus(); if (el.select) try{el.select();}catch(e){}; if (ed.field==='due' && el.showPicker) try{el.showPicker();}catch(e){} }
+    }
+    if (!key) this._focusKey = '';
+    /* Focus fiable du champ de renommage (catégorie via menu ⋮ ou clic sur le nom) : différé pour survivre à la restauration de focus du navigateur après le clic. */
+    const lkey = (this.state.labelEdit && this.state.labelEdit.id) ? this.state.labelEdit.type+':'+this.state.labelEdit.id : '';
+    if (lkey && lkey !== this._labelKey) {
+      this._labelKey = lkey;
+      this._labelKeyAt = Date.now();
+      setTimeout(()=>{ const el=document.querySelector('[data-labeledit="1"]'); if(el){ el.focus(); if(el.select) try{el.select();}catch(e){} } }, 20);
+    }
+    if (!lkey) this._labelKey = '';
+  }
+
+  uid() { return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  initials(name){ return (name||'').split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+  avatarStyle(color, size){ const s=size||20; return `width:${s}px;height:${s}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(s*0.42)}px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`; }
+
+  // ---- view / selection / settings ----
+  setView(v){ this.setState({ view:v }); }
+  toggleSelect(id){ this.setState(st=>({ selectedId: st.selectedId===id ? null : id, editing:{id:null,field:null} })); }
+  // ---- editing ----
+  startEdit(id,field){ this.setState({ editing:{id,field} }); }
+  stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
+  // ---- mutations ----
+  toggleDone(id){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t) })); }
+  setStatus(id,status){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,status}:t), editing:{id:null,field:null} })); }
+  toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
+  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; return { filters:{...st.filters,[axis]:ax} }; }); }
+  clearFilters(){ this.setState({ filters:{status:{},cat:{},person:{}} }); }
+
+  addTask(catId,title){
+    const t = { id:this.uid(), title, cat:catId||'', status:'todo', due:'', person:'', notes:'', deps:[] };
+    this.setState(st=>({ tasks:[...st.tasks, t] }));
+  }
+  addTaskPreset(preset,title){
+    const t = { id:this.uid(), title, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], ...(preset||{}) };
+    this.setState(st=>({ tasks:[...st.tasks, t] }));
+  }
+  reorderAdopt(dragId, beforeId, axis, target){
+    if(!dragId || dragId===beforeId){ this.setState({dragId:null,dragOverId:null}); return; }
+    this.setState(st=>{
+      const tasks=[...st.tasks];
+      const di=tasks.findIndex(t=>t.id===dragId); if(di<0) return {dragId:null,dragOverId:null};
+      const d={...tasks[di]};
+      if(axis==='status') d.status=target.status; else if(axis==='person') d.person=target.person; else d.cat=target.cat;
+      tasks.splice(di,1);
+      const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d);
+      return {tasks,dragId:null,dragOverId:null};
+    });
+  }
+  askDelete(id){ this.setState({ confirmId:id }); }
+  cancelDelete(){ this.setState({ confirmId:null }); }
+  confirmDelete(){ const id=this.state.confirmId; if(!id){ this.setState({confirmId:null}); return; }
+    this.setState(st=>({ tasks: st.tasks.filter(t=>t.id!==id).map(t=>({...t, deps:t.deps.filter(d=>d!==id)})),
+      selectedId: st.selectedId===id?null:st.selectedId, editing:{id:null,field:null}, confirmId:null })); }
+  patch(id,patch){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,...patch}:t) })); }
+  updateTitle(id,val){ this.patch(id,{title:val}); }
+  updateDue(id,due){ this.patch(id,{due}); }
+  updateDep(id,depId){ this.patch(id,{deps: depId?[depId]:[]}); }
+  updatePerson(id,person){ this.patch(id,{person}); }
+  startPersonEdit(id){ this.setState({ editing:{id,field:'person'}, personQuery:'' }); }
+  stopPersonEdit(){ this.setState({ editing:{id:null,field:null}, personQuery:'' }); }
+  setPersonQuery(v){ this.setState({ personQuery:v }); }
+  addPerson(name){ const id=this.uid(); const palette=['#3b5bdb','#d6643f','#2c9c6a','#8a5cd6','#c79a1e','#0f9bb0','#c0497e','#5566d6']; const color=palette[this.state.people.length % palette.length]; this.setState(st=>({ people:[...st.people,{id,name:(name||'').trim(),color}] })); return id; }
+  updateNotes(id,val){ this.patch(id,{notes:val}); }
+  addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
+  toggleCatMenu(id){ this.setState(st=>({ catMenuId: st.catMenuId===id?null:id })); }
+  // Supprime une catégorie sans toucher aux tâches : elles repassent en "Sans catégorie" (cat='').
+  deleteCategory(id){ this.setState(st=>{ const cat={...st.filters.cat}; delete cat[id]; const collapsed={...st.collapsed}; delete collapsed['ca:'+id]; return { categories: st.categories.filter(c=>c.id!==id), tasks: st.tasks.map(t=> (t.cat||'')===id ? {...t, cat:''} : t), filters:{...st.filters, cat}, collapsed, catMenuId:null, labelEdit:{type:null,id:null} }; }); }
+
+  // ---- inline rename of category / person labels (sidebar + group headers) ----
+  startLabelEdit(type,id,fromRail){ this.setState({ labelEdit:{type,id,rail:!!fromRail} }); }
+  stopLabelEdit(){ this.setState({ labelEdit:{type:null,id:null} }); }
+  renameCategory(id,name){ const n=(name||'').trim(); this.setState(st=>({ categories: n ? st.categories.map(c=> c.id===id?{...c,name:n}:c) : st.categories })); }
+  renamePerson(id,name){ const n=(name||'').trim(); this.setState(st=>({ people: n ? st.people.map(p=> p.id===id?{...p,name:n}:p) : st.people })); }
+  commitLabelEdit(type,id,value){ if(type==='cat') this.renameCategory(id,value); else if(type==='person') this.renamePerson(id,value); this.stopLabelEdit(); }
+
+  reorder(dragId, beforeId, catId){
+    if(!dragId || dragId===beforeId) { this.setState({dragId:null,dragOverId:null}); return; }
+    this.setState(st=>{
+      const tasks=[...st.tasks];
+      const di=tasks.findIndex(t=>t.id===dragId);
+      if(di<0) return { dragId:null, dragOverId:null };
+      const d={...tasks[di], cat:catId};
+      tasks.splice(di,1);
+      if(beforeId){ const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d); }
+      else { let last=-1; tasks.forEach((t,i)=>{ if((t.cat||'')===catId) last=i; }); tasks.splice(last+1,0,d); }
+      return { tasks, dragId:null, dragOverId:null };
+    });
+  }
+  setStatusByDrag(dragId,status){
+    if(!dragId){ this.setState({dragId:null}); return; }
+    this.setState(st=>({ tasks: st.tasks.map(t=> t.id===dragId?{...t,status}:t), dragId:null }));
+  }
+
+  // ---- helpers ----
+  catName(id){ const c=this.state.categories.find(c=>c.id===id); return c?c.name:'Sans catégorie'; }
+  person(id){ return this.state.people.find(p=>p.id===id) || null; }
+  formatDue(iso){
+    const isDark = this.state.theme!=='clair';
+    const soon = isDark ? '#e3ab43' : '#b5651d';
+    const over = isDark ? '#f0746d' : '#d04a45';
+    if(!iso) return { text:'—', color:'var(--cbox)' };
+    const d=new Date(iso+'T00:00:00'); if(isNaN(d)) return { text:'—', color:'var(--cbox)' };
+    const now=new Date(); now.setHours(0,0,0,0);
+    const diff=Math.round((d-now)/86400000);
+    if(diff===0) return { text:"Aujourd'hui", color:soon };
+    if(diff===1) return { text:'Demain', color:soon };
+    if(diff===-1) return { text:'Hier', color:over };
+    const txt=d.getDate()+' '+MONTHS[d.getMonth()];
+    return { text:txt, color: diff<0 ? over : 'var(--muted)' };
+  }
+  checkBox(done, size, accent){
+    const a = accent||'#3b5bdb';
+    const s = size||15;
+    if(done) return `width:${s}px;height:${s}px;border-radius:5px;background:${a};border:1.5px solid ${a};display:flex;align-items:center;justify-content:center;color:#fff;font-size:${s-5}px;flex:none;cursor:pointer;`;
+    return `width:${s}px;height:${s}px;border-radius:5px;border:1.6px solid var(--cbox);background:var(--panel);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;`;
+  }
+  facetBox(active, accent){
+    const a = accent||'#3b5bdb';
+    if(active) return `width:15px;height:15px;border-radius:4px;background:${a};border:1.5px solid ${a};color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none;`;
+    return 'width:15px;height:15px;border-radius:4px;border:1.6px solid var(--cbox);background:var(--panel);flex:none;';
+  }
+
+  // -------- view model (port of renderVals) --------
+  buildVM(){
+    const st = this.state;
+    const f = st.filters; const ed = st.editing;
+    const actS = Object.keys(f.status), actC = Object.keys(f.cat), actP = Object.keys(f.person);
+    const anyFilter = actS.length || actC.length || actP.length;
+    const match = t => (!actS.length||actS.includes(t.status)) && (!actC.length||actC.includes(t.cat)) && (!actP.length||actP.includes(t.person));
+    const filtered = st.tasks.filter(match);
+    const taskById = id => st.tasks.find(t=>t.id===id);
+    const stop = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
+
+    const theme = st.theme || 'marine';
+    const isDark = theme==='marine' || theme==='indigo' || theme==='ocean';
+    this._dark = isDark;
+    const STATUS = isDark ? STATUS_DARK : STATUS_LIGHT;
+    const accent = st.accent || '#3a8ff0';
+    const aTint = (a)=> accent + a;
+    const selA = isDark ? '30' : '14';
+    const fillA = isDark ? '26' : '1a';
+    const lighten = (hex,amt)=>{ const h=(hex||'').replace('#',''); if(h.length!==6) return hex; let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt); return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); };
+    const D = DEN[st.density] || DEN.confortable;
+    const groupBy = st.groupBy || 'cat';
+    const le = st.labelEdit || {type:null,id:null};
+    const labelEditing = (type,id)=> le.type===type && le.id===id;
+
+
+    // Shared pill recipe — Personne & Statut chips share identical geometry & type.
+    const chipBase = `display:inline-flex;align-items:center;line-height:1;border-radius:20px;padding:${D.stPad};font-size:12px;font-weight:500;white-space:nowrap;`;
+
+    const vm = (t) => {
+      const sm = STATUS[t.status];
+      const done = t.status==='done';
+      const sel = st.selectedId===t.id;
+      const isEd = (fld)=> ed.id===t.id && ed.field===fld;
+      let rowStyle = `position:relative;display:flex;flex-wrap:nowrap;align-items:center;height:${D.rowH}px;padding:0 ${D.padX}px;border-bottom:1px solid var(--divider);cursor:default;background:var(--panel);`;
+      if(sel) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
+      if(isEd('status')) rowStyle += 'z-index:25;';
+      if(st.dragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
+      const dep = t.deps[0] ? taskById(t.deps[0]) : null;
+      const du = this.formatDue(t.due);
+      const depOptions = [{id:'',name:'Aucune'}, ...st.tasks.filter(x=>x.id!==t.id).map(x=>({id:x.id,name:x.title}))];
+      const p = this.person(t.person);
+      const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
+        return { key:k, label:m.label, dot:m.dot,
+          style:'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);'+(on?'font-weight:600;':''),
+          checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'),
+          onPick:(e)=>{ stop(e); this.setStatus(t.id,k); } }; });
+      let personMenu=[];
+      if(isEd('person')){
+        const mrow=(on)=>'display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;'+(on?`background:${aTint(selA)};`:'');
+        const q=(st.personQuery||'').trim(); const ql=q.toLowerCase();
+        if(!ql || 'non assigné'.indexOf(ql)>=0) personMenu.push({ label:'Non assigné', initials:'', avatarStyle:'width:18px;height:18px;border-radius:50%;border:1.5px dashed var(--cbox);flex:none;', labelStyle:'font-size:12.5px;color:var(--text3);', checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(t.person===''?'':'visibility:hidden;'), style:mrow(t.person===''), onPick:(e)=>{ stop(e); this.updatePerson(t.id,''); this.stopPersonEdit(); } });
+        st.people.filter(pp=>pp.name.toLowerCase().indexOf(ql)>=0).forEach(pp=>{ const on=t.person===pp.id; personMenu.push({ label:pp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${pp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,pp.id); this.stopPersonEdit(); } }); });
+        const exact=st.people.find(pp=>pp.name.toLowerCase()===ql);
+        if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
+      }
+      return {
+        id:t.id, cat:t.cat, rowStyle, title:t.title,
+        dueISO:t.due||'', dueText:du.text, dueColor:du.color,
+        personId:t.person||'', personQuery:st.personQuery, personMenu,
+        hasPerson: !!p, noPerson: !p,
+        personName: p ? p.name : '',
+        personChip: p ? chipBase + `max-width:100%;overflow:hidden;text-overflow:ellipsis;background:${p.color}${isDark?'33':'18'};color:${isDark?lighten(p.color,0.55):lighten(p.color,-0.12)};` : '',
+        titleStyle: `font-size:${D.titleFs}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;` + (done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'),
+        checkStyle: this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
+        statusStyle: chipBase + `gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`,
+        statusLabel:sm.label, statusDot:sm.dot, statusOptions,
+        depId: t.deps[0]||'', depOptions,
+        depText: dep ? '⛓' : '—', depColor: dep ? '#b5651d' : 'var(--cbox)', depTitle: dep ? ('Bloquée par : '+dep.title) : 'Aucune dépendance',
+        edTitle:isEd('title'), showTitle:!isEd('title'),
+        edDue:isEd('due'), showDue:!isEd('due'),
+        edPerson:isEd('person'), showPerson:!isEd('person'),
+        edStatus:isEd('status'),
+        edDep:isEd('dep'), showDep:!isEd('dep'),
+        stop,
+        onRowToggle: ()=>this.toggleSelect(t.id),
+        onCheck: (e)=>{ stop(e); this.toggleDone(t.id); },
+        onDelete: (e)=>{ stop(e); this.askDelete(t.id); },
+        onTitleClick: (e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
+        onTitleDbl: (e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
+        onTitleInput: (e)=>this.updateTitle(t.id, e.target.value),
+        onTitleKey: (e)=>{ stop(e); if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } if(e.key==='Escape'){ e.target.blur(); } },
+        onTitleBlur: ()=>this.stopEdit(),
+        onDueClick: (e)=>{ stop(e); this.startEdit(t.id,'due'); },
+        onDueChange: (e)=>{ this.updateDue(t.id, e.target.value); this.stopEdit(); },
+        onDueBlur: ()=>this.stopEdit(),
+        onPersonClick: (e)=>{ stop(e); this.startPersonEdit(t.id); },
+        onPersonQuery: (e)=>this.setPersonQuery(e.target.value),
+        onPersonKey: (e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const hit=st.people.find(pp=>pp.name.toLowerCase()===ql) || st.people.find(pp=>pp.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
+        onStatusClick: (e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
+        onDepClick: (e)=>{ stop(e); this.startEdit(t.id,'dep'); },
+        onDepChange: (e)=>{ this.updateDep(t.id, e.target.value); this.stopEdit(); },
+        onDragStart: (e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
+        onDragOver: (e)=>{ e.preventDefault(); },
+        onDragEnter: (e)=>{ e.preventDefault(); if(st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
+        onDrop: (e)=>{ e.preventDefault(); e.stopPropagation(); if(groupBy==='cat') this.reorder(st.dragId, t.id, t.cat); else this.reorderAdopt(st.dragId, t.id, groupBy, t); },
+        onDragEnd: ()=>this.setState({dragId:null,dragOverId:null}),
+      };
+    };
+
+    const grpHeaderStyle = `display:flex;align-items:center;gap:8px;height:${D.grpH+6}px;padding:0 ${D.padX}px;background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;`;
+    const grpNameStyle = `font-family:'IBM Plex Mono',monospace;font-size:${Math.round((D.grpFs-1)*10)/10}px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);`;
+    const grpCountStyle = `font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;`;
+    const addRowStyle = `display:flex;align-items:center;gap:8px;height:${D.addH}px;padding:0 ${D.padX}px;background:var(--soft);border-bottom:1px solid var(--divider);`;
+    const mkGroup = (gkey, id, name, filterFn, preset, marker)=>{
+      const list = filtered.filter(filterFn);
+      const collapsed = !!st.collapsed[gkey];
+      const labelType = groupBy==='cat' ? 'cat' : (groupBy==='person' ? 'person' : null);
+      const editable = !!labelType && id!=='';
+      return { key:gkey, id, name, count:list.length, open:!collapsed, caret: collapsed?'▸':'▾',
+        headerStyle:grpHeaderStyle, nameStyle:grpNameStyle, countStyle:grpCountStyle, marker:marker||accent, addRowStyle, addHint:'Ajouter dans '+name+'…',
+        tasks:list.map(vm),
+        editable, editing: editable && labelEditing(labelType, id) && !le.rail,
+        onNameClick: editable ? (e)=>{ stop(e); this.startLabelEdit(labelType, id); } : null,
+        onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit(labelType, id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
+        onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type===labelType&&cur.id===id) this.commitLabelEdit(labelType, id, e.target.value); },
+        onToggle:()=>this.toggleCollapse(gkey),
+        onAddKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
+        onAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } },
+        onDragOver:(e)=>{ e.preventDefault(); },
+        onDrop:(e)=>{ e.preventDefault();
+          if(groupBy==='cat') this.reorder(st.dragId,null,id);
+          else if(groupBy==='status') this.setStatusByDrag(st.dragId,id);
+          else if(groupBy==='person'){ if(st.dragId){ this.updatePerson(st.dragId,id); this.setState({dragId:null,dragOverId:null}); } }
+        },
+      };
+    };
+    let groups;
+    if(groupBy==='status'){
+      groups = SORDER.map(k=> mkGroup('st:'+k, k, STATUS[k].label, t=>t.status===k, {status:k}, STATUS[k].dot));
+    } else if(groupBy==='person'){
+      groups = st.people.map(p=> mkGroup('pe:'+p.id, p.id, p.name, t=>t.person===p.id, {person:p.id}, p.color));
+      const un = mkGroup('pe:', '', 'Non assigné', t=>!t.person, {person:''}, 'var(--cbox)');
+      if(un.count>0) groups.push(un);
+    } else {
+      groups = st.categories.map(c=> mkGroup('ca:'+c.id, c.id, c.name, t=>(t.cat||'')===c.id, {cat:c.id}, accent));
+      const unc = mkGroup('ca:', '', 'Sans catégorie', t=>!t.cat, {cat:''}, 'var(--cbox)');
+      if(unc.count>0) groups.unshift(unc);
+    }
+    /* En mode catégorie, toujours afficher les vraies catégories (même vides / sous filtre) pour pouvoir y ajouter une tâche ; "Sans catégorie" (id='') reste affiché seulement s'il contient des tâches. */
+    groups = groups.filter(g=> g.count>0 || (g.id!=='' && (groupBy==='cat' || !anyFilter)));
+
+    const cnt = (pred)=> st.tasks.filter(pred).length;
+    const statusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot,
+      active:!!f.status[k], count:cnt(t=>t.status===k),
+      boxStyle:this.facetBox(!!f.status[k], accent), check:f.status[k]?'✓':'',
+      onToggle:()=>this.toggleFilter('status',k) }));
+    const catFacets = st.categories.map(c=>({ id:c.id, label:c.name, active:!!f.cat[c.id], count:cnt(t=>t.cat===c.id),
+      boxStyle:this.facetBox(!!f.cat[c.id], accent), check:f.cat[c.id]?'✓':'',
+      editing: labelEditing('cat', c.id) && le.rail,
+      menuOpen: st.catMenuId===c.id,
+      onMenuToggle:(e)=>{ stop(e); this.toggleCatMenu(c.id); },
+      onRename:(e)=>{ stop(e); this.setState({ catMenuId:null, labelEdit:{type:'cat', id:c.id, rail:true} }); },
+      onDelete:(e)=>{ stop(e); this.deleteCategory(c.id); },
+      onToggle:()=>this.toggleFilter('cat',c.id),
+      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('cat', c.id, true); },
+      onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('cat', c.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
+      onLabelBlur:(e)=>{} }));
+    const personFacets = st.people.map(p=>({ id:p.id, label:p.name,
+      avatarStyle:`width:9px;height:9px;border-radius:50%;background:${p.color};flex:none;`, active:!!f.person[p.id], count:cnt(t=>t.person===p.id),
+      boxStyle:this.facetBox(!!f.person[p.id], accent), check:f.person[p.id]?'✓':'',
+      editing: labelEditing('person', p.id),
+      onToggle:()=>this.toggleFilter('person',p.id),
+      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('person', p.id); },
+      onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('person', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
+      onLabelBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='person'&&cur.id===p.id) this.commitLabelEdit('person', p.id, e.target.value); } }));
+
+    const stask = taskById(st.selectedId);
+    let sel = null;
+    if(stask){
+      sel = { id:stask.id, title:stask.title, catLabel:this.catName(stask.cat), notes:stask.notes,
+        onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
+        onDelete:()=>this.askDelete(stask.id) };
+    }
+    const confirmTask = st.confirmId ? taskById(st.confirmId) : null;
+
+    return {
+      theme, accent,
+      headerStyle:`position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;height:${D.hdrH}px;padding:0 ${D.padX}px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`,
+      onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
+      onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
+      groups, statusFacets, catFacets, personFacets,
+      totalCount: st.tasks.length,
+      allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(anyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`),
+      onClearFilters:()=>this.clearFilters(),
+      addingCat: st.addingCat,
+      onStartAddCat:()=>this.setState({addingCat:true}),
+      onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
+      onAddCatBlur:(e)=>{ const v=e.target.value.trim(); if(v) this.addCategory(v); else this.setState({addingCat:false}); },
+      hasSel: !!sel, sel: sel||{}, onCloseDetail:()=>this.setState({selectedId:null}),
+      hasConfirm: !!confirmTask, confirmTitle: confirmTask?confirmTask.title:'',
+      onCancelDelete:()=>this.cancelDelete(), onConfirmDelete:()=>this.confirmDelete(), stopModal:(e)=>stop(e),
+      danger: isDark
+        ? { fg:'#ff9089', bg:'rgba(208,74,69,.16)', border:'rgba(208,74,69,.42)', iconBg:'rgba(208,74,69,.20)', solid:'#cf4f49' }
+        : { fg:'#c0524a', bg:'#fbeae8', border:'#f0d5d2', iconBg:'#fbeae8', solid:'#c0524a' },
+    };
+  }
+
+  renderRow(t){
+    return (
+      <div className="taskrow" data-task="1" style={css(t.rowStyle)} draggable={!t.edTitle}
+        onClick={t.onRowToggle} onDragStart={t.onDragStart} onDragOver={t.onDragOver}
+        onDragEnter={t.onDragEnter} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
+        <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}>
+          <span style={css(t.checkStyle)}>{t.checkMark}</span>
+        </span>
+        {/* TITLE */}
+        <span style={css('width:480px;flex:none;display:flex;align-items:center;gap:8px;overflow:hidden;padding-right:8px;')}>
+          {t.edTitle &&
+            <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />}
+          {t.showTitle &&
+            <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
+        </span>
+        {/* DUE */}
+        <span className="cell" style={css('width:104px;flex:none;padding:3px 6px;position:relative;')} onClick={t.onDueClick}>
+          {t.edDue &&
+            <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css("width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;")} />}
+          {t.showDue && <span style={css("font-size:12px;color:"+t.dueColor+";")}>{t.dueText}</span>}
+        </span>
+        {/* PERSON */}
+        <span className="cell" style={css('width:150px;flex:none;padding:3px 6px;overflow:visible;position:relative;')} onClick={t.onPersonClick}>
+          {t.edPerson &&
+            <React.Fragment>
+              <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
+              <div style={css('position:absolute;top:32px;left:6px;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
+                {t.personMenu.map((o,i)=>
+                  <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
+                    <span style={css(o.avatarStyle)}>{o.initials}</span>
+                    <span style={css(o.labelStyle)}>{o.label}</span>
+                    <span style={css(o.checkStyle)}>✓</span>
+                  </div>)}
+              </div>
+            </React.Fragment>}
+          {t.showPerson &&
+            <span style={css('display:flex;align-items:center;gap:7px;overflow:hidden;')}>
+              {t.hasPerson && <span style={css(t.personChip)}>{t.personName}</span>}
+              {t.noPerson && <span style={css('font-size:12px;color:var(--cbox);')}>＋ assigner</span>}
+            </span>}
+        </span>
+        {/* STATUS */}
+        <span style={css('width:128px;flex:none;position:relative;')}>
+          <span onClick={t.onStatusClick} title="Changer le statut" style={css(t.statusStyle)}>
+            <span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>
+            {t.statusLabel}
+            <span style={css('margin-left:auto;opacity:.5;font-size:9px;padding-left:4px;')}>▾</span>
+          </span>
+          {t.edStatus &&
+            <div style={css('position:absolute;top:32px;left:0;min-width:152px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;')}>
+              {t.statusOptions.map(so=>
+                <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
+                  <span style={css('width:7px;height:7px;border-radius:50%;background:'+so.dot+';')}></span>
+                  {so.label}
+                  <span style={css(so.checkStyle)}>✓</span>
+                </div>)}
+            </div>}
+        </span>
+        {/* DEP */}
+        <span className="cell" style={css('width:62px;flex:none;text-align:center;padding:3px 4px;')} onClick={t.onDepClick}>
+          {t.edDep &&
+            <select className="ied" data-edit="1" value={t.depId} onChange={t.onDepChange} onClick={t.stop} style={css('width:100%;font-size:11px;')}>
+              {t.depOptions.map(o=> <option key={o.id||'none'} value={o.id}>{o.name}</option>)}
+            </select>}
+          {t.showDep && <span title={t.depTitle} style={css("font-size:12px;color:"+t.depColor+";")}>{t.depText}</span>}
+        </span>
+        <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
+      </div>
+    );
+  }
+
+  render(){
+    const v = this.buildVM();
+    const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
+    const renameInput = 'flex:1;min-width:0;border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
+    return (
+      <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
+
+        {/* ===================== TOP BAR ===================== */}
+        <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+          <div style={css('flex:1;max-width:300px;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
+            <span style={css('color:var(--muted);font-size:14px;')}>＋</span>
+            <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
+            <span style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;")}>↵</span>
+          </div>
+        </div>
+
+        {/* ===================== BODY ===================== */}
+        <div style={css('flex:1;display:flex;min-height:0;position:relative;')}>
+
+          {/* ---------- LEFT FACET RAIL ---------- */}
+          <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
+
+            <div onClick={v.onClearFilters} style={css(v.allViewStyle)}>
+              <span style={css('font-size:13px;')}>Toutes les tâches</span>
+              <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{v.totalCount}</span>
+            </div>
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
+            {v.statusFacets.map(f=>
+              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
+                <span style={css(f.boxStyle)}>{f.check}</span>
+                <span style={css('width:7px;height:7px;border-radius:50%;background:'+f.dot+';')}></span>
+                <span>{f.label}</span>
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
+              </div>)}
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>CATÉGORIES</div>
+            {v.catFacets.map(f=>
+              <div key={f.id} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;font-size:13px;color:var(--text2);')}>
+                <span onClick={f.onToggle} title="Filtrer" style={css(f.boxStyle+'cursor:pointer;')}>{f.check}</span>
+                {f.editing
+                  ? <input data-labeledit="1" onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
+                  : <span onClick={f.onLabelClick} title="Cliquer pour renommer" style={css('flex:1;cursor:text;')}>{f.label}</span>}
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
+                <span data-catmenu style={css('position:relative;display:flex;align-items:center;')}>
+                  <span onClick={f.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
+                  {f.menuOpen &&
+                    <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:50;')}>
+                      <div className="stopt" onClick={f.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
+                      <div className="stopt" onClick={f.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
+                    </div>}
+                </span>
+              </div>)}
+            {v.addingCat &&
+              <input autoFocus onKeyDown={v.onAddCatKey} onBlur={v.onAddCatBlur} placeholder="Nom de la catégorie…" style={css('width:100%;margin-top:4px;border:1px solid var(--cbox);border-radius:7px;padding:6px 9px;font-size:13px;background:var(--panel);color:var(--text);')} />}
+            <div onClick={v.onStartAddCat} style={css('display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text3);')}>＋ Nouvelle catégorie</div>
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PERSONNES</div>
+            {v.personFacets.map(f=>
+              <div key={f.id} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;font-size:13px;color:var(--text2);')}>
+                <span onClick={f.onToggle} title="Filtrer" style={css(f.boxStyle+'cursor:pointer;')}>{f.check}</span>
+                <span style={css(f.avatarStyle)}></span>
+                {f.editing
+                  ? <input autoFocus onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
+                  : <span onClick={f.onLabelClick} title="Cliquer pour renommer" style={css('flex:1;cursor:text;')}>{f.label}</span>}
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
+              </div>)}
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>VUES ENREGISTRÉES</div>
+            <div style={css('display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;color:'+v.accent+';cursor:default;')}>★ À traiter aujourd'hui</div>
+          </div>
+
+          {/* ---------- CENTER ---------- */}
+          <div className="fxcol scrl" style={css('flex:1;min-width:0;overflow:auto;background:var(--bg);animation-delay:.08s;')}>
+            <div style={css('min-width:820px;')}>
+              {/* column header */}
+              <div style={css(v.headerStyle)}>
+                <span style={css('width:26px;flex:none;')}></span>
+                <span style={css('width:480px;flex:none;')}>Tâche</span>
+                <span style={css('width:104px;flex:none;')}>Échéance</span>
+                <span style={css('width:150px;flex:none;')}>Personne</span>
+                <span style={css('width:128px;flex:none;')}>Statut</span>
+                <span style={css('width:62px;flex:none;text-align:center;')}>Bloquée par</span>
+              </div>
+
+              {v.groups.map(g=>
+                <React.Fragment key={g.key}>
+                  <div onClick={g.onToggle} style={css(g.headerStyle)}>
+                    <span style={css('width:3px;align-self:stretch;margin:5px 0;border-radius:2px;background:'+g.marker+';')}></span>
+                    <span style={css('font-size:9px;color:var(--text3);width:9px;')}>{g.caret}</span>
+                    {g.editing
+                      ? <input autoFocus onFocus={selectAll} defaultValue={g.name} onKeyDown={g.onNameKey} onBlur={g.onNameBlur} onClick={e=>e.stopPropagation()} style={css(g.nameStyle+'border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);color:var(--text);padding:2px 7px;')} />
+                      : <span onClick={g.onNameClick||undefined} title={g.editable?'Cliquer pour renommer':undefined} style={css(g.nameStyle+(g.editable?'cursor:text;':''))}>{g.name}</span>}
+                    <span style={css(g.countStyle)}>{g.count}</span>
+                  </div>
+                  {g.open &&
+                    <div>
+                      {g.tasks.map(t=> <React.Fragment key={t.id}>{this.renderRow(t)}</React.Fragment>)}
+                      <div onDragOver={g.onDragOver} onDrop={g.onDrop} style={css(g.addRowStyle)}>
+                        <span style={css('width:26px;flex:none;color:var(--cbox);font-size:15px;')}>＋</span>
+                        <input onKeyDown={g.onAddKey} onBlur={g.onAddBlur} placeholder={g.addHint} style={css('flex:1;border:none;background:transparent;font-size:13px;color:var(--text);')} />
+                      </div>
+                    </div>}
+                </React.Fragment>)}
+              <div style={css('height:40px;')}></div>
+            </div>
+          </div>
+
+          {/* ---------- RIGHT DETAIL PANEL — NOTES ---------- */}
+          {v.hasSel &&
+            <div data-panel="1" className="fxcol scrl" style={css('position:absolute;top:0;right:0;bottom:0;width:360px;z-index:20;background:var(--panel);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.28);display:flex;flex-direction:column;animation-delay:0s;')}>
+              <div style={css('padding:18px 20px 14px;border-bottom:1px solid var(--divider);')}>
+                <div style={css("display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;")}>
+                  <span>{v.sel.catLabel}</span>
+                  <span style={css('margin-left:auto;cursor:pointer;color:var(--muted);font-size:13px;')} onClick={v.onCloseDetail}>✕</span>
+                </div>
+                <div style={css('font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em;')}>{v.sel.title}</div>
+              </div>
+              <div style={css('flex:1;display:flex;flex-direction:column;min-height:0;padding:16px 20px 6px;')}>
+                <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:9px;")}>DÉTAIL · NOTES</div>
+                <textarea value={v.sel.notes} onChange={v.sel.onNotes} placeholder="Écris ici tout le détail de la tâche — autant de texte que nécessaire…" style={css('flex:1;min-height:0;width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--soft);')}></textarea>
+              </div>
+              <div style={css('padding:12px 20px 16px;border-top:1px solid var(--divider);')}>
+                <div onClick={v.sel.onDelete} style={css('display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:'+v.danger.fg+';cursor:pointer;border:1px solid '+v.danger.border+';border-radius:8px;padding:7px 13px;background:'+v.danger.bg+';')}>✕ Supprimer la tâche</div>
+              </div>
+            </div>}
+
+        </div>
+
+        {/* ===================== DELETE CONFIRM MODAL ===================== */}
+        {v.hasConfirm &&
+          <div onClick={v.onCancelDelete} style={css('position:fixed;inset:0;background:rgba(20,22,28,.4);display:flex;align-items:center;justify-content:center;z-index:60;')}>
+            <div onClick={v.stopModal} style={css('width:392px;background:var(--panel);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.34);padding:24px;')}>
+              <div style={css('display:flex;align-items:center;gap:11px;margin-bottom:12px;')}>
+                <span style={css('width:34px;height:34px;border-radius:9px;background:'+v.danger.iconBg+';color:'+v.danger.fg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;')}>⚠</span>
+                <span style={css('font-size:16px;font-weight:600;')}>Supprimer la tâche ?</span>
+              </div>
+              <div style={css('font-size:13.5px;line-height:1.55;color:var(--text2);margin-bottom:20px;')}>« <b style={css('color:var(--text);')}>{v.confirmTitle}</b> » sera définitivement supprimée. Cette action est irréversible.</div>
+              <div style={css('display:flex;justify-content:flex-end;gap:9px;')}>
+                <div onClick={v.onCancelDelete} style={css('font-size:13px;padding:8px 16px;border-radius:9px;border:1px solid var(--line);cursor:pointer;color:var(--text2);')}>Annuler</div>
+                <div onClick={v.onConfirmDelete} style={css('font-size:13px;font-weight:500;padding:8px 16px;border-radius:9px;background:'+v.danger.solid+';color:#fff;cursor:pointer;')}>Supprimer</div>
+              </div>
+            </div>
+          </div>}
+
+      </div>
+    );
+  }
+}
+window.Flux = Flux;
 </script>
 </body>
 </html>
