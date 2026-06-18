@@ -11,20 +11,20 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
 
 ## Carte de l'app — menu & fonctionnalités
 
-**Sidebar = 5 onglets** (tableau `tabs` ~ligne 901, dispatch `S.tab` → renderer ~ligne 910). `sT(k)` change d'onglet.
+**Sidebar** (tableau `tabs`, dispatch `S.tab` → renderer). `sT(k)` change d'onglet.
 
-1. **Tâches** (`tab:"global"` → `rGT` L948) — cœur de l'app. 4 sous-onglets via `S.gSection` :
+1. **Tâches** (`tab:"global"` → `rGT`) — cœur de l'app. 4 sous-onglets via `S.gSection` :
    - **Planning** (`plan`, défaut) — actions groupées par tranche de date planifiée (`scheduledDate` → `schedBucket`) : En retard / Aujourd'hui / Demain / Cette semaine / Plus tard / En attente / Non planifié. Drag&drop = replanifier (drop sur tranche) ou réordonner.
    - **Projets** (`task`) — actions groupées par projet, puis par tâche. **Rendu inline dans `rGT`** (branche `S.gSection==='task'`), PAS via une fonction projet dédiée : `rP`/`rPT` (ancien onglet « Projets ») ont été **supprimés** (code mort, jamais dispatché). Conséquence : `delP()` (suppression projet → corbeille) existe encore mais **n'a plus de bouton** dans cette vue.
-   - **Terminé** (`done` → `rDN` L1044) — actions terminées (avec heures passées).
-   - **Temps** (`time` → `rTM` L1092) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
+   - **Terminé** (`done` → `rDN`) — actions terminées (avec heures passées).
+   - **Temps** (`time` → `rTM`) — feuille de temps hebdo : heures par projet × jour, navigation semaine via `S.wo`. Inclut `S.archive`.
    - Barre commune : **carte de création dépliable** style Google Tasks (`.qa-bar`/`.qa-card` ; `qaOpen`/`qaAdd`/`qaCancel`/`qaKey`, état transient `addCard`). Champs : titre, détails (→ `a.text`, stocké en HTML), projet/tâche via combobox `ac*` **filtré aux projets en cours** (`pEnCours`). Même carte ouvrable depuis un projet (lien `.pa-add` en bas du projet) ou une tâche (`qaOpen(pid,tid)`, pré-rempli). Pas de date à la création (planif via drag&drop Planning). Filtre statut `S.gFilter` (Toutes / En cours `ec` / Attente `wt` / Priorité `prio`), recherche `S.gQ`.
-2. **CRM** (`tab:"crm"` → `rCRM` L1176) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`).
-3. **Prix** (`tab:"price"` → `rPL` L2148) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
-4. **Notes** (`tab:"feedback"` → `rFB` L2540) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
-5. **Corbeille** (`tab:"trash"` → `rTR` L1126) — éléments supprimés (`S.trash[]`), restaurer / vider.
+2. **CRM** (`tab:"crm"` → `rCRM`) — 2 vues `S.crmView` : **Fournisseurs** / **Produits**. Fournisseur = `{name, products[], contacts[]}` ; `S.crm.preferred`. Sync Google Contacts (People API, scope `contacts.readonly`, bouton « Resync », matching via `crmMatchOrg`/`contactAlias`).
+3. **Prix** (`tab:"price"` → `rPL`) — Bibliothèque de prix (vue large `main-wide`). Devis `S.priceLib.quotes[]` à N lignes d'équipement (`lines[]`), schémas de champs dynamiques par sous-catégorie `S.priceLib.schemas{}` (form-builder), table filtrable/triable, édition inline, fusion de devis (`plMerge*`), import depuis bloc structuré collé (JSON produit par Claude). Voir « Pièges spécifiques ».
+4. **Notes** (`tab:"feedback"` → `rFB`) — Notes & remarques à transmettre à Claude (`S.feedback.items[]`), validables/supprimables, bouton « Copier les actions en cours » (`fbCopy`).
+5. **Corbeille** (`tab:"trash"` → `rTR`) — éléments supprimés (`S.trash[]`), restaurer / vider.
 
-**Modèle de données** (état global `S`, init ~ligne 747 ; persisté : `projects, trash, archive, globalOrder, crm, feedback, priceLib`) :
+**Modèle de données** (état global `S` ; persisté : `projects, trash, archive, globalOrder, crm, feedback, priceLib`) :
 - **Action** : `{id, title, text, urgency, status:"todo"|"done", deadline, scheduledDate, waitReason, timeH, doneDate, taskId, paused, priority}`.
 - **Projet** : `{id, number, name, deadline, actions[], tasks:[{id,title}]}`. Inbox réservée `__inbox` (« À trier »), créée à la volée, auto-purgée quand vide.
 - `globalOrder[]` = ordre manuel transverse des actions ; `openProjects`/`openTasks`/`ex` = états d'expansion UI.
@@ -32,12 +32,10 @@ App web personnelle (todo + deadlines + CRM fournisseurs/produits + Notes). **Mo
 ## Commandes utiles
 
 ```bash
-python3 -m http.server 8000               # puis http://localhost:8000
+py -m http.server 8000                    # puis http://localhost:8000
 grep -nE "^function r[A-Z]" index.html    # liste les renderers (rXX)
 grep -n "^// ▼ " index.html               # liste les ancres (à poser au fil des ajouts)
 ```
-
-Pour pousser sans clé de signature locale, passer par le MCP GitHub (`push_files`) — fait côté serveur, signature OK.
 
 **Workflow git** : travail Claude sur `claude/<slug>` ; **merge squash dans `main` uniquement sur demande explicite** ("pousse"). Messages courts à l'impératif, en anglais, préfixe type `feat:` / `fix:` / `docs:`.
 
@@ -97,43 +95,68 @@ Pour pousser sans clé de signature locale, passer par le MCP GitHub (`push_file
 - **Convention de noms courts** : ne pas "renommer pour la lisibilité" `S`, `rGT`, etc.
 - **Migration Firebase v8 → v9 modulaire**.
 
-## Méthode de travail
+# CLAUDE.md
 
-- **Découpage en phases** pour toute tâche non triviale : audit / proposition / exécution. Stop explicite à la fin de chaque phase, attente "OK".
-- **Audit + proposition obligatoires** pour : navigation/menu, schéma `S`, suppression > 50 lignes, `sed` ou Edit multi-zones.
-- **Refonte UX multi-zones en N étapes** : proposer un plan en 3-4 étapes avec validation entre chaque (« étape 1 schéma + helpers / étape 2 zones simples / étape 3 cas complexes / étape 4 cleanup »). Évite les commits monstres.
-- **Challenger** bienvenu : propose alternatives/questions, sépare clairement de ce que je demande, indique : maintenant / plus tard / juste à noter.
-- **Demander plutôt que deviner** sur les points métier (intentions produit, modèle de données, sémantique d'un statut).
-- **Grep avant Edit** : vérifier l'unicité de `old_string` (`grep -c`) avant un Edit. Beaucoup de patterns courts collisionnent dans un mono-fichier. Si non unique, élargir contexte ou cibler via ancre voisine.
-- **Sanity check manuel** : recharger localement (`python3 -m http.server`) et vérifier au moins le rendu de l'onglet touché avant de déclarer la tâche finie. Pas de tests automatisés ici.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Efficacité
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-- **Grep/glob avant `read`**. Fichier entier seulement si nécessaire — sur `index.html` (~930 lignes), 50 lignes ciblées via ancre suffisent presque toujours.
-- **Reads serrés via ancres** : `grep -n "^// ▼ <nom>"` puis `Read offset=<L> limit=80`. Pas 200 lignes par sécurité.
-- **Résumer plutôt que citer**. Pas de réaffichage de gros blocs sans nécessité.
-- **Grouper les modifs liées dans un seul tour** (un seul `Edit` ou un seul commit cohérent).
+## 1. Think Before Coding
 
-## Code mort / obsolète — pas de big-bang
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-L'utilisateur ne lit pas le code, donc ne peut pas valider ligne par ligne. Sans tests + avec `window.X` exposées via `onclick="..."` strings, le risque de régression silencieuse en supprimant du code "mort" est asymétrique vs le gain de fluidité. Donc :
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-- **Nettoyage à la marge** : à chaque fois que je touche une zone, je supprime autour le mort évident (helper sans caller, branche commentée, `setTimeout` mort) — tant que c'est local et certain.
-- **Audit déclenché par symptôme** : si une zone précise me freine en grep/lecture, je le signale et on cible.
-- **Pas de gros nettoyage spéculatif** sans douleur exprimée.
+## 2. Simplicity First
 
-## Auto-maintenance du CLAUDE.md
+**Minimum code that solves the problem. Nothing speculative.**
 
-- **Auto-alimentation** : en fin de tâche, si une convention non documentée, un piège, ou une commande non triviale est apparu → l'ajouter ici en 1–2 lignes max, dans la bonne section. Pas attendre la fin de session.
-- **Critère d'ajout strict** : une info entre dans CLAUDE.md uniquement si **(a)** elle n'est pas déductible du code en < 30 s, **ET (b)** elle resservira dans une future session. Sinon, je n'écris rien.
-- **Diagnostic périodique** : tous les ~10 commits, relancer un audit obsolescence/doublons/verbeux/trivial et proposer un nettoyage avant exécution.
-- **Format** : phrases courtes, listes à puces, code en `backticks`. Pas de « il est important de noter que », « par ailleurs », « en effet ».
-- **Délégation** : si l'info est dans le code et triviale à grep → ne pas dupliquer, référencer l'emplacement.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-## Fin de session
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-Mot-clé : **« Kenavo ! »**. Quand l'utilisateur l'écrit, répondre **avant** toute autre chose par :
+## 3. Surgical Changes
 
-> Au vu de ce qu'on vient de faire, qu'est-ce qui mériterait d'être ajouté au CLAUDE.md pour qu'une prochaine session démarre mieux ? Propose des ajouts précis avec leur emplacement dans le fichier.
+**Touch only what you must. Clean up only your own mess.**
 
-Précis = nouveau bullet, sous-section ou modif d'une règle, avec emplacement exact (section + position). Une fois validé/refusé, l'user fait `/clear`.
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
