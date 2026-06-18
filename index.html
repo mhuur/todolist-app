@@ -302,6 +302,46 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .wn button{border:1px solid #2A3A52;background:#162032;color:#64748B;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:600}
 .wn button:hover{border-color:#38BDF8;color:#38BDF8}
 .wn span{font-size:11px;color:#94A3B8;font-weight:600}
+/* Temps (timesheet) */
+.ts-wrap{max-width:1120px}
+.ts-top{display:flex;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.ts-prefill{font-size:10px;color:#FBBF24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:2px 8px}
+.ts-scroll{overflow-x:auto}
+.ts-tab{border-collapse:collapse;font-size:11px;min-width:720px}
+.ts-tab th{text-align:center;padding:5px 6px;color:#64748B;font-weight:700;border-bottom:1px solid #2A3A52;font-size:9px;text-transform:uppercase}
+.ts-tab th.ts-name{text-align:left}
+.ts-tab td{padding:3px 6px;border-bottom:1px solid #1E293B}
+.ts-name{text-align:left;min-width:210px}
+.ts-day{min-width:48px}
+.ts-date{font-size:8px;color:#475569;font-weight:600}
+.ts-num{text-align:right;color:#94A3B8;font-variant-numeric:tabular-nums;min-width:48px}
+.ts-prow td{background:rgba(56,189,248,.05);border-bottom:1px solid #233247}
+.ts-prow .ts-name{color:#E2E8F0;font-weight:700}
+.ts-car{cursor:pointer;color:#64748B;font-size:9px;margin-right:5px;display:inline-block;width:9px}
+.ts-pn{cursor:text}.ts-pn:hover{color:#7DD3FC}
+.ts-rn{border:1px solid #38BDF8;border-radius:4px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;font-weight:700;padding:2px 6px;outline:none;min-width:220px}
+.ts-prow .ts-num{color:#7DD3FC;font-weight:600}
+.ts-pt{font-weight:700}
+.ts-tname{padding-left:24px;color:#94A3B8}
+.ts-inp{width:44px;border:1px solid #1E3050;border-radius:4px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;text-align:right;padding:2px 5px;outline:none}
+.ts-inp:focus{border-color:#38BDF8}
+.ts-tt{color:#94A3B8;font-weight:600}
+.ts-act{width:30px;text-align:center}
+.ts-x{border:none;background:transparent;color:#475569;cursor:pointer;font-size:11px;padding:2px 4px;opacity:0;transition:opacity .12s}
+.ts-prow:hover .ts-x,.ts-trow:hover .ts-x{opacity:1}
+.ts-x:hover{color:#F87171}
+.ts-add{color:#38BDF8;opacity:.65;cursor:pointer;font-size:11px;font-weight:600}
+.ts-add:hover{opacity:1}
+.ts-addtask .ts-add{margin-left:24px;font-size:10px}
+.ts-addbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 0}
+.ts-addinp{border:1px solid #38BDF8;border-radius:5px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;padding:4px 8px;outline:none;min-width:210px}
+.ts-pick{display:flex;gap:5px;flex-wrap:wrap}
+.ts-chip{font-size:10px;color:#94A3B8;background:#152236;border:1px solid #2A3A52;border-radius:12px;padding:2px 9px;cursor:pointer}
+.ts-chip:hover{border-color:#38BDF8;color:#7DD3FC}
+.ts-cancel{font-size:10px;color:#64748B;cursor:pointer}.ts-cancel:hover{color:#94A3B8}
+.ts-grow td{border-top:2px solid #2A3A52;color:#38BDF8;font-weight:700;padding-top:6px}
+.ts-grow .ts-name{color:#38BDF8}
+.ts-gt{font-weight:700}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0B1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
 
 /* Login */
@@ -681,7 +721,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+                                                            <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Onglet Flux (proto React embarqué) : tout est scopé sous #flux-root pour ne rien casser de l'app ── */
 .main-flux{max-width:none;padding:0;height:100vh;overflow:hidden}
@@ -770,9 +810,9 @@ async function loadFromCloud(){
       if(d.crm){S.crm=d.crm}else{initCRM()}
       S.feedback=d.feedback&&Array.isArray(d.feedback.items)?d.feedback:{items:[]};
       S.priceLib=d.priceLib&&typeof d.priceLib==='object'?{schemas:d.priceLib.schemas||{},quotes:Array.isArray(d.priceLib.quotes)?d.priceLib.quotes:[]}:{schemas:{},quotes:[]};
-      S.flux=d.flux||null;
+      S.flux=d.flux||null;S.timesheet=tsNorm(d.timesheet);
       /* Also cache locally */
-      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux}));
+      localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet}));
     }else{
       /* First login: check if localStorage has data to migrate */
       const local=localStorage.getItem(SK);
@@ -781,7 +821,7 @@ async function loadFromCloud(){
         S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];
         if(p.crm){S.crm=p.crm}else{initCRM()}
         S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;
+        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);
         await saveToCloudNow();
       }
     }
@@ -803,14 +843,14 @@ async function loadFromCloud(){
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
     S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;
+    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
 async function saveToCloudNow(){
   if(!currentUser)return;
-  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux};
+  const data={projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet};
   const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
   try{
     await db.collection('users').doc(currentUser.uid).set(stripped);
@@ -829,7 +869,7 @@ function saveToCloud(){
 }
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"global",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"flux",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,timesheet:{projects:[],weeks:{}},tsCol:{},tsAdd:null,tsEdit:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -838,7 +878,7 @@ function load(){/* Data loaded from cloud in onAuthStateChanged */}function migr
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#38BDF8","#F59E0B","#22C55E","#E879F9","#F87171","#2DD4BF","#A78BFA","#FBBF24","#F472B6","#818CF8"];
 function pCol(pid){if(pid==="__inbox")return"#F59E0B";const p=fp(pid);return(p&&p.color)||PCOLS[0]}
-function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux}))}catch{};saveToCloud()}
+function save(){try{localStorage.setItem(SK,JSON.stringify({projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet}))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
@@ -980,7 +1020,7 @@ function rA(a,pid,o){
 const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,price:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8.5V3a1 1 0 011-1h5.5L14 7.5l-5.5 5.5L2 8.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/></svg>`,flux:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9 1.5L3 9h4l-1 5.5L13 7H9l1-5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`};
 function render(){
   /* Sidebar */
-  const tabs=[{k:"global",l:"Tâches",i:SB_ICONS.global},{k:"flux",l:"Flux",i:SB_ICONS.flux},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"flux",l:"Flux",i:SB_ICONS.flux},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar">`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -988,8 +1028,8 @@ function render(){
   sb+=`</div>`;
   /* Main */
   let h="";
-  if(S.tab==="projects")S.tab="global";
-  if(S.tab==="global")h+=rGT();else if(S.tab==="done")h+=rDN();else if(S.tab==="time")h+=rTM();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux")h+=`<div id="flux-root"></div>`;else h+=rTR();
+  if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
+  if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux")h+=`<div id="flux-root"></div>`;else h+=rTR();
   const mainCls=S.tab==="price"?"main main-wide":(S.tab==="flux"?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
@@ -1234,6 +1274,77 @@ function rTM(){
   h+=`<tr class="ttr"><td>Total</td>`;
   gtD.forEach(d=>{h+=`<td style="text-align:right">${d?d.toFixed(2):"-"}</td>`});
   h+=`<td style="text-align:right">${gt.toFixed(2)}h</td></tr></table></div>`;return h}
+
+/* ── Temps (timesheet hebdo indépendant : projets → tâches → heures/jour) ──
+   Modèle : S.timesheet={projects:[{id,name,tasks:[{id,name}]}], weeks:{[lundiISO]:[{projId,rows:[{taskId,h:[7]}]}]}}.
+   Une semaine sans entrée reprend par défaut (prefill) les projets/tâches de la dernière semaine remplie, heures à 0 ; matérialisée à la 1re édition. */
+function tsNorm(t){return(t&&typeof t==='object')?{projects:Array.isArray(t.projects)?t.projects:[],weeks:(t.weeks&&typeof t.weeks==='object')?t.weeks:{}}:{projects:[],weeks:{}}}
+function tsData(){if(!S.timesheet||typeof S.timesheet!=='object')S.timesheet={projects:[],weeks:{}};if(!Array.isArray(S.timesheet.projects))S.timesheet.projects=[];if(!S.timesheet.weeks||typeof S.timesheet.weeks!=='object')S.timesheet.weeks={};return S.timesheet}
+function tsMon(){const n=new Date();const m=new Date(n);m.setDate(m.getDate()-m.getDay()+1+(S.wo||0)*7);m.setHours(0,0,0,0);return m}
+function tsWK(){return lDS(tsMon())}
+function tsProj(id){return tsData().projects.find(p=>p.id===id)}
+function tsPN(id){const p=tsProj(id);return p?p.name:'?'}
+function tsTN(pid,tid){const p=tsProj(pid);const t=p&&p.tasks.find(x=>x.id===tid);return t?t.name:'?'}
+function tsGetWeek(wk){const w=tsData().weeks;if(w[wk])return w[wk];const ks=Object.keys(w).filter(k=>k<wk).sort();if(!ks.length)return[];return w[ks[ks.length-1]].map(r=>({projId:r.projId,rows:r.rows.map(tr=>({taskId:tr.taskId,h:[0,0,0,0,0,0,0]}))}))}
+function tsEnsureWeek(wk){const w=tsData().weeks;if(!w[wk])w[wk]=tsGetWeek(wk).map(r=>({projId:r.projId,rows:r.rows.map(tr=>({taskId:tr.taskId,h:tr.h.slice()}))}));return w[wk]}
+function tsFmt(v){return v?(Math.round(v*100)/100).toString().replace('.',','):'0'}
+function tsAddProjectByName(name){name=(name||'').trim();if(!name)return;const d=tsData();let p=d.projects.find(x=>x.name.toLowerCase()===name.toLowerCase());if(!p){p={id:gid(),name,tasks:[]};d.projects.push(p)}tsAddProjectToWeek(p.id)}
+function tsAddProjectToWeek(pid){const rows=tsEnsureWeek(tsWK());if(!rows.some(r=>r.projId===pid))rows.push({projId:pid,rows:[]});S.tsAdd=null;save();render()}
+function tsRemoveProjectFromWeek(pid){const rows=tsEnsureWeek(tsWK());const i=rows.findIndex(r=>r.projId===pid);if(i>=0)rows.splice(i,1);save();render()}
+function tsAddTaskByName(pid,name){name=(name||'').trim();if(!name)return;const p=tsProj(pid);if(!p)return;let t=p.tasks.find(x=>x.name.toLowerCase()===name.toLowerCase());if(!t){t={id:gid(),name};p.tasks.push(t)}tsAddTaskToWeek(pid,t.id)}
+function tsAddTaskToWeek(pid,tid){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(pr&&!pr.rows.some(tr=>tr.taskId===tid))pr.rows.push({taskId:tid,h:[0,0,0,0,0,0,0]});S.tsAdd=null;save();render()}
+function tsRemoveTaskFromWeek(pid,tid){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(pr){const i=pr.rows.findIndex(tr=>tr.taskId===tid);if(i>=0)pr.rows.splice(i,1)}save();render()}
+function tsInput(pid,tid,di,inp){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(!pr)return;const tr=pr.rows.find(x=>x.taskId===tid);if(!tr)return;let v=parseFloat(String(inp.value).replace(',','.'));if(isNaN(v)||v<0)v=0;tr.h[di]=v;tsRecalcDom();save()}
+function tsRecalcDom(){const rows=tsGetWeek(tsWK());const gtd=[0,0,0,0,0,0,0];rows.forEach(pr=>{const ps=[0,0,0,0,0,0,0];pr.rows.forEach(tr=>{let tt=0;tr.h.forEach((v,i)=>{ps[i]+=v;tt+=v});const te=document.getElementById('tstt-'+pr.projId+'-'+tr.taskId);if(te)te.textContent=tt?tsFmt(tt):'·'});let pt=0;ps.forEach((v,i)=>{pt+=v;gtd[i]+=v;const pe=document.getElementById('tsps-'+pr.projId+'-'+i);if(pe)pe.textContent=v?tsFmt(v):'·'});const pte=document.getElementById('tspt-'+pr.projId);if(pte)pte.textContent=pt?tsFmt(pt):'·'});let gt=0;gtd.forEach((v,i)=>{gt+=v;const ge=document.getElementById('tsgt-'+i);if(ge)ge.textContent=v?tsFmt(v):'·'});const gte=document.getElementById('tsg');if(gte)gte.textContent=gt?tsFmt(gt):'·'}
+function tsToggleCol(pid){S.tsCol[pid]=!S.tsCol[pid];render()}
+function tsStartRename(pid){S.tsEdit=pid;render();requestAnimationFrame(()=>{const el=document.getElementById('ts-rninp');if(el){el.focus();el.select()}})}
+function tsRenameCommit(pid,val){if(S.tsEdit!==pid)return;val=(val||'').trim();const p=tsProj(pid);if(p&&val)p.name=val;S.tsEdit=null;save();render()}
+function tsOpenAdd(which){S.tsAdd=(S.tsAdd===which)?null:which;render();requestAnimationFrame(()=>{const el=document.getElementById('ts-addinp');if(el)el.focus()})}
+function tsAddProjectRow(){const wk=tsWK();if(S.tsAdd!=='proj')return`<tr class="ts-addrow"><td colspan="10"><span class="ts-add" onclick="tsOpenAdd('proj')">＋ Ajouter un projet</span></td></tr>`;const inW=new Set(tsGetWeek(wk).map(r=>r.projId));const av=tsData().projects.filter(p=>!inW.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<tr class="ts-addrow ts-addopen"><td colspan="10"><div class="ts-addbox"><input id="ts-addinp" class="ts-addinp" placeholder="Nom du projet… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddProjectByName(this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;if(av.length){h+=`<div class="ts-pick">`;av.forEach(p=>{h+=`<span class="ts-chip" onclick="tsAddProjectToWeek('${p.id}')">${esc(p.name)}</span>`});h+=`</div>`}h+=`<span class="ts-cancel" onclick="S.tsAdd=null;render()">Annuler</span></div></td></tr>`;return h}
+function tsAddTaskRow(pid){if(S.tsAdd!=='task:'+pid)return`<tr class="ts-addrow ts-addtask"><td colspan="10"><span class="ts-add" onclick="tsOpenAdd('task:${pid}')">＋ Ajouter une tâche</span></td></tr>`;const pr=tsGetWeek(tsWK()).find(r=>r.projId===pid);const inW=new Set(pr?pr.rows.map(tr=>tr.taskId):[]);const p=tsProj(pid);const av=(p?p.tasks:[]).filter(t=>!inW.has(t.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<tr class="ts-addrow ts-addtask ts-addopen"><td colspan="10"><div class="ts-addbox"><input id="ts-addinp" class="ts-addinp" placeholder="Nom de la tâche… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddTaskByName('${pid}',this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;if(av.length){h+=`<div class="ts-pick">`;av.forEach(t=>{h+=`<span class="ts-chip" onclick="tsAddTaskToWeek('${pid}','${t.id}')">${esc(t.name)}</span>`});h+=`</div>`}h+=`<span class="ts-cancel" onclick="S.tsAdd=null;render()">Annuler</span></div></td></tr>`;return h}
+function rTS(){
+  tsData();
+  const mon=tsMon(),wk=tsWK();
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  const label=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" – "+sun.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
+  const days=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);days.push(d)}
+  const dl=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  const rows=tsGetWeek(wk);
+  const prefill=!tsData().weeks[wk]&&rows.length>0;
+  let h=`<div class="ts-wrap"><div class="ts-top"><div class="wn"><button onclick="S.wo--;render()">◀</button><span>${label}</span><button onclick="S.wo++;render()">▶</button><button onclick="S.wo=0;render()" style="margin-left:4px">Auj.</button></div>`;
+  if(prefill)h+=`<span class="ts-prefill">Reprise de la semaine précédente — édite pour valider</span>`;
+  h+=`</div>`;
+  h+=`<div class="ts-scroll"><table class="ts-tab"><thead><tr><th class="ts-name">Projet / Tâche</th>`;
+  days.forEach((d,i)=>{h+=`<th class="ts-day"><div>${dl[i]}</div><div class="ts-date">${d.getDate()}/${d.getMonth()+1}</div></th>`});
+  h+=`<th class="ts-tot">Total</th><th class="ts-act"></th></tr></thead><tbody>`;
+  const gtd=[0,0,0,0,0,0,0];let gt=0;
+  rows.forEach(pr=>{
+    const ps=[0,0,0,0,0,0,0];pr.rows.forEach(tr=>{tr.h.forEach((v,i)=>{ps[i]+=v})});
+    const pt=ps.reduce((a,b)=>a+b,0);ps.forEach((v,i)=>{gtd[i]+=v});gt+=pt;
+    const col=!!S.tsCol[pr.projId];
+    const pnCell=S.tsEdit===pr.projId
+      ? `<input id="ts-rninp" class="ts-rn" value="${esc(tsPN(pr.projId))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){tsRenameCommit('${pr.projId}',this.value)}else if(event.key==='Escape'){S.tsEdit=null;render()}" onblur="tsRenameCommit('${pr.projId}',this.value)">`
+      : `<span class="ts-pn" title="Cliquer pour renommer" onclick="tsStartRename('${pr.projId}')">${esc(tsPN(pr.projId))}</span>`;
+    h+=`<tr class="ts-prow"><td class="ts-name"><span class="ts-car" onclick="tsToggleCol('${pr.projId}')">${col?'▸':'▾'}</span>${pnCell}</td>`;
+    ps.forEach((v,i)=>{h+=`<td class="ts-num" id="tsps-${pr.projId}-${i}">${v?tsFmt(v):'·'}</td>`});
+    h+=`<td class="ts-num ts-pt" id="tspt-${pr.projId}">${pt?tsFmt(pt):'·'}</td><td class="ts-act"><button class="ts-x" title="Retirer le projet de la semaine" onclick="tsRemoveProjectFromWeek('${pr.projId}')">✕</button></td></tr>`;
+    if(!col){
+      pr.rows.forEach(tr=>{
+        const tt=tr.h.reduce((a,b)=>a+b,0);
+        h+=`<tr class="ts-trow"><td class="ts-name ts-tname">${esc(tsTN(pr.projId,tr.taskId))}</td>`;
+        tr.h.forEach((v,i)=>{h+=`<td class="ts-num"><input type="text" inputmode="decimal" class="ts-inp" value="${v||''}" oninput="tsInput('${pr.projId}','${tr.taskId}',${i},this)"></td>`});
+        h+=`<td class="ts-num ts-tt" id="tstt-${pr.projId}-${tr.taskId}">${tt?tsFmt(tt):'·'}</td><td class="ts-act"><button class="ts-x" title="Retirer la tâche" onclick="tsRemoveTaskFromWeek('${pr.projId}','${tr.taskId}')">✕</button></td></tr>`;
+      });
+      h+=tsAddTaskRow(pr.projId);
+    }
+  });
+  h+=tsAddProjectRow();
+  h+=`<tr class="ts-grow"><td class="ts-name">Total</td>`;
+  gtd.forEach((v,i)=>{h+=`<td class="ts-num" id="tsgt-${i}">${v?tsFmt(v):'·'}</td>`});
+  h+=`<td class="ts-num ts-gt" id="tsg">${gt?tsFmt(gt):'·'}</td><td class="ts-act"></td></tr>`;
+  h+=`</tbody></table></div></div>`;
+  return h;
+}
 
 /* ── Trash ── */
 function rTR(){if(!S.trash.length)return`<div class="es">Corbeille vide.</div>`;let h=`<div class="bar"><div></div><button class="bs" style="border-color:#F87171;color:#F87171" onclick="if(confirm('Vider ?'))emptyT()">Vider</button></div>`;S.trash.slice().reverse().forEach((it,ri)=>{const i=S.trash.length-1-ri;const m=Math.round((Date.now()-it.date)/60000);const t=m<1?"maintenant":m<60?m+"min":Math.round(m/60)+"h";const label=it.type==="project"?it.data.name:(it.data.title||"Sans titre");const sub=it.type==="project"?"Projet":"Action · "+esc(it.pn||"");h+=`<div class="tri"><div class="tii"><b>${esc(label)}</b> <span style="font-size:9px;color:#4B6480">${sub}</span> · ${t}</div><button class="brs" onclick="restT(${i})">↩</button><button class="bpu" onclick="purgeT(${i})">✕</button></div>`});return h}
@@ -2827,14 +2938,18 @@ class Flux extends React.Component {
       if(this.state.projMenuId && !inProjMenu){ this.setState({ projMenuId:null, projDelId:null }); }
       const inLabelEdit = tg && tg.closest && tg.closest('[data-labeledit="1"]');
       if(this.state.labelEdit && this.state.labelEdit.type==='cat' && this.state.labelEdit.rail && !inLabelEdit){ const inp=document.querySelector('[data-labeledit="1"]'); this.commitLabelEdit('cat', this.state.labelEdit.id, inp?inp.value:''); }
-      if(this.state.editing.id && !inTask){ this.setState({ editing:{id:null,field:null} }); }
+      const downIn = (sel)=> this._downEl && this._downEl.closest && this._downEl.closest(sel);
+      if(this.state.editing.id && !inTask && !downIn('[data-task]')){ this.setState({ editing:{id:null,field:null} }); }
       if(!this.state.selectedId) return;
-      if(inTask || inPanel) return;
+      /* Ne pas fermer le panneau si un drag de sélection a commencé dedans (ou sur une ligne) puis a été relâché dehors. */
+      if(inTask || inPanel || downIn('[data-panel]') || downIn('[data-task]')) return;
       this.setState({ selectedId:null });
     };
+    this._docDown = (e)=>{ this._downEl = e.target; };
+    document.addEventListener('mousedown', this._docDown, true);
     document.addEventListener('click', this._docClick, true);
   }
-  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); }
 
   componentDidUpdate() {
     try {
@@ -2929,7 +3044,9 @@ class Flux extends React.Component {
   startPersonEdit(id){ this.setState({ editing:{id,field:'person'}, personQuery:'' }); }
   stopPersonEdit(){ this.setState({ editing:{id:null,field:null}, personQuery:'' }); }
   setPersonQuery(v){ this.setState({ personQuery:v }); }
-  addPerson(name){ const id=this.uid(); const palette=['#3b5bdb','#d6643f','#2c9c6a','#8a5cd6','#c79a1e','#0f9bb0','#c0497e','#5566d6']; const color=palette[this.state.people.length % palette.length]; this.setState(st=>({ people:[...st.people,{id,name:(name||'').trim(),color}] })); return id; }
+  addPerson(name,color){ const id=this.uid(); const palette=['#3b5bdb','#d6643f','#2c9c6a','#8a5cd6','#c79a1e','#0f9bb0','#c0497e','#5566d6']; const c=color||palette[this.state.people.length % palette.length]; this.setState(st=>({ people:[...st.people,{id,name:(name||'').trim(),color:c}] })); return id; }
+  // Toutes les personnes connues (union de tous les projets), dédupliquées par nom (le projet courant prime pour la couleur).
+  knownPeople(){ const st=this.state; const m=new Map(); (st.projects||[]).forEach(p=>{ (p.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k&&!m.has(k)) m.set(k,{name:pp.name,color:pp.color}); }); }); (st.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k) m.set(k,{name:pp.name,color:pp.color}); }); return m; }
   updateNotes(id,val){ this.patch(id,{notes:val}); }
   addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
   toggleCatMenu(id){ this.setState(st=>({ catMenuId: st.catMenuId===id?null:id })); }
@@ -3056,9 +3173,12 @@ class Flux extends React.Component {
       if(isEd('person')){
         const mrow=(on)=>'display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;'+(on?`background:${aTint(selA)};`:'');
         const q=(st.personQuery||'').trim(); const ql=q.toLowerCase();
+        const curNames=new Set(st.people.map(pp=>(pp.name||'').trim().toLowerCase()));
+        const known=this.knownPeople();
         if(!ql || 'non assigné'.indexOf(ql)>=0) personMenu.push({ label:'Non assigné', initials:'', avatarStyle:'width:18px;height:18px;border-radius:50%;border:1.5px dashed var(--cbox);flex:none;', labelStyle:'font-size:12.5px;color:var(--text3);', checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(t.person===''?'':'visibility:hidden;'), style:mrow(t.person===''), onPick:(e)=>{ stop(e); this.updatePerson(t.id,''); this.stopPersonEdit(); } });
         st.people.filter(pp=>pp.name.toLowerCase().indexOf(ql)>=0).forEach(pp=>{ const on=t.person===pp.id; personMenu.push({ label:pp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${pp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,pp.id); this.stopPersonEdit(); } }); });
-        const exact=st.people.find(pp=>pp.name.toLowerCase()===ql);
+        Array.from(known.values()).filter(kp=>{ const k=(kp.name||'').trim().toLowerCase(); return !curNames.has(k) && kp.name.toLowerCase().indexOf(ql)>=0; }).forEach(kp=>{ personMenu.push({ label:kp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${kp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);', checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(kp.name,kp.color); this.updatePerson(t.id,id); this.stopPersonEdit(); } }); });
+        const exact=ql && known.has(ql);
         if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
       }
       return {
