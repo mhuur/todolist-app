@@ -748,6 +748,15 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .cell:hover{box-shadow:inset 0 0 0 1px var(--line);}
 #flux-root .ied{border:1px solid #aebbf0;border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 7px;}
 #flux-root .stopt:hover{background:var(--soft);}
+#flux-root .ckrow{border-radius:7px;transition:background .12s;}
+#flux-root .ckrow:hover{background:var(--soft);}
+#flux-root .ckdel{opacity:0;transition:opacity .12s,color .12s;}
+#flux-root .ckrow:hover .ckdel{opacity:.55;}
+#flux-root .ckdel:hover{opacity:1 !important;color:#d04a45 !important;}
+#flux-root .ckbox:hover{border-color:#22C55E !important;box-shadow:0 0 8px rgba(34,197,94,.35);}
+#flux-root .fxstar{cursor:pointer;color:var(--cbox);font-size:15px;line-height:1;transition:color .12s,text-shadow .12s;}
+#flux-root .fxstar:hover{color:#FBBF24;}
+#flux-root .fxstar.on{color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.6);}
 #flux-root input::placeholder,#flux-root textarea::placeholder{color:var(--muted);}
 </style>
 </head>
@@ -2754,7 +2763,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null };
+    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -2762,7 +2771,7 @@ class Flux extends React.Component {
       tasks: this.normTasks(p.tasks),
       collapsed: (p.collapsed&&typeof p.collapsed==='object')?p.collapsed:{},
       filters: normFilters(p.filters) });
-    const ui = { theme:(s&&s.theme)||base.theme, accent:(s&&s.accent)||base.accent, density:(s&&s.density)||base.density, groupBy:(s&&s.groupBy)||base.groupBy, view:(s&&s.view)||base.view };
+    const ui = { theme:(s&&s.theme)||base.theme, accent:(s&&s.accent)||base.accent, density:(s&&s.density)||base.density, groupBy:(s&&s.groupBy)||base.groupBy, view:(s&&s.view)||base.view, todayOrder:(s&&Array.isArray(s.todayOrder))?s.todayOrder:[] };
     let projects, currentProjectId;
     if (s && Array.isArray(s.projects) && s.projects.length) {
       projects = s.projects.map(normProj);
@@ -2813,7 +2822,7 @@ class Flux extends React.Component {
     try {
       const st = this.state;
       const projects = this._snapshotCurrent(st);   // réécrit l'état plat de travail dans le projet courant
-      const _payload = { theme:st.theme, accent:st.accent, density:st.density, groupBy:st.groupBy, view:st.view, projects, currentProjectId:st.currentProjectId };
+      const _payload = { theme:st.theme, accent:st.accent, density:st.density, groupBy:st.groupBy, view:st.view, projects, currentProjectId:st.currentProjectId, todayOrder:st.todayOrder };
       localStorage.setItem(LS_KEY, JSON.stringify(_payload));
       if (window.__fluxSave) window.__fluxSave(_payload);
     } catch(e) {}
@@ -2836,13 +2845,13 @@ class Flux extends React.Component {
   }
 
   uid() { return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-  normTasks(arr){ if(!Array.isArray(arr)) return []; const isISO=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v); return arr.map(t=>({ ...t, due:isISO(t.due)?t.due:'', person:typeof t.person==='string'?t.person:'', deps:Array.isArray(t.deps)?t.deps:[] })); }
+  normTasks(arr){ if(!Array.isArray(arr)) return []; const isISO=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v); return arr.map(t=>({ ...t, due:isISO(t.due)?t.due:'', person:typeof t.person==='string'?t.person:'', deps:Array.isArray(t.deps)?t.deps:[], checklist:Array.isArray(t.checklist)?t.checklist:[], today:!!t.today })); }
   initials(name){ return (name||'').split(/\s+/).filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
   avatarStyle(color, size){ const s=size||20; return `width:${s}px;height:${s}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(s*0.42)}px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`; }
 
   // ---- view / selection / settings ----
   setView(v){ this.setState({ view:v }); }
-  toggleSelect(id){ this.setState(st=>({ selectedId: st.selectedId===id ? null : id, editing:{id:null,field:null} })); }
+  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; const t = willSel ? st.tasks.find(x=>x.id===id) : null; return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false }; }); }
   // ---- editing ----
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
@@ -2850,15 +2859,15 @@ class Flux extends React.Component {
   toggleDone(id){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t) })); }
   setStatus(id,status){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,status}:t), editing:{id:null,field:null} })); }
   toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
-  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null }; }); }
+  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null, todayView:false }; }); }
   // Master « Toutes les tâches » : 1er clic = tout cocher/afficher ('all'), 2e clic = tout décocher/masquer ('none').
-  toggleBulk(){ this.setState(st=>({ bulk: st.bulk==='all' ? 'none' : 'all', filters:{status:{},cat:{},person:{}} })); }
+  toggleBulk(){ this.setState(st=>({ bulk: st.bulk==='all' ? 'none' : 'all', filters:{status:{},cat:{},person:{}}, todayView:false })); }
 
   // ---- projects ----
   // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
   _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
   // Réinitialise tout l'état de vue transient en entrant dans un projet.
-  _enterProject(extra){ return { selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, ...extra }; }
+  _enterProject(extra){ return { selectedId:null, noteOpen:false, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
   switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
   createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
   renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
@@ -2870,11 +2879,11 @@ class Flux extends React.Component {
     const projects=this._snapshotCurrent(st).filter(p=>p.id!==id); return { projects, projMenuId:null, projDelId:null }; }); }
 
   addTask(catId,title){
-    const t = { id:this.uid(), title, cat:catId||'', status:'todo', due:'', person:'', notes:'', deps:[] };
+    const t = { id:this.uid(), title, cat:catId||'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[] };
     this.setState(st=>({ tasks:[...st.tasks, t] }));
   }
   addTaskPreset(preset,title){
-    const t = { id:this.uid(), title, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], ...(preset||{}) };
+    const t = { id:this.uid(), title, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], ...(preset||{}) };
     this.setState(st=>({ tasks:[...st.tasks, t] }));
   }
   reorderAdopt(dragId, beforeId, axis, target){
@@ -2893,7 +2902,8 @@ class Flux extends React.Component {
   cancelDelete(){ this.setState({ confirmId:null }); }
   confirmDelete(){ const id=this.state.confirmId; if(!id){ this.setState({confirmId:null}); return; }
     this.setState(st=>({ tasks: st.tasks.filter(t=>t.id!==id).map(t=>({...t, deps:t.deps.filter(d=>d!==id)})),
-      selectedId: st.selectedId===id?null:st.selectedId, editing:{id:null,field:null}, confirmId:null })); }
+      selectedId: st.selectedId===id?null:st.selectedId, editing:{id:null,field:null}, confirmId:null,
+      todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) })); }
   patch(id,patch){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,...patch}:t) })); }
   updateTitle(id,val){ this.patch(id,{title:val}); }
   updateDue(id,due){ this.patch(id,{due}); }
@@ -2906,6 +2916,12 @@ class Flux extends React.Component {
   // Toutes les personnes connues (union de tous les projets), dédupliquées par nom (le projet courant prime pour la couleur).
   knownPeople(){ const st=this.state; const m=new Map(); (st.projects||[]).forEach(p=>{ (p.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k&&!m.has(k)) m.set(k,{name:pp.name,color:pp.color}); }); }); (st.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k) m.set(k,{name:pp.name,color:pp.color}); }); return m; }
   updateNotes(id,val){ this.patch(id,{notes:val}); }
+  // ---- checklist (mini sous-actions cochables, par tâche) ----
+  patchCheck(id,fn){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, checklist: fn(Array.isArray(t.checklist)?t.checklist:[])} : t) })); }
+  addCheck(id,text){ const tx=(text||'').trim(); if(!tx) return; this.patchCheck(id, arr=>[...arr,{id:this.uid(),text:tx,done:false}]); }
+  toggleCheck(id,iid){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,done:!i.done}:i)); }
+  updateCheckText(id,iid,val){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,text:val}:i)); }
+  deleteCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
   addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
   toggleCatMenu(id){ this.setState(st=>({ catMenuId: st.catMenuId===id?null:id })); }
   // Supprime une catégorie sans toucher aux tâches : elles repassent en "Sans catégorie" (cat='').
@@ -2949,6 +2965,60 @@ class Flux extends React.Component {
   setStatusByDrag(dragId,status){
     if(!dragId){ this.setState({dragId:null}); return; }
     this.setState(st=>({ tasks: st.tasks.map(t=> t.id===dragId?{...t,status}:t), dragId:null }));
+  }
+
+  // ---- Aujourd'hui (vue globale tous projets ; ordre propre via todayOrder, n'affecte JAMAIS l'ordre de Flux) ----
+  // Toutes les tâches marquées today, à travers tous les projets, ordonnées par todayOrder.
+  // Projet courant : on lit l'état de travail (st.tasks), pas la copie figée dans st.projects.
+  todayTasks(st){
+    st = st || this.state;
+    const out = [];
+    (st.projects||[]).forEach(p=>{
+      const isCur = p.id===st.currentProjectId;
+      const tasks  = isCur ? st.tasks  : (p.tasks||[]);
+      const people = isCur ? st.people : (p.people||[]);
+      tasks.forEach(t=>{ if(t.today) out.push({ task:t, projId:p.id, projName:p.name, people }); });
+    });
+    const order = Array.isArray(st.todayOrder)?st.todayOrder:[];
+    const rank = id => { const i=order.indexOf(id); return i<0?1e9:i; };
+    out.sort((a,b)=> rank(a.task.id)-rank(b.task.id));   // tri stable : les nouvelles étoilées (rank ∞) gardent l'ordre de découverte
+    return out;
+  }
+  // Bascule l'étoile "today" d'une tâche, où qu'elle soit (projet courant ou autre). Maintient todayOrder.
+  toggleToday(id){
+    this.setState(st=>{
+      const inCur = st.tasks.some(t=>t.id===id);
+      let cur = inCur ? st.tasks.find(t=>t.id===id) : null;
+      if(!cur){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ cur=tt; break; } } }
+      if(!cur) return null;
+      const next = !cur.today;
+      const tasks = inCur ? st.tasks.map(t=> t.id===id?{...t,today:next}:t) : st.tasks;
+      const projects = (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id))
+        ? {...p, tasks:p.tasks.map(t=> t.id===id?{...t,today:next}:t)} : p);
+      let order = (Array.isArray(st.todayOrder)?st.todayOrder:[]).slice();
+      if(next){ if(order.indexOf(id)<0) order.push(id); } else { order = order.filter(x=>x!==id); }
+      return { tasks, projects, todayOrder:order };
+    });
+  }
+  // Valide/dévalide une tâche où qu'elle soit (vue Aujourd'hui = multi-projets).
+  toggleDoneAny(id){
+    this.setState(st=>{
+      const flip = t => t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t;
+      if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip) };
+      return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p) };
+    });
+  }
+  // Réordonne UNIQUEMENT la vue Aujourd'hui (todayOrder). N'affecte jamais l'ordre de Flux (st.tasks).
+  reorderToday(dragId, beforeId){
+    if(!dragId || dragId===beforeId){ this.setState({todayDragId:null,todayDragOverId:null}); return; }
+    this.setState(st=>{
+      const ids = this.todayTasks(st).map(x=>x.task.id);
+      const di = ids.indexOf(dragId); if(di<0) return { todayDragId:null, todayDragOverId:null };
+      ids.splice(di,1);
+      if(beforeId){ const bi=ids.indexOf(beforeId); ids.splice(bi<0?ids.length:bi,0,dragId); }
+      else ids.push(dragId);
+      return { todayOrder:ids, todayDragId:null, todayDragOverId:null };
+    });
   }
 
   // ---- helpers ----
@@ -3070,8 +3140,10 @@ class Flux extends React.Component {
         edStatus:isEd('status'),
         edDep:isEd('dep'), showDep:!isEd('dep'),
         stop,
+        today: !!t.today,
         onRowToggle: ()=>this.toggleSelect(t.id),
         onCheck: (e)=>{ stop(e); this.toggleDone(t.id); },
+        onStar: (e)=>{ stop(e); this.toggleToday(t.id); },
         onDelete: (e)=>{ stop(e); this.askDelete(t.id); },
         onTitleClick: (e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
         onTitleDbl: (e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
@@ -3172,11 +3244,46 @@ class Flux extends React.Component {
       onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('person', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
       onLabelBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='person'&&cur.id===p.id) this.commitLabelEdit('person', p.id, e.target.value); } }));
 
+    // ---- Vue Aujourd'hui (liste globale, ordre propre) ----
+    const tProjBadge = "font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 8px;white-space:nowrap;flex:none;";
+    const tvm = (entry)=>{
+      const t = entry.task; const done = t.status==='done'; const sm = STATUS[t.status];
+      const pp = (entry.people||[]).find(x=>x.id===t.person) || null;
+      const du = this.formatDue(t.due);
+      let rowStyle = `position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.rowH}px;padding:0 16px;border-bottom:1px solid var(--divider);background:var(--panel);cursor:grab;`;
+      if(st.todayDragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
+      return {
+        id:t.id, title:t.title, projName:entry.projName, projBadgeStyle:tProjBadge,
+        dueText:du.text, dueColor:du.color,
+        statusLabel:sm.label, statusDot:sm.dot, statusStyle: chipBase+`gap:5px;background:${sm.bg};color:${sm.fg};`,
+        hasPerson:!!pp, personName:pp?pp.name:'', personChip: pp? chipBase+`max-width:140px;overflow:hidden;text-overflow:ellipsis;background:${pp.color}${isDark?'33':'18'};color:${isDark?lighten(pp.color,0.55):lighten(pp.color,-0.12)};` : '',
+        checkStyle:this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
+        titleStyle:`flex:1;min-width:0;font-size:${D.titleFs}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`+(done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'),
+        rowStyle, stop,
+        onCheck:(e)=>{ stop(e); this.toggleDoneAny(t.id); },
+        onUnstar:(e)=>{ stop(e); this.toggleToday(t.id); },
+        onDragStart:(e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({todayDragId:t.id}); },
+        onDragEnter:(e)=>{ e.preventDefault(); if(st.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
+        onDragOver:(e)=>{ e.preventDefault(); },
+        onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderToday(st.todayDragId, t.id); },
+        onDragEnd:()=>this.setState({todayDragId:null,todayDragOverId:null}),
+      };
+    };
+    const todayList = this.todayTasks(st).map(tvm);
+    const todayHeaderStyle = `position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:11px;height:${D.hdrH}px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--line);`;
+
     const stask = taskById(st.selectedId);
     let sel = null;
     if(stask){
+      const cl = Array.isArray(stask.checklist)?stask.checklist:[];
+      const cdone = cl.filter(i=>i.done).length;
       sel = { id:stask.id, title:stask.title, catLabel:this.catName(stask.cat), notes:stask.notes,
+        checklist:cl, checkDone:cdone, checkTotal:cl.length, checkPct: cl.length?Math.round(cdone/cl.length*100):0,
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
+        onToggleCheck:(iid)=>this.toggleCheck(stask.id, iid),
+        onCheckText:(iid,val)=>this.updateCheckText(stask.id, iid, val),
+        onAddCheck:(text)=>this.addCheck(stask.id, text),
+        onDeleteCheck:(iid)=>this.deleteCheck(stask.id, iid),
         onDelete:()=>this.askDelete(stask.id) };
     }
     const confirmTask = st.confirmId ? taskById(st.confirmId) : null;
@@ -3209,6 +3316,8 @@ class Flux extends React.Component {
       onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
       groups, statusFacets, catFacets, personFacets,
+      todayView: st.todayView, todayList, todayCount: todayList.length, todayHeaderStyle,
+      onToday: ()=>this.setState(s=>({ todayView:!s.todayView, selectedId:null, noteOpen:false, editing:{id:null,field:null} })),
       totalCount: st.tasks.length,
       allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(showingAll?`background:${aTint(fillA)};color:${accent};`:'color:var(--text2);'),
       onAllTasks:()=>this.toggleBulk(),
@@ -3216,7 +3325,7 @@ class Flux extends React.Component {
       onStartAddCat:()=>this.setState({addingCat:true}),
       onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
       onAddCatBlur:(e)=>{ const v=e.target.value.trim(); if(v) this.addCategory(v); else this.setState({addingCat:false}); },
-      hasSel: !!sel, sel: sel||{}, onCloseDetail:()=>this.setState({selectedId:null}),
+      hasSel: !!sel, sel: sel||{}, noteOpen: st.noteOpen, onToggleNote:()=>this.setState(s=>({noteOpen:!s.noteOpen})), onCloseDetail:()=>this.setState({selectedId:null}),
       hasConfirm: !!confirmTask, confirmTitle: confirmTask?confirmTask.title:'',
       onCancelDelete:()=>this.cancelDelete(), onConfirmDelete:()=>this.confirmDelete(), stopModal:(e)=>stop(e),
       danger: isDark
@@ -3232,6 +3341,10 @@ class Flux extends React.Component {
         onDragEnter={t.onDragEnter} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
         <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}>
           <span style={css(t.checkStyle)}>{t.checkMark}</span>
+        </span>
+        {/* STAR — désigne la tâche pour Aujourd'hui */}
+        <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}>
+          <span className={'fxstar'+(t.today?' on':'')} onClick={t.onStar} title={t.today?"Retirer d'Aujourd'hui":"Ajouter à Aujourd'hui"}>{t.today?'★':'☆'}</span>
         </span>
         {/* TITLE */}
         <span style={css('width:480px;flex:none;display:flex;align-items:center;gap:8px;overflow:hidden;padding-right:8px;')}>
@@ -3305,6 +3418,9 @@ class Flux extends React.Component {
     const v = this.buildVM();
     const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
     const renameInput = 'flex:1;min-width:0;border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
+    const ckBox = (done)=> done
+      ? 'width:18px;height:18px;border-radius:50%;background:#22C55E;border:1.5px solid #22C55E;box-shadow:0 0 9px rgba(34,197,94,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex:none;cursor:pointer;margin-top:1px;'
+      : 'width:18px;height:18px;border-radius:50%;border:1.7px solid var(--cbox);background:transparent;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;margin-top:1px;';
     return (
       <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
 
@@ -3363,6 +3479,10 @@ class Flux extends React.Component {
               <span style={css('font-size:13px;')}>Toutes les tâches</span>
               <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{v.totalCount}</span>
             </div>
+            <div onClick={v.onToday} title="Tâches que tu fais aujourd'hui (tous projets)" style={css('display:flex;align-items:center;gap:9px;padding:7px 9px;margin-top:2px;border-radius:8px;font-size:13px;cursor:pointer;color:'+(v.todayView?'#FBBF24':v.accent)+';'+(v.todayView?'background:rgba(251,191,36,.12);':''))}>
+              <span>★ À traiter aujourd'hui</span>
+              <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:"+(v.todayView?'#FBBF24':'var(--muted)')+";")}>{v.todayCount}</span>
+            </div>
 
             <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
             {v.statusFacets.map(f=>
@@ -3413,16 +3533,39 @@ class Flux extends React.Component {
                 </span>
               </div>)}
 
-            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>VUES ENREGISTRÉES</div>
-            <div style={css('display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;color:'+v.accent+';cursor:default;')}>★ À traiter aujourd'hui</div>
           </div>
 
           {/* ---------- CENTER ---------- */}
           <div className="fxcol scrl" style={css('flex:1;min-width:0;overflow:auto;background:var(--bg);animation-delay:.08s;')}>
+            {v.todayView ? (
             <div style={css('min-width:820px;')}>
+              <div style={css(v.todayHeaderStyle)}>
+                <span style={css('font-size:15px;color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.5);')}>★</span>
+                <span style={css('font-size:13px;font-weight:600;color:var(--text);')}>Aujourd'hui</span>
+                <span style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{v.todayCount}</span>
+                <span style={css('margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;')}>Glisser pour réordonner — propre à Aujourd'hui</span>
+              </div>
+              {v.todayCount===0
+                ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Aucune tâche pour aujourd'hui.<br/>Clique sur l'étoile <span style={css('color:var(--cbox);')}>☆</span> d'une tâche pour l'ajouter ici.</div>
+                : v.todayList.map(t=>
+                  <div key={t.id} className="taskrow" data-task="1" draggable style={css(t.rowStyle)}
+                    onDragStart={t.onDragStart} onDragEnter={t.onDragEnter} onDragOver={t.onDragOver} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
+                    <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
+                    <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className="fxstar on" onClick={t.onUnstar} title="Retirer d'Aujourd'hui">★</span></span>
+                    <span style={css(t.titleStyle)}>{t.title}</span>
+                    <span style={css('width:210px;flex:none;display:flex;align-items:center;overflow:hidden;')}><span style={css(t.projBadgeStyle+'max-width:100%;overflow:hidden;text-overflow:ellipsis;')}>{t.projName}</span></span>
+                    <span style={css('width:88px;flex:none;font-size:12px;color:'+t.dueColor+';')}>{t.dueText}</span>
+                    <span style={css('width:150px;flex:none;display:flex;align-items:center;overflow:hidden;')}>{t.hasPerson ? <span style={css(t.personChip)}>{t.personName}</span> : <span style={css('font-size:12px;color:var(--cbox);')}>—</span>}</span>
+                    <span style={css('width:128px;flex:none;display:flex;align-items:center;')}><span style={css(t.statusStyle)}><span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>{t.statusLabel}</span></span>
+                  </div>)}
+              <div style={css('height:40px;')}></div>
+            </div>
+            ) : (
+            <div style={css('min-width:844px;')}>
               {/* column header */}
               <div style={css(v.headerStyle)}>
                 <span style={css('width:26px;flex:none;')}></span>
+                <span style={css('width:24px;flex:none;')}></span>
                 <span style={css('width:480px;flex:none;')}>Tâche</span>
                 <span style={css('width:104px;flex:none;')}>Échéance</span>
                 <span style={css('width:150px;flex:none;')}>Personne</span>
@@ -3447,12 +3590,14 @@ class Flux extends React.Component {
                       {g.tasks.map(t=> <React.Fragment key={t.id}>{this.renderRow(t)}</React.Fragment>)}
                       <div onDragOver={g.onDragOver} onDrop={g.onDrop} style={css(g.addRowStyle)}>
                         <span style={css('width:26px;flex:none;color:var(--cbox);font-size:15px;')}>＋</span>
+                        <span style={css('width:24px;flex:none;')}></span>
                         <input onKeyDown={g.onAddKey} onBlur={g.onAddBlur} placeholder={g.addHint} style={css('flex:1;border:none;background:transparent;font-size:13px;color:var(--text);')} />
                       </div>
                     </div>}
                 </React.Fragment>)}
               <div style={css('height:40px;')}></div>
             </div>
+            )}
           </div>
 
           {/* ---------- RIGHT DETAIL PANEL — NOTES ---------- */}
@@ -3465,9 +3610,48 @@ class Flux extends React.Component {
                 </div>
                 <div style={css('font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em;')}>{v.sel.title}</div>
               </div>
-              <div style={css('flex:1;display:flex;flex-direction:column;min-height:0;padding:16px 20px 6px;')}>
-                <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:9px;")}>DÉTAIL · NOTES</div>
-                <textarea value={v.sel.notes} onChange={v.sel.onNotes} placeholder="Écris ici tout le détail de la tâche — autant de texte que nécessaire…" style={css('flex:1;min-height:0;width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--soft);')}></textarea>
+              <div className="scrl" style={css('flex:1;min-height:0;overflow-y:auto;padding:16px 20px 6px;')}>
+
+                {/* progression */}
+                <div style={css("display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;")}>
+                  <span>ACTIONS</span>
+                  {v.sel.checkTotal>0 &&
+                    <React.Fragment>
+                      <span style={css('color:var(--text2);')}>{v.sel.checkDone}/{v.sel.checkTotal}</span>
+                      <span style={css('flex:1;height:4px;border-radius:3px;background:var(--soft);overflow:hidden;position:relative;')}>
+                        <span style={css('position:absolute;left:0;top:0;bottom:0;width:'+v.sel.checkPct+'%;background:#22C55E;box-shadow:0 0 8px rgba(34,197,94,.6);border-radius:3px;')}></span>
+                      </span>
+                    </React.Fragment>}
+                </div>
+
+                {/* items */}
+                {v.sel.checklist.map(it=>
+                  <div key={it.id} className="ckrow" style={css('display:flex;align-items:flex-start;gap:11px;padding:5px 6px;margin:0 -6px;')}>
+                    <span className="ckbox" onClick={()=>v.sel.onToggleCheck(it.id)} style={css(ckBox(it.done))}>{it.done?'✓':''}</span>
+                    <input value={it.text} onChange={e=>v.sel.onCheckText(it.id, e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } }} style={css('flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;line-height:1.5;padding:0;color:'+(it.done?'var(--muted)':'var(--text)')+';'+(it.done?'text-decoration:line-through;':''))} />
+                    <span className="ckdel" onClick={()=>v.sel.onDeleteCheck(it.id)} title="Supprimer l'action" style={css('flex:none;color:var(--muted);font-size:12px;cursor:pointer;padding:1px 3px;margin-top:2px;')}>✕</span>
+                  </div>)}
+
+                {/* ajout */}
+                <div style={css('display:flex;align-items:center;gap:11px;padding:6px 6px;margin:0 -6px;')}>
+                  <span style={css('width:18px;height:18px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--cbox);font-size:16px;')}>＋</span>
+                  <input placeholder="Ajouter une action…" onKeyDown={e=>{ if(e.key==='Enter'){ const val=e.target.value; if(val.trim()){ v.sel.onAddCheck(val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} onBlur={e=>{ const val=e.target.value; if(val.trim()){ v.sel.onAddCheck(val); e.target.value=''; } }} style={css('flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;color:var(--text);')} />
+                </div>
+
+                {/* note repliable */}
+                <div style={css('margin-top:16px;border-top:1px solid var(--divider);padding-top:14px;')}>
+                  {v.noteOpen
+                    ? <div>
+                        <div style={css("display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;")}>
+                          <span>NOTE</span>
+                          <span onClick={v.onToggleNote} title="Replier la note" style={css('margin-left:auto;cursor:pointer;font-size:11px;')}>▾</span>
+                        </div>
+                        <textarea autoFocus={!(v.sel.notes||'').trim()} value={v.sel.notes} onChange={v.sel.onNotes} placeholder="Détail, contexte, liens…" style={css('width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--soft);resize:vertical;')}></textarea>
+                      </div>
+                    : <div onClick={v.onToggleNote} style={css('display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text2);cursor:pointer;')}><span style={css('font-size:10px;')}>▸</span> {(v.sel.notes||'').trim()?'Voir la note':'Ajouter une note'}</div>}
+                </div>
+
+                <div style={css('height:16px;')}></div>
               </div>
               <div style={css('padding:12px 20px 16px;border-top:1px solid var(--divider);')}>
                 <div onClick={v.sel.onDelete} style={css('display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:'+v.danger.fg+';cursor:pointer;border:1px solid '+v.danger.border+';border-radius:8px;padding:7px 13px;background:'+v.danger.bg+';')}>✕ Supprimer la tâche</div>
