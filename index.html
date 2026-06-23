@@ -1038,10 +1038,10 @@ function rA(a,pid,o){
   </div></div>`}
 
 /* ── Render ── */
-const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,price:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8.5V3a1 1 0 011-1h5.5L14 7.5l-5.5 5.5L2 8.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/></svg>`,flux:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9 1.5L3 9h4l-1 5.5L13 7H9l1-5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`};
+const SB_ICONS={projects:`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 6a2 2 0 012-2h3.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0011.828 7H16a2 2 0 012 2v5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5"/></svg>`,global:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M2 6.5h12M2 10h12M2 13.5h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,done:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,time:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,trash:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,crm:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.2"/><path d="M2 4l6-2 6 2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>`,feedback:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.7 1.6a3.4 3.4 0 00-3.2 4.5L2 12.6l1.4 1.4 6.5-6.5a3.4 3.4 0 004.5-3.2l-1.9 1.9-1.7-1.7 1.9-1.9a3.4 3.4 0 00-1-.1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>`,price:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8.5V3a1 1 0 011-1h5.5L14 7.5l-5.5 5.5L2 8.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/></svg>`,flux:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9 1.5L3 9h4l-1 5.5L13 7H9l1-5.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`,today:`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.76 3.57 3.94.57-2.85 2.78.67 3.92L8 10.56l-3.52 1.85.67-3.92L2.3 5.64l3.94-.57z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`};
 function render(){
   /* Sidebar */
-  const tabs=[{k:"flux",l:"Flux",i:SB_ICONS.flux},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"flux",l:"Flux",i:SB_ICONS.flux},{k:"today",l:"Aujourd'hui",i:SB_ICONS.today},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar">`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -1050,14 +1050,14 @@ function render(){
   /* Main */
   let h="";
   if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
-  if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux")h+=`<div id="flux-root"></div>`;else h+=rTR();
-  const mainCls=S.tab==="price"?"main main-wide":(S.tab==="flux"?"main main-flux":"main");
+  if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today")h+=`<div id="flux-root"></div>`;else h+=rTR();
+  const mainCls=S.tab==="price"?"main main-wide":((S.tab==="flux"||S.tab==="today")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
   const _comboPos=(_comboFocusId&&typeof _comboActive.selectionStart==='number')?_comboActive.selectionStart:null;
   document.getElementById("app").innerHTML=sb+`<div class="${mainCls}">${h}</div>`;syncEl=document.getElementById('sync-ind');
-  if(S.tab==="flux")mountFlux();else unmountFlux();
+  if(S.tab==="flux"||S.tab==="today")mountFlux();else unmountFlux();
   if(_comboFocusId){const el=document.getElementById(_comboFocusId);if(el){el.focus();if(_comboPos!==null&&typeof el.setSelectionRange==='function')try{el.setSelectionRange(_comboPos,_comboPos)}catch(e){}}}
   requestAnimationFrame(sEd)}
 
@@ -1076,7 +1076,7 @@ function mountFlux(){
   const el=document.getElementById('flux-root');if(!el)return;
   if(!window.Flux){el.innerHTML='<div style="padding:40px;color:#8595ac;font-family:sans-serif;font-size:14px">Chargement de Flux…</div>';loadFluxLibs();return}
   if(_fluxNode!==el){if(_fluxRoot){try{_fluxRoot.unmount()}catch(e){}}_fluxRoot=ReactDOM.createRoot(el);_fluxNode=el}
-  _fluxRoot.render(React.createElement(window.Flux));
+  _fluxRoot.render(React.createElement(window.Flux,{todayOnly:S.tab==="today"}));
 }
 function unmountFlux(){if(_fluxRoot){try{_fluxRoot.unmount()}catch(e){}_fluxRoot=null;_fluxNode=null}}
 // ▼ Pont de persistance Flux ↔ état app : Flux lit/écrit S.flux (un blob), sauvegardé dans Firestore avec le reste via save(). Le localStorage 'flux_proto_v6' reste un cache local de secours.
@@ -2763,7 +2763,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null };
+    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, todayAddProj:'' };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -2851,13 +2851,15 @@ class Flux extends React.Component {
 
   // ---- view / selection / settings ----
   setView(v){ this.setState({ view:v }); }
-  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; const t = willSel ? st.tasks.find(x=>x.id===id) : null; return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false }; }); }
+  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; let t=null; if(willSel){ t=st.tasks.find(x=>x.id===id); if(!t){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt){ t=tt; break; } } } } return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false }; }); }
   // ---- editing ----
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
   // ---- mutations ----
   toggleDone(id){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t) })); }
-  setStatus(id,status){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,status}:t), editing:{id:null,field:null} })); }
+  setStatus(id,status){ this.setState(st=>{ const flip=arr=>arr.map(t=> t.id===id?{...t,status}:t); return st.tasks.some(t=>t.id===id)
+    ? { tasks: flip(st.tasks), editing:{id:null,field:null} }
+    : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:{id:null,field:null} }; }); }
   toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
   toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null, todayView:false }; }); }
   // Master « Toutes les tâches » : 1er clic = tout cocher/afficher ('all'), 2e clic = tout décocher/masquer ('none').
@@ -2901,10 +2903,12 @@ class Flux extends React.Component {
   askDelete(id){ this.setState({ confirmId:id }); }
   cancelDelete(){ this.setState({ confirmId:null }); }
   confirmDelete(){ const id=this.state.confirmId; if(!id){ this.setState({confirmId:null}); return; }
-    this.setState(st=>({ tasks: st.tasks.filter(t=>t.id!==id).map(t=>({...t, deps:t.deps.filter(d=>d!==id)})),
-      selectedId: st.selectedId===id?null:st.selectedId, editing:{id:null,field:null}, confirmId:null,
-      todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) })); }
-  patch(id,patch){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id?{...t,...patch}:t) })); }
+    this.setState(st=>{ const order=(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id); const base={ selectedId: st.selectedId===id?null:st.selectedId, editing:{id:null,field:null}, confirmId:null, todayOrder:order }; return st.tasks.some(t=>t.id===id)
+      ? { ...base, tasks: st.tasks.filter(t=>t.id!==id).map(t=>({...t, deps:(t.deps||[]).filter(d=>d!==id)})) }
+      : { ...base, projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.filter(t=>t.id!==id).map(t=>({...t, deps:(t.deps||[]).filter(d=>d!==id)}))} : p) }; }); }
+  patch(id,patch){ this.setState(st=> st.tasks.some(t=>t.id===id)
+    ? ({ tasks: st.tasks.map(t=> t.id===id?{...t,...patch}:t) })
+    : ({ projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(t=> t.id===id?{...t,...patch}:t)} : p) }) ); }
   updateTitle(id,val){ this.patch(id,{title:val}); }
   updateDue(id,due){ this.patch(id,{due}); }
   updateDep(id,depId){ this.patch(id,{deps: depId?[depId]:[]}); }
@@ -2917,7 +2921,9 @@ class Flux extends React.Component {
   knownPeople(){ const st=this.state; const m=new Map(); (st.projects||[]).forEach(p=>{ (p.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k&&!m.has(k)) m.set(k,{name:pp.name,color:pp.color}); }); }); (st.people||[]).forEach(pp=>{ const k=(pp.name||'').trim().toLowerCase(); if(k) m.set(k,{name:pp.name,color:pp.color}); }); return m; }
   updateNotes(id,val){ this.patch(id,{notes:val}); }
   // ---- checklist (mini sous-actions cochables, par tâche) ----
-  patchCheck(id,fn){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, checklist: fn(Array.isArray(t.checklist)?t.checklist:[])} : t) })); }
+  patchCheck(id,fn){ this.setState(st=>{ const apply=arr=>arr.map(t=> t.id===id ? {...t, checklist: fn(Array.isArray(t.checklist)?t.checklist:[])} : t); return st.tasks.some(t=>t.id===id)
+    ? { tasks: apply(st.tasks) }
+    : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:apply(p.tasks)} : p) }; }); }
   addCheck(id,text){ const tx=(text||'').trim(); if(!tx) return; this.patchCheck(id, arr=>[...arr,{id:this.uid(),text:tx,done:false}]); }
   toggleCheck(id,iid){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,done:!i.done}:i)); }
   updateCheckText(id,iid,val){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,text:val}:i)); }
@@ -3020,6 +3026,15 @@ class Flux extends React.Component {
       return { todayOrder:ids, todayDragId:null, todayDragOverId:null };
     });
   }
+  // Trouve une tâche n'importe où (projet courant OU autre projet) + son contexte projet. Pour l'édition depuis la vue Aujourd'hui.
+  taskByIdAny(id){ const st=this.state; let t=st.tasks.find(x=>x.id===id); if(t) return { task:t, projId:st.currentProjectId, isCur:true, people:st.people, categories:st.categories }; for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt) return { task:tt, projId:p.id, isCur:false, people:p.people||[], categories:p.categories||[] }; } return null; }
+  // Ajoute une personne à un projet précis (courant ou autre), renvoie son id. Pour assigner depuis la vue Aujourd'hui (multi-projets).
+  addPersonTo(projId,name,color){ const id=this.uid(); const palette=['#3b5bdb','#d6643f','#2c9c6a','#8a5cd6','#c79a1e','#0f9bb0','#c0497e','#5566d6']; this.setState(st=>{ if(projId===st.currentProjectId){ const c=color||palette[st.people.length % palette.length]; return { people:[...st.people,{id,name:(name||'').trim(),color:c}] }; } return { projects:(st.projects||[]).map(p=> p.id===projId ? {...p, people:[...(p.people||[]),{id,name:(name||'').trim(),color:color||palette[(p.people||[]).length % palette.length]}]} : p) }; }); return id; }
+  // ---- Aujourd'hui : filtres propres à l'onglet (transient, non persistés) + ajout rapide cross-project ----
+  toggleTodayFilter(axis,id){ this.setState(st=>{ const cur=st.todayFilters||{status:{},proj:{},person:{}}; const ax={...(cur[axis]||{})}; if(ax[id]) delete ax[id]; else ax[id]=true; return { todayFilters:{...cur,[axis]:ax} }; }); }
+  clearTodayFilters(){ this.setState({ todayFilters:{status:{},proj:{},person:{}} }); }
+  // Crée une tâche déjà étoilée (today:true) dans le projet cible (courant ou autre) et l'ajoute en fin de la liste Aujourd'hui.
+  addTodayTask(projId,title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const tgt=projId||st.currentProjectId; if(tgt===st.currentProjectId || !tgt){ return { tasks:[...st.tasks, nt], todayOrder:norder }; } return { projects:(st.projects||[]).map(p=> p.id===tgt ? {...p, tasks:[...(p.tasks||[]), nt]} : p), todayOrder:norder }; }); }
 
   // ---- helpers ----
   catName(id){ const c=this.state.categories.find(c=>c.id===id); return c?c.name:'Sans catégorie'; }
@@ -3250,18 +3265,54 @@ class Flux extends React.Component {
       const t = entry.task; const done = t.status==='done'; const sm = STATUS[t.status];
       const pp = (entry.people||[]).find(x=>x.id===t.person) || null;
       const du = this.formatDue(t.due);
+      const isEd = (fld)=> ed.id===t.id && ed.field===fld;
+      const selR = st.selectedId===t.id;
       let rowStyle = `position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.rowH}px;padding:0 16px;border-bottom:1px solid var(--divider);background:var(--panel);cursor:grab;`;
+      if(selR) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
+      if(isEd('status')||isEd('person')) rowStyle += 'z-index:25;';
       if(st.todayDragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
+      const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
+        return { key:k, label:m.label, dot:m.dot,
+          style:'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);'+(on?'font-weight:600;':''),
+          checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'),
+          onPick:(e)=>{ stop(e); this.setStatus(t.id,k); } }; });
+      let personMenu=[];
+      if(isEd('person')){
+        const mrow=(on)=>'display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;'+(on?`background:${aTint(selA)};`:'');
+        const q=(st.personQuery||'').trim(); const ql=q.toLowerCase();
+        const ppl=entry.people||[]; const proj=entry.projId;
+        const curNames=new Set(ppl.map(x=>(x.name||'').trim().toLowerCase()));
+        const known=this.knownPeople();
+        if(!ql || 'non assigné'.indexOf(ql)>=0) personMenu.push({ label:'Non assigné', initials:'', avatarStyle:'width:18px;height:18px;border-radius:50%;border:1.5px dashed var(--cbox);flex:none;', labelStyle:'font-size:12.5px;color:var(--text3);', checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(t.person===''?'':'visibility:hidden;'), style:mrow(t.person===''), onPick:(e)=>{ stop(e); this.updatePerson(t.id,''); this.stopPersonEdit(); } });
+        ppl.filter(x=>x.name.toLowerCase().indexOf(ql)>=0).forEach(x=>{ const on=t.person===x.id; personMenu.push({ label:x.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${x.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,x.id); this.stopPersonEdit(); } }); });
+        Array.from(known.values()).filter(kp=>{ const k=(kp.name||'').trim().toLowerCase(); return !curNames.has(k) && kp.name.toLowerCase().indexOf(ql)>=0; }).forEach(kp=>{ personMenu.push({ label:kp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${kp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);', checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPersonTo(proj,kp.name,kp.color); this.updatePerson(t.id,id); this.stopPersonEdit(); } }); });
+        const exact=ql && known.has(ql);
+        if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPersonTo(proj,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
+      }
       return {
         id:t.id, title:t.title, projName:entry.projName, projBadgeStyle:tProjBadge,
-        dueText:du.text, dueColor:du.color,
-        statusLabel:sm.label, statusDot:sm.dot, statusStyle: chipBase+`gap:5px;background:${sm.bg};color:${sm.fg};`,
-        hasPerson:!!pp, personName:pp?pp.name:'', personChip: pp? chipBase+`max-width:140px;overflow:hidden;text-overflow:ellipsis;background:${pp.color}${isDark?'33':'18'};color:${isDark?lighten(pp.color,0.55):lighten(pp.color,-0.12)};` : '',
+        dueText:du.text, dueColor:du.color, dueISO:t.due||'',
+        statusLabel:sm.label, statusDot:sm.dot, statusStyle: chipBase+`gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`, statusOptions,
+        hasPerson:!!pp, personName:pp?pp.name:'', personChip: pp? chipBase+`max-width:140px;overflow:hidden;text-overflow:ellipsis;background:${pp.color}${isDark?'33':'18'};color:${isDark?lighten(pp.color,0.55):lighten(pp.color,-0.12)};` : '', personQuery:st.personQuery, personMenu,
         checkStyle:this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
-        titleStyle:`flex:1;min-width:0;font-size:${D.titleFs}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`+(done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'),
+        titleStyle:`flex:1;min-width:0;font-size:${D.titleFs}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;`+(done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'),
+        edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
+        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')),
         rowStyle, stop,
         onCheck:(e)=>{ stop(e); this.toggleDoneAny(t.id); },
         onUnstar:(e)=>{ stop(e); this.toggleToday(t.id); },
+        onTitleClick:(e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
+        onTitleDbl:(e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
+        onTitleInput:(e)=>this.updateTitle(t.id, e.target.value),
+        onTitleKey:(e)=>{ stop(e); if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } if(e.key==='Escape'){ e.target.blur(); } },
+        onTitleBlur:()=>this.stopEdit(),
+        onDueClick:(e)=>{ stop(e); this.startEdit(t.id,'due'); },
+        onDueChange:(e)=>{ this.updateDue(t.id, e.target.value); this.stopEdit(); },
+        onDueBlur:()=>this.stopEdit(),
+        onPersonClick:(e)=>{ stop(e); this.startPersonEdit(t.id); },
+        onPersonQuery:(e)=>this.setPersonQuery(e.target.value),
+        onPersonKey:(e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const ppl=entry.people||[]; const hit=ppl.find(x=>x.name.toLowerCase()===ql) || ppl.find(x=>x.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPersonTo(entry.projId,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
+        onStatusClick:(e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
         onDragStart:(e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({todayDragId:t.id}); },
         onDragEnter:(e)=>{ e.preventDefault(); if(st.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
         onDragOver:(e)=>{ e.preventDefault(); },
@@ -3269,15 +3320,32 @@ class Flux extends React.Component {
         onDragEnd:()=>this.setState({todayDragId:null,todayDragOverId:null}),
       };
     };
-    const todayList = this.todayTasks(st).map(tvm);
-    const todayHeaderStyle = `position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:11px;height:${D.hdrH}px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--line);`;
+    const todayEntriesAll = this.todayTasks(st);
+    const tf = st.todayFilters || {status:{},proj:{},person:{}};
+    const tfS=Object.keys(tf.status||{}), tfP=Object.keys(tf.proj||{}), tfN=Object.keys(tf.person||{});
+    const todayAnyFilter = !!(tfS.length||tfP.length||tfN.length);
+    const entryPName = e => { const pp=(e.people||[]).find(x=>x.id===e.task.person); return pp?(pp.name||'').trim().toLowerCase():''; };
+    const tMatch = e => (!tfS.length||tfS.indexOf(e.task.status)>=0) && (!tfP.length||tfP.indexOf(e.projId)>=0) && (!tfN.length||tfN.indexOf(entryPName(e))>=0);
+    const todayList = todayEntriesAll.filter(tMatch).map(tvm);
+    // Facettes (comptées sur l'ensemble non filtré) — Statut / Projet / Personne (par nom, cross-project).
+    const todayStatusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot, active:!!tf.status[k], count:todayEntriesAll.filter(e=>e.task.status===k).length, boxStyle:this.facetBox(!!tf.status[k],accent), check:tf.status[k]?'✓':'', onToggle:()=>this.toggleTodayFilter('status',k) }));
+    const _projWithToday=[]; todayEntriesAll.forEach(e=>{ if(_projWithToday.indexOf(e.projId)<0) _projWithToday.push(e.projId); });
+    const todayProjFacets = (st.projects||[]).filter(p=>_projWithToday.indexOf(p.id)>=0).slice().sort(byName).map(p=>({ id:p.id, label:p.name, active:!!tf.proj[p.id], count:todayEntriesAll.filter(e=>e.projId===p.id).length, boxStyle:this.facetBox(!!tf.proj[p.id],accent), check:tf.proj[p.id]?'✓':'', onToggle:()=>this.toggleTodayFilter('proj',p.id) }));
+    const _nameMeta=new Map(); todayEntriesAll.forEach(e=>{ const pp=(e.people||[]).find(x=>x.id===e.task.person); if(pp){ const k=(pp.name||'').trim().toLowerCase(); if(k&&!_nameMeta.has(k)) _nameMeta.set(k,{name:pp.name,color:pp.color}); } });
+    const todayPersonFacets = Array.from(_nameMeta.entries()).map(([k,meta])=>({ id:k, label:meta.name, active:!!tf.person[k], count:todayEntriesAll.filter(e=>entryPName(e)===k).length, boxStyle:this.facetBox(!!tf.person[k],accent), check:tf.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${meta.color};flex:none;`, onToggle:()=>this.toggleTodayFilter('person',k) })).sort((a,b)=>(a.label||'').localeCompare(b.label||'','fr',{sensitivity:'base'}));
+    const todayAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(todayAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
+    const todayColHeaderStyle = `position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.hdrH}px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`;
+    const todayProjOptions = (st.projects||[]).slice().sort(byName).map(p=>({id:p.id,name:p.name}));
+    const todayAddProj = st.todayAddProj || st.currentProjectId || (((st.projects||[])[0]||{}).id) || '';
 
-    const stask = taskById(st.selectedId);
+    const staskRes = st.selectedId ? this.taskByIdAny(st.selectedId) : null;
+    const stask = staskRes ? staskRes.task : null;
     let sel = null;
     if(stask){
       const cl = Array.isArray(stask.checklist)?stask.checklist:[];
       const cdone = cl.filter(i=>i.done).length;
-      sel = { id:stask.id, title:stask.title, catLabel:this.catName(stask.cat), notes:stask.notes,
+      const _selCat = (staskRes.categories||[]).find(c=>c.id===stask.cat);
+      sel = { id:stask.id, title:stask.title, catLabel:_selCat?_selCat.name:'Sans catégorie', notes:stask.notes,
         checklist:cl, checkDone:cdone, checkTotal:cl.length, checkPct: cl.length?Math.round(cdone/cl.length*100):0,
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
         onToggleCheck:(iid)=>this.toggleCheck(stask.id, iid),
@@ -3316,8 +3384,13 @@ class Flux extends React.Component {
       onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
       groups, statusFacets, catFacets, personFacets,
-      todayView: st.todayView, todayList, todayCount: todayList.length, todayHeaderStyle,
-      onToday: ()=>this.setState(s=>({ todayView:!s.todayView, selectedId:null, noteOpen:false, editing:{id:null,field:null} })),
+      todayView: st.todayView, todayList, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayColHeaderStyle, todayAnyFilter, todayAllStyle,
+      todayStatusFacets, todayProjFacets, todayPersonFacets,
+      todayAddProj, todayProjOptions,
+      onTodayAddProj:(e)=>this.setState({todayAddProj:e.target.value}),
+      onTodayQuickAdd:(e)=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTodayTask(this.state.todayAddProj||this.state.currentProjectId, val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
+      onTodayQuickAddBlur:(e)=>{ const val=e.target.value.trim(); if(val){ this.addTodayTask(this.state.todayAddProj||this.state.currentProjectId, val); e.target.value=''; } },
+      onClearTodayFilters:()=>this.clearTodayFilters(),
       totalCount: st.tasks.length,
       allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(showingAll?`background:${aTint(fillA)};color:${accent};`:'color:var(--text2);'),
       onAllTasks:()=>this.toggleBulk(),
@@ -3416,6 +3489,7 @@ class Flux extends React.Component {
 
   render(){
     const v = this.buildVM();
+    const todayOnly = !!this.props.todayOnly;   // onglet « Aujourd'hui » dédié : pas de top bar ni de rail de filtres
     const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
     const renameInput = 'flex:1;min-width:0;border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
     const ckBox = (done)=> done
@@ -3425,6 +3499,7 @@ class Flux extends React.Component {
       <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
 
         {/* ===================== TOP BAR ===================== */}
+        {!todayOnly &&
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div data-projsel style={css('position:relative;flex:none;')}>
             <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:9px;height:34px;min-width:160px;max-width:240px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);cursor:pointer;')}>
@@ -3467,21 +3542,34 @@ class Flux extends React.Component {
             <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
             <span style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;")}>↵</span>
           </div>
-        </div>
+        </div>}
+
+        {/* ===================== TOP BAR (Aujourd'hui) ===================== */}
+        {todayOnly &&
+        <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+          <span style={css('font-size:16px;color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.5);flex:none;')}>★</span>
+          <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Aujourd'hui</span>
+          <span style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;flex:none;")}>{v.todayCount}</span>
+          <div style={css('flex:1;max-width:460px;margin-left:6px;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;background:var(--soft);')}>
+            <span style={css('color:var(--muted);font-size:14px;flex:none;')}>＋</span>
+            <input onKeyDown={v.onTodayQuickAdd} onBlur={v.onTodayQuickAddBlur} placeholder="Ajouter une tâche pour aujourd'hui…" style={css('border:none;background:transparent;font-size:13.5px;flex:1;min-width:0;color:var(--text);')} />
+            {v.todayProjOptions.length>0 &&
+              <select value={v.todayAddProj} onChange={v.onTodayAddProj} title="Projet de destination" style={css("flex:none;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px;font-family:'IBM Plex Sans',sans-serif;padding:4px 6px;max-width:170px;cursor:pointer;")}>
+                {v.todayProjOptions.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
+              </select>}
+          </div>
+        </div>}
 
         {/* ===================== BODY ===================== */}
         <div style={css('flex:1;display:flex;min-height:0;position:relative;')}>
 
           {/* ---------- LEFT FACET RAIL ---------- */}
+          {!todayOnly &&
           <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
 
             <div onClick={v.onAllTasks} style={css(v.allViewStyle)}>
               <span style={css('font-size:13px;')}>Toutes les tâches</span>
               <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{v.totalCount}</span>
-            </div>
-            <div onClick={v.onToday} title="Tâches que tu fais aujourd'hui (tous projets)" style={css('display:flex;align-items:center;gap:9px;padding:7px 9px;margin-top:2px;border-radius:8px;font-size:13px;cursor:pointer;color:'+(v.todayView?'#FBBF24':v.accent)+';'+(v.todayView?'background:rgba(251,191,36,.12);':''))}>
-              <span>★ À traiter aujourd'hui</span>
-              <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:"+(v.todayView?'#FBBF24':'var(--muted)')+";")}>{v.todayCount}</span>
             </div>
 
             <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
@@ -3533,30 +3621,117 @@ class Flux extends React.Component {
                 </span>
               </div>)}
 
-          </div>
+          </div>}
+
+          {/* ---------- LEFT FILTER RAIL (Aujourd'hui) ---------- */}
+          {todayOnly &&
+          <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
+
+            <div onClick={v.onClearTodayFilters} title="Afficher toutes les tâches du jour" style={css(v.todayAllStyle)}>
+              <span style={css('font-size:13px;')}>Toutes les tâches</span>
+              <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{v.todayTotal}</span>
+            </div>
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
+            {v.todayStatusFacets.map(f=>
+              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
+                <span style={css(f.boxStyle)}>{f.check}</span>
+                <span style={css('width:7px;height:7px;border-radius:50%;background:'+f.dot+';')}></span>
+                <span>{f.label}</span>
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
+              </div>)}
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PROJETS</div>
+            {v.todayProjFacets.map(f=>
+              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
+                <span style={css(f.boxStyle)}>{f.check}</span>
+                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
+              </div>)}
+            {!v.todayProjFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
+
+            <div style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PERSONNES</div>
+            {v.todayPersonFacets.map(f=>
+              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
+                <span style={css(f.boxStyle)}>{f.check}</span>
+                <span style={css(f.avatarStyle)}></span>
+                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
+                <span style={css("margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
+              </div>)}
+            {!v.todayPersonFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
+
+          </div>}
 
           {/* ---------- CENTER ---------- */}
           <div className="fxcol scrl" style={css('flex:1;min-width:0;overflow:auto;background:var(--bg);animation-delay:.08s;')}>
-            {v.todayView ? (
+            {(todayOnly || v.todayView) ? (
             <div style={css('min-width:820px;')}>
-              <div style={css(v.todayHeaderStyle)}>
-                <span style={css('font-size:15px;color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.5);')}>★</span>
-                <span style={css('font-size:13px;font-weight:600;color:var(--text);')}>Aujourd'hui</span>
-                <span style={css("font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{v.todayCount}</span>
-                <span style={css('margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;')}>Glisser pour réordonner — propre à Aujourd'hui</span>
+              {/* column header */}
+              <div style={css(v.todayColHeaderStyle)}>
+                <span style={css('width:26px;flex:none;')}></span>
+                <span style={css('width:24px;flex:none;')}></span>
+                <span style={css('flex:1;min-width:0;')}>Tâche</span>
+                <span style={css('width:210px;flex:none;')}>Projet</span>
+                <span style={css('width:88px;flex:none;')}>Échéance</span>
+                <span style={css('width:150px;flex:none;')}>Personne</span>
+                <span style={css('width:128px;flex:none;')}>Statut</span>
               </div>
               {v.todayCount===0
-                ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Aucune tâche pour aujourd'hui.<br/>Clique sur l'étoile <span style={css('color:var(--cbox);')}>☆</span> d'une tâche pour l'ajouter ici.</div>
+                ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>{v.todayHasAny
+                    ? <React.Fragment>Aucune tâche ne correspond aux filtres.<br/><span onClick={v.onClearTodayFilters} style={css('color:'+v.accent+';cursor:pointer;')}>Réinitialiser les filtres</span></React.Fragment>
+                    : <React.Fragment>Aucune tâche pour aujourd'hui.<br/>Dans l'onglet <b style={css('color:var(--text2);')}>Flux</b>, clique sur l'étoile <span style={css('color:var(--cbox);')}>☆</span> d'une tâche pour l'ajouter ici.</React.Fragment>}</div>
                 : v.todayList.map(t=>
-                  <div key={t.id} className="taskrow" data-task="1" draggable style={css(t.rowStyle)}
+                  <div key={t.id} className="taskrow" data-task="1" draggable={t.draggable} style={css(t.rowStyle)}
                     onDragStart={t.onDragStart} onDragEnter={t.onDragEnter} onDragOver={t.onDragOver} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
                     <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
                     <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className="fxstar on" onClick={t.onUnstar} title="Retirer d'Aujourd'hui">★</span></span>
-                    <span style={css(t.titleStyle)}>{t.title}</span>
+                    {/* TITLE */}
+                    <span style={css('flex:1;min-width:0;display:flex;align-items:center;overflow:hidden;padding-right:8px;')}>
+                      {t.edTitle
+                        ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
+                        : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
+                    </span>
+                    {/* PROJECT */}
                     <span style={css('width:210px;flex:none;display:flex;align-items:center;overflow:hidden;')}><span style={css(t.projBadgeStyle+'max-width:100%;overflow:hidden;text-overflow:ellipsis;')}>{t.projName}</span></span>
-                    <span style={css('width:88px;flex:none;font-size:12px;color:'+t.dueColor+';')}>{t.dueText}</span>
-                    <span style={css('width:150px;flex:none;display:flex;align-items:center;overflow:hidden;')}>{t.hasPerson ? <span style={css(t.personChip)}>{t.personName}</span> : <span style={css('font-size:12px;color:var(--cbox);')}>—</span>}</span>
-                    <span style={css('width:128px;flex:none;display:flex;align-items:center;')}><span style={css(t.statusStyle)}><span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>{t.statusLabel}</span></span>
+                    {/* DUE */}
+                    <span className="cell" style={css('width:88px;flex:none;padding:3px 6px;position:relative;')} onClick={t.onDueClick}>
+                      {t.edDue
+                        ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css("width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;")} />
+                        : <span style={css('font-size:12px;color:'+t.dueColor+';')}>{t.dueText||'—'}</span>}
+                    </span>
+                    {/* PERSON */}
+                    <span className="cell" style={css('width:150px;flex:none;padding:3px 6px;overflow:visible;position:relative;')} onClick={t.onPersonClick}>
+                      {t.edPerson
+                        ? <React.Fragment>
+                            <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
+                            <div style={css('position:absolute;top:32px;left:6px;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
+                              {t.personMenu.map((o,i)=>
+                                <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
+                                  <span style={css(o.avatarStyle)}>{o.initials}</span>
+                                  <span style={css(o.labelStyle)}>{o.label}</span>
+                                  <span style={css(o.checkStyle)}>✓</span>
+                                </div>)}
+                            </div>
+                          </React.Fragment>
+                        : (t.hasPerson ? <span style={css(t.personChip)}>{t.personName}</span> : <span style={css('font-size:12px;color:var(--cbox);')}>＋ assigner</span>)}
+                    </span>
+                    {/* STATUS */}
+                    <span style={css('width:128px;flex:none;position:relative;')}>
+                      <span onClick={t.onStatusClick} title="Changer le statut" style={css(t.statusStyle)}>
+                        <span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>
+                        {t.statusLabel}
+                        <span style={css('margin-left:auto;opacity:.5;font-size:9px;padding-left:4px;')}>▾</span>
+                      </span>
+                      {t.edStatus &&
+                        <div style={css('position:absolute;top:32px;left:0;min-width:152px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;')}>
+                          {t.statusOptions.map(so=>
+                            <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
+                              <span style={css('width:7px;height:7px;border-radius:50%;background:'+so.dot+';')}></span>
+                              {so.label}
+                              <span style={css(so.checkStyle)}>✓</span>
+                            </div>)}
+                        </div>}
+                    </span>
                   </div>)}
               <div style={css('height:40px;')}></div>
             </div>
