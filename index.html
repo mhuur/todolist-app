@@ -2851,7 +2851,7 @@ class Flux extends React.Component {
 
   // ---- view / selection / settings ----
   setView(v){ this.setState({ view:v }); }
-  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; let t=null; if(willSel){ t=st.tasks.find(x=>x.id===id); if(!t){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt){ t=tt; break; } } } } return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false }; }); }
+  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; let t=null; if(willSel){ t=st.tasks.find(x=>x.id===id); if(!t){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt){ t=tt; break; } } } } return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false, childQuery:'', childOpen:false }; }); }
   // ---- editing ----
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
@@ -2911,7 +2911,27 @@ class Flux extends React.Component {
     : ({ projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(t=> t.id===id?{...t,...patch}:t)} : p) }) ); }
   updateTitle(id,val){ this.patch(id,{title:val}); }
   updateDue(id,due){ this.patch(id,{due}); }
-  updateDep(id,depId){ this.patch(id,{deps: depId?[depId]:[]}); }
+  // ---- interdépendances (tâches filles = prérequis) ----
+  // Niveau de blocage dans un projet : 0 = aucun prérequis non terminé ; sinon 1 + max(niveau des bloqueurs). Une fille « done » ne bloque plus. Anti-cycle (back-edge → 0).
+  taskLevels(tasks){
+    const byId = new Map((tasks||[]).map(t=>[t.id,t]));
+    const memo = new Map(), stack = new Set();
+    const lvl = id => { if(memo.has(id)) return memo.get(id); const t=byId.get(id); if(!t) return 0; if(stack.has(id)) return 0; stack.add(id); let mx=-1; (t.deps||[]).forEach(d=>{ const dt=byId.get(d); if(!dt||dt.status==='done') return; mx=Math.max(mx, lvl(d)); }); stack.delete(id); const v=mx<0?0:mx+1; memo.set(id,v); return v; };
+    (tasks||[]).forEach(t=>lvl(t.id));
+    return memo;
+  }
+  // true si fromId dépend (transitivement) de targetId — interdit la création de cycles.
+  dependsOn(tasks, fromId, targetId){ const byId=new Map((tasks||[]).map(t=>[t.id,t])); const seen=new Set(); const visit=id=>{ if(seen.has(id)) return false; seen.add(id); const t=byId.get(id); if(!t) return false; for(const d of (t.deps||[])){ if(d===targetId) return true; if(visit(d)) return true; } return false; }; return visit(fromId); }
+  // Applique fn(tasks) au projet contenant parentId (courant ou autre), en un seul setState.
+  mutProjectOf(parentId, fn){ this.setState(st=> st.tasks.some(t=>t.id===parentId)
+    ? ({ tasks: fn(st.tasks) })
+    : ({ projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===parentId)) ? {...p, tasks: fn(p.tasks)} : p) }) ); }
+  // Lie une fille existante (prérequis). No-op si déjà liée, soi-même, ou si ça créerait un cycle.
+  addChild(parentId, childId){ if(!childId||childId===parentId) return; this.mutProjectOf(parentId, tasks=>{ const par=tasks.find(t=>t.id===parentId); if(!par||(par.deps||[]).indexOf(childId)>=0) return tasks; if(this.dependsOn(tasks, childId, parentId)) return tasks; return tasks.map(t=> t.id===parentId ? {...t, deps:[...(t.deps||[]), childId]} : t); }); }
+  // Crée une nouvelle tâche dans le projet du parent et la lie comme fille.
+  addChildNew(parentId, title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); this.mutProjectOf(parentId, tasks=>{ const par=tasks.find(t=>t.id===parentId); const child={ id, title:tx, cat:par?par.cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:false }; return [...tasks, child].map(t=> t.id===parentId ? {...t, deps:[...(t.deps||[]), id]} : t); }); }
+  // Détache une fille (retire le lien, ne supprime pas la tâche).
+  removeChild(parentId, childId){ this.mutProjectOf(parentId, tasks=> tasks.map(t=> t.id===parentId ? {...t, deps:(t.deps||[]).filter(d=>d!==childId)} : t)); }
   updatePerson(id,person){ this.patch(id,{person}); }
   startPersonEdit(id){ this.setState({ editing:{id,field:'person'}, personQuery:'' }); }
   stopPersonEdit(){ this.setState({ editing:{id:null,field:null}, personQuery:'' }); }
@@ -3037,7 +3057,6 @@ class Flux extends React.Component {
   addTodayTask(projId,title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const tgt=projId||st.currentProjectId; if(tgt===st.currentProjectId || !tgt){ return { tasks:[...st.tasks, nt], todayOrder:norder }; } return { projects:(st.projects||[]).map(p=> p.id===tgt ? {...p, tasks:[...(p.tasks||[]), nt]} : p), todayOrder:norder }; }); }
 
   // ---- helpers ----
-  catName(id){ const c=this.state.categories.find(c=>c.id===id); return c?c.name:'Sans catégorie'; }
   person(id){ return this.state.people.find(p=>p.id===id) || null; }
   formatDue(iso){
     const isDark = this.state.theme!=='clair';
@@ -3098,6 +3117,12 @@ class Flux extends React.Component {
     // Shared pill recipe — Personne & Statut chips share identical geometry & type.
     const chipBase = `display:inline-flex;align-items:center;line-height:1;border-radius:20px;padding:${D.stPad};font-size:12px;font-weight:500;white-space:nowrap;`;
 
+    // Niveau de blocage de chaque tâche du projet courant (0 = prête). Calculé une fois par render.
+    const fluxLevels = this.taskLevels(st.tasks);
+    const lvlBadge = (lv)=> lv===0
+      ? "display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#22C55E;background:transparent;border:1px solid rgba(34,197,94,.5);box-shadow:inset 0 0 0 1px rgba(34,197,94,.20),0 0 8px rgba(34,197,94,.22);text-shadow:0 0 6px currentColor;"
+      : "display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--line);";
+
     const vm = (t) => {
       const sm = STATUS[t.status];
       const done = t.status==='done';
@@ -3107,17 +3132,9 @@ class Flux extends React.Component {
       if(sel) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
       if(isEd('status')) rowStyle += 'z-index:25;';
       if(st.dragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
-      const depRaw = t.deps[0] || '';
-      const isCatDep = depRaw.slice(0,4)==='cat:';
-      const dep = (!isCatDep && depRaw) ? taskById(depRaw) : null;
-      const depCatName = isCatDep ? this.catName(depRaw.slice(4)) : '';
-      const hasDep = isCatDep || !!dep;
+      const level = fluxLevels.get(t.id) || 0;
+      const blockers = (t.deps||[]).map(d=>taskById(d)).filter(x=>x && x.status!=='done');
       const du = this.formatDue(t.due);
-      /* Options du menu « Bloquée par », groupées par catégorie (triées) : chaque catégorie est sélectionnable (bloque par toute la catégorie), puis ses tâches ; tâches sans catégorie en dernier. */
-      const depGroups = [];
-      st.categories.slice().sort(byName).forEach(c=>{ const tk=st.tasks.filter(x=>x.id!==t.id && (x.cat||'')===c.id).map(x=>({id:x.id,name:x.title})); depGroups.push({ id:c.id, name:c.name, selectable:true, tasks:tk }); });
-      const unTk = st.tasks.filter(x=>x.id!==t.id && !x.cat).map(x=>({id:x.id,name:x.title}));
-      if(unTk.length) depGroups.push({ id:'', name:'Sans catégorie', selectable:false, tasks:unTk });
       const p = this.person(t.person);
       const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
         return { key:k, label:m.label, dot:m.dot,
@@ -3147,13 +3164,12 @@ class Flux extends React.Component {
         checkStyle: this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
         statusStyle: chipBase + `gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`,
         statusLabel:sm.label, statusDot:sm.dot, statusOptions,
-        depId: depRaw, depGroups,
-        depText: hasDep ? '⛓' : '—', depColor: hasDep ? '#b5651d' : 'var(--cbox)', depTitle: dep ? ('Bloquée par : '+dep.title) : (isCatDep ? ('Bloquée par la catégorie : '+depCatName) : 'Aucune dépendance'),
+        level, levelText:String(level), levelBadgeStyle:lvlBadge(level),
+        levelTitle: blockers.length ? ('Bloquée par : '+blockers.map(b=>b.title).join(', ')) : 'Niveau 0 — aucun prérequis, à faire',
         edTitle:isEd('title'), showTitle:!isEd('title'),
         edDue:isEd('due'), showDue:!isEd('due'),
         edPerson:isEd('person'), showPerson:!isEd('person'),
         edStatus:isEd('status'),
-        edDep:isEd('dep'), showDep:!isEd('dep'),
         stop,
         today: !!t.today,
         onRowToggle: ()=>this.toggleSelect(t.id),
@@ -3172,8 +3188,6 @@ class Flux extends React.Component {
         onPersonQuery: (e)=>this.setPersonQuery(e.target.value),
         onPersonKey: (e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const hit=st.people.find(pp=>pp.name.toLowerCase()===ql) || st.people.find(pp=>pp.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
         onStatusClick: (e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
-        onDepClick: (e)=>{ stop(e); this.startEdit(t.id,'dep'); },
-        onDepChange: (e)=>{ this.updateDep(t.id, e.target.value); this.stopEdit(); },
         onDragStart: (e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
         onDragOver: (e)=>{ e.preventDefault(); },
         onDragEnter: (e)=>{ e.preventDefault(); if(!st.dragCatId && st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
@@ -3261,8 +3275,12 @@ class Flux extends React.Component {
 
     // ---- Vue Aujourd'hui (liste globale, ordre propre) ----
     const tProjBadge = "font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 8px;white-space:nowrap;flex:none;";
+    // Niveau d'une tâche d'aujourd'hui, calculé dans SON projet (vue cross-projet → mémo par projet).
+    const _todayLvlCache = {};
+    const todayLevelOf = (entry)=>{ let m=_todayLvlCache[entry.projId]; if(!m){ const pj=(st.projects||[]).find(p=>p.id===entry.projId); const tks = pj ? (pj.id===st.currentProjectId ? st.tasks : (pj.tasks||[])) : []; m=this.taskLevels(tks); _todayLvlCache[entry.projId]=m; } return m.get(entry.task.id)||0; };
     const tvm = (entry)=>{
       const t = entry.task; const done = t.status==='done'; const sm = STATUS[t.status];
+      const level = todayLevelOf(entry);
       const pp = (entry.people||[]).find(x=>x.id===t.person) || null;
       const du = this.formatDue(t.due);
       const isEd = (fld)=> ed.id===t.id && ed.field===fld;
@@ -3291,6 +3309,7 @@ class Flux extends React.Component {
       }
       return {
         id:t.id, title:t.title, projName:entry.projName, projBadgeStyle:tProjBadge,
+        level, levelText:String(level), levelBadgeStyle:lvlBadge(level), levelTitle: level===0?'Niveau 0 — aucun prérequis, à faire':('Niveau '+level),
         dueText:du.text, dueColor:du.color, dueISO:t.due||'',
         statusLabel:sm.label, statusDot:sm.dot, statusStyle: chipBase+`gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`, statusOptions,
         hasPerson:!!pp, personName:pp?pp.name:'', personChip: pp? chipBase+`max-width:140px;overflow:hidden;text-overflow:ellipsis;background:${pp.color}${isDark?'33':'18'};color:${isDark?lighten(pp.color,0.55):lighten(pp.color,-0.12)};` : '', personQuery:st.personQuery, personMenu,
@@ -3313,6 +3332,7 @@ class Flux extends React.Component {
         onPersonQuery:(e)=>this.setPersonQuery(e.target.value),
         onPersonKey:(e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const ppl=entry.people||[]; const hit=ppl.find(x=>x.name.toLowerCase()===ql) || ppl.find(x=>x.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPersonTo(entry.projId,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
         onStatusClick:(e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
+        onDelete:(e)=>{ stop(e); this.askDelete(t.id); },
         onDragStart:(e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({todayDragId:t.id}); },
         onDragEnter:(e)=>{ e.preventDefault(); if(st.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
         onDragOver:(e)=>{ e.preventDefault(); },
@@ -3342,19 +3362,44 @@ class Flux extends React.Component {
     const stask = staskRes ? staskRes.task : null;
     let sel = null;
     if(stask){
-      const cl = Array.isArray(stask.checklist)?stask.checklist:[];
-      const cdone = cl.filter(i=>i.done).length;
       const _selCat = (staskRes.categories||[]).find(c=>c.id===stask.cat);
+      // Tâches filles = prérequis (stask.deps), résolues dans le projet propriétaire de la tâche sélectionnée (cross-projet en vue Aujourd'hui).
+      const ownerTasks = staskRes.isCur ? st.tasks : (((st.projects||[]).find(p=>p.id===staskRes.projId)||{}).tasks || []);
+      const ownerLevels = this.taskLevels(ownerTasks);
+      const childBadge = lv => lv===0
+        ? "display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;color:#22C55E;background:transparent;border:1px solid rgba(34,197,94,.5);box-shadow:0 0 7px rgba(34,197,94,.22);text-shadow:0 0 6px currentColor;flex:none;"
+        : "display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--line);flex:none;";
+      const mkRel = ct => { const lv=ownerLevels.get(ct.id)||0; return { id:ct.id, title:ct.title, done:ct.status==='done', dot:(STATUS[ct.status]||{}).dot||'var(--muted)', level:lv, levelBadgeStyle:childBadge(lv), levelTitle: lv===0?'Niveau 0 — prête':('Niveau '+lv) }; };
+      const children = (stask.deps||[]).map(did=>{ const ct=ownerTasks.find(t=>t.id===did); return ct?mkRel(ct):null; }).filter(Boolean);
+      const cDone = children.filter(c=>c.done).length;
+      // Tâches mères = inverse de deps : les tâches qui ont la tâche courante comme prérequis (elle les débloque).
+      const parents = ownerTasks.filter(t=> t.id!==stask.id && (t.deps||[]).indexOf(stask.id)>=0).map(mkRel);
+      const cq=(st.childQuery||''); const cqt=cq.trim(); const cql=cqt.toLowerCase();
+      const linked=new Set(stask.deps||[]);
+      // Candidats liables : même projet, pas soi-même, pas déjà lié, et ne créerait pas de cycle (la candidate ne dépend pas déjà de la tâche courante).
+      const childCandidates = ownerTasks.filter(t=> t.id!==stask.id && !linked.has(t.id) && !this.dependsOn(ownerTasks, t.id, stask.id) && (!cql || (t.title||'').toLowerCase().indexOf(cql)>=0))
+        .slice(0,8).map(t=>({ id:t.id, title:t.title, dot:(STATUS[t.status]||{}).dot||'var(--muted)' }));
+      const childExact = ownerTasks.some(t=> t.id!==stask.id && (t.title||'').toLowerCase()===cql);
+      const childCanCreate = !!cqt && !childExact;
       sel = { id:stask.id, title:stask.title, catLabel:_selCat?_selCat.name:'Sans catégorie', notes:stask.notes,
-        checklist:cl, checkDone:cdone, checkTotal:cl.length, checkPct: cl.length?Math.round(cdone/cl.length*100):0,
+        children, childDone:cDone, childTotal:children.length, childPct: children.length?Math.round(cDone/children.length*100):0,
+        parents, parentTotal:parents.length,
+        childQuery:cq, childQueryTrim:cqt, childOpen:!!st.childOpen, childCandidates, childCanCreate,
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
-        onToggleCheck:(iid)=>this.toggleCheck(stask.id, iid),
-        onCheckText:(iid,val)=>this.updateCheckText(stask.id, iid, val),
-        onAddCheck:(text)=>this.addCheck(stask.id, text),
-        onDeleteCheck:(iid)=>this.deleteCheck(stask.id, iid),
+        onOpenChild:(cid)=>this.toggleSelect(cid),
+        onUnlinkChild:(cid)=>this.removeChild(stask.id, cid),
+        onOpenParent:(pid)=>this.toggleSelect(pid),
+        onUnlinkParent:(pid)=>this.removeChild(pid, stask.id),
+        onChildQuery:(e)=>this.setState({childQuery:e.target.value, childOpen:true}),
+        onChildFocus:()=>this.setState({childOpen:true}),
+        onChildBlur:()=>this.setState({childOpen:false}),
+        onChildPick:(cid)=>{ this.addChild(stask.id, cid); this.setState({childQuery:''}); },
+        onChildCreate:()=>{ if(cqt){ this.addChildNew(stask.id, cqt); this.setState({childQuery:''}); } },
+        onChildKey:(e)=>{ if(e.key==='Escape'){ this.setState({childQuery:'', childOpen:false}); return; } if(e.key==='Enter'){ e.preventDefault(); if(!cqt) return; const ex=childCandidates.find(o=>o.title.toLowerCase()===cql); if(ex){ this.addChild(stask.id, ex.id); this.setState({childQuery:''}); } else if(childCanCreate){ this.addChildNew(stask.id, cqt); this.setState({childQuery:''}); } else if(childCandidates[0]){ this.addChild(stask.id, childCandidates[0].id); this.setState({childQuery:''}); } } },
         onDelete:()=>this.askDelete(stask.id) };
     }
-    const confirmTask = st.confirmId ? taskById(st.confirmId) : null;
+    const confirmRes = st.confirmId ? this.taskByIdAny(st.confirmId) : null;
+    const confirmTask = confirmRes ? confirmRes.task : null;
 
     // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
     const curProj = (st.projects||[]).find(p=>p.id===st.currentProjectId) || null;
@@ -3398,7 +3443,7 @@ class Flux extends React.Component {
       onStartAddCat:()=>this.setState({addingCat:true}),
       onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
       onAddCatBlur:(e)=>{ const v=e.target.value.trim(); if(v) this.addCategory(v); else this.setState({addingCat:false}); },
-      hasSel: !!sel, sel: sel||{}, noteOpen: st.noteOpen, onToggleNote:()=>this.setState(s=>({noteOpen:!s.noteOpen})), onCloseDetail:()=>this.setState({selectedId:null}),
+      hasSel: !!sel, sel: sel||{}, noteOpen: st.noteOpen, onToggleNote:()=>this.setState(s=>({noteOpen:!s.noteOpen})), onCloseDetail:()=>this.setState({selectedId:null, childQuery:'', childOpen:false}),
       hasConfirm: !!confirmTask, confirmTitle: confirmTask?confirmTask.title:'',
       onCancelDelete:()=>this.cancelDelete(), onConfirmDelete:()=>this.confirmDelete(), stopModal:(e)=>stop(e),
       danger: isDark
@@ -3469,18 +3514,9 @@ class Flux extends React.Component {
                 </div>)}
             </div>}
         </span>
-        {/* DEP */}
-        <span className="cell" style={css('width:62px;flex:none;text-align:center;padding:3px 4px;')} onClick={t.onDepClick}>
-          {t.edDep &&
-            <select className="ied" data-edit="1" value={t.depId} onChange={t.onDepChange} onClick={t.stop} style={css('width:100%;font-size:11px;')}>
-              <option value="">Aucune</option>
-              {t.depGroups.map(g=>
-                <optgroup key={g.id||'none'} label={g.name}>
-                  {g.selectable && <option value={'cat:'+g.id}>▸ Toute la catégorie</option>}
-                  {g.tasks.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
-                </optgroup>)}
-            </select>}
-          {t.showDep && <span title={t.depTitle} style={css("font-size:12px;color:"+t.depColor+";")}>{t.depText}</span>}
+        {/* NIVEAU */}
+        <span className="cell" style={css('width:62px;flex:none;display:flex;align-items:center;justify-content:center;padding:3px 4px;')}>
+          <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>
         </span>
         <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
       </div>
@@ -3492,9 +3528,6 @@ class Flux extends React.Component {
     const todayOnly = !!this.props.todayOnly;   // onglet « Aujourd'hui » dédié : pas de top bar ni de rail de filtres
     const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
     const renameInput = 'flex:1;min-width:0;border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
-    const ckBox = (done)=> done
-      ? 'width:18px;height:18px;border-radius:50%;background:#22C55E;border:1.5px solid #22C55E;box-shadow:0 0 9px rgba(34,197,94,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex:none;cursor:pointer;margin-top:1px;'
-      : 'width:18px;height:18px;border-radius:50%;border:1.7px solid var(--cbox);background:transparent;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;margin-top:1px;';
     return (
       <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
 
@@ -3686,7 +3719,8 @@ class Flux extends React.Component {
                     <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
                     <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className="fxstar on" onClick={t.onUnstar} title="Retirer d'Aujourd'hui">★</span></span>
                     {/* TITLE */}
-                    <span style={css('flex:1;min-width:0;display:flex;align-items:center;overflow:hidden;padding-right:8px;')}>
+                    <span style={css('flex:1;min-width:0;display:flex;align-items:center;gap:9px;overflow:hidden;padding-right:8px;')}>
+                      <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>
                       {t.edTitle
                         ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
                         : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
@@ -3732,6 +3766,7 @@ class Flux extends React.Component {
                             </div>)}
                         </div>}
                     </span>
+                    <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
                   </div>)}
               <div style={css('height:40px;')}></div>
             </div>
@@ -3745,7 +3780,7 @@ class Flux extends React.Component {
                 <span style={css('width:104px;flex:none;')}>Échéance</span>
                 <span style={css('width:150px;flex:none;')}>Personne</span>
                 <span style={css('width:128px;flex:none;')}>Statut</span>
-                <span style={css('width:62px;flex:none;text-align:center;')}>Bloquée par</span>
+                <span style={css('width:62px;flex:none;text-align:center;')}>Niveau</span>
               </div>
 
               {v.groups.map(g=>
@@ -3787,31 +3822,65 @@ class Flux extends React.Component {
               </div>
               <div className="scrl" style={css('flex:1;min-height:0;overflow-y:auto;padding:16px 20px 6px;')}>
 
-                {/* progression */}
+                {/* progression — tâches filles terminées */}
                 <div style={css("display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;")}>
-                  <span>ACTIONS</span>
-                  {v.sel.checkTotal>0 &&
+                  <span>TÂCHES FILLES</span>
+                  {v.sel.childTotal>0 &&
                     <React.Fragment>
-                      <span style={css('color:var(--text2);')}>{v.sel.checkDone}/{v.sel.checkTotal}</span>
+                      <span style={css('color:var(--text2);')}>{v.sel.childDone}/{v.sel.childTotal}</span>
                       <span style={css('flex:1;height:4px;border-radius:3px;background:var(--soft);overflow:hidden;position:relative;')}>
-                        <span style={css('position:absolute;left:0;top:0;bottom:0;width:'+v.sel.checkPct+'%;background:#22C55E;box-shadow:0 0 8px rgba(34,197,94,.6);border-radius:3px;')}></span>
+                        <span style={css('position:absolute;left:0;top:0;bottom:0;width:'+v.sel.childPct+'%;background:#22C55E;box-shadow:0 0 8px rgba(34,197,94,.6);border-radius:3px;')}></span>
                       </span>
                     </React.Fragment>}
                 </div>
 
-                {/* items */}
-                {v.sel.checklist.map(it=>
-                  <div key={it.id} className="ckrow" style={css('display:flex;align-items:flex-start;gap:11px;padding:5px 6px;margin:0 -6px;')}>
-                    <span className="ckbox" onClick={()=>v.sel.onToggleCheck(it.id)} style={css(ckBox(it.done))}>{it.done?'✓':''}</span>
-                    <input value={it.text} onChange={e=>v.sel.onCheckText(it.id, e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } }} style={css('flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;line-height:1.5;padding:0;color:'+(it.done?'var(--muted)':'var(--text)')+';'+(it.done?'text-decoration:line-through;':''))} />
-                    <span className="ckdel" onClick={()=>v.sel.onDeleteCheck(it.id)} title="Supprimer l'action" style={css('flex:none;color:var(--muted);font-size:12px;cursor:pointer;padding:1px 3px;margin-top:2px;')}>✕</span>
+                {/* liste des filles (prérequis) — badge niveau + statut, titre cliquable, ✕ = détacher */}
+                {v.sel.children.map(c=>
+                  <div key={c.id} className="ckrow" style={css('display:flex;align-items:center;gap:10px;padding:5px 6px;margin:0 -6px;')}>
+                    <span title={c.levelTitle} style={css(c.levelBadgeStyle)}>{c.level}</span>
+                    <span style={css('width:7px;height:7px;border-radius:50%;flex:none;background:'+c.dot+';')}></span>
+                    <span onClick={()=>v.sel.onOpenChild(c.id)} title="Ouvrir cette tâche" style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px;cursor:pointer;'+(c.done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'))}>{c.title}</span>
+                    <span className="ckdel" onClick={()=>v.sel.onUnlinkChild(c.id)} title="Détacher (ne supprime pas la tâche)" style={css('flex:none;color:var(--muted);font-size:12px;cursor:pointer;padding:1px 3px;')}>✕</span>
                   </div>)}
 
-                {/* ajout */}
-                <div style={css('display:flex;align-items:center;gap:11px;padding:6px 6px;margin:0 -6px;')}>
-                  <span style={css('width:18px;height:18px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--cbox);font-size:16px;')}>＋</span>
-                  <input placeholder="Ajouter une action…" onKeyDown={e=>{ if(e.key==='Enter'){ const val=e.target.value; if(val.trim()){ v.sel.onAddCheck(val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} onBlur={e=>{ const val=e.target.value; if(val.trim()){ v.sel.onAddCheck(val); e.target.value=''; } }} style={css('flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;color:var(--text);')} />
+                {/* ajout d'une fille : lier une tâche existante du projet, ou la créer */}
+                <div style={css('position:relative;')}>
+                  <div style={css('display:flex;align-items:center;gap:11px;padding:6px 6px;margin:0 -6px;')}>
+                    <span style={css('width:18px;height:18px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--cbox);font-size:16px;')}>＋</span>
+                    <input value={v.sel.childQuery} onChange={v.sel.onChildQuery} onFocus={v.sel.onChildFocus} onBlur={v.sel.onChildBlur} onKeyDown={v.sel.onChildKey} placeholder="Lier ou créer une tâche fille…" style={css('flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;color:var(--text);')} />
+                  </div>
+                  {v.sel.childOpen && (v.sel.childCandidates.length>0 || v.sel.childCanCreate) &&
+                    <div style={css('position:absolute;left:24px;right:6px;top:36px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.22);padding:5px;z-index:50;max-height:240px;overflow:auto;')}>
+                      {v.sel.childCandidates.map(o=>
+                        <div key={o.id} className="stopt" onMouseDown={e=>{ e.preventDefault(); v.sel.onChildPick(o.id); }} style={css('display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);')}>
+                          <span style={css('width:7px;height:7px;border-radius:50%;flex:none;background:'+o.dot+';')}></span>
+                          <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.title}</span>
+                        </div>)}
+                      {v.sel.childCanCreate &&
+                        <div className="stopt" onMouseDown={e=>{ e.preventDefault(); v.sel.onChildCreate(); }} style={css('display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;color:'+v.accent+';font-weight:500;')}>
+                          <span style={css('font-size:14px;')}>＋</span>
+                          <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>Créer « {v.sel.childQueryTrim} »</span>
+                        </div>}
+                    </div>}
                 </div>
+
+                {/* tâches mères (dérivé : tâches que celle-ci débloque) — affichage seul, ✕ = détacher */}
+                {v.sel.parentTotal>0 &&
+                  <div style={css('margin-top:18px;')}>
+                    <div style={css("display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;")}>
+                      <span>TÂCHES MÈRES</span>
+                      <span style={css('color:var(--text2);')}>{v.sel.parentTotal}</span>
+                      <span style={css('flex:1;')}></span>
+                      <span style={css('font-size:9px;color:var(--cbox);text-transform:none;letter-spacing:0;')}>débloquées par celle-ci</span>
+                    </div>
+                    {v.sel.parents.map(c=>
+                      <div key={c.id} className="ckrow" style={css('display:flex;align-items:center;gap:10px;padding:5px 6px;margin:0 -6px;')}>
+                        <span title={c.levelTitle} style={css(c.levelBadgeStyle)}>{c.level}</span>
+                        <span style={css('width:7px;height:7px;border-radius:50%;flex:none;background:'+c.dot+';')}></span>
+                        <span onClick={()=>v.sel.onOpenParent(c.id)} title="Ouvrir cette tâche" style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px;cursor:pointer;'+(c.done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'))}>{c.title}</span>
+                        <span className="ckdel" onClick={()=>v.sel.onUnlinkParent(c.id)} title="Détacher (ne supprime pas la tâche)" style={css('flex:none;color:var(--muted);font-size:12px;cursor:pointer;padding:1px 3px;')}>✕</span>
+                      </div>)}
+                  </div>}
 
                 {/* note repliable */}
                 <div style={css('margin-top:16px;border-top:1px solid var(--divider);padding-top:14px;')}>
