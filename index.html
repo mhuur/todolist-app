@@ -4034,7 +4034,7 @@ class Flux extends React.Component {
         {!todayOnly && !v.planning &&
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div data-projsel style={css('position:relative;flex:none;')}>
-            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:8px;height:36px;width:340px;flex:none;border:1px solid var(--line);border-radius:9px;padding:0 9px 0 11px;background:var(--soft);cursor:pointer;')}>
+            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:8px;height:36px;width:max-content;max-width:600px;border:1px solid var(--line);border-radius:9px;padding:0 9px 0 11px;background:var(--soft);cursor:pointer;')}>
               <span style={css("font-family:'Nunito',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
               <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+(v.hasProject?v.projDeadlineCol:'var(--line)')+';')}></span>
               <span title={v.allMode?'Tous les projets':(v.hasProject?v.projName:'')} style={css('flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+(v.hasProject?'var(--text)':'var(--muted)')+';')}>{v.allMode?'Tous les projets':(v.hasProject?v.projName:'Aucun projet')}</span>
@@ -4081,7 +4081,7 @@ class Flux extends React.Component {
               </div>}
           </div>
           {v.projView==='todo' && !v.allMode &&
-          <div style={css('flex:none;width:300px;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
+          <div style={css('flex:none;width:300px;margin-left:auto;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
             <span style={css('color:var(--muted);font-size:14px;')}>＋</span>
             <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
             <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;")}>↵</span>
