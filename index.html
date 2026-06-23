@@ -3455,8 +3455,10 @@ class Flux extends React.Component {
     // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
     const curProj = (st.projects||[]).find(p=>p.id===st.currentProjectId) || null;
     const pq = (st.projQuery||'').trim(); const pql = pq.toLowerCase();
+    // Badge échéance projet (jours restants + couleur d'urgence) — partagé sélecteur + liste déroulante.
+    const projDayBadge = dl => { if(!/^\d{4}-\d{2}-\d{2}$/.test(dl||'')) return { j:'', col:'var(--muted)' }; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(dl+'T00:00:00')-t)/86400000); return { j: j<0?('J+'+(-j)):j===0?'Auj.':('J‑'+j), col: j<=10?'#f0746d':j<=28?'#f4b24c':'#37cf9b' }; };
     const projList = (st.projects||[]).filter(p=> p.name.toLowerCase().indexOf(pql)>=0)
-      .sort(byName).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId,
+      .sort(byName).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
         confirmDel: st.projDelId===p.id,
@@ -3476,8 +3478,8 @@ class Flux extends React.Component {
       projPlanning: curProj ? this.planGeo([curProj], {sort:false}) : {months:[],projects:[],accent},
       projDeadline: curProj ? (curProj.deadline||'') : '',
       projHasDeadline: !!(curProj && /^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')),
-      projDeadlineJ: (()=>{ if(!curProj||!/^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')) return ''; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(curProj.deadline+'T00:00:00')-t)/86400000); return j<0?('J+'+(-j)):j===0?"Aujourd'hui":('J‑'+j); })(),
-      projDeadlineCol: (()=>{ if(!curProj||!/^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')) return 'var(--muted)'; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(curProj.deadline+'T00:00:00')-t)/86400000); return j<=10?'#f0746d':j<=28?'#f4b24c':'#37cf9b'; })(),
+      projDeadlineJ: curProj?projDayBadge(curProj.deadline).j:'',
+      projDeadlineCol: curProj?projDayBadge(curProj.deadline).col:'var(--muted)',
       projNotes: curProj ? (curProj.notes||'') : '',
       projSteps: curProj ? (curProj.steps||[]).map(s=>({ id:s.id, name:s.name||'', date:s.date||'' })) : [],
       onSetProjView:(vw)=>this.setProjView(vw),
@@ -3799,10 +3801,13 @@ class Flux extends React.Component {
         {!todayOnly && !v.planning &&
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div data-projsel style={css('position:relative;flex:none;')}>
-            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:9px;height:34px;min-width:160px;max-width:240px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);cursor:pointer;')}>
+            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:8px;height:36px;min-width:220px;max-width:380px;border:1px solid var(--line);border-radius:9px;padding:0 9px 0 11px;background:var(--soft);cursor:pointer;')}>
               <span style={css("font-family:'Nunito',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
-              <span style={css('font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+(v.hasProject?'var(--text)':'var(--muted)')+';')}>{v.hasProject?v.projName:'Aucun projet'}</span>
-              <span style={css('margin-left:auto;opacity:.55;font-size:9px;flex:none;')}>▾</span>
+              <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+(v.hasProject?v.projDeadlineCol:'var(--line)')+';')}></span>
+              <span style={css('flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+(v.hasProject?'var(--text)':'var(--muted)')+';')}>{v.hasProject?v.projName:'Aucun projet'}</span>
+              {v.hasProject && v.projDeadlineJ &&
+                <span title="Jours avant l'échéance du projet" style={css("flex:none;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;color:#0b1626;background:"+v.projDeadlineCol+";border:1px solid "+v.projDeadlineCol+";")}>{v.projDeadlineJ}</span>}
+              <span style={css('opacity:.55;font-size:9px;flex:none;')}>▾</span>
             </div>
             {v.projOpen &&
               <div style={css('position:absolute;top:40px;left:0;width:264px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 32px rgba(20,22,28,.30);padding:6px;z-index:60;')}>
@@ -3813,7 +3818,9 @@ class Flux extends React.Component {
                       {o.editing
                         ? <input data-labeledit="1" onFocus={selectAll} defaultValue={o.name} onKeyDown={o.onNameKey} onBlur={o.onNameBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
                         : <span className="stopt" onClick={o.onPick} title="Ouvrir ce projet" style={css('flex:1;display:flex;align-items:center;gap:8px;min-width:0;cursor:pointer;')}>
-                            <span style={css('flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
+                            <span style={css('flex:none;width:7px;height:7px;border-radius:2px;background:'+o.dlCol+';')}></span>
+                            <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
+                            {o.dlJ && <span title="Jours avant l'échéance" style={css("flex:none;font-family:'Nunito',sans-serif;font-size:9.5px;font-weight:700;border-radius:5px;padding:1px 5px;color:#0b1626;background:"+o.dlCol+";")}>{o.dlJ}</span>}
                             <span style={css('color:'+v.accent+';font-size:11px;flex:none;'+(o.current?'':'visibility:hidden;'))}>✓</span>
                           </span>}
                       <span data-projmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
