@@ -754,7 +754,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ckrow:hover .ckdel{opacity:.55;}
 #flux-root .ckdel:hover{opacity:1 !important;color:#d04a45 !important;}
 #flux-root .ckbox:hover{border-color:#22C55E !important;box-shadow:0 0 8px rgba(34,197,94,.35);}
-#flux-root .fxstar{cursor:pointer;color:var(--cbox);font-size:15px;line-height:1;transition:color .12s,text-shadow .12s;}
+#flux-root .fxstar{cursor:pointer;color:var(--cbox);font-size:15px;line-height:1;transition:color .12s,text-shadow .12s,opacity .12s;opacity:0;}
+#flux-root .fxstar.on{opacity:1;}
+#flux-root .taskrow:hover .fxstar{opacity:1;}
 #flux-root .fxstar:hover{color:#FBBF24;}
 #flux-root .fxstar.on{color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.6);}
 #flux-root input::placeholder,#flux-root textarea::placeholder{color:var(--muted);}
@@ -2790,7 +2792,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, todayAddProj:'', allFilters:{status:{},cat:{},person:{}} };
+    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, todayAddProj:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -2831,6 +2833,8 @@ class Flux extends React.Component {
       if(this.state.personMenuId && !inPersonMenu){ this.setState({ personMenuId:null }); }
       const inProj = tg && tg.closest && tg.closest('[data-projsel]');
       if(this.state.projOpen && !inProj){ this.setState({ projOpen:false, projQuery:'', projMenuId:null, projDelId:null }); }
+      const inFilter = tg && tg.closest && tg.closest('[data-filterbar]');
+      if(this.state.filterOpen && !inFilter){ this.setState({ filterOpen:null }); }
       const inProjMenu = tg && tg.closest && tg.closest('[data-projmenu]');
       if(this.state.projMenuId && !inProjMenu){ this.setState({ projMenuId:null, projDelId:null }); }
       const inLabelEdit = tg && tg.closest && tg.closest('[data-labeledit="1"]');
@@ -3614,7 +3618,7 @@ class Flux extends React.Component {
         </span>
         {/* TITLE */}
         <span style={css('flex:1;min-width:120px;display:flex;align-items:center;gap:8px;overflow:hidden;padding-right:8px;')}>
-          <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>
+          {t.level>0 && <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>}
           {t.edTitle &&
             <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />}
           {t.showTitle &&
@@ -3881,7 +3885,7 @@ class Flux extends React.Component {
         <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
         <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className={'fxstar'+(t.today?' on':'')} onClick={t.onStar} title={t.today?"Retirer d'Aujourd'hui":"Ajouter à Aujourd'hui"}>{t.today?'★':'☆'}</span></span>
         <span style={css('flex:1;min-width:0;display:flex;align-items:center;gap:9px;overflow:hidden;padding-right:8px;')}>
-          <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>
+          {t.level>0 && <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>}
           {t.edTitle
             ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
             : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
@@ -3970,7 +3974,7 @@ class Flux extends React.Component {
         <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
         <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className={'fxstar'+(t.today?' on':'')} onClick={t.onStar} title={t.today?"Retirer d'Aujourd'hui":"Ajouter à Aujourd'hui"}>{t.today?'★':'☆'}</span></span>
         <span style={css('flex:1;min-width:0;display:flex;align-items:center;gap:9px;overflow:hidden;padding-right:8px;')}>
-          <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>
+          {t.level>0 && <span title={t.levelTitle} style={css(t.levelBadgeStyle)}>{t.levelText}</span>}
           {t.edTitle
             ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
             : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
@@ -4018,6 +4022,118 @@ class Flux extends React.Component {
             </div>}
         </span>
         <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
+      </div>
+    );
+  }
+
+  // Barre de filtres (Direction B) : remplace le rail latéral. mode = 'proj' | 'all' | 'today'
+  renderFilterBar(v, mode){
+    const accent = v.accent;
+    const tint = accent+'1f';
+    const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
+    const renameInput = 'flex:1;min-width:0;border:1px solid '+accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
+    const fOpen = this.state.filterOpen;
+    const setOpen = (k)=> this.setState(s=>({ filterOpen: s.filterOpen===k?null:k }));
+    let statusFacets, group2, personFacets, summaryCount, onClearAll, quick;
+    if(mode==='today'){
+      statusFacets=v.todayStatusFacets; personFacets=v.todayPersonFacets;
+      group2={ key:'proj', label:'Projet', kind:'proj', facets:v.todayProjFacets };
+      summaryCount=v.todayTotal; onClearAll=v.onClearTodayFilters;
+      quick={ onKeyDown:v.onTodayQuickAdd, onBlur:v.onTodayQuickAddBlur, placeholder:"Ajouter une tâche pour aujourd'hui…", sel:true };
+    } else if(mode==='all'){
+      statusFacets=v.allStatusFacets; personFacets=v.allPersonFacets;
+      group2={ key:'cat', label:'Catégorie', kind:'catRO', facets:v.allCatFacets };
+      summaryCount=v.allTotal; onClearAll=v.onClearAllFilters; quick=null;
+    } else {
+      statusFacets=v.statusFacets; personFacets=v.personFacets;
+      group2={ key:'cat', label:'Catégorie', kind:'cat', facets:v.catFacets };
+      summaryCount=v.totalCount; onClearAll=v.onAllTasks;
+      quick={ onKeyDown:v.onQuickAdd, onBlur:v.onQuickAddBlur, placeholder:'Ajouter une tâche rapide…', sel:false };
+    }
+    const anyOf = arr => (arr||[]).some(x=>x.active);
+    const statusActive=anyOf(statusFacets), g2Active=anyOf(group2.facets), personActive=anyOf(personFacets);
+    const anyFilter = statusActive || g2Active || personActive;
+    const chip = (active,open)=> 'display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;flex:none;border:1px solid '+((active||open)?accent:'var(--line)')+';background:'+(active?tint:'var(--soft)')+';color:'+((active||open)?accent:'var(--text2)')+';';
+    const dd = 'position:absolute;top:calc(100% + 6px);left:0;min-width:226px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 32px rgba(0,0,0,.30);padding:6px;z-index:60;max-height:340px;overflow-y:auto;overflow-x:hidden;';
+    const frow = 'display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);';
+    const cnt = "font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;";
+    const statusDD = ()=> statusFacets.map(ff=>
+      <div key={ff.id} onClick={ff.onToggle} style={css(frow)}>
+        <span style={css(ff.boxStyle)}>{ff.check}</span>
+        <span style={css('width:7px;height:7px;border-radius:50%;flex:none;background:'+ff.dot+';')}></span>
+        <span style={css('flex:1;min-width:0;')}>{ff.label}</span>
+        <span style={css(cnt)}>{ff.count}</span>
+      </div>);
+    const projDD = ()=>{ const rows=group2.facets.map(ff=>
+        <div key={ff.id} onClick={ff.onToggle} style={css(frow)}>
+          <span style={css(ff.boxStyle)}>{ff.check}</span>
+          <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>
+          <span style={css(cnt)}>{ff.count}</span>
+        </div>);
+      if(!group2.facets.length) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
+      return rows; };
+    const labelEdit = (ff, editable, avatar)=> editable && ff.editing
+      ? <input data-labeledit="1" onFocus={selectAll} defaultValue={ff.label} onKeyDown={ff.onLabelKey} onBlur={ff.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
+      : <span onClick={editable?ff.onLabelClick:ff.onToggle} title={editable?'Cliquer pour renommer':undefined} style={css('flex:1;min-width:0;'+(editable?'cursor:text;':'cursor:pointer;')+'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>;
+    const rowMenu = (ff, attr)=> attr==='cat'
+      ? <span data-catmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
+          <span onClick={ff.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
+          {ff.menuOpen && <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:70;')}>
+            <div className="stopt" onClick={ff.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
+            <div className="stopt" onClick={ff.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
+          </div>}
+        </span>
+      : <span data-personmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
+          <span onClick={ff.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
+          {ff.menuOpen && <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:70;')}>
+            <div className="stopt" onClick={ff.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
+            <div className="stopt" onClick={ff.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
+          </div>}
+        </span>;
+    const catDD = (editable)=>{ const rows=group2.facets.map(ff=>
+        <div key={ff.id} style={css(frow)}>
+          <span onClick={ff.onToggle} title="Filtrer" style={css(ff.boxStyle+'cursor:pointer;')}>{ff.check}</span>
+          {labelEdit(ff, editable)}
+          <span style={css(cnt)}>{ff.count}</span>
+          {editable && rowMenu(ff,'cat')}
+        </div>);
+      if(!group2.facets.length && !editable) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
+      return <React.Fragment>
+        {rows}
+        {editable && v.addingCat && <input autoFocus onKeyDown={v.onAddCatKey} onBlur={v.onAddCatBlur} placeholder="Nom de la catégorie…" style={css('width:100%;margin-top:4px;border:1px solid var(--cbox);border-radius:7px;padding:6px 9px;font-size:13px;background:var(--panel);color:var(--text);')} />}
+        {editable && <div onClick={v.onStartAddCat} style={css('display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text3);')}>＋ Nouvelle catégorie</div>}
+      </React.Fragment>; };
+    const personDD = (editable)=>{ const rows=personFacets.map(ff=>
+        <div key={ff.id} style={css(frow)}>
+          <span onClick={ff.onToggle} title="Filtrer" style={css(ff.boxStyle+'cursor:pointer;')}>{ff.check}</span>
+          {ff.avatarStyle && <span style={css(ff.avatarStyle)}></span>}
+          {labelEdit(ff, editable)}
+          <span style={css(cnt)}>{ff.count}</span>
+          {editable && rowMenu(ff,'person')}
+        </div>);
+      if(!personFacets.length) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
+      return rows; };
+    return (
+      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:7px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line);z-index:4;')}>
+        <div onClick={onClearAll} title="Afficher toutes les tâches" style={css('display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:8px;cursor:pointer;flex:none;border:1px solid '+(!anyFilter?accent:'var(--line)')+';background:'+(!anyFilter?tint:'var(--soft)')+';color:'+(!anyFilter?accent:'var(--text2)')+';')}>Tout <span style={css('font-size:10.5px;opacity:.85;')}>{summaryCount}</span></div>
+        <div data-fchip style={css('position:relative;flex:none;')}>
+          <div onClick={()=>setOpen('status')} style={css(chip(statusActive, fOpen==='status'))}>Statut <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
+          {fOpen==='status' && <div style={css(dd)}>{statusDD()}</div>}
+        </div>
+        <div data-fchip style={css('position:relative;flex:none;')}>
+          <div onClick={()=>setOpen(group2.key)} style={css(chip(g2Active, fOpen===group2.key))}>{group2.label} <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
+          {fOpen===group2.key && <div style={css(dd)}>{ group2.kind==='proj' ? projDD() : group2.kind==='catRO' ? catDD(false) : catDD(true) }</div>}
+        </div>
+        <div data-fchip style={css('position:relative;flex:none;')}>
+          <div onClick={()=>setOpen('person')} style={css(chip(personActive, fOpen==='person'))}>Personne <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
+          {fOpen==='person' && <div style={css(dd)}>{ personDD(mode==='proj') }</div>}
+        </div>
+        {quick &&
+          <div style={css('margin-left:auto;flex:none;width:300px;display:flex;align-items:center;gap:8px;height:30px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;background:var(--soft);')}>
+            <span style={css('color:var(--muted);font-size:14px;flex:none;')}>＋</span>
+            <input onKeyDown={quick.onKeyDown} onBlur={quick.onBlur} placeholder={quick.placeholder} style={css('border:none;background:transparent;font-size:13px;flex:1;min-width:0;color:var(--text);')} />
+            <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;flex:none;")}>↵</span>
+          </div>}
       </div>
     );
   }
@@ -4080,7 +4196,7 @@ class Flux extends React.Component {
                 </div>
               </div>}
           </div>
-          {v.projView==='todo' && !v.allMode &&
+          {false && v.projView==='todo' && !v.allMode &&
           <div style={css('flex:none;width:300px;margin-left:auto;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
             <span style={css('color:var(--muted);font-size:14px;')}>＋</span>
             <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
@@ -4095,17 +4211,15 @@ class Flux extends React.Component {
         {/* ===================== TOP BAR (Aujourd'hui) ===================== */}
         {todayOnly &&
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
-          <span style={css('font-size:16px;color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.5);flex:none;')}>★</span>
-          <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Aujourd'hui</span>
+          {v.todayProjOptions.length>0
+            ? <div title="Projet de destination des nouvelles tâches" style={css('flex:none;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 8px 0 11px;background:var(--soft);')}>
+                <span style={css("font-family:'Nunito',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
+                <select value={v.todayAddProj} onChange={v.onTodayAddProj} style={css("border:none;background:transparent;color:var(--text);font-size:14px;font-weight:700;font-family:'Nunito',sans-serif;outline:none;cursor:pointer;max-width:300px;")}>
+                  {v.todayProjOptions.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              </div>
+            : <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Aujourd'hui</span>}
           <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;flex:none;")}>{v.todayCount}</span>
-          <div style={css('flex:1;max-width:460px;margin-left:6px;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;background:var(--soft);')}>
-            <span style={css('color:var(--muted);font-size:14px;flex:none;')}>＋</span>
-            <input onKeyDown={v.onTodayQuickAdd} onBlur={v.onTodayQuickAddBlur} placeholder="Ajouter une tâche pour aujourd'hui…" style={css('border:none;background:transparent;font-size:13.5px;flex:1;min-width:0;color:var(--text);')} />
-            {v.todayProjOptions.length>0 &&
-              <select value={v.todayAddProj} onChange={v.onTodayAddProj} title="Projet de destination" style={css("flex:none;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px;font-family:'Nunito',sans-serif;padding:4px 6px;max-width:170px;cursor:pointer;")}>
-                {v.todayProjOptions.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
-              </select>}
-          </div>
         </div>}
 
         {v.planning &&
@@ -4118,11 +4232,14 @@ class Flux extends React.Component {
           </div>
         </div>}
 
+        {(todayOnly || (!v.planning && v.projView==='todo')) &&
+          this.renderFilterBar(v, todayOnly ? 'today' : (v.allMode ? 'all' : 'proj'))}
+
         {/* ===================== BODY ===================== */}
         <div style={css('flex:1;display:flex;min-height:0;position:relative;')}>
 
           {/* ---------- LEFT FACET RAIL ---------- */}
-          {!todayOnly && !v.planning && v.projView==='todo' && !v.allMode &&
+          {false && !todayOnly && !v.planning && v.projView==='todo' && !v.allMode &&
           <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
 
             <div onClick={v.onAllTasks} style={css(v.allViewStyle)}>
@@ -4182,7 +4299,7 @@ class Flux extends React.Component {
           </div>}
 
           {/* ---------- LEFT FILTER RAIL (Aujourd'hui) ---------- */}
-          {todayOnly &&
+          {false && todayOnly &&
           <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
 
             <div onClick={v.onClearTodayFilters} title="Afficher toutes les tâches du jour" style={css(v.todayAllStyle)}>
@@ -4221,7 +4338,7 @@ class Flux extends React.Component {
           </div>}
 
           {/* ---------- LEFT FILTER RAIL (Tous les projets) ---------- */}
-          {!todayOnly && !v.planning && v.projView==='todo' && v.allMode &&
+          {false && !todayOnly && !v.planning && v.projView==='todo' && v.allMode &&
           <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
 
             <div onClick={v.onClearAllFilters} title="Afficher toutes les tâches" style={css(v.allAllStyle)}>
@@ -4269,7 +4386,7 @@ class Flux extends React.Component {
                 <span style={css('width:24px;flex:none;')}></span>
                 <span style={css('flex:1;min-width:0;')}>Tâche</span>
                 <span style={css('width:210px;flex:none;')}>Projet</span>
-                <span style={css('width:88px;flex:none;')}>Échéance</span>
+                <span style={css('width:88px;flex:none;')}>Faire le</span>
                 <span style={css('width:150px;flex:none;')}>Personne</span>
                 <span style={css('width:128px;flex:none;')}>Statut</span>
               </div>
@@ -4362,11 +4479,6 @@ class Flux extends React.Component {
                   <span style={css('margin-left:auto;cursor:pointer;color:var(--muted);font-size:13px;')} onClick={v.onCloseDetail}>✕</span>
                 </div>
                 <div style={css('font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em;')}>{v.sel.title}</div>
-                <div style={css('display:flex;align-items:center;gap:10px;margin-top:12px;')}>
-                  <span style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;")}>Échéance</span>
-                  <input type="date" value={v.sel.due} onChange={v.sel.onDue} style={css("margin-left:auto;border:1px solid var(--line);border-radius:7px;padding:5px 9px;font-size:12.5px;background:var(--soft);color:var(--text);font-family:'Nunito',sans-serif;outline:none;")} />
-                  {v.sel.due && <span onClick={()=>v.sel.onDue({target:{value:''}})} title="Retirer la date" style={css('cursor:pointer;color:var(--muted);font-size:13px;padding:2px 3px;')}>✕</span>}
-                </div>
               </div>
               <div className="scrl" style={css('flex:1;min-height:0;overflow-y:auto;padding:16px 20px 6px;')}>
 
