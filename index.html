@@ -2792,7 +2792,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, todayAddProj:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
+    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, todayAddProj:'', projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -2890,10 +2890,10 @@ class Flux extends React.Component {
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
   // ---- mutations ----
-  toggleDone(id){ this.setState(st=>({ tasks: st.tasks.map(t=> t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t) })); }
-  setStatus(id,status){ this.setState(st=>{ const flip=arr=>arr.map(t=> t.id===id?{...t,status}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; return st.tasks.some(t=>t.id===id)
-    ? { tasks: flip(st.tasks), editing:_ed }
-    : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:_ed }; }); }
+  toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false}:{})} : t), ..._order }; }); }
+  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
+    ? { tasks: flip(st.tasks), editing:_ed, ..._order }
+    : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:_ed, ..._order }; }); }
   toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
   toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null, todayView:false }; }); }
   // Master « Toutes les tâches » : 1er clic = tout cocher/afficher ('all'), 2e clic = tout décocher/masquer ('none').
@@ -3061,7 +3061,7 @@ class Flux extends React.Component {
       const isCur = p.id===st.currentProjectId;
       const tasks  = isCur ? st.tasks  : (p.tasks||[]);
       const people = isCur ? st.people : (p.people||[]);
-      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; if(t.today||_sched||_rel) out.push({ task:t, projId:p.id, projName:p.name, people, sched:_sched, relanceDue:_rel }); });
+      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; if((t.today||_sched||_rel) && t.status!=='done') out.push({ task:t, projId:p.id, projName:p.name, people, sched:_sched, relanceDue:_rel }); });
     });
     const order = Array.isArray(st.todayOrder)?st.todayOrder:[];
     const rank = id => { const i=order.indexOf(id); return i<0?1e9:i; };
@@ -3087,16 +3087,19 @@ class Flux extends React.Component {
   // Valide/dévalide une tâche où qu'elle soit (vue Aujourd'hui = multi-projets).
   toggleDoneAny(id){
     this.setState(st=>{
-      const flip = t => t.id===id ? {...t, status: t.status==='done'?'todo':'done'} : t;
-      if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip) };
-      return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p) };
+      const found = st.tasks.find(t=>t.id===id) || (st.projects||[]).map(p=>(p.tasks||[]).find(t=>t.id===id)).find(Boolean);
+      const toDone = !(found && found.status==='done');
+      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false}:{})} : t;
+      const _order = toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {};
+      if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip), ..._order };
+      return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p), ..._order };
     });
   }
   // Réordonne UNIQUEMENT la vue Aujourd'hui (todayOrder). N'affecte jamais l'ordre de Flux (st.tasks).
   reorderToday(dragId, beforeId){
     if(!dragId || dragId===beforeId){ this.setState({todayDragId:null,todayDragOverId:null}); return; }
     this.setState(st=>{
-      const ids = this.todayTasks(st).filter(e=>!e.sched).map(x=>x.task.id);
+      const ids = this.todayTasks(st).filter(e=>!e.relanceDue).map(x=>x.task.id);
       const di = ids.indexOf(dragId); if(di<0) return { todayDragId:null, todayDragOverId:null };
       ids.splice(di,1);
       if(beforeId){ const bi=ids.indexOf(beforeId); ids.splice(bi<0?ids.length:bi,0,dragId); }
@@ -3114,8 +3117,30 @@ class Flux extends React.Component {
   // ---- Tous les projets : filtres cross-project (transient) : statut + catégorie/personne par NOM ----
   toggleAllFilter(axis,id){ this.setState(st=>{ const cur=st.allFilters||{status:{},cat:{},person:{}}; const ax={...(cur[axis]||{})}; if(ax[id]) delete ax[id]; else ax[id]=true; return { allFilters:{...cur,[axis]:ax} }; }); }
   clearAllFilters(){ this.setState({ allFilters:{status:{},cat:{},person:{}} }); }
-  // Crée une tâche déjà étoilée (today:true) dans le projet cible (courant ou autre) et l'ajoute en fin de la liste Aujourd'hui.
-  addTodayTask(projId,title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const tgt=projId||st.currentProjectId; if(tgt===st.currentProjectId || !tgt){ return { tasks:[...st.tasks, nt], todayOrder:norder }; } return { projects:(st.projects||[]).map(p=> p.id===tgt ? {...p, tasks:[...(p.tasks||[]), nt]} : p), todayOrder:norder }; }); }
+  // Capture rapide depuis Aujourd'hui : tâche étoilée (today:true) créée SANS projet → va dans l'inbox « Sans projet », à trier ensuite via la cellule Projet.
+  addTodayTask(title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const projects=this._withInbox(st.projects||[]).map(p=> p.id==='__inbox' ? {...p, tasks:[...(p.tasks||[]), nt]} : p); return { projects, todayOrder:norder }; }); }
+  // Projet réservé « Sans projet » (id __inbox) : créé à la volée, masqué du sélecteur/facettes, auto-purgé quand vide.
+  _withInbox(projects){ const arr=projects||[]; return arr.some(p=>p.id==='__inbox') ? arr : [...arr, { id:'__inbox', name:'Sans projet', deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }]; }
+  setProjPickQuery(v){ this.setState({ projPickQuery:v }); }
+  // Déplace une tâche vers un autre projet (ou l'inbox '__inbox'). Réinitialise ses deps (résolues par projet), retire les liens qui la visaient, purge l'inbox si vidée.
+  moveTaskToProject(id, toProjId){
+    this.setState(st=>{
+      const _close={ editing:{id:null,field:null}, projPickQuery:'' };
+      if(!toProjId) return _close;
+      let task=null, fromPid=null;
+      if(st.tasks.some(t=>t.id===id)){ task=st.tasks.find(t=>t.id===id); fromPid=st.currentProjectId; }
+      else { for(const p of (st.projects||[])){ const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ task=tt; fromPid=p.id; break; } } }
+      if(!task || fromPid===toProjId) return _close;
+      const moved={...task, deps:[]};
+      const strip=arr=> arr.filter(t=>t.id!==id).map(t=> (t.deps&&t.deps.indexOf(id)>=0)?{...t,deps:t.deps.filter(d=>d!==id)}:t);
+      let tasks=st.tasks; let projects=st.projects||[];
+      if(toProjId==='__inbox') projects=this._withInbox(projects);
+      if(fromPid===st.currentProjectId){ tasks=strip(tasks); } else { projects=projects.map(p=> p.id===fromPid?{...p,tasks:strip(p.tasks||[])}:p); }
+      if(toProjId===st.currentProjectId){ tasks=[...tasks, moved]; } else { projects=projects.map(p=> p.id===toProjId?{...p,tasks:[...(p.tasks||[]), moved]}:p); }
+      projects=projects.filter(p=> p.id!=='__inbox' || (Array.isArray(p.tasks)&&p.tasks.length>0));
+      return { tasks, projects, ..._close };
+    });
+  }
 
   // Ajoute une tâche datée (depuis Planning) au projet cible — la date est obligatoire.
   addPlanningTask(projId,title,dueISO){ const tx=(title||'').trim(); if(!tx||!dueISO) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:dueISO, person:'', notes:'', deps:[], checklist:[] }; this.setState(st=>{ const tgt=projId||st.currentProjectId; if(tgt===st.currentProjectId || !tgt){ return { tasks:[...st.tasks, nt] }; } return { projects:(st.projects||[]).map(p=> p.id===tgt ? {...p, tasks:[...(p.tasks||[]), nt]} : p) }; }); }
@@ -3353,7 +3378,7 @@ class Flux extends React.Component {
       const selR = st.selectedId===t.id;
       let rowStyle = `position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.rowH}px;padding:0 16px;border-bottom:1px solid var(--divider);background:var(--panel);cursor:grab;`;
       if(selR) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
-      if(isEd('status')||isEd('person')) rowStyle += 'z-index:25;';
+      if(isEd('status')||isEd('person')||isEd('proj')) rowStyle += 'z-index:25;';
       if(st.todayDragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
       const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
         return { key:k, label:m.label, dot:m.dot,
@@ -3373,8 +3398,19 @@ class Flux extends React.Component {
         const exact=ql && known.has(ql);
         if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPersonTo(proj,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
       }
+      let projMenu=[];
+      if(isEd('proj')){
+        const q=(st.projPickQuery||'').trim(); const ql=q.toLowerCase();
+        const mrow=(on)=>'display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--text);'+(on?`background:${aTint(selA)};`:'');
+        const chk=(on)=>`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;');
+        if(!ql || 'sans projet'.indexOf(ql)>=0) projMenu.push({ key:'__none', label:'Sans projet', dotStyle:'width:7px;height:7px;border-radius:2px;background:var(--cbox);flex:none;', style:mrow(entry.projId==='__inbox'), checkStyle:chk(entry.projId==='__inbox'), onPick:(e)=>{ stop(e); this.moveTaskToProject(t.id,'__inbox'); } });
+        (st.projects||[]).filter(p=>p.id!=='__inbox' && p.name.toLowerCase().indexOf(ql)>=0).forEach(p=>{ const on=p.id===entry.projId; projMenu.push({ key:p.id, label:p.name, dotStyle:`width:7px;height:7px;border-radius:2px;background:${on?accent:'var(--cbox)'};flex:none;`, style:mrow(on), checkStyle:chk(on), onPick:(e)=>{ stop(e); this.moveTaskToProject(t.id,p.id); } }); });
+      }
       return {
         id:t.id, title:t.title, projName:entry.projName, projBadgeStyle:tProjBadge,
+        projId:entry.projId, isInbox:entry.projId==='__inbox', edProj:isEd('proj'), projQuery:st.projPickQuery, projMenu,
+        onProjClick:(e)=>{ stop(e); if(isEd('proj')) this.stopEdit(); else this.setState({ editing:{id:t.id,field:'proj'}, projPickQuery:'' }); },
+        onProjQuery:(e)=>this.setProjPickQuery(e.target.value),
         level, levelText:String(level), levelBadgeStyle:lvlBadge(level), levelTitle: level===0?'Niveau 0 — aucun prérequis, à faire':('Niveau '+level),
         dueText:du.text, dueColor:du.color, dueISO:t.due||'',
         statusLabel:sm.label, statusDot:sm.dot, statusStyle: chipBase+`gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`, statusOptions,
@@ -3384,7 +3420,7 @@ class Flux extends React.Component {
         edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
         isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
         onRelanceClick:(e)=>{ stop(e); this.startEdit(t.id,'relance'); }, onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
-        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')),
+        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')||isEd('proj')),
         rowStyle, stop,
         onCheck:(e)=>{ stop(e); this.toggleDoneAny(t.id); },
         today:!!t.today, onStar:(e)=>{ stop(e); this.toggleToday(t.id); },
@@ -3415,23 +3451,26 @@ class Flux extends React.Component {
     const todayAnyFilter = !!(tfS.length||tfP.length||tfN.length);
     const entryPName = e => { const pp=(e.people||[]).find(x=>x.id===e.task.person); return pp?(pp.name||'').trim().toLowerCase():''; };
     const tMatch = e => (!tfS.length||tfS.indexOf(e.task.status)>=0) && (!tfP.length||tfP.indexOf(e.projId)>=0) && (!tfN.length||tfN.indexOf(entryPName(e))>=0);
-    const _schedSort=(a,b)=>{ const ad=a.task.due||'', bd=b.task.due||''; return ad===bd?0:(ad<bd?-1:1); };
     const _relSort=(a,b)=>{ const ad=a.task.relance||'', bd=b.task.relance||''; return ad===bd?0:(ad<bd?-1:1); };
     const _flatToday=(e)=>{ const r=tvm(e); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); };
-    const todayRelanceList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
-    const todaySchedList = todayEntriesAll.filter(e=>e.sched && !e.relanceDue).filter(tMatch).slice().sort(_schedSort).map(_flatToday);
-    const todayStarList = todayEntriesAll.filter(e=>!e.sched && !e.relanceDue).filter(tMatch).map(tvm);
-    const todayList = todayRelanceList.concat(todaySchedList, todayStarList);
+    // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente. Les "terminé" sont exclues par todayTasks (auto-décochées).
+    const _relList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
+    const _statusList = k => todayEntriesAll.filter(e=>!e.relanceDue && e.task.status===k).filter(tMatch).map(tvm);
+    const todayGroups = [
+      { key:'relance', label:'À relancer', icon:'↻', dot:'#e3ab43', items:_relList },
+      { key:'doing',   label:STATUS.doing.label, dot:STATUS.doing.dot, items:_statusList('doing') },
+      { key:'todo',    label:STATUS.todo.label,  dot:STATUS.todo.dot,  items:_statusList('todo') },
+      { key:'wait',    label:STATUS.wait.label,  dot:STATUS.wait.dot,  items:_statusList('wait') },
+    ].filter(g=>g.items.length>0);
+    const todayList = todayGroups.reduce((acc,g)=>acc.concat(g.items),[]);
     // Facettes (comptées sur l'ensemble non filtré) — Statut / Projet / Personne (par nom, cross-project).
-    const todayStatusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot, active:!!tf.status[k], count:todayEntriesAll.filter(e=>e.task.status===k).length, boxStyle:this.facetBox(!!tf.status[k],accent), check:tf.status[k]?'✓':'', onToggle:()=>this.toggleTodayFilter('status',k) }));
+    const todayStatusFacets = SORDER.filter(k=>k!=='done').map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot, active:!!tf.status[k], count:todayEntriesAll.filter(e=>e.task.status===k).length, boxStyle:this.facetBox(!!tf.status[k],accent), check:tf.status[k]?'✓':'', onToggle:()=>this.toggleTodayFilter('status',k) }));
     const _projWithToday=[]; todayEntriesAll.forEach(e=>{ if(_projWithToday.indexOf(e.projId)<0) _projWithToday.push(e.projId); });
-    const todayProjFacets = (st.projects||[]).filter(p=>_projWithToday.indexOf(p.id)>=0).slice().sort(byName).map(p=>({ id:p.id, label:p.name, active:!!tf.proj[p.id], count:todayEntriesAll.filter(e=>e.projId===p.id).length, boxStyle:this.facetBox(!!tf.proj[p.id],accent), check:tf.proj[p.id]?'✓':'', onToggle:()=>this.toggleTodayFilter('proj',p.id) }));
+    const todayProjFacets = (st.projects||[]).filter(p=>p.id!=='__inbox' && _projWithToday.indexOf(p.id)>=0).slice().sort(byName).map(p=>({ id:p.id, label:p.name, active:!!tf.proj[p.id], count:todayEntriesAll.filter(e=>e.projId===p.id).length, boxStyle:this.facetBox(!!tf.proj[p.id],accent), check:tf.proj[p.id]?'✓':'', onToggle:()=>this.toggleTodayFilter('proj',p.id) }));
     const _nameMeta=new Map(); todayEntriesAll.forEach(e=>{ const pp=(e.people||[]).find(x=>x.id===e.task.person); if(pp){ const k=(pp.name||'').trim().toLowerCase(); if(k&&!_nameMeta.has(k)) _nameMeta.set(k,{name:pp.name,color:pp.color}); } });
     const todayPersonFacets = Array.from(_nameMeta.entries()).map(([k,meta])=>({ id:k, label:meta.name, active:!!tf.person[k], count:todayEntriesAll.filter(e=>entryPName(e)===k).length, boxStyle:this.facetBox(!!tf.person[k],accent), check:tf.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${meta.color};flex:none;`, onToggle:()=>this.toggleTodayFilter('person',k) })).sort((a,b)=>(a.label||'').localeCompare(b.label||'','fr',{sensitivity:'base'}));
     const todayAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(todayAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
     const todayColHeaderStyle = `position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.hdrH}px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`;
-    const todayProjOptions = (st.projects||[]).slice().sort(byName).map(p=>({id:p.id,name:p.name}));
-    const todayAddProj = st.todayAddProj || st.currentProjectId || (((st.projects||[])[0]||{}).id) || '';
 
     const staskRes = st.selectedId ? this.taskByIdAny(st.selectedId) : null;
     const stask = staskRes ? staskRes.task : null;
@@ -3486,7 +3525,7 @@ class Flux extends React.Component {
     const _allT0=new Date(); _allT0.setHours(0,0,0,0);
     const _projDays = dl => /^\d{4}-\d{2}-\d{2}$/.test(dl||'') ? Math.round((new Date(dl+'T00:00:00')-_allT0)/86400000) : Infinity;
     const _projDeadlineSort = (a,b)=>{ const da=_projDays(a.deadline), db=_projDays(b.deadline); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
-    const projList = (st.projects||[]).filter(p=> p.name.toLowerCase().indexOf(pql)>=0)
+    const projList = (st.projects||[]).filter(p=> p.id!=='__inbox' && p.name.toLowerCase().indexOf(pql)>=0)
       .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
@@ -3514,7 +3553,7 @@ class Flux extends React.Component {
     const allCatFacets = Array.from(_allCatMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.cat[k], boxStyle:this.facetBox(!!af.cat[k],accent), check:af.cat[k]?'✓':'', onToggle:()=>this.toggleAllFilter('cat',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
     const allPersonFacets = Array.from(_allPersonMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.person[k], boxStyle:this.facetBox(!!af.person[k],accent), check:af.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${m.color};flex:none;`, onToggle:()=>this.toggleAllFilter('person',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
     const allAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(allAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
-    const allGroups = (st.projects||[]).map(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]); const dl=projDayBadge(p.deadline); const ftasks=(tasks||[]).filter(t=>_allMatch(t,cats,ppl)); const rows=ftasks.map(tk=>{ const r=tvm({task:tk, projId:p.id, projName:p.name, people:ppl}); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); }); return { projId:p.id, name:p.name, count:ftasks.length, dlJ:dl.j, dlCol:dl.col, days:_projDays(p.deadline), rows }; }).filter(g=> allAnyFilter ? g.count>0 : true).sort((a,b)=>{ if(a.days!==b.days) return a.days-b.days; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); });
+    const allGroups = (st.projects||[]).map(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]); const dl=projDayBadge(p.deadline); const ftasks=(tasks||[]).filter(t=>_allMatch(t,cats,ppl)); const rows=ftasks.map(tk=>{ const r=tvm({task:tk, projId:p.id, projName:p.name, people:ppl}); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); }); return { projId:p.id, name:p.name, count:ftasks.length, dlJ:dl.j, dlCol:dl.col, days:_projDays(p.deadline), rows }; }).filter(g=> (allAnyFilter ? g.count>0 : true) && !(g.projId==='__inbox' && g.count===0)).sort((a,b)=>{ if(a.days!==b.days) return a.days-b.days; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); });
     const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
 
     return {
@@ -3581,12 +3620,10 @@ class Flux extends React.Component {
       onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
       groups, statusFacets, catFacets, personFacets,
-      todayView: st.todayView, todayList, todayRelanceList, todaySchedList, todayStarList, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayColHeaderStyle, todayAnyFilter, todayAllStyle,
+      todayView: st.todayView, todayList, todayGroups, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayColHeaderStyle, todayAnyFilter, todayAllStyle,
       todayStatusFacets, todayProjFacets, todayPersonFacets,
-      todayAddProj, todayProjOptions,
-      onTodayAddProj:(e)=>this.setState({todayAddProj:e.target.value}),
-      onTodayQuickAdd:(e)=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTodayTask(this.state.todayAddProj||this.state.currentProjectId, val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
-      onTodayQuickAddBlur:(e)=>{ const val=e.target.value.trim(); if(val){ this.addTodayTask(this.state.todayAddProj||this.state.currentProjectId, val); e.target.value=''; } },
+      onTodayQuickAdd:(e)=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
+      onTodayQuickAddBlur:(e)=>{ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } },
       onClearTodayFilters:()=>this.clearTodayFilters(),
       totalCount: st.tasks.length,
       allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(showingAll?`background:${aTint(fillA)};color:${accent};`:'color:var(--text2);'),
@@ -3979,7 +4016,24 @@ class Flux extends React.Component {
             ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
             : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
         </span>
-        <span style={css('width:210px;flex:none;display:flex;align-items:center;overflow:hidden;')}><span style={css(t.projBadgeStyle+'max-width:100%;overflow:hidden;text-overflow:ellipsis;')}>{t.projName}</span></span>
+        <span className="cell" style={css('width:210px;flex:none;padding:3px 6px;overflow:visible;position:relative;display:flex;align-items:center;')} onClick={t.onProjClick} title="Changer le projet de la tâche">
+          {t.edProj
+            ? <React.Fragment>
+                <input className="ied" data-edit="1" autoFocus value={t.projQuery} onChange={t.onProjQuery} onClick={t.stop} placeholder="Chercher un projet…" style={css('width:100%;')} />
+                <div style={css('position:absolute;top:32px;left:6px;min-width:220px;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;max-height:264px;overflow:auto;')}>
+                  {t.projMenu.map(o=>
+                    <div className="stopt" key={o.key} onClick={o.onPick} style={css(o.style)}>
+                      <span style={css(o.dotStyle)}></span>
+                      <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.label}</span>
+                      <span style={css(o.checkStyle)}>✓</span>
+                    </div>)}
+                  {!t.projMenu.length && <div style={css('padding:7px 9px;font-size:12px;color:var(--muted);')}>Aucun projet.</div>}
+                </div>
+              </React.Fragment>
+            : (t.isInbox
+                ? <span style={css('font-size:12px;color:var(--cbox);')}>＋ projet</span>
+                : <span style={css(t.projBadgeStyle+'max-width:100%;overflow:hidden;text-overflow:ellipsis;')}>{t.projName}</span>)}
+        </span>
         <span className="cell" style={css('width:88px;flex:none;padding:3px 6px;position:relative;')} onClick={t.onDueClick}>
           {t.edDue
             ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css("width:100%;font-family:'Nunito',sans-serif;font-size:11px;")} />
@@ -4211,14 +4265,7 @@ class Flux extends React.Component {
         {/* ===================== TOP BAR (Aujourd'hui) ===================== */}
         {todayOnly &&
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
-          {v.todayProjOptions.length>0
-            ? <div title="Projet de destination des nouvelles tâches" style={css('flex:none;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 8px 0 11px;background:var(--soft);')}>
-                <span style={css("font-family:'Nunito',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
-                <select value={v.todayAddProj} onChange={v.onTodayAddProj} style={css("border:none;background:transparent;color:var(--text);font-size:14px;font-weight:700;font-family:'Nunito',sans-serif;outline:none;cursor:pointer;max-width:300px;")}>
-                  {v.todayProjOptions.map(o=> <option key={o.id} value={o.id}>{o.name}</option>)}
-                </select>
-              </div>
-            : <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Aujourd'hui</span>}
+          <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Aujourd'hui</span>
           <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;flex:none;")}>{v.todayCount}</span>
         </div>}
 
@@ -4395,30 +4442,16 @@ class Flux extends React.Component {
                     ? <React.Fragment>Aucune tâche ne correspond aux filtres.<br/><span onClick={v.onClearTodayFilters} style={css('color:'+v.accent+';cursor:pointer;')}>Réinitialiser les filtres</span></React.Fragment>
                     : <React.Fragment>Aucune tâche pour aujourd'hui.<br/>Dans l'onglet <b style={css('color:var(--text2);')}>Projet</b>, clique sur l'étoile <span style={css('color:var(--cbox);')}>☆</span> d'une tâche pour l'ajouter ici.</React.Fragment>}</div>
                 : (<React.Fragment>
-                    {v.todayRelanceList.length>0 && <React.Fragment>
+                    {v.todayGroups.map(g=> <React.Fragment key={g.key}>
                       <div style={css('display:flex;align-items:center;gap:8px;height:30px;padding:0 16px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--divider);')}>
-                        <span style={css('flex:none;font-size:12px;line-height:1;color:#e3ab43;')}>↻</span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);")}>À relancer</span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{v.todayRelanceList.length}</span>
+                        {g.icon
+                          ? <span style={css('flex:none;font-size:12px;line-height:1;color:'+g.dot+';')}>{g.icon}</span>
+                          : <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+g.dot+';')}></span>}
+                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);")}>{g.label}</span>
+                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{g.items.length}</span>
                       </div>
-                      {v.todayRelanceList.map(t=> this.renderTodayRow(t))}
-                    </React.Fragment>}
-                    {v.todaySchedList.length>0 && <React.Fragment>
-                      <div style={css('display:flex;align-items:center;gap:8px;height:30px;padding:0 16px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--divider);')}>
-                        <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+v.accent+';')}></span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);")}>Programmées</span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{v.todaySchedList.length}</span>
-                      </div>
-                      {v.todaySchedList.map(t=> this.renderTodayRow(t))}
-                    </React.Fragment>}
-                    {v.todayStarList.length>0 && <React.Fragment>
-                      <div style={css('display:flex;align-items:center;gap:8px;height:30px;padding:0 16px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--divider);')}>
-                        <span style={css('flex:none;font-size:12px;line-height:1;color:#FBBF24;')}>★</span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);")}>Sélectionnées</span>
-                        <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{v.todayStarList.length}</span>
-                      </div>
-                      {v.todayStarList.map(t=> this.renderTodayRow(t))}
-                    </React.Fragment>}
+                      {g.items.map(t=> this.renderTodayRow(t))}
+                    </React.Fragment>)}
                   </React.Fragment>)}
               <div style={css('height:40px;')}></div>
             </div>
