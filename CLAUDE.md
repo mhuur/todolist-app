@@ -40,6 +40,8 @@ grep -n "^// ▼ " index.html               # liste les ancres (à poser au fil 
 
 ## Conventions
 
+> **Direction visuelle (décidée 2026-07-01) : migration vers le thème _clair Ekopak_.** L'app passe du néon sombre au design system Ekopak — fonds clairs (`--surface-card`/`--neutral-50`), bleu profond `#0f3f93`, accents light-blue/corail/lime, ombres bleutées douces (`--shadow-sm/md`), police Montserrat. **Réf. vivante = [`revision.html`](revision.html)** : aperçu autonome (lecture seule des vraies données via localStorage/Firebase) des écrans **Aujourd'hui / Projet (Tableau + Kanban) / Temps**, source design = projet Claude Design « Révision TodoList CRM » (`Todolist CRM.dc.html`), tokens dans `../ekopak-design/tokens/`. **Tant que la refonte n'est pas portée dans `index.html`, la prod reste en néon sombre** — ne pas mélanger les deux langages dans un même écran. Les règles « néon » ci-dessous restent la référence pour retoucher un écran encore sombre ; pour un écran migré, suivre le thème clair Ekopak.
+
 - **Identifiants ultra-courts** (le code est dense par choix) : état global `S`, helpers `gid()`, `esc()`, `save()`, `render()`. Renderers par onglet : `rGT` (tâches du jour), `rDN` (deadlines), `rTM` (templates), `rCRM`, `rFB` (Notes), `rTR` (corbeille).
 - **Pose une ancre `// ▼ <nom>`** au-dessus de toute fonction-clé que tu ajoutes — la nav du fichier en dépend.
 - **Pattern de rendu** : `render()` reconstruit tout `app.innerHTML`. Pas de diff, pas de framework.
