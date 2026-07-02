@@ -772,7 +772,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-tab.on{color:var(--text);border-color:#0f3f93}
 #flux-root .ek-tab:hover:not(.on){color:var(--text2)}
 /* ── Écran Aujourd'hui (thème clair Ekopak) : lignes, groupes, zone Focus du jour, panneau détail ── */
-#flux-root .ek-trow{display:flex;align-items:center;gap:14px;padding:10px 8px;border-bottom:1px solid var(--divider);border-radius:6px;position:relative;transition:background .12s}
+#flux-root .ek-trow{display:flex;align-items:center;gap:15px;padding:12px 8px;border-bottom:1px solid var(--divider);border-radius:6px;position:relative;transition:background .12s}
 #flux-root .ek-trow:hover{background:#eef2f8}
 #flux-root .ek-ck{width:19px;height:19px;border-radius:6px;border:1.8px solid #c2cbd9;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer;background:var(--panel);transition:border-color .12s,background .12s}
 #flux-root .ek-ck svg{width:11px;height:11px}
@@ -799,7 +799,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-focusgrp{margin-bottom:28px;border-left:2px solid #81d0f5;padding-left:18px;border-radius:0 12px 12px 0;transition:background .12s}
 #flux-root .ek-grp.drop-hi,#flux-root .ek-focusgrp.drop-hi{background:#f2f5fb}
 #flux-root .ek-focusgrp .ek-trow{border-bottom:none}
-#flux-root .ek-dropslot{border:1.5px dashed #95a0b3;border-radius:10px;padding:13px 8px;margin:4px 8px;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;text-align:center;background:#e6f6fd}
+#flux-root .ek-dropslot{border:1.5px dashed #c5d0e6;border-radius:10px;padding:13px 8px;margin:4px 8px;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;text-align:center;background:#e6f6fd}
 #flux-root .ek-dtitle{flex:1;min-width:0;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;line-height:1.4;color:var(--text);border:none;border-bottom:1.5px solid transparent;background:none;outline:none;padding:0 0 3px;resize:none;overflow:hidden}
 #flux-root .ek-dtitle:focus{border-color:#81d0f5}
 #flux-root .ek-dnote{width:100%;border:1.5px solid #c2cbd9;border-radius:10px;padding:12px 13px;font-size:13px;line-height:1.6;color:var(--text);outline:none;resize:none;background:var(--panel);min-height:220px}
@@ -3477,10 +3477,9 @@ class Flux extends React.Component {
     const tvm = (entry, gkey)=>{
       const t = entry.task; const done = t.status==='done'; const sm = STATUS[t.status];
       const pp = (entry.people||[]).find(x=>x.id===t.person) || null;
-      // Couleurs d'échéance remappées sur la palette Ekopak (formatDue renvoie la palette du thème sombre).
-      const _ekc = c => (c==='#e3ab43'||c==='#b5651d') ? '#3aaae8' : ((c==='#f0746d'||c==='#d04a45') ? '#d8442b' : (c==='var(--cbox)' ? '#95a0b3' : c));
+      // Couleurs d'échéance Ekopak, fidèles à la maquette : seul « Aujourd'hui » est en light-blue, le dépassé en corail, tout le reste (Demain, futur, vide) en gris.
       const _duRaw = this.formatDue(t.due);
-      const du = { text:_duRaw.text, color:_ekc(_duRaw.color) };
+      const du = { text:_duRaw.text, color: _duRaw.text==="Aujourd'hui" ? '#3aaae8' : ((_duRaw.color==='#f0746d'||_duRaw.color==='#d04a45') ? '#d8442b' : 'var(--muted)') };
       const isEd = (fld)=> ed.id===t.id && ed.field===fld;
       const selR = st.selectedId===t.id;
       const isRel = !!entry.relanceDue;
@@ -4178,7 +4177,7 @@ class Flux extends React.Component {
                   </div>
                 </React.Fragment>
               : <span className={'ek-mchip'+(t.hasPerson?'':' none')}>
-                  <span style={css('overflow:hidden;text-overflow:ellipsis;')}>{t.hasPerson?t.personName:'＋'}</span>
+                  <span style={css('overflow:hidden;text-overflow:ellipsis;')}>{t.hasPerson?t.personName:'Non assigné'}</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
                 </span>}
           </span>
@@ -4212,13 +4211,15 @@ class Flux extends React.Component {
     const item = (active)=> 'display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:'+(active?'#0f3f93':'var(--text2)')+';white-space:nowrap;';
     const chk = <span style={css('margin-left:auto;color:#0f3f93;display:flex;font-size:12px;')}>✓</span>;
     const dropBtn = (active,open)=> "font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;background:none;border:none;padding:0;display:inline-flex;align-items:center;gap:7px;color:"+((active||open)?'#0f3f93':'var(--muted)')+";";
+    const chev = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;color:#95a0b3;flex:none;')}><path d="M6 9l6 6 6-6"></path></svg>;
     return (
-      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:24px;padding:0 30px;background:var(--panel);border-bottom:1px solid var(--line);z-index:4;')}>
+      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:24px;padding:0 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:4;')}>
         {v.todayStatusTabs.map(tb=>
           <button key={tb.k} className={'ek-tab'+(tb.active?' on':'')} onClick={()=>v.onSetTodayStatus(tb.k)}>{tb.label}</button>)}
-        <div style={css('margin-left:auto;display:flex;align-items:center;gap:22px;')}>
-          <div data-fchip style={css('position:relative;')}>
-            <button style={css(dropBtn(projSel.length>0, fOpen==='proj'))} onClick={()=>setOpen('proj')}>{projLabel}<span style={css('font-size:9px;opacity:.7;')}>▾</span></button>
+        {/* Filtres alignés au-dessus des colonnes méta (largeurs maquette : 148/82/106/67, gap 14) */}
+        <div style={css('margin-left:auto;display:flex;align-items:center;gap:14px;margin-right:6px;')}>
+          <div data-fchip style={css('position:relative;width:148px;display:flex;justify-content:flex-end;')}>
+            <button style={css(dropBtn(projSel.length>0, fOpen==='proj'))} onClick={()=>setOpen('proj')}>{projLabel}{chev}</button>
             {fOpen==='proj' &&
               <div style={css(dd)}>
                 <div onClick={()=>clearAxis('proj')} style={css(item(projSel.length===0))}><span style={css('flex:1;')}>Tous les projets</span>{projSel.length===0 && chk}</div>
@@ -4226,8 +4227,9 @@ class Flux extends React.Component {
                 {!(v.todayProjFacets||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
               </div>}
           </div>
-          <div data-fchip style={css('position:relative;')}>
-            <button style={css(dropBtn(personSel.length>0, fOpen==='person'))} onClick={()=>setOpen('person')}>{personLabel}<span style={css('font-size:9px;opacity:.7;')}>▾</span></button>
+          <span style={css('width:82px;flex:none;')}></span>
+          <div data-fchip style={css('position:relative;width:106px;display:flex;justify-content:flex-start;')}>
+            <button style={css(dropBtn(personSel.length>0, fOpen==='person'))} onClick={()=>setOpen('person')}>{personLabel}{chev}</button>
             {fOpen==='person' &&
               <div style={css(dd)}>
                 <div onClick={()=>clearAxis('person')} style={css(item(personSel.length===0))}><span style={css('flex:1;')}>Toutes les personnes</span>{personSel.length===0 && chk}</div>
@@ -4235,6 +4237,7 @@ class Flux extends React.Component {
                 {!(v.todayPersonFacets||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
               </div>}
           </div>
+          <span style={css('width:67px;flex:none;')}></span>
         </div>
       </div>
     );
@@ -4423,16 +4426,15 @@ class Flux extends React.Component {
 
         {/* ===================== EN-TÊTE (Aujourd'hui — thème clair Ekopak) ===================== */}
         {todayOnly &&
-        <div style={css('flex:none;display:flex;align-items:center;gap:22px;padding:18px 30px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+        <div style={css('flex:none;display:flex;align-items:center;gap:24px;padding:22px 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div style={css('flex:none;')}>
-            <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3aaae8;")}>{v.todayDateLong}</div>
-            <div style={css("font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-top:3px;")}>Aujourd'hui</div>
+            <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3aaae8;")}>{v.todayDateLong}</div>
+            <div style={css("font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-top:4px;")}>Aujourd'hui</div>
           </div>
-          <div className="qadd-ek" style={css('flex:1;max-width:420px;display:flex;align-items:center;gap:11px;height:40px;padding:0 4px;')}>
+          <div className="qadd-ek" style={css('flex:1;max-width:420px;display:flex;align-items:center;gap:11px;height:42px;padding:0 4px;')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#3aaae8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={css('width:17px;height:17px;flex:none;')}><path d="M12 5v14M5 12h14"></path></svg>
             <input onKeyDown={v.onTodayQuickAdd} onBlur={v.onTodayQuickAddBlur} placeholder="Ajouter une tâche…" style={css('flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13.5px;font-weight:500;color:var(--text);')} />
           </div>
-          <div style={css('flex:none;margin-left:auto;font-size:12.5px;color:var(--muted);')}><b style={css('color:var(--ekopak-deep-blue,#0f3f93);font-weight:700;')}>{v.todayTotal}</b> à faire</div>
         </div>}
 
         {v.planning &&
@@ -4593,7 +4595,7 @@ class Flux extends React.Component {
           {/* ---------- CENTER ---------- */}
           <div className="fxcol scrl" style={css('flex:1;min-width:0;overflow:auto;background:var(--bg);animation-delay:.08s;')}>
             {(todayOnly || v.todayView) ? (
-            <div style={css('min-width:860px;max-width:1180px;padding:24px 30px 40px;')}>
+            <div style={css('min-width:860px;padding:24px 30px 40px;')}>
               {v.todayFocus.show &&
                 <div className={'ek-focusgrp'+(v.todayFocus.hi?' drop-hi':'')} onDragOver={v.todayFocus.onOver} onDragEnter={v.todayFocus.onOver} onDrop={v.todayFocus.onDrop}>
                   <div className="ek-glabel"><b>Focus du jour</b><span className="c">{v.todayFocus.label}</span></div>
