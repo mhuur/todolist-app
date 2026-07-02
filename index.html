@@ -303,10 +303,43 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .ddh{font-size:10px;font-weight:700;color:#64748B;padding:8px 0 3px;text-transform:uppercase;letter-spacing:.3px}
 
 /* Trash */
-.tri{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#162032;border:1px solid #2A3A52;border-radius:6px;margin-bottom:4px}
-.tri .tii{flex:1;min-width:0;font-size:10px;color:#64748B}.tri b{color:#E2E8F0}
-.brs{border:none;border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;font-family:inherit;cursor:pointer;background:#10B981;color:#fff}
-.bpu{border:none;border-radius:4px;padding:3px 8px;font-size:9px;font-weight:700;font-family:inherit;cursor:pointer;background:#EF4444;color:#fff;margin-left:3px}
+/* Corbeille — thème clair Ekopak (scopé .k2wrap) + toast global réutilisable */
+.ek-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);background:var(--ekopak-dark-blue);color:#fff;font-family:'Montserrat','Nunito',sans-serif;font-size:12.5px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:var(--shadow-lg);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.ek-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.k2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
+.k2wrap .htop{display:flex;align-items:center;gap:20px;padding:20px 32px;border-bottom:1px solid var(--border-subtle);background:var(--surface-card)}
+.k2wrap .ov{font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--light-blue-600);text-transform:uppercase}
+.k2wrap .htop h1{font-size:19px;font-weight:700;color:var(--text-strong);margin:4px 0 0;letter-spacing:-.01em}
+.k2wrap .grow{flex:1}
+.k2wrap .bvider{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border:1.5px solid var(--coral-200,#f9c4b9);border-radius:10px;background:var(--surface-card);color:var(--coral-600);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.k2wrap .bvider:hover{background:var(--coral-50)}
+.k2wrap .bvider svg{width:14px;height:14px}
+.k2wrap .list{flex:1;overflow:auto;padding:22px 32px}
+.k2wrap .count{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px;padding:0 8px}
+.k2wrap .tri{display:flex;align-items:center;gap:13px;padding:11px 14px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:12px;margin-bottom:8px;box-shadow:var(--shadow-xs)}
+.k2wrap .tico{width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-sunken);color:var(--neutral-400);display:flex;align-items:center;justify-content:center}
+.k2wrap .tico svg{width:15px;height:15px}
+.k2wrap .tlbl{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k2wrap .tsub{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--deep-blue-50);color:var(--ekopak-deep-blue);white-space:nowrap;flex:none}
+.k2wrap .tsub.proj{background:var(--light-blue-100);color:var(--light-blue-600)}
+.k2wrap .tago{font-size:11.5px;font-weight:600;color:var(--text-muted);white-space:nowrap;flex:none;width:82px;text-align:right}
+.k2wrap .brs{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border:1.5px solid var(--deep-blue-200);border-radius:9px;background:var(--surface-card);color:var(--ekopak-deep-blue);font-size:11.5px;font-weight:700;cursor:pointer;flex:none;font-family:inherit}
+.k2wrap .brs:hover{background:var(--deep-blue-50)}
+.k2wrap .brs svg{width:13px;height:13px}
+.k2wrap .bpu{width:28px;height:28px;flex:none;border:none;background:none;border-radius:8px;color:var(--neutral-300);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.k2wrap .bpu:hover{background:var(--coral-50);color:var(--coral-600)}
+.k2wrap .bpu svg{width:14px;height:14px}
+.k2wrap .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;gap:12px;color:var(--neutral-400)}
+.k2wrap .empty svg{width:36px;height:36px;color:var(--ekopak-light-blue)}
+.k2wrap .empty b{font-size:15px;font-weight:700;color:var(--text-body)}
+.k2wrap .empty span{font-size:12.5px;font-weight:500}
+.k2wrap .cf-back{position:fixed;inset:0;background:rgba(26,40,83,.28);z-index:120;display:flex;align-items:center;justify-content:center}
+.k2wrap .cf{width:370px;max-width:92vw;background:var(--surface-card);border-radius:16px;box-shadow:var(--shadow-lg);padding:20px}
+.k2wrap .cf h3{font-size:14.5px;font-weight:700;color:var(--text-strong);margin:0 0 6px}
+.k2wrap .cf p{font-size:12.5px;line-height:1.5;color:var(--text-muted);margin:0 0 16px}
+.k2wrap .cf .row{display:flex;gap:10px;justify-content:flex-end}
+.k2wrap .cf .del{height:36px;padding:0 16px;border:none;border-radius:9px;background:var(--ekopak-coral);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.k2wrap .cf .no{height:36px;padding:0 14px;border:none;background:none;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 
 /* Time table */
 .tt{width:100%;border-collapse:collapse;font-size:10px}
@@ -1251,7 +1284,7 @@ function render(){
   let h="";
   if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
   if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
-  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
+  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="trash")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
@@ -1432,7 +1465,46 @@ function rTS(){
 }
 
 /* ── Trash ── */
-function rTR(){if(!S.trash.length)return`<div class="es">Corbeille vide.</div>`;let h=`<div class="bar"><div></div><button class="bs" style="border-color:#F87171;color:#F87171" onclick="if(confirm('Vider ?'))emptyT()">Vider</button></div>`;S.trash.slice().reverse().forEach((it,ri)=>{const i=S.trash.length-1-ri;const m=Math.round((Date.now()-it.date)/60000);const t=m<1?"maintenant":m<60?m+"min":Math.round(m/60)+"h";const label=it.type==="project"?it.data.name:(it.data.title||"Sans titre");const sub=it.type==="project"?"Projet":"Action · "+esc(it.pn||"");h+=`<div class="tri"><div class="tii"><b>${esc(label)}</b> <span style="font-size:9px;color:#4B6480">${sub}</span> · ${t}</div><button class="brs" onclick="restT(${i})">↩</button><button class="bpu" onclick="purgeT(${i})">✕</button></div>`});return h}
+let _toastT=null;
+function toast(msg){let el=document.getElementById('app-toast');if(!el){el=document.createElement('div');el.id='app-toast';el.className='ek-toast';document.body.appendChild(el)}el.textContent=msg;el.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>{el.classList.remove('show')},2600)}
+function trAgo(ts){const m=Math.round((Date.now()-ts)/60000);if(m<1)return"maintenant";if(m<60)return"il y a "+m+" min";const h=Math.round(m/60);if(h<24)return"il y a "+h+" h";return"il y a "+Math.round(h/24)+" j"}
+const K_ICO={
+  trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>`,
+  restore:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+};
+let trConfirm=null; // {kind:'all'} | {kind:'one', i, label} — confirmation Corbeille (transient)
+function restTt(i){const it=S.trash[i];if(!it)return;const label=it.type==="project"?it.data.name:(it.data.title||"Sans titre");const wasProj=it.type==="project";restT(i);toast("« "+label+" » restauré"+(wasProj?"":"e"))}
+function trAskEmpty(){trConfirm={kind:'all'};render()}
+function trAskPurge(i){const it=S.trash[i];const label=it?(it.type==="project"?it.data.name:(it.data.title||"Sans titre")):"";trConfirm={kind:'one',i,label};render()}
+function trConfirmCancel(){trConfirm=null;render()}
+function trConfirmOk(){const c=trConfirm;trConfirm=null;if(!c)return;if(c.kind==='all'){emptyT();toast("Corbeille vidée")}else{purgeT(c.i);toast("Élément supprimé définitivement")}}
+function rTR(){
+  let h=`<div class="k2wrap"><div class="htop"><div><div class="ov">Éléments supprimés</div><h1>Corbeille</h1></div><div class="grow"></div>`;
+  if(S.trash.length)h+=`<button class="bvider" onclick="trAskEmpty()">${K_ICO.trash}Vider la corbeille</button>`;
+  h+=`</div><div class="list">`;
+  if(!S.trash.length){
+    h+=`<div class="empty">${K_ICO.trash}<b>Corbeille vide</b><span>Les projets et tâches supprimés apparaîtront ici.</span></div>`;
+  }else{
+    h+=`<div class="count">${S.trash.length} élément${S.trash.length>1?"s":""}</div>`;
+    S.trash.slice().reverse().forEach((it,ri)=>{
+      const i=S.trash.length-1-ri;
+      const isProj=it.type==="project";
+      const label=isProj?it.data.name:(it.data.title||"Sans titre");
+      const sub=isProj?"Projet":"Tâche · "+esc(it.pn||"");
+      h+=`<div class="tri"><span class="tico">${K_ICO.trash}</span><span class="tlbl">${esc(label)}</span><span class="tsub${isProj?" proj":""}">${sub}</span><span class="tago">${trAgo(it.date)}</span><button class="brs" onclick="restTt(${i})">${K_ICO.restore}Restaurer</button><button class="bpu" onclick="trAskPurge(${i})" title="Supprimer définitivement">${K_ICO.x}</button></div>`;
+    });
+  }
+  h+=`</div>`;
+  if(trConfirm){
+    const all=trConfirm.kind==='all';
+    const title=all?"Vider la corbeille ?":"Supprimer définitivement ?";
+    const txt=all?"Tous les éléments seront supprimés définitivement. Cette action est irréversible.":("« "+esc(trConfirm.label||"")+" » — cette action est irréversible.");
+    h+=`<div class="cf-back" onclick="trConfirmCancel()"><div class="cf" onclick="event.stopPropagation()"><h3>${title}</h3><p>${txt}</p><div class="row"><button class="no" onclick="trConfirmCancel()">Annuler</button><button class="del" onclick="trConfirmOk()">Supprimer</button></div></div></div>`;
+  }
+  h+=`</div>`;
+  return h;
+}
 
 /* ── Mutations ── */
 function sT(t){S.tab=t;render()}
