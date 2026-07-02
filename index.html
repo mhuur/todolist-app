@@ -295,9 +295,6 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .cv{transition:transform .15s;display:inline-flex}.cv.op{transform:rotate(90deg)}
 
 /* Sub-views */
-.vt{display:flex;gap:2px;background:#0F1A2E;border-radius:6px;padding:2px;margin-bottom:6px}
-.vtb{flex:1;padding:3px 0;border:none;border-radius:4px;font-family:inherit;font-size:9px;font-weight:700;cursor:pointer;background:transparent;color:#4B5563;transition:all .12s}
-.vtb.on{background:#1E293B;color:#38BDF8}
 
 /* Done date */
 .ddh{font-size:10px;font-weight:700;color:#64748B;padding:8px 0 3px;text-transform:uppercase;letter-spacing:.3px}
@@ -424,15 +421,17 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0B1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
 
 /* Login */
-.login-screen{position:fixed;inset:0;background:#0B1120;display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
-.login-box{background:#162032;border:1px solid #2A3A52;border-radius:16px;padding:32px 28px;text-align:center;max-width:320px;width:90%}
-.login-box h1{font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
-.login-box p{color:#64748B;font-size:12px;margin-bottom:20px}
-.btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 24px;border-radius:8px;border:1px solid #2A3A52;background:#1E293B;color:#E2E8F0;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
-.btn-google:hover{border-color:#38BDF8;background:#243347}
-.btn-google img{width:20px;height:20px}
-.login-loading{color:#64748B;font-size:11px;margin-top:8px}
-.login-err{color:#F87171;font-size:11px;margin-top:8px}
+.login-screen{position:fixed;inset:0;background:var(--surface-page);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px;font-family:'Montserrat','Nunito',sans-serif}
+.login-box{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:20px;padding:38px 32px;text-align:center;max-width:340px;width:90%;box-shadow:var(--shadow-lg)}
+.login-logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(150deg,var(--ekopak-light-blue),var(--ekopak-deep-blue));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:var(--shadow-brand)}
+.login-logo svg{width:32px;height:32px}
+.login-box h1{font-size:22px;font-weight:800;color:var(--text-strong);margin-bottom:6px}
+.login-box p{color:var(--text-muted);font-size:12.5px;line-height:1.5;margin-bottom:22px}
+.btn-google{display:inline-flex;align-items:center;gap:10px;padding:11px 22px;border-radius:10px;border:1.5px solid var(--deep-blue-200);background:var(--surface-card);color:var(--text-strong);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-google:hover{border-color:var(--ekopak-deep-blue);background:var(--deep-blue-50)}
+.btn-google svg{width:18px;height:18px}
+.login-loading{color:var(--text-muted);font-size:11px;margin-top:8px}
+.login-err{color:var(--coral-600);font-size:11px;margin-top:8px}
 .sync-indicator{font-size:8px;color:#34D399;margin-left:4px}
 .sync-indicator.saving{color:#FBBF24}
 .sync-indicator.error{color:#F87171}
@@ -483,7 +482,6 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   .ugt{font-size:11px;padding:10px 0 4px}
   .pgl{font-size:10px}
   .ddh{font-size:11px}
-  .vtb{padding:5px 0;font-size:10px}
 }
 
 /* CRM — thème clair Ekopak (scopé .c2wrap) */
@@ -993,17 +991,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ckrow:hover .ckdel{opacity:.55;}
 #flux-root .ckdel:hover{opacity:1 !important;color:#d04a45 !important;}
 #flux-root .ckbox:hover{border-color:#22C55E !important;box-shadow:0 0 8px rgba(34,197,94,.35);}
-#flux-root .fxstar{cursor:pointer;color:var(--cbox);font-size:15px;line-height:1;transition:color .12s,text-shadow .12s,opacity .12s;opacity:0;}
-#flux-root .fxstar.on{opacity:1;}
-#flux-root .taskrow:hover .fxstar{opacity:1;}
-#flux-root .fxstar:hover{color:#FBBF24;}
-#flux-root .fxstar.on{color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,.6);}
 #flux-root input::placeholder,#flux-root textarea::placeholder{color:var(--muted);}
 </style>
 <link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap">
 </head>
 <body>
-<div id="login-screen" class="login-screen"><div class="login-box"><h1>🌊 Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
+<div id="login-screen" class="login-screen"><div class="login-box"><div class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg></div><h1>Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-2.9.8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8 2.1-6.3 0-11.7-3.8-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
 <script>
 /* ── Firebase Init ── */
 firebase.initializeApp({
@@ -4288,62 +4281,6 @@ class Flux extends React.Component {
     );
   }
 
-  renderCrossRow(t){
-    return (
-      <div className="taskrow" data-task="1" style={css(t.rowStyle)}>
-        <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}><span style={css(t.checkStyle)}>{t.checkMark}</span></span>
-        <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}><span className={'fxstar'+(t.today?' on':'')} onClick={t.onStar} title={t.today?"Retirer d'Aujourd'hui":"Ajouter à Aujourd'hui"}>{t.today?'★':'☆'}</span></span>
-        <span style={css('flex:1;min-width:0;display:flex;align-items:center;gap:9px;overflow:hidden;padding-right:8px;')}>
-          {t.edTitle
-            ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
-            : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
-        </span>
-        <span className="cell" style={css('width:104px;flex:none;padding:3px 6px;position:relative;')} onClick={t.onDueClick}>
-          {t.edDue
-            ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css("width:100%;font-family:'Nunito',sans-serif;font-size:11px;")} />
-            : <span style={css('font-size:12px;color:'+t.dueColor+';')}>{t.dueText||'—'}</span>}
-        </span>
-        <span className="cell" style={css('width:150px;flex:none;padding:3px 6px;overflow:visible;position:relative;')} onClick={t.onPersonClick}>
-          {t.edPerson
-            ? <React.Fragment>
-                <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
-                <div style={css('position:absolute;top:32px;left:6px;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
-                  {t.personMenu.map((o,i)=>
-                    <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
-                      <span style={css(o.avatarStyle)}>{o.initials}</span>
-                      <span style={css(o.labelStyle)}>{o.label}</span>
-                      <span style={css(o.checkStyle)}>✓</span>
-                    </div>)}
-                </div>
-              </React.Fragment>
-            : (t.hasPerson ? <span style={css(t.personChip)}>{t.personName}</span> : <span style={css('font-size:12px;color:var(--cbox);')}>＋ assigner</span>)}
-        </span>
-        <span style={css('width:128px;flex:none;position:relative;')}>
-          <span onClick={t.onStatusClick} title="Changer le statut" style={css(t.statusStyle)}>
-            <span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>
-            {t.statusLabel}
-            <span style={css('margin-left:auto;opacity:.5;font-size:9px;padding-left:4px;')}>▾</span>
-          </span>
-          {t.edStatus &&
-            <div style={css('position:absolute;top:32px;left:0;min-width:152px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;')}>
-              {t.statusOptions.map(so=>
-                <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
-                  <span style={css('width:7px;height:7px;border-radius:50%;background:'+so.dot+';')}></span>
-                  {so.label}
-                  <span style={css(so.checkStyle)}>✓</span>
-                </div>)}
-            </div>}
-          {t.edRelance &&
-            <div style={css('position:absolute;top:32px;left:0;min-width:204px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:9px;z-index:45;')}>
-              <div style={css("font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px;")}>Date de relance</div>
-              <input autoFocus type="date" value={t.relanceISO} onChange={t.onRelanceChange} onBlur={t.onRelanceBlur} onClick={t.stop} style={css("width:100%;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12.5px;background:var(--soft);color:var(--text);font-family:'Nunito',sans-serif;outline:none;")} />
-            </div>}
-        </span>
-        <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
-      </div>
-    );
-  }
-
   renderAllProjects(v){
     return (
       <div style={css('min-width:860px;padding:22px 32px 40px;')}>
@@ -4504,117 +4441,6 @@ class Flux extends React.Component {
           </div>
           <span style={css('width:67px;flex:none;')}></span>
         </div>
-      </div>
-    );
-  }
-
-  renderFilterBar(v, mode){
-    const accent = v.accent;
-    const tint = accent+'1f';
-    const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
-    const renameInput = 'flex:1;min-width:0;border:1px solid '+accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
-    const fOpen = this.state.filterOpen;
-    const setOpen = (k)=> this.setState(s=>({ filterOpen: s.filterOpen===k?null:k }));
-    let statusFacets, group2, personFacets, summaryCount, onClearAll, quick;
-    if(mode==='today'){
-      statusFacets=v.todayStatusFacets; personFacets=v.todayPersonFacets;
-      group2={ key:'proj', label:'Projet', kind:'proj', facets:v.todayProjFacets };
-      summaryCount=v.todayTotal; onClearAll=v.onClearTodayFilters;
-      quick={ onKeyDown:v.onTodayQuickAdd, onBlur:v.onTodayQuickAddBlur, placeholder:"Ajouter une tâche pour aujourd'hui…", sel:true };
-    } else if(mode==='all'){
-      statusFacets=v.allStatusFacets; personFacets=v.allPersonFacets;
-      group2={ key:'cat', label:'Catégorie', kind:'catRO', facets:v.allCatFacets };
-      summaryCount=v.allTotal; onClearAll=v.onClearAllFilters; quick=null;
-    } else {
-      statusFacets=v.statusFacets; personFacets=v.personFacets;
-      group2={ key:'cat', label:'Catégorie', kind:'cat', facets:v.catFacets };
-      summaryCount=v.totalCount; onClearAll=v.onAllTasks;
-      quick={ onKeyDown:v.onQuickAdd, onBlur:v.onQuickAddBlur, placeholder:'Ajouter une tâche rapide…', sel:false };
-    }
-    const anyOf = arr => (arr||[]).some(x=>x.active);
-    const statusActive=anyOf(statusFacets), g2Active=anyOf(group2.facets), personActive=anyOf(personFacets);
-    const anyFilter = statusActive || g2Active || personActive;
-    const chip = (active,open)=> 'display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;flex:none;border:1px solid '+((active||open)?accent:'var(--line)')+';background:'+(active?tint:'var(--soft)')+';color:'+((active||open)?accent:'var(--text2)')+';';
-    const dd = 'position:absolute;top:calc(100% + 6px);left:0;min-width:226px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 32px rgba(0,0,0,.30);padding:6px;z-index:60;max-height:340px;overflow-y:auto;overflow-x:hidden;';
-    const frow = 'display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);';
-    const cnt = "font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;";
-    const statusDD = ()=> statusFacets.map(ff=>
-      <div key={ff.id} onClick={ff.onToggle} style={css(frow)}>
-        <span style={css(ff.boxStyle)}>{ff.check}</span>
-        <span style={css('width:7px;height:7px;border-radius:50%;flex:none;background:'+ff.dot+';')}></span>
-        <span style={css('flex:1;min-width:0;')}>{ff.label}</span>
-        <span style={css(cnt)}>{ff.count}</span>
-      </div>);
-    const projDD = ()=>{ const rows=group2.facets.map(ff=>
-        <div key={ff.id} onClick={ff.onToggle} style={css(frow)}>
-          <span style={css(ff.boxStyle)}>{ff.check}</span>
-          <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>
-          <span style={css(cnt)}>{ff.count}</span>
-        </div>);
-      if(!group2.facets.length) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
-      return rows; };
-    const labelEdit = (ff, editable, avatar)=> editable && ff.editing
-      ? <input data-labeledit="1" onFocus={selectAll} defaultValue={ff.label} onKeyDown={ff.onLabelKey} onBlur={ff.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
-      : <span onClick={editable?ff.onLabelClick:ff.onToggle} title={editable?'Cliquer pour renommer':undefined} style={css('flex:1;min-width:0;'+(editable?'cursor:text;':'cursor:pointer;')+'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>;
-    const rowMenu = (ff, attr)=> attr==='cat'
-      ? <span data-catmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
-          <span onClick={ff.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
-          {ff.menuOpen && <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:70;')}>
-            <div className="stopt" onClick={ff.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
-            <div className="stopt" onClick={ff.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
-          </div>}
-        </span>
-      : <span data-personmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
-          <span onClick={ff.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
-          {ff.menuOpen && <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:70;')}>
-            <div className="stopt" onClick={ff.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
-            <div className="stopt" onClick={ff.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
-          </div>}
-        </span>;
-    const catDD = (editable)=>{ const rows=group2.facets.map(ff=>
-        <div key={ff.id} style={css(frow)}>
-          <span onClick={ff.onToggle} title="Filtrer" style={css(ff.boxStyle+'cursor:pointer;')}>{ff.check}</span>
-          {labelEdit(ff, editable)}
-          <span style={css(cnt)}>{ff.count}</span>
-          {editable && rowMenu(ff,'cat')}
-        </div>);
-      if(!group2.facets.length && !editable) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
-      return <React.Fragment>
-        {rows}
-        {editable && v.addingCat && <input autoFocus onKeyDown={v.onAddCatKey} onBlur={v.onAddCatBlur} placeholder="Nom de la catégorie…" style={css('width:100%;margin-top:4px;border:1px solid var(--cbox);border-radius:7px;padding:6px 9px;font-size:13px;background:var(--panel);color:var(--text);')} />}
-        {editable && <div onClick={v.onStartAddCat} style={css('display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text3);')}>＋ Nouvelle catégorie</div>}
-      </React.Fragment>; };
-    const personDD = (editable)=>{ const rows=personFacets.map(ff=>
-        <div key={ff.id} style={css(frow)}>
-          <span onClick={ff.onToggle} title="Filtrer" style={css(ff.boxStyle+'cursor:pointer;')}>{ff.check}</span>
-          {ff.avatarStyle && <span style={css(ff.avatarStyle)}></span>}
-          {labelEdit(ff, editable)}
-          <span style={css(cnt)}>{ff.count}</span>
-          {editable && rowMenu(ff,'person')}
-        </div>);
-      if(!personFacets.length) rows.push(<div key="_e" style={css('padding:4px 8px;font-size:12px;color:var(--muted);')}>—</div>);
-      return rows; };
-    return (
-      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:7px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line);z-index:4;')}>
-        <div onClick={onClearAll} title="Afficher toutes les tâches" style={css('display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:8px;cursor:pointer;flex:none;border:1px solid '+(!anyFilter?accent:'var(--line)')+';background:'+(!anyFilter?tint:'var(--soft)')+';color:'+(!anyFilter?accent:'var(--text2)')+';')}>Tout <span style={css('font-size:10.5px;opacity:.85;')}>{summaryCount}</span></div>
-        <div data-fchip style={css('position:relative;flex:none;')}>
-          <div onClick={()=>setOpen('status')} style={css(chip(statusActive, fOpen==='status'))}>Statut <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
-          {fOpen==='status' && <div style={css(dd)}>{statusDD()}</div>}
-        </div>
-        <div data-fchip style={css('position:relative;flex:none;')}>
-          <div onClick={()=>setOpen(group2.key)} style={css(chip(g2Active, fOpen===group2.key))}>{group2.label} <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
-          {fOpen===group2.key && <div style={css(dd)}>{ group2.kind==='proj' ? projDD() : group2.kind==='catRO' ? catDD(false) : catDD(true) }</div>}
-        </div>
-        <div data-fchip style={css('position:relative;flex:none;')}>
-          <div onClick={()=>setOpen('person')} style={css(chip(personActive, fOpen==='person'))}>Personne <span style={css('font-size:9px;opacity:.7;')}>▾</span></div>
-          {fOpen==='person' && <div style={css(dd)}>{ personDD(mode==='proj') }</div>}
-        </div>
-        {quick &&
-          <div style={css('margin-left:auto;flex:none;width:300px;display:flex;align-items:center;gap:8px;height:30px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;background:var(--soft);')}>
-            <span style={css('color:var(--muted);font-size:14px;flex:none;')}>＋</span>
-            <input onKeyDown={quick.onKeyDown} onBlur={quick.onBlur} placeholder={quick.placeholder} style={css('border:none;background:transparent;font-size:13px;flex:1;min-width:0;color:var(--text);')} />
-            <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;flex:none;")}>↵</span>
-          </div>}
       </div>
     );
   }
