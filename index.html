@@ -4710,7 +4710,7 @@ class Flux extends React.Component {
             ) : v.planning ? (
               this.renderGlobalPlanning(v)
             ) : v.projView==='infos' ? (
-              v.allMode ? this.renderGlobalPlanning(v) : this.renderProjectInfos(v)
+              this.renderGlobalPlanning(v)   /* Planning = vue globale tous projets (maquette) ; renderProjectInfos (timeline solo) n'est plus branché */
             ) : v.projView==='notes' ? (
               v.allMode ? (<div style={css('max-width:920px;margin:0 auto;padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Les notes sont propres à chaque projet.<br/>Sélectionne un projet (en haut à gauche) pour voir et modifier ses notes.</div>) : this.renderProjectNotes(v)
             ) : v.allMode ? (
