@@ -577,36 +577,47 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .cf .row{display:flex;gap:10px;justify-content:flex-end}
 .c2wrap .cf .del{height:36px;padding:0 16px;border:none;border-radius:9px;background:var(--ekopak-coral);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
 .c2wrap .cf .no{height:36px;padding:0 14px;border:none;background:none;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
-/* Feedback */
-.fb-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.fb-title{color:#5CB8F0;font-size:13px;font-weight:800}
-.fb-subtitle{color:#4B6480;font-size:10px;margin-bottom:8px}
-.fb-card{background:#162032;border:1px solid #2A3A52;border-radius:8px;padding:8px 10px;margin-bottom:6px;animation:fadeSlideIn .2s ease;transition:opacity .15s}
-.fb-card.fb-done{opacity:.55;background:#111B2C}
-.fb-card.fb-done .fb-text{text-decoration:line-through;color:#64748B}
-.fb-card.fb-done .fb-step-text{text-decoration:line-through;color:#475569}
-.fb-hd{display:flex;align-items:center;gap:6px}
-.fb-check{border:1.5px solid #2A3A52;background:transparent;color:transparent;width:18px;height:18px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;padding:0}
-.fb-check:hover{border-color:#22C55E}
-.fb-check.on{background:#22C55E;border-color:#22C55E;color:#fff}
-.fb-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:#E2E8F0;outline:none;padding:3px 6px;border-radius:4px;min-width:0}
-.fb-text:hover{background:rgba(92,184,240,.04)}
-.fb-text:focus{background:rgba(92,184,240,.08)}
-.fb-del{border:none;background:transparent;color:#334155;cursor:pointer;flex-shrink:0;padding:3px 5px;border-radius:4px;transition:all .12s;display:flex;align-items:center}
-.fb-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
-.fb-step{display:flex;align-items:center;gap:5px;padding:2px 0 2px 24px;margin-top:2px}
-.fb-step-bul{color:#475569;font-size:11px;flex-shrink:0;font-weight:700}
-.fb-step-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:11px;color:#CBD5E1;outline:none;padding:2px 5px;border-radius:3px;min-width:0}
-.fb-step-text:hover{background:rgba(92,184,240,.04)}
-.fb-step-text:focus{background:rgba(92,184,240,.08)}
-.fb-step-del{border:none;background:transparent;color:#334155;cursor:pointer;font-size:10px;flex-shrink:0;padding:1px 4px;border-radius:3px;opacity:0;transition:all .12s}
-.fb-step:hover .fb-step-del{opacity:1}
-.fb-step-del:hover{color:#F87171;background:rgba(248,113,113,.08)}
-.fb-add-step{margin:4px 0 0 24px;border:none;background:transparent;color:#5CB8F0;font-family:inherit;font-size:10px;cursor:pointer;padding:3px 8px;border-radius:4px;font-weight:600;transition:all .12s}
-.fb-add-step:hover{background:rgba(92,184,240,.08)}
-.fb-copy-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:1px solid #2A3A52;background:#162032;color:#94A3B8;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
-.fb-copy-btn:hover{border-color:#5CB8F0;color:#5CB8F0;background:rgba(92,184,240,.05)}
-.fb-copy-btn.copied{border-color:#22C55E;color:#22C55E;background:rgba(34,197,94,.08)}
+/* Notes (feedback) — thème clair Ekopak (scopé .n2wrap) */
+.n2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
+.n2wrap .htop{display:flex;align-items:center;gap:20px;padding:20px 32px;border-bottom:1px solid var(--border-subtle);background:var(--surface-card)}
+.n2wrap .ov{font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--light-blue-600);text-transform:uppercase}
+.n2wrap .htop h1{font-size:19px;font-weight:700;color:var(--text-strong);margin:4px 0 0;letter-spacing:-.01em}
+.n2wrap .grow{flex:1}
+.n2wrap .fb-copy-btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:10px;border:1.5px solid var(--deep-blue-200);background:var(--surface-card);color:var(--ekopak-deep-blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.n2wrap .fb-copy-btn:hover{background:var(--deep-blue-50)}
+.n2wrap .fb-copy-btn.copied{border-color:var(--lime-600);color:var(--lime-600);background:var(--lime-50)}
+.n2wrap .list{flex:1;overflow:auto;padding:22px 32px;max-width:860px}
+.n2wrap .fb-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5}
+.n2wrap .fb-addrow{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.n2wrap .fb-addrow input{flex:1;height:42px;padding:0 14px;border:1.5px solid var(--border-default);border-radius:10px;font-size:13.5px;font-family:inherit;color:var(--text-strong);background:var(--surface-card);outline:none}
+.n2wrap .fb-addrow input:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.n2wrap .fb-addrow button{height:42px;width:44px;flex:none;border:none;border-radius:10px;background:var(--ekopak-deep-blue);color:#fff;font-size:20px;cursor:pointer;box-shadow:var(--shadow-brand);font-family:inherit}
+.n2wrap .fb-card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow-xs);transition:opacity .15s}
+.n2wrap .fb-card.fb-done{opacity:.6}
+.n2wrap .fb-card.fb-done .fb-text{text-decoration:line-through;color:var(--text-muted)}
+.n2wrap .fb-card.fb-done .fb-step-text{text-decoration:line-through;color:var(--neutral-400)}
+.n2wrap .fb-hd{display:flex;align-items:center;gap:10px}
+.n2wrap .fb-check{border:1.6px solid var(--border-default);background:var(--surface-card);color:transparent;width:20px;height:20px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;transition:all .12s;padding:0}
+.n2wrap .fb-check:hover{border-color:var(--lime-600)}
+.n2wrap .fb-check.on{background:var(--lime-600);border-color:var(--lime-600);color:#fff}
+.n2wrap .fb-check svg{width:12px;height:12px}
+.n2wrap .fb-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--text-strong);outline:none;padding:4px 6px;border-radius:6px;min-width:0}
+.n2wrap .fb-text:hover{background:var(--neutral-50)}
+.n2wrap .fb-text:focus{background:var(--deep-blue-50)}
+.n2wrap .fb-del{border:none;background:transparent;color:var(--neutral-300);cursor:pointer;flex:none;padding:4px 6px;border-radius:7px;transition:all .12s;display:flex;align-items:center}
+.n2wrap .fb-del:hover{color:var(--coral-600);background:var(--coral-50)}
+.n2wrap .fb-del svg{width:15px;height:15px}
+.n2wrap .fb-step{display:flex;align-items:center;gap:7px;padding:2px 0 2px 28px;margin-top:3px}
+.n2wrap .fb-step-bul{color:var(--neutral-400);font-size:12px;flex:none;font-weight:700}
+.n2wrap .fb-step-text{flex:1;border:none;background:transparent;font-family:inherit;font-size:12px;color:var(--text-body);outline:none;padding:3px 5px;border-radius:5px;min-width:0}
+.n2wrap .fb-step-text:hover{background:var(--neutral-50)}
+.n2wrap .fb-step-text:focus{background:var(--deep-blue-50)}
+.n2wrap .fb-step-del{border:none;background:transparent;color:var(--neutral-300);cursor:pointer;font-size:11px;flex:none;padding:2px 5px;border-radius:5px;opacity:0;transition:all .12s}
+.n2wrap .fb-step:hover .fb-step-del{opacity:1}
+.n2wrap .fb-step-del:hover{color:var(--coral-600);background:var(--coral-50)}
+.n2wrap .fb-add-step{margin:6px 0 0 28px;border:none;background:transparent;color:var(--ekopak-deep-blue);font-family:inherit;font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px;font-weight:600}
+.n2wrap .fb-add-step:hover{background:var(--deep-blue-50)}
+.n2wrap .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 0;gap:10px;color:var(--neutral-400);font-size:13px}
 /* Bibliothèque de prix — modal (thème clair Ekopak) */
 .pl-overlay{position:fixed;inset:0;background:rgba(26,40,83,.32);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(2px);font-family:'Montserrat','Nunito',sans-serif}
 .pl-modal{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;padding:20px 22px 18px;width:100%;max-width:580px;color:var(--text-body);box-shadow:var(--shadow-lg)}
@@ -1284,7 +1295,7 @@ function render(){
   let h="";
   if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
   if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
-  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="trash")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
+  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="trash"||S.tab==="feedback")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
@@ -2948,11 +2959,12 @@ function plRenderLineCard(line,idx,st){
 /* ── Feedback / Notes ── */
 function rFB(){
   if(!S.feedback||!Array.isArray(S.feedback.items))S.feedback={items:[]};
-  let h=`<div class="fb-bar"><div class="fb-title">Notes & Remarques</div><button class="fb-copy-btn" onclick="fbCopy()" id="fb-copy-btn">📋 Copier les actions en cours</button></div>`;
-  h+=`<div class="fb-subtitle">Note ici les remarques ou bugs à transmettre à Claude. Chaque action peut recevoir des étapes complémentaires, être validée ou supprimée.</div>`;
-  h+=`<div class="add-row" style="position:static"><input id="fb-input" placeholder="Nouvelle action / remarque…" value="${esc(S.fbQ||"")}" oninput="S.fbQ=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();fbAdd()}"><button onclick="fbAdd()">＋</button></div>`;
+  let h=`<div class="n2wrap"><div class="htop"><div><div class="ov">Remarques &amp; bugs</div><h1>Notes</h1></div><div class="grow"></div><button class="fb-copy-btn" onclick="fbCopy()" id="fb-copy-btn">Copier les actions en cours</button></div>`;
+  h+=`<div class="list">`;
+  h+=`<div class="fb-subtitle">Note ici les remarques ou bugs à transmettre à Claude. Chaque note peut recevoir des étapes complémentaires, être validée ou supprimée.</div>`;
+  h+=`<div class="fb-addrow"><input id="fb-input" placeholder="Nouvelle note / remarque…" value="${esc(S.fbQ||"")}" oninput="S.fbQ=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();fbAdd()}"><button onclick="fbAdd()">＋</button></div>`;
   const items=[...S.feedback.items].sort((a,b)=>{if(!!a.validated!==!!b.validated)return a.validated?1:-1;return (b.createdAt||0)-(a.createdAt||0)});
-  if(!items.length)h+=`<div class="es">Aucune note pour l'instant.</div>`;
+  if(!items.length)h+=`<div class="empty">Aucune note pour l'instant.</div>`;
   items.forEach(it=>{
     h+=`<div class="fb-card ${it.validated?"fb-done":""}">`;
     h+=`<div class="fb-hd">`;
@@ -2966,6 +2978,7 @@ function rFB(){
     h+=`<button class="fb-add-step" onclick="fbAddStep('${it.id}')">＋ étape</button>`;
     h+=`</div>`;
   });
+  h+=`</div></div>`;
   return h;
 }
 function fbAdd(){const t=(S.fbQ||"").trim();if(!t)return;if(!S.feedback||!Array.isArray(S.feedback.items))S.feedback={items:[]};S.feedback.items.unshift({id:gid(),text:t,steps:[],validated:false,createdAt:Date.now()});S.fbQ="";save();render();requestAnimationFrame(()=>{const el=document.getElementById('fb-input');if(el)el.focus()})}
