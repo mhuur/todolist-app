@@ -760,10 +760,6 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 /* ── Onglet Flux (proto React embarqué) : tout est scopé sous #flux-root pour ne rien casser de l'app ── */
 .main-flux{max-width:none;padding:0;height:100vh;overflow:hidden}
 #flux-root{height:100%;--bg:#0f1d33;--rail:#0c1729;--band:#16273f;--soft:#13233c;--line:#243650;--panel:#142540;--text:#e7edf6;--text2:#aebcd0;--text3:#8595ac;--muted:#6c7d96;--divider:#1f3049;--cbox:#3a4a64;--sbThumb:#2a3a55;--sbThumb2:#384a69;}
-#flux-root [data-theme="marine"]{--bg:#0f1d33;--rail:#0c1729;--band:#16273f;--soft:#13233c;--line:#243650;--panel:#142540;--text:#e7edf6;--text2:#aebcd0;--text3:#8595ac;--muted:#6c7d96;--divider:#1f3049;--cbox:#3a4a64;--sbThumb:#2a3a55;--sbThumb2:#384a69;}
-#flux-root [data-theme="indigo"]{--bg:#161433;--rail:#110f28;--band:#221f46;--soft:#1b1840;--line:#302b58;--panel:#1c1941;--text:#ebe7f7;--text2:#bbb4d8;--text3:#928cb4;--muted:#7a749c;--divider:#28244e;--cbox:#433e6a;--sbThumb:#322d57;--sbThumb2:#3f3968;}
-#flux-root [data-theme="ocean"]{--bg:#0c2327;--rail:#091d20;--band:#143036;--soft:#11292e;--line:#20434a;--panel:#112c32;--text:#e2f0f0;--text2:#a6c4c6;--text3:#7ea3a6;--muted:#638a8d;--divider:#1a383e;--cbox:#2f565c;--sbThumb:#244a50;--sbThumb2:#30595f;}
-#flux-root [data-theme="clair"]{--bg:#eceef1;--rail:#f6f7f9;--band:#e7eaee;--soft:#fafbfc;--line:#e3e6ea;--panel:#ffffff;--text:#1b1e23;--text2:#4a5159;--text3:#6b7280;--muted:#9ca1ab;--divider:#eef0f3;--cbox:#c2c6cd;--sbThumb:#d3d7dd;--sbThumb2:#bcc1c9;}
 /* Thème clair Ekopak — utilisé uniquement par l'écran Aujourd'hui (todayOnly), le reste reste sombre. Palette = tokens ekopak-design. */
 #flux-root [data-theme="ekopak"]{--bg:#f5f8fc;--rail:#eef2f8;--band:#eef2f8;--soft:#eef2f8;--line:#dde4ee;--panel:#ffffff;--text:#1a2853;--text2:#353d4a;--text3:#4d5666;--muted:#6b7689;--divider:#eef2f8;--cbox:#c2cbd9;--sbThumb:#c2cbd9;--sbThumb2:#95a0b3;}
 #flux-root .qadd-ek{border-bottom:1.5px solid var(--line);transition:border-color .15s}
@@ -2859,18 +2855,6 @@ function css(str){
   return o;
 }
 
-const STATUS_LIGHT = {
-  todo:  { label:'À faire',    dot:'#9aa1ad', bg:'#eef0f3', fg:'#5b616e' },
-  doing: { label:'En cours',   dot:'#3b5bdb', bg:'#e8edfd', fg:'#314fc7' },
-  wait:  { label:'En attente', dot:'#d39327', bg:'#fbf0df', fg:'#9a6712' },
-  done:  { label:'Terminé',    dot:'#3f9d6a', bg:'#e6f2ec', fg:'#2c764d' },
-};
-const STATUS_DARK = {
-  todo:  { label:'À faire',    dot:'#8a93a6', bg:'rgba(255,255,255,.07)', fg:'#b4bfd0' },
-  doing: { label:'En cours',   dot:'#5b9bff', bg:'rgba(91,155,255,.18)',  fg:'#9cc3ff' },
-  wait:  { label:'En attente', dot:'#e3ab43', bg:'rgba(227,171,67,.18)',  fg:'#f0c578' },
-  done:  { label:'Terminé',    dot:'#4fc08a', bg:'rgba(79,192,138,.18)',  fg:'#86d8ad' },
-};
 // Palette de statuts du thème clair Ekopak (écran Aujourd'hui) : deep-blue / light-blue / or / lime.
 const STATUS_EKOPAK = {
   todo:  { label:'À faire',    dot:'#0f3f93', bg:'#e5ebf5', fg:'#0f3f93' },
@@ -2946,7 +2930,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, noteOpen:false, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       categories: Array.isArray(p.categories)?p.categories:[],
@@ -3039,7 +3023,7 @@ class Flux extends React.Component {
 
   // ---- view / selection / settings ----
   setView(v){ this.setState({ view:v }); }
-  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; let t=null; if(willSel){ t=st.tasks.find(x=>x.id===id); if(!t){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt){ t=tt; break; } } } } return { selectedId: willSel?id:null, editing:{id:null,field:null}, noteOpen: willSel ? !!(t&&(t.notes||'').trim()) : false }; }); }
+  toggleSelect(id){ this.setState(st=>{ const willSel = st.selectedId!==id; let t=null; if(willSel){ t=st.tasks.find(x=>x.id===id); if(!t){ for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(x=>x.id===id); if(tt){ t=tt; break; } } } } return { selectedId: willSel?id:null, editing:{id:null,field:null} }; }); }
   // ---- editing ----
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
@@ -3057,7 +3041,7 @@ class Flux extends React.Component {
   // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
   _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
   // Réinitialise tout l'état de vue transient en entrant dans un projet.
-  _enterProject(extra){ return { allMode:false, selectedId:null, noteOpen:false, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
+  _enterProject(extra){ return { allMode:false, selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
   switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { allMode:false, projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { allMode:false, projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
   createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
   renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
@@ -3332,9 +3316,8 @@ class Flux extends React.Component {
   // ---- helpers ----
   person(id){ return this.state.people.find(p=>p.id===id) || null; }
   formatDue(iso){
-    const isDark = this.state.theme!=='clair';
-    const soon = isDark ? '#e3ab43' : '#b5651d';
-    const over = isDark ? '#f0746d' : '#d04a45';
+    const soon = '#b5651d';
+    const over = '#d04a45';
     if(!iso) return { text:'—', color:'var(--cbox)' };
     const d=new Date(iso+'T00:00:00'); if(isNaN(d)) return { text:'—', color:'var(--cbox)' };
     const now=new Date(); now.setHours(0,0,0,0);
@@ -3689,7 +3672,6 @@ class Flux extends React.Component {
     const _nameMeta=new Map(); todayEntriesAll.forEach(e=>{ const pp=(e.people||[]).find(x=>x.id===e.task.person); if(pp){ const k=(pp.name||'').trim().toLowerCase(); if(k&&!_nameMeta.has(k)) _nameMeta.set(k,{name:pp.name,color:pp.color}); } });
     const todayPersonFacets = Array.from(_nameMeta.entries()).map(([k,meta])=>({ id:k, label:meta.name, active:!!tf.person[k], count:todayEntriesAll.filter(e=>entryPName(e)===k).length, boxStyle:this.facetBox(!!tf.person[k],accent), check:tf.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${meta.color};flex:none;`, onToggle:()=>this.toggleTodayFilter('person',k) })).sort((a,b)=>(a.label||'').localeCompare(b.label||'','fr',{sensitivity:'base'}));
     const todayAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(todayAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
-    const todayColHeaderStyle = `position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:${D.hdrH}px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`;
 
     const staskRes = st.selectedId ? this.taskByIdAny(st.selectedId) : null;
     const stask = staskRes ? staskRes.task : null;
@@ -3812,7 +3794,7 @@ class Flux extends React.Component {
       onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
       groups, statusFacets, catFacets, personFacets,
-      todayView: st.todayView, todayList, todayGroups, todayFocus, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayColHeaderStyle, todayAnyFilter, todayAllStyle,
+      todayView: st.todayView, todayList, todayGroups, todayFocus, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayAnyFilter, todayAllStyle,
       todayStatusFacets, todayProjFacets, todayPersonFacets, todayStatusTabs, todayDateLong,
       hasPersonDel: !!_personDel, personDelName: _personDel?_personDel.name:'',
       onPersonDelCancel:()=>this.setState({personDelId:null}),
@@ -3831,12 +3813,9 @@ class Flux extends React.Component {
       onStartAddCat:()=>this.setState({addingCat:true}),
       onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
       onAddCatBlur:(e)=>{ const v=e.target.value.trim(); if(v) this.addCategory(v); else this.setState({addingCat:false}); },
-      hasSel: !!sel, sel: sel||{}, noteOpen: st.noteOpen, onToggleNote:()=>this.setState(s=>({noteOpen:!s.noteOpen})), onCloseDetail:()=>this.setState({selectedId:null}),
+      hasSel: !!sel, sel: sel||{}, onCloseDetail:()=>this.setState({selectedId:null}),
       hasConfirm: !!confirmTask, confirmTitle: confirmTask?confirmTask.title:'',
       onCancelDelete:()=>this.cancelDelete(), onConfirmDelete:()=>this.confirmDelete(), stopModal:(e)=>stop(e),
-      danger: isDark
-        ? { fg:'#ff9089', bg:'rgba(208,74,69,.16)', border:'rgba(208,74,69,.42)', iconBg:'rgba(208,74,69,.20)', solid:'#cf4f49' }
-        : { fg:'#c0524a', bg:'#fbeae8', border:'#f0d5d2', iconBg:'#fbeae8', solid:'#c0524a' },
     };
   }
 
