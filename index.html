@@ -15,7 +15,7 @@
   --light-blue-600:#3aaae8;--light-blue-100:#e6f6fd;
   --lime-600:#8fc02e;--lime-50:#f6fbe8;--coral-600:#d8442b;--coral-50:#fef1ed;
   --surface-page:#f5f8fc;--surface-card:#ffffff;--surface-sunken:#eef2f8;
-  --neutral-200:#dde4ee;--neutral-300:#c2cbd9;--neutral-400:#95a0b3;
+  --neutral-50:#f5f8fc;--neutral-100:#eef2f8;--neutral-200:#dde4ee;--neutral-300:#c2cbd9;--neutral-400:#95a0b3;
   --text-strong:#1a2853;--text-body:#353d4a;--text-muted:#6b7689;
   --border-subtle:#dde4ee;--border-default:#c2cbd9;
   --shadow-xs:0 1px 2px rgba(15,63,147,.06);--shadow-sm:0 2px 6px rgba(15,63,147,.08);--shadow-md:0 8px 24px rgba(15,63,147,.10);--shadow-lg:0 18px 44px rgba(15,63,147,.14);--shadow-brand:0 8px 20px rgba(15,63,147,.24);
@@ -319,45 +319,75 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .wn button:hover{border-color:#38BDF8;color:#38BDF8}
 .wn span{font-size:11px;color:#94A3B8;font-weight:600}
 /* Temps (timesheet) */
-.ts-wrap{max-width:1120px}
-.ts-top{display:flex;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap}
-.ts-prefill{font-size:10px;color:#FBBF24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:2px 8px}
-.ts-scroll{overflow-x:auto}
-.ts-tab{border-collapse:collapse;font-size:11px;min-width:720px}
-.ts-tab th{text-align:center;padding:5px 6px;color:#64748B;font-weight:700;border-bottom:1px solid #2A3A52;font-size:9px;text-transform:uppercase}
-.ts-tab th.ts-name{text-align:left}
-.ts-tab td{padding:3px 6px;border-bottom:1px solid #1E293B}
-.ts-name{text-align:left;min-width:210px}
-.ts-day{min-width:48px}
-.ts-date{font-size:8px;color:#475569;font-weight:600}
-.ts-num{text-align:right;color:#94A3B8;font-variant-numeric:tabular-nums;min-width:48px}
-.ts-prow td{background:rgba(56,189,248,.05);border-bottom:1px solid #233247}
-.ts-prow .ts-name{color:#E2E8F0;font-weight:700}
-.ts-car{cursor:pointer;color:#64748B;font-size:9px;margin-right:5px;display:inline-block;width:9px}
-.ts-pn{cursor:text}.ts-pn:hover{color:#7DD3FC}
-.ts-rn{border:1px solid #38BDF8;border-radius:4px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;font-weight:700;padding:2px 6px;outline:none;min-width:220px}
-.ts-prow .ts-num{color:#7DD3FC;font-weight:600}
-.ts-pt{font-weight:700}
-.ts-tname{padding-left:24px;color:#94A3B8}
-.ts-inp{width:44px;border:1px solid #1E3050;border-radius:4px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;text-align:right;padding:2px 5px;outline:none}
-.ts-inp:focus{border-color:#38BDF8}
-.ts-tt{color:#94A3B8;font-weight:600}
-.ts-act{width:30px;text-align:center}
-.ts-x{border:none;background:transparent;color:#475569;cursor:pointer;font-size:11px;padding:2px 4px;opacity:0;transition:opacity .12s}
-.ts-prow:hover .ts-x,.ts-trow:hover .ts-x{opacity:1}
-.ts-x:hover{color:#F87171}
-.ts-add{color:#38BDF8;opacity:.65;cursor:pointer;font-size:11px;font-weight:600}
-.ts-add:hover{opacity:1}
-.ts-addtask .ts-add{margin-left:24px;font-size:10px}
-.ts-addbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 0}
-.ts-addinp{border:1px solid #38BDF8;border-radius:5px;background:#0F1D32;color:#E2E8F0;font-family:inherit;font-size:11px;padding:4px 8px;outline:none;min-width:210px}
-.ts-pick{display:flex;gap:5px;flex-wrap:wrap}
-.ts-chip{font-size:10px;color:#94A3B8;background:#152236;border:1px solid #2A3A52;border-radius:12px;padding:2px 9px;cursor:pointer}
-.ts-chip:hover{border-color:#38BDF8;color:#7DD3FC}
-.ts-cancel{font-size:10px;color:#64748B;cursor:pointer}.ts-cancel:hover{color:#94A3B8}
-.ts-grow td{border-top:2px solid #2A3A52;color:#38BDF8;font-weight:700;padding-top:6px}
-.ts-grow .ts-name{color:#38BDF8}
-.ts-gt{font-weight:700}
+/* ── Temps — thème clair Ekopak (grille + cartes) ── */
+.t2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
+.t2top{display:flex;align-items:center;gap:24px;padding:20px 30px;border-bottom:1px solid var(--border-subtle);background:var(--surface-card)}
+.t2ov{font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--light-blue-600);text-transform:uppercase}
+.t2wnav{display:flex;align-items:center;gap:10px;margin-top:4px}
+.t2wnav h1{font-size:19px;font-weight:700;color:var(--text-strong);margin:0;letter-spacing:-.01em}
+.t2wbtn{width:30px;height:30px;border-radius:9px;border:1.5px solid var(--border-default);background:var(--surface-card);color:var(--text-body);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.t2wbtn svg{width:15px;height:15px}
+.t2wbtn:hover{border-color:var(--deep-blue-200);color:var(--ekopak-deep-blue)}
+.t2wlnk{font-size:12px;font-weight:600;color:var(--ekopak-deep-blue);cursor:pointer;margin-left:4px;background:none;border:none;padding:0;font-family:inherit}
+.t2prefill{font-size:11.5px;font-weight:600;color:var(--light-blue-600);background:var(--light-blue-100);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.t2grow{flex:1}
+.t2target{display:flex;align-items:center;gap:12px}
+.t2tl{font-size:12px;color:var(--text-muted);white-space:nowrap}
+.t2tl b{color:var(--text-strong);font-weight:700}
+.t2bar{width:150px;height:6px;border-radius:99px;background:var(--neutral-200);overflow:hidden}
+.t2fill{height:100%;border-radius:99px;background:var(--ekopak-deep-blue);transition:width .3s ease}
+.t2sheet{flex:1;overflow:auto;padding:16px 30px 0;display:flex;flex-direction:column}
+.t2grid{display:grid;grid-template-columns:minmax(180px,1fr) repeat(7,64px) 80px 30px;align-items:center}
+.t2dayrow{padding:0 15px;margin-bottom:8px}
+.t2dh{text-align:center;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;line-height:1.5}
+.t2dh .t2dnum{display:block;font-size:11.5px;font-weight:600;letter-spacing:0;color:var(--text-body);text-transform:none}
+.t2dh.tdy{color:var(--light-blue-600)}
+.t2dh.tdy .t2dnum{color:var(--light-blue-600);font-weight:700}
+.t2dh.we{opacity:.45}
+.t2toth{text-align:center;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text-strong);text-transform:uppercase}
+.t2card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:var(--shadow-xs);margin-bottom:14px;padding:2px 14px 4px}
+.t2head{display:flex;align-items:center;gap:10px;padding:11px 2px 9px}
+.t2head.open{border-bottom:1px solid var(--border-subtle)}
+.t2pn{font-size:13.5px;font-weight:700;color:var(--text-strong);display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;background:none;border:none;padding:0;text-align:left;font-family:inherit}
+.t2pn svg{width:14px;height:14px;color:var(--neutral-400);transition:transform .15s;flex:none}
+.t2pn.closed svg{transform:rotate(-90deg)}
+.t2rn{flex:1;font-size:13.5px;font-weight:700;color:var(--text-strong);border:1.5px solid var(--ekopak-light-blue);border-radius:7px;padding:4px 8px;outline:none;box-shadow:var(--pl-ring);font-family:inherit}
+.t2pill{font-size:12px;font-weight:700;color:var(--ekopak-deep-blue);background:var(--deep-blue-50);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.t2px{width:26px;height:26px;border:none;background:none;border-radius:7px;color:var(--neutral-300);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0}
+.t2card:hover .t2px{opacity:1}
+.t2px:hover{background:var(--coral-50);color:var(--coral-600)}
+.t2px svg{width:14px;height:14px}
+.t2rw{border-bottom:1px solid var(--border-subtle)}
+.t2rw:hover{background:var(--neutral-50)}
+.t2tn{font-size:13px;font-weight:500;color:var(--text-body);padding-left:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t2cell{width:58px;height:30px;margin:3px;text-align:center;font-size:12.5px;font-weight:600;color:var(--text-strong);border:1.5px solid transparent;border-radius:7px;background:transparent;outline:none;justify-self:center;font-family:inherit}
+.t2cell::placeholder{color:var(--neutral-300)}
+.t2cell:hover{background:var(--neutral-100)}
+.t2cell:focus{background:#fff;border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.t2cell.tdy{background:var(--light-blue-100)}
+.t2cell.tdy:focus{background:#fff}
+.t2tot{text-align:center;font-size:12.5px;font-weight:700;color:var(--text-strong)}
+.t2tot.z{color:var(--neutral-300)}
+.t2xd{width:24px;height:24px;border:none;background:none;border-radius:7px;color:var(--neutral-300);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;justify-self:center}
+.t2rw:hover .t2xd{opacity:1}
+.t2xd:hover{background:var(--coral-50);color:var(--coral-600)}
+.t2xd svg{width:13px;height:13px}
+.t2ghost{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--neutral-400);cursor:pointer;padding:9px 0 9px 22px;background:none;border:none;font-family:inherit}
+.t2ghost:hover{color:var(--ekopak-deep-blue)}
+.t2ghost svg{width:14px;height:14px}
+.t2ghost.top{padding-left:2px}
+.t2add{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0 11px 22px}
+.t2add.top{padding-left:2px}
+.t2add input{width:230px;height:34px;padding:0 11px;border:1.5px solid var(--ekopak-light-blue);border-radius:9px;font-size:13px;font-weight:500;color:var(--text-strong);outline:none;box-shadow:var(--pl-ring);font-family:inherit}
+.t2chip{font-size:12px;font-weight:600;color:var(--ekopak-deep-blue);background:var(--deep-blue-50);border:none;border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit}
+.t2chip:hover{filter:brightness(0.96)}
+.t2cancel{font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;background:none;border:none;font-family:inherit}
+.t2foot{position:sticky;bottom:0;background:var(--surface-card);border-top:2px solid var(--deep-blue-200);box-shadow:0 -4px 12px rgba(15,63,147,.05);margin:0 -30px;padding:0 45px}
+.t2fl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding:12px 0}
+.t2ft{text-align:center;font-size:12.5px;font-weight:700;color:var(--ekopak-deep-blue)}
+.t2ft.z{color:var(--neutral-300)}
+.t2gt{text-align:center;font-size:14px;font-weight:800;color:var(--ekopak-deep-blue)}
+.t2empty{padding:40px 0;text-align:center;font-size:13px;font-weight:500;color:var(--neutral-400)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0B1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
 
 /* Login */
@@ -1197,7 +1227,7 @@ function render(){
   let h="";
   if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
   if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
-  const mainCls=S.tab==="price"?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
+  const mainCls=(S.tab==="price"||S.tab==="time")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
@@ -1308,54 +1338,72 @@ function tsAddTaskByName(pid,name){name=(name||'').trim();if(!name)return;const 
 function tsAddTaskToWeek(pid,tid){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(pr&&!pr.rows.some(tr=>tr.taskId===tid))pr.rows.push({taskId:tid,h:[0,0,0,0,0,0,0]});S.tsAdd=null;save();render()}
 function tsRemoveTaskFromWeek(pid,tid){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(pr){const i=pr.rows.findIndex(tr=>tr.taskId===tid);if(i>=0)pr.rows.splice(i,1)}save();render()}
 function tsInput(pid,tid,di,inp){const rows=tsEnsureWeek(tsWK());const pr=rows.find(r=>r.projId===pid);if(!pr)return;const tr=pr.rows.find(x=>x.taskId===tid);if(!tr)return;let v=parseFloat(String(inp.value).replace(',','.'));if(isNaN(v)||v<0)v=0;tr.h[di]=v;tsRecalcDom();save()}
-function tsRecalcDom(){const rows=tsGetWeek(tsWK());const gtd=[0,0,0,0,0,0,0];rows.forEach(pr=>{const ps=[0,0,0,0,0,0,0];pr.rows.forEach(tr=>{let tt=0;tr.h.forEach((v,i)=>{ps[i]+=v;tt+=v});const te=document.getElementById('tstt-'+pr.projId+'-'+tr.taskId);if(te)te.textContent=tt?tsFmt(tt):'·'});let pt=0;ps.forEach((v,i)=>{pt+=v;gtd[i]+=v;const pe=document.getElementById('tsps-'+pr.projId+'-'+i);if(pe)pe.textContent=v?tsFmt(v):'·'});const pte=document.getElementById('tspt-'+pr.projId);if(pte)pte.textContent=pt?tsFmt(pt):'·'});let gt=0;gtd.forEach((v,i)=>{gt+=v;const ge=document.getElementById('tsgt-'+i);if(ge)ge.textContent=v?tsFmt(v):'·'});const gte=document.getElementById('tsg');if(gte)gte.textContent=gt?tsFmt(gt):'·'}
+function tsRecalcDom(){const rows=tsGetWeek(tsWK());const gtd=[0,0,0,0,0,0,0];rows.forEach(pr=>{let pt=0;pr.rows.forEach(tr=>{let tt=0;tr.h.forEach((v,i)=>{gtd[i]+=v;tt+=v});pt+=tt;const te=document.getElementById('tstt-'+pr.projId+'-'+tr.taskId);if(te){te.textContent=tsFmt(tt);te.classList.toggle('z',!tt)}});const pte=document.getElementById('tspt-'+pr.projId);if(pte)pte.textContent=(pt?tsFmt(pt):'0')+' h'});let gt=0;gtd.forEach((v,i)=>{gt+=v;const ge=document.getElementById('tsgt-'+i);if(ge){ge.textContent=tsFmt(v);ge.classList.toggle('z',!v)}});const gte=document.getElementById('tsg');if(gte)gte.textContent=gt?tsFmt(gt):'0';const wt=document.getElementById('tsWkT');if(wt)wt.textContent=(gt?tsFmt(gt):'0')+' h';const wb=document.getElementById('tsWkB');if(wb)wb.style.width=(Math.min(100,Math.round(gt/TS_TARGET*100))||0)+'%'}
 function tsToggleCol(pid){S.tsCol[pid]=!S.tsCol[pid];render()}
 function tsStartRename(pid){S.tsEdit=pid;render();requestAnimationFrame(()=>{const el=document.getElementById('ts-rninp');if(el){el.focus();el.select()}})}
 function tsRenameCommit(pid,val){if(S.tsEdit!==pid)return;val=(val||'').trim();const p=tsProj(pid);if(p&&val)p.name=val;S.tsEdit=null;save();render()}
 function tsOpenAdd(which){S.tsAdd=(S.tsAdd===which)?null:which;render();requestAnimationFrame(()=>{const el=document.getElementById('ts-addinp');if(el)el.focus()})}
-function tsAddProjectRow(){const wk=tsWK();if(S.tsAdd!=='proj')return`<tr class="ts-addrow"><td colspan="10"><span class="ts-add" onclick="tsOpenAdd('proj')">＋ Ajouter un projet</span></td></tr>`;const inW=new Set(tsGetWeek(wk).map(r=>r.projId));const av=tsData().projects.filter(p=>!inW.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<tr class="ts-addrow ts-addopen"><td colspan="10"><div class="ts-addbox"><input id="ts-addinp" class="ts-addinp" placeholder="Nom du projet… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddProjectByName(this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;if(av.length){h+=`<div class="ts-pick">`;av.forEach(p=>{h+=`<span class="ts-chip" onclick="tsAddProjectToWeek('${p.id}')">${esc(p.name)}</span>`});h+=`</div>`}h+=`<span class="ts-cancel" onclick="S.tsAdd=null;render()">Annuler</span></div></td></tr>`;return h}
-function tsAddTaskRow(pid){if(S.tsAdd!=='task:'+pid)return`<tr class="ts-addrow ts-addtask"><td colspan="10"><span class="ts-add" onclick="tsOpenAdd('task:${pid}')">＋ Ajouter une tâche</span></td></tr>`;const pr=tsGetWeek(tsWK()).find(r=>r.projId===pid);const inW=new Set(pr?pr.rows.map(tr=>tr.taskId):[]);const p=tsProj(pid);const av=(p?p.tasks:[]).filter(t=>!inW.has(t.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<tr class="ts-addrow ts-addtask ts-addopen"><td colspan="10"><div class="ts-addbox"><input id="ts-addinp" class="ts-addinp" placeholder="Nom de la tâche… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddTaskByName('${pid}',this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;if(av.length){h+=`<div class="ts-pick">`;av.forEach(t=>{h+=`<span class="ts-chip" onclick="tsAddTaskToWeek('${pid}','${t.id}')">${esc(t.name)}</span>`});h+=`</div>`}h+=`<span class="ts-cancel" onclick="S.tsAdd=null;render()">Annuler</span></div></td></tr>`;return h}
+function tsAddProjectRow(){const wk=tsWK();if(S.tsAdd!=='proj')return`<button class="t2ghost top" onclick="tsOpenAdd('proj')">${TS_ICO.plus}Ajouter un projet</button>`;const inW=new Set(tsGetWeek(wk).map(r=>r.projId));const av=tsData().projects.filter(p=>!inW.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<div class="t2add top"><input id="ts-addinp" placeholder="Nom du projet… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddProjectByName(this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;av.forEach(p=>{h+=`<button class="t2chip" onclick="tsAddProjectToWeek('${p.id}')">${esc(p.name)}</button>`});h+=`<button class="t2cancel" onclick="S.tsAdd=null;render()">Annuler</button></div>`;return h}
+function tsAddTaskRow(pid){if(S.tsAdd!=='task:'+pid)return`<button class="t2ghost" onclick="tsOpenAdd('task:${pid}')">${TS_ICO.plus}Ajouter une tâche</button>`;const pr=tsGetWeek(tsWK()).find(r=>r.projId===pid);const inW=new Set(pr?pr.rows.map(tr=>tr.taskId):[]);const p=tsProj(pid);const av=(p?p.tasks:[]).filter(t=>!inW.has(t.id)).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));let h=`<div class="t2add"><input id="ts-addinp" placeholder="Nom de la tâche… (Entrée)" onkeydown="if(event.key==='Enter'){tsAddTaskByName('${pid}',this.value)}else if(event.key==='Escape'){S.tsAdd=null;render()}">`;av.forEach(t=>{h+=`<button class="t2chip" onclick="tsAddTaskToWeek('${pid}','${t.id}')">${esc(t.name)}</button>`});h+=`<button class="t2cancel" onclick="S.tsAdd=null;render()">Annuler</button></div>`;return h}
+const TS_TARGET=40; // objectif hebdo fixe (h) pour la jauge Temps
+const TS_ICO={
+  chevL:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`,
+  chevR:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`,
+  chevD:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+  plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+};
+function tsWeekNum(d){const t=new Date(d);t.setHours(0,0,0,0);t.setDate(t.getDate()+3-((t.getDay()+6)%7));const w1=new Date(t.getFullYear(),0,4);return 1+Math.round(((t-w1)/86400000-3+((w1.getDay()+6)%7))/7)}
 function rTS(){
   tsData();
   const mon=tsMon(),wk=tsWK();
   const sun=new Date(mon);sun.setDate(sun.getDate()+6);
-  const label=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" – "+sun.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
+  const label=mon.toLocaleDateString("fr-FR",{day:"numeric",month:"long"})+" – "+sun.toLocaleDateString("fr-FR",{day:"numeric",month:"long"})+(S.wo===0?"":" "+sun.getFullYear());
   const days=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);days.push(d)}
   const dl=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  const todayIdx=S.wo===0?(new Date().getDay()+6)%7:-1;
   const rows=tsGetWeek(wk);
   const prefill=!tsData().weeks[wk]&&rows.length>0;
-  let h=`<div class="ts-wrap"><div class="ts-top"><div class="wn"><button onclick="S.wo--;render()">◀</button><span>${label}</span><button onclick="S.wo++;render()">▶</button><button onclick="S.wo=0;render()" style="margin-left:4px">Auj.</button></div>`;
-  if(prefill)h+=`<span class="ts-prefill">Reprise de la semaine précédente — édite pour valider</span>`;
-  h+=`</div>`;
-  h+=`<div class="ts-scroll"><table class="ts-tab"><thead><tr><th class="ts-name">Projet / Tâche</th>`;
-  days.forEach((d,i)=>{h+=`<th class="ts-day"><div>${dl[i]}</div><div class="ts-date">${d.getDate()}/${d.getMonth()+1}</div></th>`});
-  h+=`<th class="ts-tot">Total</th><th class="ts-act"></th></tr></thead><tbody>`;
   const gtd=[0,0,0,0,0,0,0];let gt=0;
+  rows.forEach(pr=>pr.rows.forEach(tr=>tr.h.forEach((v,i)=>{gtd[i]+=v})));
+  gtd.forEach(v=>gt+=v);
+  const pct=Math.min(100,Math.round(gt/TS_TARGET*100))||0;
+  let h=`<div class="t2wrap">`;
+  h+=`<div class="t2top"><div><div class="t2ov">Semaine ${tsWeekNum(mon)}</div><div class="t2wnav"><button class="t2wbtn" onclick="S.wo--;render()">${TS_ICO.chevL}</button><h1>${label}</h1><button class="t2wbtn" onclick="S.wo++;render()">${TS_ICO.chevR}</button>${S.wo!==0?`<button class="t2wlnk" onclick="S.wo=0;render()">Cette semaine</button>`:""}</div></div>`;
+  if(prefill)h+=`<span class="t2prefill">Projets repris de la semaine précédente — ajoute les tâches effectuées</span>`;
+  h+=`<div class="t2grow"></div><div class="t2target"><span class="t2tl"><b id="tsWkT">${gt?tsFmt(gt):'0'} h</b> / ${TS_TARGET} h</span><div class="t2bar"><div class="t2fill" id="tsWkB" style="width:${pct}%"></div></div></div></div>`;
+  h+=`<div class="t2sheet">`;
+  h+=`<div class="t2grid t2dayrow"><span></span>`;
+  days.forEach((d,i)=>{h+=`<span class="t2dh${i===todayIdx?' tdy':''}${i>=5?' we':''}">${dl[i]}<span class="t2dnum">${d.getDate()}</span></span>`});
+  h+=`<span class="t2toth">Total</span><span></span></div>`;
   rows.forEach(pr=>{
-    const ps=[0,0,0,0,0,0,0];pr.rows.forEach(tr=>{tr.h.forEach((v,i)=>{ps[i]+=v})});
-    const pt=ps.reduce((a,b)=>a+b,0);ps.forEach((v,i)=>{gtd[i]+=v});gt+=pt;
     const col=!!S.tsCol[pr.projId];
-    const pnCell=S.tsEdit===pr.projId
-      ? `<input id="ts-rninp" class="ts-rn" value="${esc(tsPN(pr.projId))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){tsRenameCommit('${pr.projId}',this.value)}else if(event.key==='Escape'){S.tsEdit=null;render()}" onblur="tsRenameCommit('${pr.projId}',this.value)">`
-      : `<span class="ts-pn" title="Cliquer pour renommer" onclick="tsStartRename('${pr.projId}')">${esc(tsPN(pr.projId))}</span>`;
-    h+=`<tr class="ts-prow"><td class="ts-name"><span class="ts-car" onclick="tsToggleCol('${pr.projId}')">${col?'▸':'▾'}</span>${pnCell}</td>`;
-    ps.forEach((v,i)=>{h+=`<td class="ts-num" id="tsps-${pr.projId}-${i}">${v?tsFmt(v):'·'}</td>`});
-    h+=`<td class="ts-num ts-pt" id="tspt-${pr.projId}">${pt?tsFmt(pt):'·'}</td><td class="ts-act"><button class="ts-x" title="Retirer le projet de la semaine" onclick="tsRemoveProjectFromWeek('${pr.projId}')">✕</button></td></tr>`;
+    let pt=0;pr.rows.forEach(tr=>tr.h.forEach(v=>pt+=v));
+    h+=`<div class="t2card"><div class="t2head${col?'':' open'}">`;
+    h+=S.tsEdit===pr.projId
+      ? `<input id="ts-rninp" class="t2rn" value="${esc(tsPN(pr.projId))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){tsRenameCommit('${pr.projId}',this.value)}else if(event.key==='Escape'){S.tsEdit=null;render()}" onblur="tsRenameCommit('${pr.projId}',this.value)">`
+      : `<button class="t2pn${col?' closed':''}" onclick="tsToggleCol('${pr.projId}')" ondblclick="tsStartRename('${pr.projId}')" title="Clic : replier · double-clic : renommer">${TS_ICO.chevD}${esc(tsPN(pr.projId))}</button>`;
+    h+=`<span class="t2pill" id="tspt-${pr.projId}">${pt?tsFmt(pt):'0'} h</span>`;
+    h+=`<button class="t2px" onclick="tsRemoveProjectFromWeek('${pr.projId}')" title="Retirer le projet de la semaine">${TS_ICO.x}</button></div>`;
     if(!col){
       pr.rows.forEach(tr=>{
-        const tt=tr.h.reduce((a,b)=>a+b,0);
-        h+=`<tr class="ts-trow"><td class="ts-name ts-tname">${esc(tsTN(pr.projId,tr.taskId))}</td>`;
-        tr.h.forEach((v,i)=>{h+=`<td class="ts-num"><input type="text" inputmode="decimal" class="ts-inp" value="${v||''}" oninput="tsInput('${pr.projId}','${tr.taskId}',${i},this)"></td>`});
-        h+=`<td class="ts-num ts-tt" id="tstt-${pr.projId}-${tr.taskId}">${tt?tsFmt(tt):'·'}</td><td class="ts-act"><button class="ts-x" title="Retirer la tâche" onclick="tsRemoveTaskFromWeek('${pr.projId}','${tr.taskId}')">✕</button></td></tr>`;
+        let tt=0;tr.h.forEach(v=>tt+=v);
+        h+=`<div class="t2grid t2rw"><span class="t2tn">${esc(tsTN(pr.projId,tr.taskId))}</span>`;
+        tr.h.forEach((v,i)=>{h+=`<input class="t2cell${i===todayIdx?' tdy':''}" type="text" inputmode="decimal" placeholder="·" value="${v||''}" oninput="tsInput('${pr.projId}','${tr.taskId}',${i},this)">`});
+        h+=`<span class="t2tot${tt?'':' z'}" id="tstt-${pr.projId}-${tr.taskId}">${tsFmt(tt)}</span>`;
+        h+=`<button class="t2xd" onclick="tsRemoveTaskFromWeek('${pr.projId}','${tr.taskId}')" title="Retirer la tâche">${TS_ICO.x}</button></div>`;
       });
       h+=tsAddTaskRow(pr.projId);
     }
+    h+=`</div>`;
   });
+  if(!rows.length)h+=`<div class="t2empty">Semaine vide — ajoute un projet pour commencer la saisie.</div>`;
   h+=tsAddProjectRow();
-  h+=`<tr class="ts-grow"><td class="ts-name">Total</td>`;
-  gtd.forEach((v,i)=>{h+=`<td class="ts-num" id="tsgt-${i}">${v?tsFmt(v):'·'}</td>`});
-  h+=`<td class="ts-num ts-gt" id="tsg">${gt?tsFmt(gt):'·'}</td><td class="ts-act"></td></tr>`;
-  h+=`</tbody></table></div></div>`;
+  h+=`<div style="flex:1"></div>`;
+  h+=`<div class="t2grid t2foot"><span class="t2fl">Total semaine</span>`;
+  gtd.forEach((v,i)=>{h+=`<span class="t2ft${v?'':' z'}" id="tsgt-${i}">${tsFmt(v)}</span>`});
+  h+=`<span class="t2gt" id="tsg">${gt?tsFmt(gt):'0'}</span><span></span></div>`;
+  h+=`</div></div>`;
   return h;
 }
 
