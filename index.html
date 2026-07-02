@@ -809,6 +809,72 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-dx svg{width:19px;height:19px}
 #flux-root .ek-dx.trash:hover{color:#d8442b}
 #flux-root .ek-dx.close:hover{color:var(--text2)}
+/* ── Écran Projet (thème clair Ekopak) : top bar, sélecteur, badges J-n, groupes de statut, sous-tâches, goutte Aujourd'hui ── */
+#flux-root .ek-ov{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3aaae8}
+#flux-root .ek-projpick{display:inline-flex;align-items:center;gap:10px;margin-top:5px;cursor:pointer;position:relative}
+#flux-root .ek-projpick h1{font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);margin:0;letter-spacing:-.01em;white-space:nowrap;max-width:430px;overflow:hidden;text-overflow:ellipsis}
+#flux-root .ek-projpick>svg{width:18px;height:18px;color:#95a0b3;flex:none}
+#flux-root .ek-pmenu{position:absolute;top:calc(100% + 8px);left:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 44px rgba(15,63,147,.14);min-width:280px;max-width:480px;padding:6px;z-index:60;cursor:default}
+#flux-root .ek-fitem{display:flex;align-items:center;gap:9px;padding:9px 6px 9px 11px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap}
+#flux-root .ek-fitem:hover{background:#f2f5fb}
+#flux-root .ek-fitem.on{color:#0f3f93}
+#flux-root .ek-fitem .chk{margin-left:auto;color:#0f3f93;display:flex}
+#flux-root .ek-fitem .chk svg{width:15px;height:15px}
+#flux-root .ek-jbadge{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;flex:none}
+#flux-root .ek-jbadge.hot{background:#fef1ed;color:#d8442b}
+#flux-root .ek-jbadge.mid{background:#f2f5fb;color:#0f3f93}
+#flux-root .ek-jbadge.far{background:#f6fbe8;color:#8fc02e}
+#flux-root .ek-pmx{width:24px;height:24px;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;margin-left:6px;flex:none;padding:0}
+#flux-root .ek-fitem:hover .ek-pmx{opacity:1}
+#flux-root .ek-pmx:hover{background:#fef1ed;color:#d8442b}
+#flux-root .ek-pmx.arm{opacity:1;background:#fef1ed;color:#d8442b}
+#flux-root .ek-pmx svg{width:13px;height:13px}
+#flux-root .stopt .ek-pmx{margin-left:4px}
+#flux-root .stopt:hover .ek-pmx{opacity:1}
+#flux-root .ek-todaypill{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:#e6f6fd;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;flex:none}
+#flux-root .ek-todaypill svg{width:16px;height:16px}
+#flux-root .ek-pseg{display:inline-flex;background:#eef2f8;border-radius:10px;padding:3px;gap:2px}
+#flux-root .ek-pseg button{padding:6px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap}
+#flux-root .ek-pseg button.on{background:var(--panel);color:#0f3f93;box-shadow:0 1px 2px rgba(15,63,147,.06)}
+#flux-root .ek-chev{width:22px;height:22px;flex:none;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#flux-root .ek-chev:hover{background:#f2f5fb;color:#0f3f93}
+#flux-root .ek-chev svg{width:15px;height:15px;transition:transform .14s}
+#flux-root .ek-chev.open svg{transform:rotate(90deg);color:#0f3f93}
+#flux-root .ek-subchip{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;color:#0f3f93;background:#f2f5fb;border:none;border-radius:999px;padding:3px 9px;cursor:pointer;flex:none;display:inline-flex;align-items:center;gap:5px}
+#flux-root .ek-subchip:hover{filter:brightness(0.96)}
+#flux-root .ek-subchip svg{width:11px;height:11px}
+#flux-root .ek-subwrap{padding:2px 0 8px 58px;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--divider)}
+#flux-root .ek-subrow{display:flex;align-items:center;gap:9px;padding:4px 0}
+#flux-root .ek-sck{width:15px;height:15px;border-radius:4px;border:1.6px solid #c2cbd9;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer;background:var(--panel)}
+#flux-root .ek-sck:hover{border-color:#8fc02e}
+#flux-root .ek-sck.on{background:#8fc02e;border-color:#8fc02e;color:#fff}
+#flux-root .ek-sck svg{width:9px;height:9px}
+#flux-root .ek-stxt{flex:1;font-size:12.5px;font-weight:500;color:var(--text2)}
+#flux-root .ek-subrow.done .ek-stxt{color:#95a0b3;text-decoration:line-through}
+#flux-root .ek-xsubdel{width:20px;height:20px;flex:none;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;padding:0}
+#flux-root .ek-subrow:hover .ek-xsubdel{opacity:1}
+#flux-root .ek-xsubdel:hover{background:#fef1ed;color:#d8442b}
+#flux-root .ek-xsubdel svg{width:13px;height:13px}
+#flux-root .ek-subaddin{height:26px;width:230px;border:1.5px solid transparent;border-radius:7px;padding:0 8px;font-size:12px;font-weight:500;outline:none;background:transparent;color:var(--text)}
+#flux-root .ek-subaddin::placeholder{color:#c2cbd9}
+#flux-root .ek-subaddin:focus{border-color:#81d0f5;background:var(--panel)}
+#flux-root .ek-tgl{flex:none;width:32px;height:32px;border-radius:9px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#c2cbd9;transition:color .14s,background .14s,opacity .14s;opacity:0;padding:0}
+#flux-root .ek-tgl svg{width:19px;height:19px}
+#flux-root .ek-trow:hover .ek-tgl{opacity:1}
+#flux-root .ek-tgl:hover{background:#eef2f8;color:#3aaae8}
+#flux-root .ek-tgl.on{opacity:1;color:#3aaae8}
+#flux-root .ek-tgl.on svg{fill:rgba(129,208,245,.3)}
+#flux-root .ek-trow.today{background:#c9ecfb}
+#flux-root .ek-trow.today:hover{background:#bfe7f9}
+#flux-root .ek-paddlnk{display:inline-flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:600;color:#95a0b3;cursor:pointer;background:none;border:none;padding:6px 8px 6px 30px}
+#flux-root .ek-paddlnk:hover{color:#0f3f93}
+#flux-root .ek-paddlnk svg{width:13px;height:13px}
+#flux-root .ek-paddbox{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 8px 8px 30px}
+#flux-root .ek-paddbox input{height:30px;border-radius:8px;font-size:12px;font-weight:500;outline:none;color:var(--text);background:var(--panel)}
+#flux-root .ek-paddbox .nm{width:170px;padding:0 9px;border:1.5px solid #81d0f5}
+#flux-root .ek-paddbox .dt{padding:0 6px;border:1.5px solid #c2cbd9}
+#flux-root .ek-paddbox .ok{height:30px;padding:0 11px;border:none;border-radius:8px;background:#0f3f93;color:#fff;font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer}
+#flux-root .ek-paddbox .nn{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;height:30px;padding:0 4px}
 #flux-root *{box-sizing:border-box;}
 #flux-root ::selection{background:#d8defb;}
 #flux-root input,#flux-root textarea,#flux-root button,#flux-root select{font-family:inherit;}
@@ -2978,8 +3044,8 @@ class Flux extends React.Component {
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
   // ---- mutations ----
-  toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false}:{})} : t), ..._order }; }); }
-  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
+  toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, focus:false, doneAt:Date.now()}:{})} : t), ..._order }; }); }
+  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false, focus:false, doneAt:Date.now()}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
     ? { tasks: flip(st.tasks), editing:_ed, ..._order }
     : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:_ed, ..._order }; }); }
   toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
@@ -3035,7 +3101,7 @@ class Flux extends React.Component {
       const tasks=[...st.tasks];
       const di=tasks.findIndex(t=>t.id===dragId); if(di<0) return {dragId:null,dragOverId:null};
       const d={...tasks[di]};
-      if(axis==='status') d.status=target.status; else if(axis==='person') d.person=target.person; else d.cat=target.cat;
+      if(axis==='status'){ d.status=target.status; if(target.status==='done'){ d.today=false; d.focus=false; d.doneAt=Date.now(); } } else if(axis==='person') d.person=target.person; else d.cat=target.cat;
       tasks.splice(di,1);
       const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d);
       return {tasks,dragId:null,dragOverId:null};
@@ -3068,6 +3134,7 @@ class Flux extends React.Component {
     : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:apply(p.tasks)} : p) }; }); }
   addCheck(id,text){ const tx=(text||'').trim(); if(!tx) return; this.patchCheck(id, arr=>[...arr,{id:this.uid(),text:tx,done:false}]); }
   toggleCheck(id,iid){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,done:!i.done}:i)); }
+  delCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
   updateCheckText(id,iid,val){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,text:val}:i)); }
   deleteCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
   addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
@@ -3154,7 +3221,7 @@ class Flux extends React.Component {
     this.setState(st=>{
       const found = st.tasks.find(t=>t.id===id) || (st.projects||[]).map(p=>(p.tasks||[]).find(t=>t.id===id)).find(Boolean);
       const toDone = !(found && found.status==='done');
-      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, focus:false}:{})} : t;
+      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, focus:false, doneAt:Date.now()}:{})} : t;
       const _order = toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {};
       if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip), ..._order };
       return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p), ..._order };
@@ -3300,23 +3367,23 @@ class Flux extends React.Component {
     const showEmpty = !anyFilter && st.bulk!=='none';     // groupes vides visibles seulement hors filtrage
     const showingAll = allOn || (st.bulk!=='none' && !anyFilter);
     const match = t => (!actS.length||actS.includes(t.status)) && (!actC.length||actC.includes(t.cat)) && (!actP.length||actP.includes(t.person));
-    const filtered = st.bulk==='none' ? [] : st.tasks.filter(match);
+    const filtered = st.tasks;   // filtres facettes retirés (onglets de statut à la place) ; st.filters/bulk dormants
     const taskById = id => st.tasks.find(t=>t.id===id);
     const stop = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
 
-    // L'onglet Aujourd'hui (todayOnly) force le thème clair Ekopak + l'accent deep-blue, sans toucher au thème (sombre) des autres onglets.
+    // Thème clair Ekopak sur tout Flux (décision 2026-07-02) : st.theme/st.accent sont ignorés (champs dormants).
     const todayOnly = !!this.props.todayOnly;
-    const theme = todayOnly ? 'ekopak' : (st.theme || 'marine');
-    const isDark = theme==='marine' || theme==='indigo' || theme==='ocean';
-    this._dark = isDark;
-    const STATUS = todayOnly ? STATUS_EKOPAK : (isDark ? STATUS_DARK : STATUS_LIGHT);
-    const accent = todayOnly ? '#0f3f93' : (st.accent || '#3a8ff0');
+    const theme = 'ekopak';
+    const isDark = false;
+    this._dark = false;
+    const STATUS = STATUS_EKOPAK;
+    const accent = '#0f3f93';
     const aTint = (a)=> accent + a;
     const selA = isDark ? '30' : '14';
     const fillA = isDark ? '26' : '1a';
     const lighten = (hex,amt)=>{ const h=(hex||'').replace('#',''); if(h.length!==6) return hex; let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt); return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); };
     const D = DEN[st.density] || DEN.confortable;
-    const groupBy = st.groupBy || 'cat';
+    const groupBy = 'status';   // groupement par statut (maquette Ekopak) — st.groupBy ignoré, dormant
     const le = st.labelEdit || {type:null,id:null};
     const labelEditing = (type,id)=> le.type===type && le.id===id;
     const byName = (a,b)=> (a.name||'').localeCompare(b.name||'', 'fr', {sensitivity:'base'});
@@ -3324,17 +3391,27 @@ class Flux extends React.Component {
 
     // Shared pill recipe — Personne & Statut chips share identical geometry & type.
     const chipBase = `display:inline-flex;align-items:center;line-height:1;border-radius:20px;padding:${D.stPad};font-size:12px;font-weight:500;white-space:nowrap;`;
+    const _todayISO = this._isoFromDays(0);
 
     const vm = (t) => {
       const sm = STATUS[t.status];
       const done = t.status==='done';
       const sel = st.selectedId===t.id;
       const isEd = (fld)=> ed.id===t.id && ed.field===fld;
-      let rowStyle = `position:relative;display:flex;flex-wrap:nowrap;align-items:center;height:${D.rowH}px;padding:0 ${D.padX}px;border-bottom:1px solid var(--divider);cursor:default;background:var(--panel);`;
-      if(sel) rowStyle += `background:${aTint(selA)};box-shadow:inset 3px 0 0 ${accent};`;
-      if(isEd('status')) rowStyle += 'z-index:25;';
-      if(st.dragOverId===t.id) rowStyle += `border-top:2px solid ${accent};`;
-      const du = this.formatDue(t.due);
+      // « effectivement aujourd'hui » (goutte + ligne surlignée) : flag today, programmée (due ≤ auj.) ou relance atteinte — même règle que todayTasks.
+      const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:'';
+      const _relDue=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayISO);
+      const _sched=!!_due && _due<=_todayISO && t.status!=='done' && t.status!=='wait';
+      const effToday = !done && (!!t.today || _sched || _relDue);
+      const isRel = t.status==='wait' && !!t.relance;
+      const subs = Array.isArray(t.checklist)?t.checklist:[];
+      let rowStyle = 'position:relative;flex-wrap:nowrap;cursor:grab;';
+      if(sel && !effToday) rowStyle += 'background:#f2f5fb;';
+      if(isEd('status')||isEd('person')||isEd('relance')) rowStyle += 'z-index:25;';
+      if(st.dragOverId===t.id) rowStyle += 'box-shadow:inset 0 2.5px 0 #81d0f5;';
+      // Couleurs d'échéance : « Aujourd'hui » light-blue, dépassé corail, le reste gris (règle de l'écran Aujourd'hui).
+      const _duRaw = this.formatDue(t.due);
+      const du = { text:_duRaw.text, color: _duRaw.text==="Aujourd'hui" ? '#3aaae8' : ((_duRaw.color==='#f0746d'||_duRaw.color==='#d04a45') ? '#d8442b' : 'var(--muted)') };
       const p = this.person(t.person);
       const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
         return { key:k, label:m.label, dot:m.dot,
@@ -3348,40 +3425,55 @@ class Flux extends React.Component {
         const curNames=new Set(st.people.map(pp=>(pp.name||'').trim().toLowerCase()));
         const known=this.knownPeople();
         if(!ql || 'non assigné'.indexOf(ql)>=0) personMenu.push({ label:'Non assigné', initials:'', avatarStyle:'width:18px;height:18px;border-radius:50%;border:1.5px dashed var(--cbox);flex:none;', labelStyle:'font-size:12.5px;color:var(--text3);', checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(t.person===''?'':'visibility:hidden;'), style:mrow(t.person===''), onPick:(e)=>{ stop(e); this.updatePerson(t.id,''); this.stopPersonEdit(); } });
-        st.people.filter(pp=>pp.name.toLowerCase().indexOf(ql)>=0).forEach(pp=>{ const on=t.person===pp.id; personMenu.push({ label:pp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${pp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,pp.id); this.stopPersonEdit(); } }); });
+        st.people.filter(pp=>pp.name.toLowerCase().indexOf(ql)>=0).forEach(pp=>{ const on=t.person===pp.id; personMenu.push({ label:pp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${pp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,pp.id); this.stopPersonEdit(); }, onDel:(e)=>{ stop(e); this.stopPersonEdit(); this.setState({personDelId:pp.id}); } }); });
         Array.from(known.values()).filter(kp=>{ const k=(kp.name||'').trim().toLowerCase(); return !curNames.has(k) && kp.name.toLowerCase().indexOf(ql)>=0; }).forEach(kp=>{ personMenu.push({ label:kp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${kp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);', checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(kp.name,kp.color); this.updatePerson(t.id,id); this.stopPersonEdit(); } }); });
         const exact=ql && known.has(ql);
         if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
       }
       return {
-        id:t.id, cat:t.cat, rowStyle, title:t.title,
+        id:t.id, rowStyle, title:t.title,
+        rowCls: 'ek-trow'+(effToday?' today':'')+(done?' is-done':''),
         dueISO:t.due||'', dueText:du.text, dueColor:du.color,
+        dueSlotText: isRel ? this.formatDue(t.relance).text : du.text,
+        dueSlotColor: isRel ? (_relDue ? '#d8442b' : 'var(--muted)') : du.color,
+        onDueSlotClick:(e)=>{ stop(e); this.startEdit(t.id, isRel?'relance':'due'); },
+        isRel, done, effToday,
         personId:t.person||'', personQuery:st.personQuery, personMenu,
-        hasPerson: !!p, noPerson: !p,
+        hasPerson: !!p,
         personName: p ? p.name : '',
-        personChip: p ? chipBase + `max-width:100%;overflow:hidden;text-overflow:ellipsis;background:${p.color}${isDark?'33':'18'};color:${isDark?lighten(p.color,0.55):lighten(p.color,-0.12)};` : '',
-        titleStyle: `font-size:${D.titleFs}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;` + (done?'color:var(--muted);text-decoration:line-through;':'color:var(--text);'),
-        checkStyle: this.checkBox(done, D.chk, accent), checkMark: done?'✓':'',
-        statusStyle: chipBase + `gap:5px;cursor:pointer;background:${sm.bg};color:${sm.fg};`,
-        statusLabel:sm.label, statusDot:sm.dot, statusOptions,
+        titleStyle: 'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;' + (done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'),
+        statusLabel: done?'Terminée':sm.label, statusDot: done?'#8fc02e':sm.dot, statusOptions,
         edTitle:isEd('title'), showTitle:!isEd('title'),
         edDue:isEd('due'), showDue:!isEd('due'),
         edPerson:isEd('person'), showPerson:!isEd('person'),
         edStatus:isEd('status'),
-        isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
-        onRelanceClick:(e)=>{ stop(e); this.startEdit(t.id,'relance'); }, onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
+        relanceISO:t.relance||'', edRelance:isEd('relance'),
+        onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
+        noteHas: !!(t.notes||'').trim(),
+        hasSubs: subs.length>0,
+        subCount: subs.filter(s=>s.done).length+'/'+subs.length,
+        subsOpen: !!(st.openSubs||{})[t.id],
+        chevCls: 'ek-chev'+((st.openSubs||{})[t.id]?' open':''),
+        onToggleSubs:(e)=>{ stop(e); this.setState(s=>({ openSubs:{...(s.openSubs||{}), [t.id]:!(s.openSubs||{})[t.id]}, subDraft:'' })); },
+        subs: subs.map(sb=>({ id:sb.id, txt:sb.text, cls:'ek-subrow'+(sb.done?' done':''), ckCls:'ek-sck'+(sb.done?' on':''),
+          onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); },
+          onDelete:(e)=>{ stop(e); this.delCheck(t.id, sb.id); } })),
+        subDraft: st.subDraft||'',
+        onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
+        onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:''}); e.target.blur(); } },
         stop,
         today: !!t.today,
-        onRowToggle: ()=>this.toggleSelect(t.id),
+        tglCls:'ek-tgl'+(effToday?' on':''),
+        tglTitle: (effToday&&!t.today) ? "Échéance atteinte — dans Aujourd'hui jusqu'à résolution" : (t.today?"Retirer d'aujourd'hui":"Ajouter à aujourd'hui"),
+        onToggleToday:(e)=>{ stop(e); this.toggleToday(t.id); },
+        onOpenDetail:(e)=>{ stop(e); this.toggleSelect(t.id); },
         onCheck: (e)=>{ stop(e); this.toggleDone(t.id); },
-        onStar: (e)=>{ stop(e); this.toggleToday(t.id); },
         onDelete: (e)=>{ stop(e); this.askDelete(t.id); },
         onTitleClick: (e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
         onTitleDbl: (e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
         onTitleInput: (e)=>this.updateTitle(t.id, e.target.value),
         onTitleKey: (e)=>{ stop(e); if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } if(e.key==='Escape'){ e.target.blur(); } },
         onTitleBlur: ()=>this.stopEdit(),
-        onDueClick: (e)=>{ stop(e); this.startEdit(t.id,'due'); },
         onDueChange: (e)=>{ this.updateDue(t.id, e.target.value); this.stopEdit(); },
         onDueBlur: ()=>this.stopEdit(),
         onPersonClick: (e)=>{ stop(e); this.startPersonEdit(t.id); },
@@ -3391,8 +3483,8 @@ class Flux extends React.Component {
         onDragStart: (e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
         onDragOver: (e)=>{ e.preventDefault(); },
         onDragEnter: (e)=>{ e.preventDefault(); if(!st.dragCatId && st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
-        onDrop: (e)=>{ e.preventDefault(); e.stopPropagation(); if(groupBy==='cat') this.reorder(st.dragId, t.id, t.cat); else this.reorderAdopt(st.dragId, t.id, groupBy, t); },
-        onDragEnd: ()=>this.setState({dragId:null,dragOverId:null}),
+        onDrop: (e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderAdopt(st.dragId, t.id, 'status', t); this.setState({dragOverGrp:null}); },
+        onDragEnd: ()=>this.setState({dragId:null,dragOverId:null,dragOverGrp:null}),
       };
     };
 
@@ -3402,6 +3494,7 @@ class Flux extends React.Component {
     const addRowStyle = `display:flex;align-items:center;gap:8px;height:${D.addH}px;padding:0 ${D.padX}px;background:var(--soft);border-bottom:1px solid var(--divider);`;
     const mkGroup = (gkey, id, name, filterFn, preset, marker)=>{
       const list = filtered.filter(filterFn);
+      if(id==='done') list.sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
       const collapsed = !!st.collapsed[gkey];
       const labelType = groupBy==='cat' ? 'cat' : (groupBy==='person' ? 'person' : null);
       const editable = !!labelType && id!=='';
@@ -3429,20 +3522,10 @@ class Flux extends React.Component {
         },
       };
     };
-    let groups;
-    if(groupBy==='status'){
-      groups = SORDER.map(k=> mkGroup('st:'+k, k, STATUS[k].label, t=>t.status===k, {status:k}, STATUS[k].dot));
-    } else if(groupBy==='person'){
-      groups = st.people.map(p=> mkGroup('pe:'+p.id, p.id, p.name, t=>t.person===p.id, {person:p.id}, p.color));
-      const un = mkGroup('pe:', '', 'Non assigné', t=>!t.person, {person:''}, 'var(--cbox)');
-      if(un.count>0) groups.push(un);
-    } else {
-      groups = st.categories.map(c=> mkGroup('ca:'+c.id, c.id, c.name, t=>(t.cat||'')===c.id, {cat:c.id}, accent));
-      const unc = mkGroup('ca:', '', 'Sans catégorie', t=>!t.cat, {cat:''}, 'var(--cbox)');
-      if(unc.count>0) groups.unshift(unc);
-    }
-    /* Hors filtrage (showEmpty), on garde les vrais groupes vides (id!=='') pour pouvoir y ajouter une tâche ; dès qu'un filtre est actif — ou en mode 'none' — seuls les groupes non vides restent. "Sans catégorie"/"Non assigné" (id='') n'apparaît que s'il contient des tâches. */
-    groups = groups.filter(g=> g.count>0 || (g.id!=='' && showEmpty));
+    // Groupes par statut (maquette Ekopak) : En cours → À faire → En attente → Terminées. « Terminées » masqué si vide (tri par doneAt desc, fait dans mkGroup). L'onglet de statut (projStatusTab, transient) masque les autres groupes.
+    const projTab = st.projStatusTab || 'all';
+    let groups = ['doing','todo','wait','done'].map(k=> mkGroup('st:'+k, k, k==='done'?'Terminées':STATUS[k].label, t=> k==='done' ? t.status==='done' : t.status===k, {status:k}, STATUS[k].dot));
+    groups = groups.filter(g=> projTab==='all' ? !(g.id==='done' && g.count===0) : g.id===projTab);
 
     const cnt = (pred)=> st.tasks.filter(pred).length;
     const statusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot,
@@ -3622,17 +3705,18 @@ class Flux extends React.Component {
     const confirmTask = confirmRes ? confirmRes.task : null;
     const _unmarkRes = st.todayUnmarkId ? this.taskByIdAny(st.todayUnmarkId) : null;
     const _unmarkTask = _unmarkRes ? _unmarkRes.task : null;
+    const _personDel = st.personDelId ? st.people.find(pp=>pp.id===st.personDelId) : null;
 
     // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
     const curProj = (st.projects||[]).find(p=>p.id===st.currentProjectId) || null;
     const pq = (st.projQuery||'').trim(); const pql = pq.toLowerCase();
     // Badge échéance projet (jours restants + couleur d'urgence) — partagé sélecteur + liste déroulante.
-    const projDayBadge = dl => { if(!/^\d{4}-\d{2}-\d{2}$/.test(dl||'')) return { j:'', col:'var(--muted)' }; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(dl+'T00:00:00')-t)/86400000); return { j: j<0?('J+'+(-j)):j===0?'Auj.':('J‑'+j), col: j<=10?'#f0746d':j<=28?'#f4b24c':'#37cf9b' }; };
+    const projDayBadge = dl => { if(!/^\d{4}-\d{2}-\d{2}$/.test(dl||'')) return { j:'', col:'var(--muted)', cls:'' }; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(dl+'T00:00:00')-t)/86400000); const cls=j<=10?'hot':j<=28?'mid':'far'; return { j: j<0?('J+'+(-j)):j===0?'Auj.':('J‑'+j), col: j<=10?'#d8442b':j<=28?'#0f3f93':'#8fc02e', cls }; };
     const _allT0=new Date(); _allT0.setHours(0,0,0,0);
     const _projDays = dl => /^\d{4}-\d{2}-\d{2}$/.test(dl||'') ? Math.round((new Date(dl+'T00:00:00')-_allT0)/86400000) : Infinity;
     const _projDeadlineSort = (a,b)=>{ const da=_projDays(a.deadline), db=_projDays(b.deadline); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
     const projList = (st.projects||[]).filter(p=> p.id!=='__inbox' && p.name.toLowerCase().indexOf(pql)>=0)
-      .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col,
+      .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col, dlCls:projDayBadge(p.deadline).cls,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
         confirmDel: st.projDelId===p.id,
@@ -3659,7 +3743,7 @@ class Flux extends React.Component {
     const allCatFacets = Array.from(_allCatMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.cat[k], boxStyle:this.facetBox(!!af.cat[k],accent), check:af.cat[k]?'✓':'', onToggle:()=>this.toggleAllFilter('cat',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
     const allPersonFacets = Array.from(_allPersonMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.person[k], boxStyle:this.facetBox(!!af.person[k],accent), check:af.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${m.color};flex:none;`, onToggle:()=>this.toggleAllFilter('person',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
     const allAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(allAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
-    const allGroups = (st.projects||[]).map(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]); const dl=projDayBadge(p.deadline); const ftasks=(tasks||[]).filter(t=>_allMatch(t,cats,ppl)); const rows=ftasks.map(tk=>{ const r=tvm({task:tk, projId:p.id, projName:p.name, people:ppl}); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); }); return { projId:p.id, name:p.name, count:ftasks.length, dlJ:dl.j, dlCol:dl.col, days:_projDays(p.deadline), rows }; }).filter(g=> (allAnyFilter ? g.count>0 : true) && !(g.projId==='__inbox' && g.count===0)).sort((a,b)=>{ if(a.days!==b.days) return a.days-b.days; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); });
+    const allGroups = (st.projects||[]).map(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]); const dl=projDayBadge(p.deadline); const ftasks=(tasks||[]).filter(t=>_allMatch(t,cats,ppl)); const rows=ftasks.map(tk=>{ const r=tvm({task:tk, projId:p.id, projName:p.name, people:ppl}); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); }); return { projId:p.id, name:p.name, count:ftasks.length, dlJ:dl.j, dlCol:dl.col, dlCls:dl.cls, days:_projDays(p.deadline), rows }; }).filter(g=> (allAnyFilter ? g.count>0 : true) && !(g.projId==='__inbox' && g.count===0)).sort((a,b)=>{ if(a.days!==b.days) return a.days-b.days; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); });
     const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
 
     return {
@@ -3683,6 +3767,8 @@ class Flux extends React.Component {
       projHasDeadline: !!(curProj && /^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')),
       projDeadlineJ: curProj?projDayBadge(curProj.deadline).j:'',
       projDeadlineCol: curProj?projDayBadge(curProj.deadline).col:'var(--muted)',
+      projDeadlineCls: curProj?projDayBadge(curProj.deadline).cls:'',
+      projTodayCount: st.allMode ? todayEntriesAll.length : todayEntriesAll.filter(e=>e.projId===st.currentProjectId).length,
       projNotes: curProj ? (curProj.notes||'') : '',
       projSteps: curProj ? (curProj.steps||[]).map(s=>({ id:s.id, name:s.name||'', date:s.date||'' })) : [],
       onSetProjView:(vw)=>this.setProjView(vw),
@@ -3717,7 +3803,7 @@ class Flux extends React.Component {
       onOpenProj:(pid)=>this.openProjectPlanning(pid),
       projName: curProj?curProj.name:'', hasProject: !!curProj,
       projOpen: st.projOpen, projQuery: st.projQuery, projList, projCreate: !!pq && !projExact,
-      onProjToggle:()=>this.setState(s=>({ projOpen:!s.projOpen, projQuery:'' })),
+      onProjToggle:()=>this.setState(s=>({ projOpen:!s.projOpen, projQuery:'', npOpen:false, projDelId:null })),
       onProjQuery:(e)=>this.setState({ projQuery:e.target.value }),
       onProjKey:(e)=>{ if(e.key==='Escape'){ this.setState({projOpen:false,projQuery:''}); } else if(e.key==='Enter'){ const q=(this.state.projQuery||'').trim(); if(!q) return; const ql=q.toLowerCase(); const hit=this.state.projects.find(p=>p.name.toLowerCase()===ql) || this.state.projects.find(p=>p.name.toLowerCase().indexOf(ql)>=0); if(hit) this.switchProject(hit.id); else this.createProject(q); } },
       onProjCreate:(e)=>{ stop(e); const q=(this.state.projQuery||'').trim(); if(q) this.createProject(q); },
@@ -3728,6 +3814,9 @@ class Flux extends React.Component {
       groups, statusFacets, catFacets, personFacets,
       todayView: st.todayView, todayList, todayGroups, todayFocus, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayColHeaderStyle, todayAnyFilter, todayAllStyle,
       todayStatusFacets, todayProjFacets, todayPersonFacets, todayStatusTabs, todayDateLong,
+      hasPersonDel: !!_personDel, personDelName: _personDel?_personDel.name:'',
+      onPersonDelCancel:()=>this.setState({personDelId:null}),
+      onPersonDelOk:()=>{ const id=this.state.personDelId; this.setState({personDelId:null}); if(id) this.deletePerson(id); },
       hasUnmark: !!_unmarkTask, unmarkTitle: _unmarkTask?_unmarkTask.title:'',
       onUnmarkCancel:()=>this.setState({todayUnmarkId:null}),
       onUnmarkOk:()=>{ const id=this.state.todayUnmarkId; this.setState({todayUnmarkId:null}); if(!id) return; const cur=this.taskByIdAny(id); if(!cur) return; if(cur.task.focus) this.patch(id,{focus:false}); if(cur.task.today) this.toggleToday(id); },
@@ -3753,79 +3842,89 @@ class Flux extends React.Component {
 
   renderRow(t){
     return (
-      <div className="taskrow" data-task="1" style={css(t.rowStyle)} draggable={!t.edTitle}
-        onClick={t.onRowToggle} onDragStart={t.onDragStart} onDragOver={t.onDragOver}
-        onDragEnter={t.onDragEnter} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
-        <span style={css('width:26px;flex:none;display:flex;align-items:center;')} onClick={t.onCheck}>
-          <span style={css(t.checkStyle)}>{t.checkMark}</span>
-        </span>
-        {/* STAR — désigne la tâche pour Aujourd'hui */}
-        <span style={css('width:24px;flex:none;display:flex;align-items:center;justify-content:center;')}>
-          <span className={'fxstar'+(t.today?' on':'')} onClick={t.onStar} title={t.today?"Retirer d'Aujourd'hui":"Ajouter à Aujourd'hui"}>{t.today?'★':'☆'}</span>
-        </span>
-        {/* TITLE */}
-        <span style={css('flex:1;min-width:120px;display:flex;align-items:center;gap:8px;overflow:hidden;padding-right:8px;')}>
-          {t.edTitle &&
-            <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />}
-          {t.showTitle &&
-            <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
-        </span>
-        {/* DUE */}
-        <span className="cell" style={css('width:104px;flex:none;padding:3px 6px;position:relative;')} onClick={t.onDueClick}>
-          {t.edDue &&
-            <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css("width:100%;font-family:'Nunito',sans-serif;font-size:11px;")} />}
-          {t.showDue && <span style={css("font-size:12px;color:"+t.dueColor+";")}>{t.dueText}</span>}
-        </span>
-        {/* PERSON */}
-        <span className="cell" style={css('width:150px;flex:none;padding:3px 6px;overflow:visible;position:relative;')} onClick={t.onPersonClick}>
-          {t.edPerson &&
-            <React.Fragment>
-              <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
-              <div style={css('position:absolute;top:32px;left:6px;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
-                {t.personMenu.map((o,i)=>
-                  <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
-                    <span style={css(o.avatarStyle)}>{o.initials}</span>
-                    <span style={css(o.labelStyle)}>{o.label}</span>
-                    <span style={css(o.checkStyle)}>✓</span>
-                  </div>)}
-              </div>
-            </React.Fragment>}
-          {t.showPerson &&
-            <span style={css('display:flex;align-items:center;gap:7px;overflow:hidden;')}>
-              {t.hasPerson && <span style={css(t.personChip)}>{t.personName}</span>}
-              {t.noPerson && <span style={css('font-size:12px;color:var(--cbox);')}>＋ assigner</span>}
-            </span>}
-        </span>
-        {/* STATUS */}
-        <span style={css('width:128px;flex:none;position:relative;')}>
-          <span onClick={t.onStatusClick} title="Changer le statut" style={css(t.statusStyle)}>
-            <span style={css('width:6px;height:6px;border-radius:50%;background:'+t.statusDot+';')}></span>
-            {t.statusLabel}
-            <span style={css('margin-left:auto;opacity:.5;font-size:9px;padding-left:4px;')}>▾</span>
+      <React.Fragment>
+        <div className={t.rowCls} data-task="1" style={css(t.rowStyle)} draggable={!t.edTitle}
+          onDragStart={t.onDragStart} onDragOver={t.onDragOver} onDragEnter={t.onDragEnter} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
+          <button className={t.chevCls} onClick={t.onToggleSubs} title="Sous-tâches">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+          <span className={'ek-ck'+(t.done?' on':'')} onClick={t.onCheck} title={t.done?'Rouvrir la tâche':'Marquer comme terminée'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
           </span>
-          {t.edStatus &&
-            <div style={css('position:absolute;top:32px;left:0;min-width:152px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:40;')}>
-              {t.statusOptions.map(so=>
-                <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
-                  <span style={css('width:7px;height:7px;border-radius:50%;background:'+so.dot+';')}></span>
-                  {so.label}
-                  <span style={css(so.checkStyle)}>✓</span>
-                </div>)}
-            </div>}
-          {t.edRelance &&
-            <div style={css('position:absolute;top:32px;left:0;min-width:204px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:9px;z-index:45;')}>
-              <div style={css("font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px;")}>Date de relance</div>
-              <input autoFocus type="date" value={t.relanceISO} onChange={t.onRelanceChange} onBlur={t.onRelanceBlur} onClick={t.stop} style={css("width:100%;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12.5px;background:var(--soft);color:var(--text);font-family:'Nunito',sans-serif;outline:none;")} />
-            </div>}
-        </span>
-        {/* RELANCE */}
-        <span className="cell" style={css('width:104px;flex:none;padding:3px 6px;')} onClick={t.onRelanceClick}>
-          {t.isWait
-            ? <span style={css('font-size:12px;color:'+t.relanceColor+';')}>{t.relanceText}</span>
-            : <span style={css('font-size:12px;color:var(--muted);opacity:.45;')}>—</span>}
-        </span>
-        <span className="rowdel" onClick={t.onDelete} title="Supprimer la tâche" style={css('position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;padding:0 8px;font-size:13px;color:var(--muted);background:var(--soft);cursor:pointer;')}>✕</span>
-      </div>
+          <span style={css('position:relative;flex:none;display:flex;')}>
+            <button className="ek-sdot" onClick={t.onStatusClick} title={t.statusLabel+' — changer le statut'}>
+              <span style={css('width:9px;height:9px;border-radius:50%;background:'+t.statusDot+';display:block;')}></span>
+            </button>
+            {t.edStatus &&
+              <div style={css('position:absolute;top:26px;left:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:45;')}>
+                {t.statusOptions.map(so=>
+                  <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
+                    <span style={css('width:9px;height:9px;border-radius:50%;background:'+so.dot+';flex:none;')}></span>
+                    {so.label}
+                    <span style={css(so.checkStyle)}>✓</span>
+                  </div>)}
+              </div>}
+            {t.edRelance &&
+              <div style={css('position:absolute;top:26px;left:0;min-width:204px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:9px;z-index:45;')}>
+                <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;")}>Date de relance</div>
+                <input autoFocus type="date" value={t.relanceISO} onChange={t.onRelanceChange} onBlur={t.onRelanceBlur} onClick={t.stop} style={css('width:100%;border:1.5px solid #c2cbd9;border-radius:8px;padding:6px 9px;font-size:12.5px;background:var(--panel);color:var(--text);outline:none;')} />
+              </div>}
+          </span>
+          {t.edTitle
+            ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
+            : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
+          {t.hasSubs && !t.edTitle &&
+            <button className="ek-subchip" onClick={t.onToggleSubs} title="Sous-tâches">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+              {t.subCount}
+            </button>}
+          <span style={css('display:flex;align-items:center;gap:14px;flex:none;')}>
+            <span style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
+              {t.edDue
+                ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css('width:100%;font-size:11px;')} />
+                : <span onClick={t.onDueSlotClick} title={t.isRel?'Modifier la date de relance':'Modifier la date'} style={css("font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;border-radius:6px;padding:2px 4px;color:"+t.dueSlotColor+";")}>{t.dueSlotText}</span>}
+            </span>
+            <span style={css('width:128px;flex:none;position:relative;display:flex;')} onClick={t.onPersonClick} title="Modifier la personne assignée">
+              {t.edPerson
+                ? <React.Fragment>
+                    <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
+                    <div style={css('position:absolute;top:30px;right:0;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
+                      {t.personMenu.map((o,i)=>
+                        <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
+                          <span style={css(o.avatarStyle)}>{o.initials}</span>
+                          <span style={css(o.labelStyle)}>{o.label}</span>
+                          <span style={css(o.checkStyle)}>✓</span>
+                          {o.onDel && <button className="ek-pmx" onClick={o.onDel} title="Supprimer la personne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>}
+                        </div>)}
+                    </div>
+                  </React.Fragment>
+                : <span className={'ek-mchip'+(t.hasPerson?'':' none')}>
+                    <span style={css('overflow:hidden;text-overflow:ellipsis;')}>{t.hasPerson?t.personName:'Non assigné'}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>}
+            </span>
+          </span>
+          <button className={'ek-x note'+(t.noteHas?' has':'')} onClick={t.onOpenDetail} title="Note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg>
+          </button>
+          <button className={t.tglCls} onClick={t.onToggleToday} title={t.tglTitle}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
+          </button>
+          <button className="ek-x del" onClick={t.onDelete} title="Supprimer la tâche">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
+          </button>
+        </div>
+        {t.subsOpen &&
+          <div className="ek-subwrap">
+            {t.subs.map(s=>
+              <div key={s.id} className={s.cls}>
+                <span className={s.ckCls} onClick={s.onCheck}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+                <span className="ek-stxt">{s.txt}</span>
+                <button className="ek-xsubdel" onClick={s.onDelete} title="Supprimer la sous-tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
+              </div>)}
+            <div className="ek-subrow"><input className="ek-subaddin" placeholder="+ Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} /></div>
+          </div>}
+      </React.Fragment>
     );
   }
 
@@ -4083,31 +4182,16 @@ class Flux extends React.Component {
 
   renderAllProjects(v){
     return (
-      <div style={css('min-width:760px;padding-bottom:40px;')}>
-        <div style={css(v.todayColHeaderStyle)}>
-          <span style={css('width:26px;flex:none;')}></span>
-          <span style={css('width:24px;flex:none;')}></span>
-          <span style={css('flex:1;min-width:0;')}>Tâche</span>
-          <span style={css('width:104px;flex:none;')}>Faire le</span>
-          <span style={css('width:150px;flex:none;')}>Personne</span>
-          <span style={css('width:128px;flex:none;')}>Statut</span>
-        </div>
+      <div style={css('min-width:860px;padding:22px 32px 40px;')}>
         {(!v.allGroups || !v.allGroups.length)
-          ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>{v.allAnyFilter
-              ? <React.Fragment>Aucune tâche ne correspond aux filtres.<br/><span onClick={v.onClearAllFilters} style={css('color:'+v.accent+';cursor:pointer;')}>Réinitialiser les filtres</span></React.Fragment>
-              : 'Aucun projet.'}</div>
+          ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Aucun projet.</div>
           : v.allGroups.map(g=>
-            <React.Fragment key={g.projId}>
-              <div style={css('display:flex;align-items:center;gap:9px;height:34px;padding:0 16px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--divider);')}>
-                <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+g.dlCol+';')}></span>
-                <span style={css("font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--text);")}>{g.name}</span>
-                <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:1px 7px;")}>{g.count}</span>
-                {g.dlJ && <span style={css("font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;color:#0b1626;background:"+g.dlCol+";")}>{g.dlJ}</span>}
-              </div>
+            <div key={g.projId} className="ek-grp">
+              <div className="ek-glabel"><b>{g.name}</b>{g.dlJ && <span className={'ek-jbadge '+g.dlCls} title="Jours avant l'échéance">{g.dlJ}</span>}<span className="c">{g.count}</span></div>
               {g.count===0
-                ? <div style={css('padding:9px 16px 11px 56px;font-size:12.5px;color:var(--muted);')}>Aucune tâche.</div>
-                : g.rows.map(t=> <React.Fragment key={t.id}>{this.renderCrossRow(t)}</React.Fragment>)}
-            </React.Fragment>)}
+                ? <div style={css('padding:9px 8px 11px 30px;font-size:12.5px;color:var(--muted);')}>Aucune tâche.</div>
+                : g.rows.map(t=> <React.Fragment key={t.id}>{this.renderTodayRow(t)}</React.Fragment>)}
+            </div>)}
       </div>
     );
   }
@@ -4198,6 +4282,23 @@ class Flux extends React.Component {
   }
 
   // Barre de filtres (Direction B) : remplace le rail latéral. mode = 'proj' | 'all' | 'today'
+  // ▼ renderProjTabs — barre d'onglets de l'écran Projet (thème clair Ekopak) : statut en onglets mono-sélection (transient projStatusTab) + segment Tâches | Planning | Notes.
+  renderProjTabs(v){
+    const cur = this.state.projStatusTab || 'all';
+    return (
+      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:24px;padding:0 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:4;min-height:47px;')}>
+        {v.projView==='todo' && [['all','Tous'],['doing','En cours'],['todo','À faire'],['wait','En attente']].map(([k,l])=>
+          <button key={k} className={'ek-tab'+(cur===k?' on':'')} onClick={()=>this.setState({projStatusTab:k})}>{l}</button>)}
+        <div style={css('margin-left:auto;display:flex;align-items:center;')}>
+          <div className="ek-pseg">
+            {[{k:'todo',l:'Tâches'},{k:'infos',l:'Planning'},{k:'notes',l:'Notes'}].map(o=>
+              <button key={o.k} className={v.projView===o.k?'on':''} onClick={()=>v.onSetProjView(o.k)}>{o.l}</button>)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Barre d'onglets de l'écran Aujourd'hui (thème clair Ekopak) : statut en onglets mono-sélection + filtres Projet/Personne en menus. Fermeture via _docClick (hors [data-filterbar]).
   renderTodayTabs(v){
     const fOpen = this.state.filterOpen;
@@ -4362,65 +4463,50 @@ class Flux extends React.Component {
     return (
       <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'"+(todayOnly?'Montserrat':'Nunito')+"',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
 
-        {/* ===================== TOP BAR ===================== */}
+        {/* ===================== TOP BAR (Projet — thème clair Ekopak) ===================== */}
         {!todayOnly && !v.planning &&
-        <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
-          <div data-projsel style={css('position:relative;flex:none;')}>
-            <div onClick={v.onProjToggle} title="Changer de projet" style={css('display:flex;align-items:center;gap:8px;height:36px;width:max-content;max-width:600px;border:1px solid var(--line);border-radius:9px;padding:0 9px 0 11px;background:var(--soft);cursor:pointer;')}>
-              <span style={css("font-family:'Nunito',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--muted);flex:none;")}>PROJET</span>
-              <span style={css('flex:none;width:8px;height:8px;border-radius:2px;background:'+(v.hasProject?v.projDeadlineCol:'var(--line)')+';')}></span>
-              <span title={v.allMode?'Tous les projets':(v.hasProject?v.projName:'')} style={css('flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+(v.hasProject?'var(--text)':'var(--muted)')+';')}>{v.allMode?'Tous les projets':(v.hasProject?v.projName:'Aucun projet')}</span>
+        <div style={css('flex:none;display:flex;align-items:center;gap:20px;padding:14px 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+          <div data-projsel style={css('flex:none;min-width:0;')}>
+            <div className="ek-ov">Projet</div>
+            <div className="ek-projpick" onClick={v.onProjToggle} title="Changer de projet">
+              <h1>{v.allMode?'Tous les projets':(v.hasProject?v.projName:'Aucun projet')}</h1>
               {!v.allMode && v.hasProject && v.projDeadlineJ &&
-                <span title="Jours avant l'échéance du projet" style={css("flex:none;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;color:#0b1626;background:"+v.projDeadlineCol+";border:1px solid "+v.projDeadlineCol+";")}>{v.projDeadlineJ}</span>}
-              <span style={css('opacity:.55;font-size:9px;flex:none;')}>▾</span>
-            </div>
-            {v.projOpen &&
-              <div style={css('position:absolute;top:40px;left:0;min-width:300px;max-width:620px;width:max-content;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 32px rgba(20,22,28,.30);padding:6px;z-index:60;')}>
-                <input autoFocus value={v.projQuery} onChange={v.onProjQuery} onKeyDown={v.onProjKey} placeholder="Rechercher ou créer un projet…" style={css('width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--soft);color:var(--text);margin-bottom:5px;')} />
-                <div>
-                  <div className="stopt" onClick={v.onSelectAllProjects} title="Afficher toutes les tâches par projet" style={css('display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--text);'+(v.allMode?'font-weight:600;':''))}>
-                    <span style={css('flex:none;width:7px;height:7px;border-radius:2px;background:'+v.accent+';')}></span>
+                <span className={'ek-jbadge '+v.projDeadlineCls} title="Jours avant l'échéance du projet">{v.projDeadlineJ}</span>}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+              {v.projOpen &&
+                <div className="ek-pmenu" onClick={e=>e.stopPropagation()}>
+                  <div className={'ek-fitem'+(v.allMode?' on':'')} onClick={v.onSelectAllProjects} title="Afficher toutes les tâches par projet">
                     <span style={css('flex:1;min-width:0;')}>Tous les projets</span>
-                    <span style={css('color:'+v.accent+';font-size:11px;flex:none;'+(v.allMode?'':'visibility:hidden;'))}>✓</span>
+                    {v.allMode && <span className="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>}
                   </div>
                   <div style={css('height:1px;background:var(--line);margin:5px 2px;')}></div>
                   {v.projList.map(o=>
-                    <div key={o.id} style={css('display:flex;align-items:center;gap:6px;padding:6px 6px 6px 9px;border-radius:7px;font-size:13px;color:var(--text);'+(o.current?'font-weight:600;':''))}>
-                      {o.editing
-                        ? <input data-labeledit="1" onFocus={selectAll} defaultValue={o.name} onKeyDown={o.onNameKey} onBlur={o.onNameBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
-                        : <span className="stopt" onClick={o.onPick} title="Ouvrir ce projet" style={css('flex:1;display:flex;align-items:center;gap:8px;min-width:0;cursor:pointer;')}>
-                            <span style={css('flex:none;width:7px;height:7px;border-radius:2px;background:'+o.dlCol+';')}></span>
-                            <span title={o.name} style={css('flex:1;min-width:0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
-                            {o.dlJ && <span title="Jours avant l'échéance" style={css("flex:none;font-family:'Nunito',sans-serif;font-size:9.5px;font-weight:700;border-radius:5px;padding:1px 5px;color:#0b1626;background:"+o.dlCol+";")}>{o.dlJ}</span>}
-                            <span style={css('color:'+v.accent+';font-size:11px;flex:none;'+((o.current&&!v.allMode)?'':'visibility:hidden;'))}>✓</span>
-                          </span>}
-                      <span data-projmenu style={css('position:relative;display:flex;align-items:center;flex:none;')}>
-                        <span onClick={o.onMenuToggle} title="Renommer ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 4px;')}>⋮</span>
-                        {o.menuOpen &&
-                          <div style={css('position:absolute;top:24px;right:0;min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.30);padding:5px;z-index:70;')}>
-                            <div className="stopt" onClick={o.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
-                            <div className="stopt" onClick={o.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;'+(o.confirmDel?'font-weight:600;background:rgba(224,116,109,.12);':''))}>{o.confirmDel?'Confirmer la suppression':'Supprimer'}</div>
-                          </div>}
-                      </span>
-                    </div>)}
-                  {v.projCreate &&
-                    <div className="stopt" onClick={v.onProjCreate} style={css('display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;color:'+v.accent+';font-weight:500;')}>
-                      <span style={css('font-size:14px;')}>＋</span> Créer « {v.projQuery} »
-                    </div>}
-                  {!v.projList.length && !v.projCreate &&
-                    <div style={css('padding:8px 9px;font-size:12.5px;color:var(--muted);')}>Tape un nom pour créer un projet.</div>}
-                </div>
-              </div>}
+                    o.editing
+                      ? <div key={o.id} style={css('padding:4px 6px;')}><input data-labeledit="1" autoFocus onFocus={selectAll} defaultValue={o.name} onKeyDown={o.onNameKey} onBlur={o.onNameBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} /></div>
+                      : <div key={o.id} className={'ek-fitem'+((o.current&&!v.allMode)?' on':'')} onClick={o.onPick} onDoubleClick={o.onRename} title="Clic : ouvrir · double-clic : renommer">
+                          <span style={css('flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
+                          {o.dlJ && <span className={'ek-jbadge '+o.dlCls} title="Jours avant l'échéance">{o.dlJ}</span>}
+                          {(o.current&&!v.allMode) && <span className="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>}
+                          <button className={'ek-pmx'+(o.confirmDel?' arm':'')} onClick={o.onDelete} title={o.confirmDel?'Cliquer à nouveau pour confirmer':'Supprimer le projet'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
+                        </div>)}
+                  {this.state.npOpen
+                    ? <div className="ek-paddbox" style={css('padding:6px 8px;')}>
+                        <input className="nm" autoFocus placeholder="Nom du projet…" value={v.projQuery} onChange={v.onProjQuery} onKeyDown={e=>{ if(e.key==='Enter'){ const q=(this.state.projQuery||'').trim(); if(q){ this.createProject(q); this.setState({npOpen:false, projQuery:'', projOpen:false}); } } else if(e.key==='Escape'){ this.setState({npOpen:false, projQuery:''}); } }} />
+                        <button className="ok" onClick={()=>{ const q=(this.state.projQuery||'').trim(); if(q){ this.createProject(q); this.setState({npOpen:false, projQuery:'', projOpen:false}); } }}>OK</button>
+                      </div>
+                    : <div className="ek-fitem" style={css('color:#0f3f93;')} onClick={()=>this.setState({npOpen:true, projQuery:''})}>+ Nouveau projet</div>}
+                </div>}
+            </div>
           </div>
-          {false && v.projView==='todo' && !v.allMode &&
-          <div style={css('flex:none;width:300px;margin-left:auto;display:flex;align-items:center;gap:8px;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--soft);')}>
-            <span style={css('color:var(--muted);font-size:14px;')}>＋</span>
-            <input onKeyDown={v.onQuickAdd} onBlur={v.onQuickAddBlur} placeholder="Ajouter une tâche rapide…" style={css('border:none;background:transparent;font-size:13.5px;width:100%;color:var(--text);')} />
-            <span style={css("font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;")}>↵</span>
+          {!v.allMode && v.hasProject &&
+          <div className="qadd-ek" style={css('flex:1;max-width:400px;display:flex;align-items:center;gap:11px;height:42px;padding:0 4px;margin:0 10px;')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#3aaae8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={css('width:17px;height:17px;flex:none;')}><path d="M12 5v14M5 12h14"></path></svg>
+            <input onKeyDown={e=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTask('', val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} placeholder="Ajouter une tâche…" style={css('flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13.5px;font-weight:500;color:var(--text);')} />
           </div>}
-          <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;')}>
-            {[{k:'todo',l:'Tâches'},{k:'infos',l:'Planning'},{k:'notes',l:'Notes'}].map(o=>
-              <span key={o.k} onClick={()=>v.onSetProjView(o.k)} style={css('cursor:pointer;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:7px;'+(v.projView===o.k?('background:'+v.accent+';color:#fff;'):'color:var(--text2);'))}>{o.l}</span>)}
+          <div style={css('flex:1;')}></div>
+          <div className="ek-todaypill" title="Tâches dans l'onglet Aujourd'hui">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
+            {v.projTodayCount} pour aujourd'hui
           </div>
         </div>}
 
@@ -4448,8 +4534,7 @@ class Flux extends React.Component {
         </div>}
 
         {todayOnly && this.renderTodayTabs(v)}
-        {!todayOnly && !v.planning && v.projView==='todo' &&
-          this.renderFilterBar(v, v.allMode ? 'all' : 'proj')}
+        {!todayOnly && !v.planning && this.renderProjTabs(v)}
 
         {/* ===================== BODY ===================== */}
         <div style={css('flex:1;display:flex;min-height:0;position:relative;')}>
@@ -4631,47 +4716,31 @@ class Flux extends React.Component {
             ) : v.allMode ? (
               this.renderAllProjects(v)
             ) : (
-            <div style={css('min-width:'+v.listMinW+'px;')}>
-              {/* column header */}
-              <div style={css(v.headerStyle)}>
-                <span style={css('width:26px;flex:none;')}></span>
-                <span style={css('width:24px;flex:none;')}></span>
-                <span style={css('flex:1;min-width:120px;')}>Tâche</span>
-                <span style={css('width:104px;flex:none;')}>Faire le</span>
-                <span style={css('width:150px;flex:none;')}>Personne</span>
-                <span style={css('width:128px;flex:none;')}>Statut</span>
-                <span style={css('width:104px;flex:none;')}>Relance</span>
-              </div>
-
+            <div style={css('min-width:860px;padding:22px 32px 40px;')}>
               {v.groups.map(g=>
-                <React.Fragment key={g.key}>
-                  <div onClick={g.onToggle} draggable={g.catDraggable && !g.editing}
-                    onDragStart={g.onGroupDragStart} onDragEnter={g.onGroupDragEnter} onDragOver={g.onDragOver} onDrop={g.onDrop} onDragEnd={g.onGroupDragEnd}
-                    style={css(g.headerStyle + g.dropMark + (g.catDraggable && !g.editing ? 'cursor:grab;' : ''))}>
-                    <span style={css('width:3px;align-self:stretch;margin:5px 0;border-radius:2px;background:'+g.marker+';')}></span>
-                    <span style={css('font-size:9px;color:var(--text3);width:9px;')}>{g.caret}</span>
-                    {g.editing
-                      ? <input autoFocus onFocus={selectAll} defaultValue={g.name} onKeyDown={g.onNameKey} onBlur={g.onNameBlur} onClick={e=>e.stopPropagation()} style={css(g.nameStyle+'border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);color:var(--text);padding:2px 7px;')} />
-                      : <span onClick={g.onNameClick||undefined} title={g.editable?'Cliquer pour renommer':undefined} style={css(g.nameStyle+(g.editable?'cursor:text;':''))}>{g.name}</span>}
-                    <span style={css(g.countStyle)}>{g.count}</span>
-                  </div>
-                  {g.open &&
-                    <div>
-                      {g.tasks.map(t=> <React.Fragment key={t.id}>{this.renderRow(t)}</React.Fragment>)}
-                      <div onDragOver={g.onDragOver} onDrop={g.onDrop} style={css(g.addRowStyle)}>
-                        <span style={css('width:26px;flex:none;color:var(--cbox);font-size:15px;')}>＋</span>
-                        <span style={css('width:24px;flex:none;')}></span>
-                        <input onKeyDown={g.onAddKey} onBlur={g.onAddBlur} placeholder={g.addHint} style={css('flex:1;border:none;background:transparent;font-size:13px;color:var(--text);')} />
+                <div key={g.key} className={'ek-grp'+(this.state.dragOverGrp===g.id?' drop-hi':'')}
+                  onDragOver={e=>{ e.preventDefault(); if(this.state.dragOverGrp!==g.id) this.setState({dragOverGrp:g.id}); }}
+                  onDrop={e=>{ g.onDrop(e); this.setState({dragOverGrp:null}); }}>
+                  <div className="ek-glabel"><b>{g.name}</b><span className="c">{g.count}</span></div>
+                  {g.tasks.map(t=> <React.Fragment key={t.id}>{this.renderRow(t)}</React.Fragment>)}
+                  {g.id!=='done' && (this.state.grpTaskAdd===g.id
+                    ? <div className="ek-paddbox">
+                        <input className="nm" autoFocus placeholder="Nouvelle tâche…" value={this.state.grpTaskName||''} onChange={e=>this.setState({grpTaskName:e.target.value})}
+                          onKeyDown={e=>{ if(e.key==='Enter'){ const val=(this.state.grpTaskName||'').trim(); if(val){ this.addTaskPreset({status:g.id}, val); this.setState({grpTaskName:''}); } } else if(e.key==='Escape'){ this.setState({grpTaskAdd:null, grpTaskName:''}); } }} />
+                        <button className="ok" onClick={()=>{ const val=(this.state.grpTaskName||'').trim(); if(val){ this.addTaskPreset({status:g.id}, val); this.setState({grpTaskName:''}); } }}>OK</button>
+                        <button className="nn" onClick={()=>this.setState({grpTaskAdd:null, grpTaskName:''})}>✕</button>
                       </div>
-                    </div>}
-                </React.Fragment>)}
-              <div style={css('height:40px;')}></div>
+                    : <button className="ek-paddlnk" onClick={()=>this.setState({grpTaskAdd:g.id, grpTaskName:''})}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        Ajouter une tâche
+                      </button>)}
+                </div>)}
             </div>
             )}
           </div>
 
-          {/* ---------- RIGHT DETAIL PANEL — Aujourd'hui (thème clair Ekopak) : titre éditable + note ---------- */}
-          {v.hasSel && todayOnly &&
+          {/* ---------- RIGHT DETAIL PANEL (thème clair Ekopak) : titre éditable + note — commun Aujourd'hui / Projet ---------- */}
+          {v.hasSel &&
             <div data-panel="1" className="fxcol scrl" style={css('position:absolute;top:0;right:0;bottom:0;width:360px;z-index:20;background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 32px -18px rgba(15,63,147,.4);display:flex;flex-direction:column;padding:26px;overflow-y:auto;animation-delay:0s;')}>
               <div style={css('display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;')}>
                 <textarea className="ek-dtitle" rows={1} value={v.sel.title} onChange={v.sel.onTitleEdit} ref={el=>{ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} placeholder="Titre de la tâche"></textarea>
@@ -4682,42 +4751,10 @@ class Flux extends React.Component {
               <textarea className="ek-dnote" style={css('flex:1;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
             </div>}
 
-          {/* ---------- RIGHT DETAIL PANEL — NOTES ---------- */}
-          {v.hasSel && !todayOnly && (v.planning || v.projView==='todo' || v.projView==='infos') &&
-            <div data-panel="1" className="fxcol scrl" style={css('position:absolute;top:0;right:0;bottom:0;width:360px;z-index:20;background:var(--panel);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.28);display:flex;flex-direction:column;animation-delay:0s;')}>
-              <div style={css('padding:18px 20px 14px;border-bottom:1px solid var(--divider);')}>
-                <div style={css("display:flex;align-items:center;font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;")}>
-                  <span>{v.sel.catLabel}</span>
-                  <span style={css('margin-left:auto;cursor:pointer;color:var(--muted);font-size:13px;')} onClick={v.onCloseDetail}>✕</span>
-                </div>
-                <div style={css('font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em;')}>{v.sel.title}</div>
-              </div>
-              <div className="scrl" style={css('flex:1;min-height:0;overflow-y:auto;padding:16px 20px 6px;')}>
-
-                {/* note repliable */}
-                <div style={css('margin-top:2px;')}>
-                  {v.noteOpen
-                    ? <div>
-                        <div style={css("display:flex;align-items:center;font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;")}>
-                          <span>NOTE</span>
-                          <span onClick={v.onToggleNote} title="Replier la note" style={css('margin-left:auto;cursor:pointer;font-size:11px;')}>▾</span>
-                        </div>
-                        <textarea autoFocus={!(v.sel.notes||'').trim()} value={v.sel.notes} onChange={v.sel.onNotes} placeholder="Détail, contexte, liens…" style={css('width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--soft);resize:vertical;')}></textarea>
-                      </div>
-                    : <div onClick={v.onToggleNote} style={css('display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text2);cursor:pointer;')}><span style={css('font-size:10px;')}>▸</span> {(v.sel.notes||'').trim()?'Voir la note':'Ajouter une note'}</div>}
-                </div>
-
-                <div style={css('height:16px;')}></div>
-              </div>
-              <div style={css('padding:12px 20px 16px;border-top:1px solid var(--divider);')}>
-                <div onClick={v.sel.onDelete} style={css('display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:'+v.danger.fg+';cursor:pointer;border:1px solid '+v.danger.border+';border-radius:8px;padding:7px 13px;background:'+v.danger.bg+';')}>✕ Supprimer la tâche</div>
-              </div>
-            </div>}
-
         </div>
 
-        {/* ===================== DELETE CONFIRM MODAL (Aujourd'hui — thème clair Ekopak) ===================== */}
-        {v.hasConfirm && todayOnly &&
+        {/* ===================== DELETE CONFIRM MODAL (thème clair Ekopak) ===================== */}
+        {v.hasConfirm &&
           <div onClick={v.onCancelDelete} style={css('position:fixed;inset:0;background:rgba(26,40,83,.28);display:flex;align-items:center;justify-content:center;z-index:70;')}>
             <div onClick={v.stopModal} style={css('width:370px;background:var(--panel);border-radius:16px;box-shadow:0 18px 44px rgba(15,63,147,.18);padding:20px;')}>
               <h3 style={css("font-family:'Montserrat',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 6px;")}>Supprimer la tâche ?</h3>
@@ -4725,6 +4762,19 @@ class Flux extends React.Component {
               <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
                 <button onClick={v.onCancelDelete} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
                 <button onClick={v.onConfirmDelete} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#d8442b;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;")}>Supprimer</button>
+              </div>
+            </div>
+          </div>}
+
+        {/* ===================== SUPPRIMER UNE PERSONNE — CONFIRM ===================== */}
+        {v.hasPersonDel &&
+          <div onClick={v.onPersonDelCancel} style={css('position:fixed;inset:0;background:rgba(26,40,83,.28);display:flex;align-items:center;justify-content:center;z-index:70;')}>
+            <div onClick={v.stopModal} style={css('width:370px;background:var(--panel);border-radius:16px;box-shadow:0 18px 44px rgba(15,63,147,.18);padding:20px;')}>
+              <h3 style={css("font-family:'Montserrat',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 6px;")}>Supprimer cette personne ?</h3>
+              <p style={css('font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 16px;')}>« <b style={css('color:var(--text);')}>{v.personDelName}</b> » — les tâches qui lui sont assignées repasseront en « Non assigné ».</p>
+              <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
+                <button onClick={v.onPersonDelCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
+                <button onClick={v.onPersonDelOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#d8442b;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;")}>Supprimer</button>
               </div>
             </div>
           </div>}
@@ -4738,22 +4788,6 @@ class Flux extends React.Component {
               <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
                 <button onClick={v.onUnmarkCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
                 <button onClick={v.onUnmarkOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#0f3f93;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(15,63,147,.24);")}>Retirer</button>
-              </div>
-            </div>
-          </div>}
-
-        {/* ===================== DELETE CONFIRM MODAL ===================== */}
-        {v.hasConfirm && !todayOnly &&
-          <div onClick={v.onCancelDelete} style={css('position:fixed;inset:0;background:rgba(20,22,28,.4);display:flex;align-items:center;justify-content:center;z-index:60;')}>
-            <div onClick={v.stopModal} style={css('width:392px;background:var(--panel);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.34);padding:24px;')}>
-              <div style={css('display:flex;align-items:center;gap:11px;margin-bottom:12px;')}>
-                <span style={css('width:34px;height:34px;border-radius:9px;background:'+v.danger.iconBg+';color:'+v.danger.fg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;')}>⚠</span>
-                <span style={css('font-size:16px;font-weight:600;')}>Supprimer la tâche ?</span>
-              </div>
-              <div style={css('font-size:13.5px;line-height:1.55;color:var(--text2);margin-bottom:20px;')}>« <b style={css('color:var(--text);')}>{v.confirmTitle}</b> » sera définitivement supprimée. Cette action est irréversible.</div>
-              <div style={css('display:flex;justify-content:flex-end;gap:9px;')}>
-                <div onClick={v.onCancelDelete} style={css('font-size:13px;padding:8px 16px;border-radius:9px;border:1px solid var(--line);cursor:pointer;color:var(--text2);')}>Annuler</div>
-                <div onClick={v.onConfirmDelete} style={css('font-size:13px;font-weight:500;padding:8px 16px;border-radius:9px;background:'+v.danger.solid+';color:#fff;cursor:pointer;')}>Supprimer</div>
               </div>
             </div>
           </div>}
