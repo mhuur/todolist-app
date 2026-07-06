@@ -619,6 +619,15 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 /* Bibliothèque de prix — modal (thème clair Ekopak) */
 .pl-overlay{position:fixed;inset:0;background:rgba(26,40,83,.32);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(2px);font-family:'Montserrat','Nunito',sans-serif}
 .pl-modal{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;padding:20px 22px 18px;width:100%;max-width:580px;color:var(--text-body);box-shadow:var(--shadow-lg)}
+.pl-cf-back{position:fixed;inset:0;background:rgba(26,40,83,.32);z-index:210;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Montserrat','Nunito',sans-serif}
+.pl-cf{width:390px;max-width:92vw;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:var(--shadow-lg);padding:20px 22px}
+.pl-cf h3{font-size:14.5px;font-weight:700;color:var(--text-strong);margin:0 0 6px}
+.pl-cf p{font-size:12.5px;line-height:1.5;color:var(--text-muted);margin:0 0 16px}
+.pl-cf .row{display:flex;gap:10px;justify-content:flex-end}
+.pl-cf button{height:36px;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.pl-cf .no{padding:0 14px;background:none;color:var(--text-muted);font-weight:600}
+.pl-cf .del{padding:0 16px;background:var(--ekopak-coral);color:#fff}
+.pl-cf .ok{padding:0 16px;background:var(--ekopak-deep-blue);color:#fff;box-shadow:var(--shadow-brand)}
 .pl-modal h3{font-size:14.5px;font-weight:800;margin-bottom:16px;color:var(--text-strong);display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
 .pl-modal h3 .pl-ref{margin-left:auto;font-size:11px;font-weight:800;color:var(--ekopak-deep-blue);background:var(--deep-blue-50);padding:3px 10px;border-radius:8px;letter-spacing:.5px}
 .pl-modal h3 .pl-close{margin-left:8px;cursor:pointer;color:var(--neutral-400);font-size:18px;line-height:1;border:none;background:transparent;padding:0 2px;font-family:inherit}
@@ -1960,14 +1969,19 @@ function plSaveQuote(){
   render();
 }
 
-// ▼ plDeleteQuote — supprime un devis (confirm natif)
+// ▼ plConfirm — confirmation thémée (remplace le confirm() natif : suppr. devis / fusion). Transient, module-level (JAMAIS persisté dans S). onOk = closure exécutée à la validation.
+let plConfirm=null; // {title, msg, okLabel, okClass:'del'|'ok', onOk}
+function plConfirmCancel(){plConfirm=null;render()}
+function plConfirmOk(){const c=plConfirm;plConfirm=null;if(c&&c.onOk)c.onOk()}
+function plConfirmHtml(){ if(!plConfirm)return ''; const c=plConfirm; return `<div class="pl-cf-back" onclick="plConfirmCancel()"><div class="pl-cf" onclick="event.stopPropagation()"><h3>${esc(c.title)}</h3><p>${esc(c.msg)}</p><div class="row"><button class="no" onclick="plConfirmCancel()">Annuler</button><button class="${c.okClass||'del'}" onclick="plConfirmOk()">${esc(c.okLabel||'Supprimer')}</button></div></div></div>`; }
+
+// ▼ plDeleteQuote — supprime un devis (modale thémée)
 function plDeleteQuote(id){
   plEnsure();
   const q=S.priceLib.quotes.find(x=>x.id===id);
   if(!q)return;
-  if(!confirm(`Supprimer le devis ${q.ref||q.id} ?\nCette action est irréversible.`))return;
-  S.priceLib.quotes=S.priceLib.quotes.filter(x=>x.id!==id);
-  save();render();
+  plConfirm={ title:'Supprimer le devis ?', msg:'« '+(q.ref||q.id)+' » sera supprimé définitivement. Cette action est irréversible.', okLabel:'Supprimer', okClass:'del', onOk:()=>{ S.priceLib.quotes=S.priceLib.quotes.filter(x=>x.id!==id); save(); render(); } };
+  render();
 }
 
 // ▼ Fusion de devis — état transient (NON persisté). null=off, []=mode actif avec ids sélectionnés.
@@ -1990,20 +2004,22 @@ function plMergeConfirm(){
   sel.sort((a,b)=>(a.ref||"").localeCompare(b.ref||""));
   const target=sel[0],others=sel.slice(1);
   const totalLines=sel.reduce((n,q)=>n+((q.lines||[]).length),0);
-  if(!confirm(`Fusionner ${sel.length} devis en un seul (${totalLines} équipements regroupés sous une réf unique) ?\nLes autres références seront supprimées. Action irréversible.`))return;
-  const dates=sel.map(q=>q.date).filter(Boolean).sort();
-  if(dates.length)target.date=dates[0];
-  if(!(target.projet||"").trim()){const p=sel.map(q=>(q.projet||"").trim()).find(Boolean);if(p)target.projet=p}
-  if(!Array.isArray(target.lines))target.lines=[];
-  others.forEach(o=>{(o.lines||[]).forEach(l=>target.lines.push(l))});
-  const sup=S.crm.suppliers.find(s=>s.id===target.supplierId);
-  if(sup)target.ref=plGenerateRef(target.date,sup.name,target.id);
-  if(target.lines[0]){target.product=target.lines[0].product;target.values=Object.assign({},target.lines[0].values)}
-  target.updatedAt=Date.now();
-  const delIds=new Set(others.map(o=>o.id));
-  S.priceLib.quotes=S.priceLib.quotes.filter(q=>!delIds.has(q.id));
-  plMergeSel=null;
-  save();render();
+  plConfirm={ title:'Fusionner les devis ?', msg:'Fusionner '+sel.length+' devis en un seul ('+totalLines+' équipements regroupés sous une réf unique) ? Les autres références seront supprimées. Action irréversible.', okLabel:'Fusionner', okClass:'ok', onOk:()=>{
+    const dates=sel.map(q=>q.date).filter(Boolean).sort();
+    if(dates.length)target.date=dates[0];
+    if(!(target.projet||"").trim()){const p=sel.map(q=>(q.projet||"").trim()).find(Boolean);if(p)target.projet=p}
+    if(!Array.isArray(target.lines))target.lines=[];
+    others.forEach(o=>{(o.lines||[]).forEach(l=>target.lines.push(l))});
+    const sup=S.crm.suppliers.find(s=>s.id===target.supplierId);
+    if(sup)target.ref=plGenerateRef(target.date,sup.name,target.id);
+    if(target.lines[0]){target.product=target.lines[0].product;target.values=Object.assign({},target.lines[0].values)}
+    target.updatedAt=Date.now();
+    const delIds=new Set(others.map(o=>o.id));
+    S.priceLib.quotes=S.priceLib.quotes.filter(q=>!delIds.has(q.id));
+    plMergeSel=null;
+    save();render();
+  } };
+  render();
 }
 
 // ▼ Import d'un devis depuis un bloc structuré (JSON produit par Claude à partir d'un devis uploadé)
@@ -2505,12 +2521,11 @@ function plSchemaDelField(prod,fieldId){
   const f=arr.find(x=>x.id===fieldId);if(!f)return;
   /* Compter les valeurs orphelines potentielles */
   let used=0;S.priceLib.quotes.forEach(q=>{if(q.product===prod&&q.values&&q.values[fieldId]!==undefined&&q.values[fieldId]!=="")used++});
-  let msg=`Supprimer le champ « ${f.name} » de la sous-catégorie « ${prod} » ?`;
-  if(used>0)msg+=`\n\n⚠ ${used} devis ont une valeur dans ce champ.\nLes valeurs ne seront plus affichées mais resteront stockées (récupérables si tu recrées le champ).`;
-  if(!confirm(msg))return;
-  S.priceLib.schemas[prod]=arr.filter(x=>x.id!==fieldId);
-  save();plRenderSchemaModal();
+  if(plSchemaModalState) plSchemaModalState.confirmField={prod,fieldId,name:f.name,used};
+  plRenderSchemaModal();
 }
+function plSchemaDelFieldCancel(){if(plSchemaModalState)plSchemaModalState.confirmField=null;plRenderSchemaModal()}
+function plSchemaDelFieldOk(){ if(!plSchemaModalState||!plSchemaModalState.confirmField)return; const cf=plSchemaModalState.confirmField; plSchemaModalState.confirmField=null; const arr=S.priceLib.schemas[cf.prod]; if(arr)S.priceLib.schemas[cf.prod]=arr.filter(x=>x.id!==cf.fieldId); save(); plRenderSchemaModal(); }
 
 // ▼ plRenderSchemaModal — modal de gestion des champs par sous-catégorie
 function plRenderSchemaModal(){
@@ -2592,6 +2607,7 @@ function plRenderSchemaModal(){
   }
   h+=`<div class="pl-actions"><button class="pl-btn pl-btn-secondary" onclick="plCloseSchemaManager()">Fermer</button></div>`;
   h+=`</div></div>`;
+  if(st.confirmField){ const cf=st.confirmField; let m='Supprimer le champ « '+cf.name+' » ?'; if(cf.used>0) m+=' '+cf.used+' devis ont une valeur dans ce champ — elle ne sera plus affichée mais reste stockée (récupérable si tu recrées le champ).'; h+=`<div class="pl-cf-back" onclick="plSchemaDelFieldCancel()"><div class="pl-cf" onclick="event.stopPropagation()"><h3>Supprimer ce champ ?</h3><p>${esc(m)}</p><div class="row"><button class="no" onclick="plSchemaDelFieldCancel()">Annuler</button><button class="del" onclick="plSchemaDelFieldOk()">Supprimer</button></div></div></div>`; }
   host.innerHTML=h;
   if(focusId){const el=document.getElementById(focusId);if(el){el.focus();if(focusPos!==null&&typeof el.setSelectionRange==='function'){try{el.setSelectionRange(focusPos,focusPos)}catch(e){}}}}
 }
@@ -2687,6 +2703,7 @@ function rPL(){
   const nLines=S.priceLib.quotes.reduce((s,q)=>s+((q.lines&&q.lines.length)||1),0);
   h+=`<div class="pl-body"><div class="pl-count" id="pl-count">${n} devis · ${nLines} équipement${nLines>1?'s':''}</div>`;
   h+=`<div class="pl-table-wrap"><div id="pl-table-host"></div></div></div>`;
+  h+=plConfirmHtml();
   requestAnimationFrame(plRenderTable);
   return h;
 }
@@ -3635,7 +3652,7 @@ class Flux extends React.Component {
         hasSubs: _subs.length>0, subCount: _subs.filter(s=>s.done).length+'/'+_subs.length,
         subsOpen: !!(st.openSubs||{})[t.id], chevCls: 'ek-chev'+((st.openSubs||{})[t.id]?' open':''),
         onToggleSubs:(e)=>{ stop(e); this.setState(s=>({ openSubs:{...(s.openSubs||{}), [t.id]:!(s.openSubs||{})[t.id]}, subDraft:'' })); },
-        subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':'')+(st.subDragOverId===sb.id?' dragover':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.delCheck(t.id, sb.id); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({subDragId:sb.id}); }, onDragOver:(e)=>{ e.preventDefault(); e.stopPropagation(); if(st.subDragOverId!==sb.id) this.setState({subDragOverId:sb.id}); }, onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderCheck(t.id, st.subDragId, sb.id); }, onDragEnd:(e)=>{ e.stopPropagation(); this.setState({subDragId:null,subDragOverId:null}); } })),
+        subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':'')+(st.subDragOverId===sb.id?' dragover':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.setState({ subDelConfirm:{ taskId:t.id, checkId:sb.id, text:sb.text||'' } }); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({subDragId:sb.id}); }, onDragOver:(e)=>{ e.preventDefault(); e.stopPropagation(); if(st.subDragOverId!==sb.id) this.setState({subDragOverId:sb.id}); }, onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderCheck(t.id, st.subDragId, sb.id); }, onDragEnd:(e)=>{ e.stopPropagation(); this.setState({subDragId:null,subDragOverId:null}); } })),
         subDraft: st.subDraft||'', onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
         onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:''}); e.target.blur(); } },
         titleStyle:'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;'+(done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'),
@@ -3713,6 +3730,7 @@ class Flux extends React.Component {
     const confirmRes = st.confirmId ? this.taskByIdAny(st.confirmId) : null;
     const confirmTask = confirmRes ? confirmRes.task : null;
     const _personDel = st.personDelId ? st.people.find(pp=>pp.id===st.personDelId) : null;
+    const _projDel = st.projDelConfirmId ? (st.projects||[]).find(pp=>pp.id===st.projDelConfirmId) : null;
 
     // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
     const curProj = (st.projects||[]).find(p=>p.id===st.currentProjectId) || null;
@@ -3726,11 +3744,10 @@ class Flux extends React.Component {
       .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col, dlCls:projDayBadge(p.deadline).cls,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
-        confirmDel: st.projDelId===p.id,
         onPick:(e)=>{ stop(e); this.switchProject(p.id); },
         onMenuToggle:(e)=>{ stop(e); this.setState(s=>({ projMenuId: s.projMenuId===p.id?null:p.id, projDelId:null })); },
         onRename:(e)=>{ stop(e); this.setState({ projMenuId:null, projDelId:null, labelEdit:{type:'proj', id:p.id} }); },
-        onDelete:(e)=>{ stop(e); if(this.state.projDelId===p.id) this.deleteProject(p.id); else this.setState({ projDelId:p.id }); },
+        onDelete:(e)=>{ stop(e); this.setState({ projDelConfirmId:p.id, projOpen:false, projMenuId:null }); },
         onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('proj', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
         onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }));
     const allMode = !!st.allMode;
@@ -3813,6 +3830,12 @@ class Flux extends React.Component {
       hasPersonDel: !!_personDel, personDelName: _personDel?_personDel.name:'',
       onPersonDelCancel:()=>this.setState({personDelId:null}),
       onPersonDelOk:()=>{ const id=this.state.personDelId; this.setState({personDelId:null}); if(id) this.deletePerson(id); },
+      hasProjDel: !!_projDel, projDelName: _projDel?(_projDel.name||'Projet'):'', projDelTaskCount: _projDel?(((_projDel.id===st.currentProjectId)?st.tasks:(_projDel.tasks||[]))||[]).length:0,
+      onProjDelCancel:()=>this.setState({projDelConfirmId:null}),
+      onProjDelOk:()=>{ const id=this.state.projDelConfirmId; this.setState({projDelConfirmId:null}); if(id) this.deleteProject(id); },
+      hasSubDel: !!st.subDelConfirm, subDelText: st.subDelConfirm?(st.subDelConfirm.text||'cette sous-tâche'):'',
+      onSubDelCancel:()=>this.setState({subDelConfirm:null}),
+      onSubDelOk:()=>{ const c=this.state.subDelConfirm; this.setState({subDelConfirm:null}); if(c) this.delCheck(c.taskId, c.checkId); },
       onTodayQuickAdd:(e)=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onTodayQuickAddBlur:(e)=>{ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } },
       onClearTodayFilters:()=>this.clearTodayFilters(),
@@ -4225,7 +4248,7 @@ class Flux extends React.Component {
                           {o.dlJ && <span className={'ek-jbadge '+o.dlCls} title="Jours avant l'échéance">{o.dlJ}</span>}
                           {(o.current&&!v.allMode) && <span className="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>}
                           <button className="ek-pmx edit" onClick={o.onRename} title="Renommer le projet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button>
-                          <button className={'ek-pmx'+(o.confirmDel?' arm':'')} onClick={o.onDelete} title={o.confirmDel?'Cliquer à nouveau pour confirmer':'Supprimer le projet'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
+                          <button className="ek-pmx" onClick={o.onDelete} title="Supprimer le projet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                         </div>)}
                   {this.state.npOpen
                     ? <div className="ek-paddbox" style={css('padding:6px 8px;')}>
@@ -4352,6 +4375,32 @@ class Flux extends React.Component {
               <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
                 <button onClick={v.onPersonDelCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
                 <button onClick={v.onPersonDelOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#d8442b;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;")}>Supprimer</button>
+              </div>
+            </div>
+          </div>}
+
+        {/* ===================== SUPPRIMER UN PROJET — CONFIRM ===================== */}
+        {v.hasProjDel &&
+          <div onClick={v.onProjDelCancel} style={css('position:fixed;inset:0;background:rgba(26,40,83,.28);display:flex;align-items:center;justify-content:center;z-index:70;')}>
+            <div onClick={v.stopModal} style={css('width:370px;background:var(--panel);border-radius:16px;box-shadow:0 18px 44px rgba(15,63,147,.18);padding:20px;')}>
+              <h3 style={css("font-family:'Montserrat',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 6px;")}>Supprimer ce projet ?</h3>
+              <p style={css('font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 16px;')}>« <b style={css('color:var(--text);')}>{v.projDelName}</b> »{v.projDelTaskCount>0?(' et ses '+v.projDelTaskCount+' tâche'+(v.projDelTaskCount>1?'s':'')):''} {v.projDelTaskCount>0?'seront supprimés définitivement':'sera supprimé définitivement'}. Cette action est irréversible.</p>
+              <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
+                <button onClick={v.onProjDelCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
+                <button onClick={v.onProjDelOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#d8442b;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;")}>Supprimer</button>
+              </div>
+            </div>
+          </div>}
+
+        {/* ===================== SUPPRIMER UNE SOUS-TÂCHE — CONFIRM ===================== */}
+        {v.hasSubDel &&
+          <div onClick={v.onSubDelCancel} style={css('position:fixed;inset:0;background:rgba(26,40,83,.28);display:flex;align-items:center;justify-content:center;z-index:70;')}>
+            <div onClick={v.stopModal} style={css('width:370px;background:var(--panel);border-radius:16px;box-shadow:0 18px 44px rgba(15,63,147,.18);padding:20px;')}>
+              <h3 style={css("font-family:'Montserrat',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 6px;")}>Supprimer cette sous-tâche ?</h3>
+              <p style={css('font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 16px;')}>« <b style={css('color:var(--text);')}>{v.subDelText}</b> » sera supprimée.</p>
+              <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
+                <button onClick={v.onSubDelCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
+                <button onClick={v.onSubDelOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#d8442b;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;")}>Supprimer</button>
               </div>
             </div>
           </div>}
