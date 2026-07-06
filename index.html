@@ -955,9 +955,6 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-todaypill.on{background:#3aaae8;color:#fff}
 #flux-root .ek-todaypill.on:hover{background:#2f9fdd}
 #flux-root .ek-todaypill svg{width:16px;height:16px}
-#flux-root .ek-pseg{display:inline-flex;background:#eef2f8;border-radius:10px;padding:3px;gap:2px}
-#flux-root .ek-pseg button{padding:6px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap}
-#flux-root .ek-pseg button.on{background:var(--panel);color:#0f3f93;box-shadow:0 1px 2px rgba(15,63,147,.06)}
 #flux-root .ek-chev{width:22px;height:22px;flex:none;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #flux-root .ek-chev:hover{background:#f2f5fb;color:#0f3f93}
 #flux-root .ek-chev svg{width:15px;height:15px;transition:transform .14s}
@@ -1321,7 +1318,7 @@ const SB_ICONS={planning:`<svg width="16" height="16" viewBox="0 0 16 16" fill="
 const SB_LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3C12 3 5.5 10.4 5.5 15.5a6.5 6.5 0 0 0 13 0C18.5 10.4 12 3 12 3z" fill="#eaf7fe"/><path d="M9.4 14.6c.15 1.7 1.35 3 3.05 3.25" fill="none" stroke="#81d0f5" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 function render(){
   /* Sidebar */
-  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"planning",l:"Planning",i:SB_ICONS.planning},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar"><div class="sb-logo" title="Ma Todolist">${SB_LOGO}</div>`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -3281,9 +3278,7 @@ class Flux extends React.Component {
     const projects=this._snapshotCurrent(st).filter(p=>p.id!==id); return { projects, projMenuId:null, projDelId:null }; }); }
 
   // ---- projet : échéance / étapes datées / notes ----
-  setProjView(v){ this.setState({ projView:v, todayView:false }); }
   setPlanSpan(d){ this.setState({ planSpan:d }); }
-  setProjNotes(val){ this.setState(st=>({ projects:(st.projects||[]).map(p=> p.id===st.currentProjectId?{...p,notes:val}:p) })); }
   _isoFromDays(days){ const t=new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+days); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
   // ---- édition timeline (par id de projet : valable dans Planning ET Infos) ----
   setProjDeadlineFor(pid,date){ this.setState(st=>({ projects:(st.projects||[]).map(p=> p.id===pid?{...p,deadline:date}:p) })); }
@@ -3751,7 +3746,7 @@ class Flux extends React.Component {
     return {
       allMode, onSelectAllProjects:()=>this.setState({allMode:true, allFilters:{status:{},cat:{},person:{}}, projOpen:false, projQuery:'', selectedId:null}),
       theme, accent,
-      planning: !!this.props.planning, projView: (st.projView==='planning')?'infos':(st.projView||'todo'),
+      planning: !!this.props.planning, projView:'todo',
       planSpan: st.planSpan||92, onSetSpan:(d)=>this.setPlanSpan(d),
       planAddTitle: st.planAddTitle||'', planAddDate: st.planAddDate||'',
       planAddProj: st.planAddProj || st.currentProjectId || (((st.projects||[])[0]||{}).id) || '',
@@ -3762,7 +3757,10 @@ class Flux extends React.Component {
       onPlanAddProj:(e)=>this.setState({planAddProj:e.target.value}),
       onPlanAddKey:(e)=>{ if(e.key==='Enter'){ const val=(this.state.planAddTitle||'').trim(); const date=this.state.planAddDate||''; if(val&&date){ this.addPlanningTask(this.state.planAddProj||this.state.currentProjectId, val, date); this.setState({planAddTitle:''}); } } else if(e.key==='Escape'){ this.setState({planAddTitle:''}); e.target.blur(); } },
       onPlanAddSubmit:()=>{ const val=(this.state.planAddTitle||'').trim(); const date=this.state.planAddDate||''; if(val&&date){ this.addPlanningTask(this.state.planAddProj||this.state.currentProjectId, val, date); this.setState({planAddTitle:''}); } },
-      globalPlanning: this.planGeo((st.projects||[]).filter(p=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(p.deadline||'')) return true; const _tks=(p.id===st.currentProjectId)?st.tasks:(p.tasks||[]); return (_tks||[]).some(t=>/^\d{4}-\d{2}-\d{2}$/.test(t.due||'')); })),
+      globalPlanning: this.planGeo((st.projects||[]).filter(p=> p.id!=='__inbox' && (st.planShowUndated || this._projPlanned(p)) )),
+      planShowUndated: !!st.planShowUndated,
+      onTogglePlanUndated: ()=>this.setState(s=>({ planShowUndated: !s.planShowUndated })),
+      planUndatedCount: (st.projects||[]).filter(p=> p.id!=='__inbox' && !this._projPlanned(p)).length,
       projPlanning: curProj ? this.planGeo([curProj], {sort:false}) : {months:[],projects:[],accent},
       projDeadline: curProj ? (curProj.deadline||'') : '',
       projHasDeadline: !!(curProj && /^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')),
@@ -3770,9 +3768,6 @@ class Flux extends React.Component {
       projDeadlineCol: curProj?projDayBadge(curProj.deadline).col:'var(--muted)',
       projDeadlineCls: curProj?projDayBadge(curProj.deadline).cls:'',
       projTodayCount: st.allMode ? todayEntriesAll.length : todayEntriesAll.filter(e=>e.projId===st.currentProjectId).length,
-      projNotes: curProj ? (curProj.notes||'') : '',
-      onSetProjView:(vw)=>this.setProjView(vw),
-      onProjNotes:(e)=>this.setProjNotes(e.target.value),
       projEdit: {
         onAddStep:(pid)=>this.addProjStepDatedFor(pid),
         onStepEdit:(id)=>this.setStepEdit(id),
@@ -3828,6 +3823,8 @@ class Flux extends React.Component {
     };
   }
 
+  // ▼ _projPlanned — un projet « a un planning » s'il a une échéance ISO ou au moins une tâche datée (due ISO). Sert au filtre de l'onglet Planning (masquer les projets sans date) et à leur comptage.
+  _projPlanned(p){ if(!p||p.id==='__inbox') return false; if(/^\d{4}-\d{2}-\d{2}$/.test(p.deadline||'')) return true; const tks=(p.id===this.state.currentProjectId)?this.state.tasks:(p.tasks||[]); return (tks||[]).some(t=>/^\d{4}-\d{2}-\d{2}$/.test(t.due||'')); }
   planGeo(list, opts){
     opts = opts || {};
     const st = this.state;
@@ -3980,26 +3977,12 @@ class Flux extends React.Component {
   }
 
   renderGlobalPlanning(v){
+    const empty = (v.planUndatedCount>0)
+      ? "Aucun projet daté pour l'instant. Clique sur « Sans date » (en haut à droite) pour afficher tes projets et leur poser une échéance."
+      : "Aucun projet. Crée-en un dans l'onglet Projet : il apparaîtra ici pour recevoir une échéance, des étapes et des tâches datées.";
     return (
       <div style={css('padding:16px 0 0;')}>
-        <div style={css('display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 16px;')}>
-          <span style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;")}>Échéance & étapes</span>
-          <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;')}>
-            {[{d:30,l:'1 mois'},{d:92,l:'3 mois'},{d:183,l:'6 mois'},{d:365,l:'1 an'}].map(o=>
-              <span key={o.d} onClick={()=>v.onSetSpan(o.d)} style={css('cursor:pointer;font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;'+(v.planSpan===o.d?('background:'+v.accent+';color:#fff;'):'color:var(--text2);'))}>{o.l}</span>)}
-          </div>
-        </div>
-        {this.renderTimeline(v.globalPlanning, { minW:1000, onOpen:v.onOpenProj, edit:v.projEdit, empty:"Aucun projet n'a d'échéance. Ouvre un projet ▸ onglet Projet ▸ Planning pour en renseigner une." })}
-      </div>
-    );
-  }
-
-  renderProjectNotes(v){
-    const lbl = "font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;";
-    return (
-      <div style={css('max-width:920px;margin:0 auto;padding:22px 24px 70px;min-width:760px;')}>
-        <span style={css(lbl)}>Notes</span>
-        <textarea value={v.projNotes} onChange={v.onProjNotes} placeholder="Contexte, contacts, décisions, liens utiles…" style={css("margin-top:10px;display:block;width:100%;min-height:460px;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:14px;line-height:1.7;color:var(--text);background:var(--panel);resize:vertical;font-family:'Nunito',sans-serif;outline:none;")}></textarea>
+        {this.renderTimeline(v.globalPlanning, { minW:1000, onOpen:v.onOpenProj, edit:v.projEdit, empty })}
       </div>
     );
   }
@@ -4192,10 +4175,6 @@ class Flux extends React.Component {
                 {!(v.projPersonOptions||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
               </div>}
           </div>}
-        <div className="ek-pseg">
-          {[{k:'todo',l:'Tâches'},{k:'infos',l:'Planning'},{k:'notes',l:'Notes'}].map(o=>
-            <button key={o.k} className={(!v.todayView && v.projView===o.k)?'on':''} onClick={()=>v.onSetProjView(o.k)}>{o.l}</button>)}
-        </div>
         <div className={'ek-todaypill'+(v.todayView?' on':'')} onClick={()=>this.setState(s=>({todayView:!s.todayView, projView:'todo'}))} title="Voir les tâches du jour, tous projets" style={css('cursor:pointer;')}>
           <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
           {v.todayTotal} pour aujourd'hui
@@ -4266,9 +4245,16 @@ class Flux extends React.Component {
         <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Planning</span>
           <span style={css('font-size:12px;color:var(--muted);')}>Vue d'ensemble, triée par urgence</span>
-          <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;')}>
-            {[{d:30,l:'1 mois'},{d:92,l:'3 mois'},{d:183,l:'6 mois'},{d:365,l:'1 an'}].map(o=>
-              <span key={o.d} onClick={()=>v.onSetSpan(o.d)} style={css('cursor:pointer;font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;'+(v.planSpan===o.d?('background:'+v.accent+';color:#fff;'):'color:var(--text2);'))}>{o.l}</span>)}
+          <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:12px;')}>
+            {(v.planUndatedCount>0 || v.planShowUndated) &&
+              <span onClick={v.onTogglePlanUndated} title={v.planShowUndated?'Masquer les projets sans échéance':'Afficher les projets sans échéance pour les planifier'} style={css('flex:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid '+(v.planShowUndated?v.accent:'var(--line)')+';background:'+(v.planShowUndated?v.accent:'var(--panel)')+';color:'+(v.planShowUndated?'#fff':'var(--text2)')+';')}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;')}>{v.planShowUndated?<React.Fragment><path d="M2 2l20 20"></path><path d="M6.7 6.7A10.6 10.6 0 0 0 1 12s4 7 11 7a10.6 10.6 0 0 0 5.3-1.4M9.9 4.2A10.9 10.9 0 0 1 12 4c7 0 11 7 11 7a17.6 17.6 0 0 1-2.2 3"></path></React.Fragment>:<React.Fragment><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></React.Fragment>}</svg>
+                {v.planShowUndated?'Masquer sans date':('Sans date · '+v.planUndatedCount)}
+              </span>}
+            <div style={css('flex:none;display:flex;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;')}>
+              {[{d:30,l:'1 mois'},{d:92,l:'3 mois'},{d:183,l:'6 mois'},{d:365,l:'1 an'}].map(o=>
+                <span key={o.d} onClick={()=>v.onSetSpan(o.d)} style={css('cursor:pointer;font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;'+(v.planSpan===o.d?('background:'+v.accent+';color:#fff;'):'color:var(--text2);'))}>{o.l}</span>)}
+            </div>
           </div>
         </div>}
 
@@ -4306,10 +4292,6 @@ class Flux extends React.Component {
             </div>
             ) : v.planning ? (
               this.renderGlobalPlanning(v)
-            ) : v.projView==='infos' ? (
-              this.renderGlobalPlanning(v)   /* Planning = vue globale tous projets (maquette) ; renderProjectInfos (timeline solo) n'est plus branché */
-            ) : v.projView==='notes' ? (
-              v.allMode ? (<div style={css('max-width:920px;margin:0 auto;padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Les notes sont propres à chaque projet.<br/>Sélectionne un projet (en haut à gauche) pour voir et modifier ses notes.</div>) : this.renderProjectNotes(v)
             ) : (
               this.renderProjTaskView(v)
             )}
