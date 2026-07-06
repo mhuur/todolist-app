@@ -858,13 +858,26 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root{height:100%;--bg:#0f1d33;--rail:#0c1729;--band:#16273f;--soft:#13233c;--line:#243650;--panel:#142540;--text:#e7edf6;--text2:#aebcd0;--text3:#8595ac;--muted:#6c7d96;--divider:#1f3049;--cbox:#3a4a64;--sbThumb:#2a3a55;--sbThumb2:#384a69;}
 /* Thème clair Ekopak — utilisé uniquement par l'écran Aujourd'hui (todayOnly), le reste reste sombre. Palette = tokens ekopak-design. */
 #flux-root [data-theme="ekopak"]{--bg:#f5f8fc;--rail:#eef2f8;--band:#eef2f8;--soft:#eef2f8;--line:#dde4ee;--panel:#ffffff;--text:#1a2853;--text2:#353d4a;--text3:#4d5666;--muted:#6b7689;--divider:#eef2f8;--cbox:#c2cbd9;--sbThumb:#c2cbd9;--sbThumb2:#95a0b3;}
-#flux-root .qadd-ek{border-bottom:1.5px solid var(--line);transition:border-color .15s}
-#flux-root .qadd-ek:focus-within{border-color:#5cbef0}
+/* Carte d'ajout compacte (~420px, alignée à gauche), épinglée sous l'en-tête (Aujourd'hui + Projet) */
+#flux-root .qadd-card{display:flex;align-items:center;gap:11px;width:100%;max-width:420px;height:46px;padding:0 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;transition:border-color .15s,box-shadow .15s}
+#flux-root .qadd-card:hover{border-color:#c5d3e6}
+#flux-root .qadd-card:focus-within{border-color:#5cbef0;box-shadow:0 0 0 3px rgba(92,190,240,.12)}
+/* Champ d'ajout fin (une ligne, vue Tâches Projet) */
+#flux-root .ek-thinadd{display:flex;align-items:center;gap:9px;width:100%;max-width:440px;height:34px;padding:0 10px;border-radius:8px;transition:background .12s,box-shadow .12s}
+#flux-root .ek-thinadd:hover{background:var(--soft)}
+#flux-root .ek-thinadd:focus-within{background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+#flux-root .ek-thinadd svg{width:15px;height:15px;color:#3aaae8;flex:none}
+#flux-root .ek-thinadd input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-weight:500;color:var(--text);font-family:'Nunito',sans-serif}
+#flux-root .ek-thinadd input::placeholder{color:var(--muted)}
 #flux-root .ek-tab{font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;padding:13px 0;border:none;background:none;border-bottom:2px solid transparent;transition:color .12s,border-color .12s}
 #flux-root .ek-tab.on{color:var(--text);border-color:#0f3f93}
 #flux-root .ek-tab:hover:not(.on){color:var(--text2)}
-/* ── Écran Aujourd'hui (thème clair Ekopak) : lignes, groupes, zone Focus du jour, panneau détail ── */
-#flux-root .ek-trow{display:flex;align-items:center;gap:15px;padding:12px 8px;border-bottom:1px solid var(--divider);border-radius:6px;position:relative;transition:background .12s}
+/* Onglets de statut intégrés à l'en-tête (underline serré, alignés sur le titre) */
+#flux-root .ek-htab{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;padding:5px 0;border:none;background:none;border-bottom:2px solid transparent;transition:color .12s,border-color .12s}
+#flux-root .ek-htab.on{color:var(--text);border-color:#0f3f93}
+#flux-root .ek-htab:hover:not(.on){color:var(--text2)}
+/* ── Écran Aujourd'hui (thème clair Ekopak) : lignes, groupes, panneau détail ── */
+#flux-root .ek-trow{display:flex;align-items:center;gap:15px;padding:7px 8px;border-bottom:1px solid var(--divider);border-radius:6px;position:relative;transition:background .12s}
 #flux-root .ek-trow:hover{background:#eef2f8}
 #flux-root .ek-ck{width:19px;height:19px;border-radius:6px;border:1.8px solid #c2cbd9;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer;background:var(--panel);transition:border-color .12s,background .12s}
 #flux-root .ek-ck svg{width:11px;height:11px}
@@ -876,22 +889,35 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-mchip:hover{border-color:#c5d0e6;color:#0f3f93}
 #flux-root .ek-mchip.none{color:#95a0b3;border-style:dashed;background:transparent}
 #flux-root .ek-mchip svg{width:12px;height:12px;flex:none;color:#95a0b3}
+/* Cellule Projet (vue Aujourd'hui / Tous les projets) : barre d'accent + numéro coloré + nom. */
+#flux-root .ek-projcell{display:flex;align-items:center;gap:8px;min-width:0;width:100%;cursor:pointer;overflow:hidden}
+#flux-root .ek-projbar{width:3px;height:26px;border-radius:2px;flex:none}
+#flux-root .ek-projtwo{display:flex;flex-direction:column;min-width:0;line-height:1.25;text-align:left}
+#flux-root .ek-projnum{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flux-root .ek-projname{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flux-root .ek-projcell .solo{font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flux-root .ek-projadd{font-size:12px;color:#95a0b3;white-space:nowrap}
+#flux-root .ek-pnum{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;flex:none}
 #flux-root .ek-x{width:26px;height:26px;flex:none;border:none;background:none;border-radius:7px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;padding:0;transition:opacity .12s,background .12s,color .12s}
 #flux-root .ek-trow:hover .ek-x{opacity:1}
 #flux-root .ek-x svg{width:15px;height:15px}
 #flux-root .ek-x.note.has{opacity:1;color:#0f3f93}
 #flux-root .ek-x.note:hover{background:#f2f5fb;color:#0f3f93}
+#flux-root .ek-x.today{opacity:1;color:#3aaae8}
 #flux-root .ek-x.today:hover{background:#e6f6fd;color:#3aaae8}
+#flux-root .ek-x.addtoday{opacity:.4}
+#flux-root .ek-x.addtoday:hover{opacity:1;background:#e6f6fd;color:#3aaae8}
 #flux-root .ek-x.del:hover{background:#fef1ed;color:#d8442b}
 #flux-root .ek-glabel{display:flex;align-items:center;gap:10px;margin:0 0 4px;padding:0 8px}
 #flux-root .ek-glabel b{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 #flux-root .ek-glabel b.rel{color:#d8442b}
 #flux-root .ek-glabel .c{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;color:#95a0b3}
-#flux-root .ek-grp{margin-bottom:28px;border-radius:12px;transition:background .12s}
-#flux-root .ek-focusgrp{margin-bottom:28px;border-left:2px solid #81d0f5;padding-left:18px;border-radius:0 12px 12px 0;transition:background .12s}
-#flux-root .ek-grp.drop-hi,#flux-root .ek-focusgrp.drop-hi{background:#f2f5fb}
-#flux-root .ek-focusgrp .ek-trow{border-bottom:none}
-#flux-root .ek-dropslot{border:1.5px dashed #c5d0e6;border-radius:10px;padding:13px 8px;margin:4px 8px;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;text-align:center;background:#e6f6fd}
+#flux-root .ek-grp{margin-bottom:14px;border-radius:12px;transition:background .12s}
+/* Groupe monté mais masqué au repos (drop-zone révélée pendant le drag) — display:none garde le nœud dans le DOM, donc le drag natif n'est pas annulé. */
+#flux-root .ek-grp.ek-hidden{display:none}
+#flux-root .ek-grp.drop-hi{background:#e6f6fd;box-shadow:inset 0 0 0 1.5px #bfe3f7;border-radius:12px}
+/* Zone de dépôt discrète (sans texte) : le groupe se teinte au survol via .drop-hi. Le pad donne juste une hauteur cliquable aux groupes vides pendant le drag. */
+#flux-root .ek-droppad{height:40px;border-radius:10px;margin:2px 8px}
 #flux-root .ek-dtitle{flex:1;min-width:0;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;line-height:1.4;color:var(--text);border:none;border-bottom:1.5px solid transparent;background:none;outline:none;padding:0 0 3px;resize:none;overflow:hidden}
 #flux-root .ek-dtitle:focus{border-color:#81d0f5}
 #flux-root .ek-dnote{width:100%;border:1.5px solid #c2cbd9;border-radius:10px;padding:12px 13px;font-size:13px;line-height:1.6;color:var(--text);outline:none;resize:none;background:var(--panel);min-height:220px}
@@ -919,11 +945,15 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-pmx{width:24px;height:24px;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;margin-left:6px;flex:none;padding:0}
 #flux-root .ek-fitem:hover .ek-pmx{opacity:1}
 #flux-root .ek-pmx:hover{background:#fef1ed;color:#d8442b}
+#flux-root .ek-pmx.edit:hover{background:#e5ebf5;color:#0f3f93}
 #flux-root .ek-pmx.arm{opacity:1;background:#fef1ed;color:#d8442b}
 #flux-root .ek-pmx svg{width:13px;height:13px}
 #flux-root .stopt .ek-pmx{margin-left:4px}
 #flux-root .stopt:hover .ek-pmx{opacity:1}
-#flux-root .ek-todaypill{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:#e6f6fd;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;flex:none}
+#flux-root .ek-todaypill{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:#e6f6fd;color:#3aaae8;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;flex:none;transition:background .12s,color .12s}
+#flux-root .ek-todaypill:hover{background:#d6eefb}
+#flux-root .ek-todaypill.on{background:#3aaae8;color:#fff}
+#flux-root .ek-todaypill.on:hover{background:#2f9fdd}
 #flux-root .ek-todaypill svg{width:16px;height:16px}
 #flux-root .ek-pseg{display:inline-flex;background:#eef2f8;border-radius:10px;padding:3px;gap:2px}
 #flux-root .ek-pseg button{padding:6px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap}
@@ -937,6 +967,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-subchip svg{width:11px;height:11px}
 #flux-root .ek-subwrap{padding:2px 0 8px 58px;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--divider)}
 #flux-root .ek-subrow{display:flex;align-items:center;gap:9px;padding:4px 0}
+#flux-root .ek-subwrap .ek-subrow[draggable="true"]{cursor:grab}
+#flux-root .ek-subwrap .ek-subrow[draggable="true"]:active{cursor:grabbing}
+#flux-root .ek-subwrap .ek-subrow.dragover{box-shadow:inset 0 2px 0 #81d0f5}
 #flux-root .ek-sck{width:15px;height:15px;border-radius:4px;border:1.6px solid #c2cbd9;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer;background:var(--panel)}
 #flux-root .ek-sck:hover{border-color:#8fc02e}
 #flux-root .ek-sck.on{background:#8fc02e;border-color:#8fc02e;color:#fff}
@@ -947,6 +980,16 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-subrow:hover .ek-xsubdel{opacity:1}
 #flux-root .ek-xsubdel:hover{background:#fef1ed;color:#d8442b}
 #flux-root .ek-xsubdel svg{width:13px;height:13px}
+#flux-root .ek-xsub{width:20px;height:20px;flex:none;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;padding:0;transition:opacity .12s,background .12s,color .12s}
+#flux-root .ek-subrow:hover .ek-xsub{opacity:1}
+#flux-root .ek-xsub.has,#flux-root .ek-xsub.open{opacity:1;color:#3aaae8}
+#flux-root .ek-xsub:hover{background:#e6f6fd;color:#3aaae8}
+#flux-root .ek-xsub svg{width:13px;height:13px}
+#flux-root .ek-subedit{flex:1;min-width:0;font-size:12.5px;font-weight:500;color:var(--text);border:1.5px solid #81d0f5;border-radius:6px;padding:2px 7px;outline:none;background:var(--panel);font-family:'Nunito',sans-serif}
+#flux-root .ek-subnote{padding:2px 0 6px 24px}
+#flux-root .ek-subnotein{width:calc(100% - 20px);min-height:52px;border:1.5px solid #dde4ee;border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.5;color:var(--text2);background:var(--panel);outline:none;resize:vertical;font-family:'Nunito',sans-serif}
+#flux-root .ek-subnotein::placeholder{color:#c2cbd9}
+#flux-root .ek-subnotein:focus{border-color:#81d0f5}
 #flux-root .ek-subaddin{height:26px;width:230px;border:1.5px solid transparent;border-radius:7px;padding:0 8px;font-size:12px;font-weight:500;outline:none;background:transparent;color:var(--text)}
 #flux-root .ek-subaddin::placeholder{color:#c2cbd9}
 #flux-root .ek-subaddin:focus{border-color:#81d0f5;background:var(--panel)}
@@ -1278,7 +1321,7 @@ const SB_ICONS={planning:`<svg width="16" height="16" viewBox="0 0 16 16" fill="
 const SB_LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3C12 3 5.5 10.4 5.5 15.5a6.5 6.5 0 0 0 13 0C18.5 10.4 12 3 12 3z" fill="#eaf7fe"/><path d="M9.4 14.6c.15 1.7 1.35 3 3.05 3.25" fill="none" stroke="#81d0f5" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 function render(){
   /* Sidebar */
-  const tabs=[{k:"today",l:"Aujourd'hui",i:SB_ICONS.today},{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
   let sb=`<div class="sidebar"><div class="sb-logo" title="Ma Todolist">${SB_LOGO}</div>`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -1286,7 +1329,7 @@ function render(){
   sb+=`</div>`;
   /* Main */
   let h="";
-  if(S.tab==="projects"||S.tab==="global"||S.tab==="done")S.tab="flux";
+  if(S.tab==="projects"||S.tab==="global"||S.tab==="done"||S.tab==="today")S.tab="flux";  // « today » (ancien onglet Aujourd'hui) fusionné dans Projet
   if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
   const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="trash"||S.tab==="feedback")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
@@ -3048,6 +3091,10 @@ const DEN = {
   spacieux:    { rowH:52, padX:22, titleFs:14.5, chk:17, stPad:'5px 11px', stW:126, grpH:40, grpFs:12.5, addH:46, hdrH:38 },
 };
 const LS_KEY = 'flux_proto_v6';
+// Palette d'identité projet (thème Ekopak) : vert, deep-blue, or, violet, cyan, magenta, indigo, brun.
+const PROJ_PALETTE = ['#2c9c6a','#0f3f93','#E39A2E','#8a5cd6','#0f9bb0','#c0497e','#3b5bdb','#b5651d'];
+// Couleur stable dérivée de l'id du projet (hash → index palette) : identité constante sans stockage requis.
+function projColorFor(id){ const s=String(id||''); let h=0; for(let i=0;i<s.length;i++){ h=((h*31)+s.charCodeAt(i))>>>0; } return PROJ_PALETTE[h % PROJ_PALETTE.length]; }
 
 class Flux extends React.Component {
   constructor(props){
@@ -3111,6 +3158,8 @@ class Flux extends React.Component {
     const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
+      number: (typeof p.number==='string')?p.number:'',
+      color: /^#[0-9a-fA-F]{6}$/.test(p.color||'') ? p.color : projColorFor(p.id||p.name||''),
       categories: Array.isArray(p.categories)?p.categories:[],
       people: Array.isArray(p.people)?p.people:[],
       tasks: this.normTasks(p.tasks),
@@ -3166,7 +3215,10 @@ class Flux extends React.Component {
     document.addEventListener('mousedown', this._docDown, true);
     document.addEventListener('click', this._docClick, true);
   }
-  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
+  // ▼ toast d'annulation (undo) : action réversible en 1 clic pendant ~5s (complétion / retrait d'Aujourd'hui). Remplace les modales de confirmation.
+  showUndo(msg, action){ if(this._undoTimer) clearTimeout(this._undoTimer); this.setState({ undo:{ msg, action } }); this._undoTimer=setTimeout(()=>{ this._undoTimer=null; this.setState({ undo:null }); }, 5000); }
+  doUndo(){ const u=this.state.undo; if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } this.setState({ undo:null }); if(u&&u.action) u.action(); }
 
   componentDidUpdate() {
     try {
@@ -3206,23 +3258,21 @@ class Flux extends React.Component {
   startEdit(id,field){ this.setState({ editing:{id,field} }); }
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
   // ---- mutations ----
-  toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, focus:false, doneAt:Date.now()}:{})} : t), ..._order }; }); }
-  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false, focus:false, doneAt:Date.now()}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
+  toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, doneAt:Date.now()}:{})} : t), ..._order }; }); }
+  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false, doneAt:Date.now()}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
     ? { tasks: flip(st.tasks), editing:_ed, ..._order }
     : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:_ed, ..._order }; }); }
-  toggleCollapse(catId){ this.setState(st=>({ collapsed:{...st.collapsed, [catId]: !st.collapsed[catId]} })); }
-  toggleFilter(axis,id){ this.setState(st=>{ const ax={...st.filters[axis]}; if(ax[id]) delete ax[id]; else ax[id]=true; const filters={...st.filters,[axis]:ax}; const empty = !Object.keys(filters.status).length && !Object.keys(filters.cat).length && !Object.keys(filters.person).length; return { filters, bulk: empty ? 'none' : null, todayView:false }; }); }
-  // Master « Toutes les tâches » : 1er clic = tout cocher/afficher ('all'), 2e clic = tout décocher/masquer ('none').
-  toggleBulk(){ this.setState(st=>({ bulk: st.bulk==='all' ? 'none' : 'all', filters:{status:{},cat:{},person:{}}, todayView:false })); }
 
   // ---- projects ----
   // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
   _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
   // Réinitialise tout l'état de vue transient en entrant dans un projet.
-  _enterProject(extra){ return { allMode:false, selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
+  _enterProject(extra){ return { allMode:false, selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, projNumEdit:false, projNameEdit:false, projPersonFilter:'', dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
   switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { allMode:false, projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { allMode:false, projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
-  createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
+  createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, number:'', color:projColorFor(id), deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
   renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
+  // ▼ setProjNumber — numéro/référence libre du projet (2e dimension, optionnel). Persisté dans le blob S.flux.
+  setProjNumber(id,val){ const n=(val||'').trim(); this.setState(st=>({ projects:(st.projects||[]).map(p=> p.id===id?{...p,number:n}:p) })); }
   // Supprime un projet ET toutes ses données (irréversible). Si c'est le projet courant, bascule sur un autre (ou page vierge).
   deleteProject(id){ this.setState(st=>{ const remaining=st.projects.filter(p=>p.id!==id);
     if(id===st.currentProjectId){ const next=remaining[0]||null;
@@ -3231,7 +3281,7 @@ class Flux extends React.Component {
     const projects=this._snapshotCurrent(st).filter(p=>p.id!==id); return { projects, projMenuId:null, projDelId:null }; }); }
 
   // ---- projet : échéance / étapes datées / notes ----
-  setProjView(v){ this.setState({ projView:v }); }
+  setProjView(v){ this.setState({ projView:v, todayView:false }); }
   setPlanSpan(d){ this.setState({ planSpan:d }); }
   setProjNotes(val){ this.setState(st=>({ projects:(st.projects||[]).map(p=> p.id===st.currentProjectId?{...p,notes:val}:p) })); }
   _isoFromDays(days){ const t=new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()+days); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
@@ -3257,16 +3307,24 @@ class Flux extends React.Component {
     const t = { id:this.uid(), title, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], ...(preset||{}) };
     this.setState(st=>({ tasks:[...st.tasks, t] }));
   }
-  reorderAdopt(dragId, beforeId, axis, target){
-    if(!dragId || dragId===beforeId){ this.setState({dragId:null,dragOverId:null}); return; }
+  // ▼ reorderTaskAny — vue Tâches : réordonne une tâche dans le tableau de SON projet (ordre projet, persistant) et adopte le statut du groupe de dépôt. Cross-project : le réordonnancement fin n'a lieu qu'au sein d'un même projet ; déposée dans un autre projet, la tâche ne change que de statut (et va en fin de sa liste).
+  reorderTaskAny(dragId, beforeId, status){
+    const clear = { dragId:null, dragOverId:null, todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
+    this._todayDrag=null;
+    if(!dragId || dragId===beforeId){ this.setState(clear); return; }
     this.setState(st=>{
-      const tasks=[...st.tasks];
-      const di=tasks.findIndex(t=>t.id===dragId); if(di<0) return {dragId:null,dragOverId:null};
-      const d={...tasks[di]};
-      if(axis==='status'){ d.status=target.status; if(target.status==='done'){ d.today=false; d.focus=false; d.doneAt=Date.now(); } } else if(axis==='person') d.person=target.person; else d.cat=target.cat;
-      tasks.splice(di,1);
-      const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d);
-      return {tasks,dragId:null,dragOverId:null};
+      const apply = arr => {
+        const a=[...arr];
+        const di=a.findIndex(t=>t.id===dragId); if(di<0) return arr;
+        const d={...a[di]};
+        if(status && status!=='relance' && d.status!==status){ d.status=status; if(status==='done'){ d.today=false; d.doneAt=Date.now(); } }
+        a.splice(di,1);
+        const bi = beforeId ? a.findIndex(t=>t.id===beforeId) : -1;
+        a.splice(bi<0?a.length:bi, 0, d);
+        return a;
+      };
+      if(st.tasks.some(t=>t.id===dragId)) return { ...clear, tasks: apply(st.tasks) };
+      return { ...clear, projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===dragId)) ? {...p, tasks:apply(p.tasks)} : p) };
     });
   }
   askDelete(id){ this.setState({ confirmId:id }); }
@@ -3298,51 +3356,19 @@ class Flux extends React.Component {
   toggleCheck(id,iid){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,done:!i.done}:i)); }
   delCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
   updateCheckText(id,iid,val){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,text:val}:i)); }
+  updateCheckNote(id,iid,val){ this.patchCheck(id, arr=>arr.map(i=> i.id===iid?{...i,note:val}:i)); }
   deleteCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
-  addCategory(name){ const id=this.uid(); this.setState(st=>({ categories:[...st.categories,{id,name}], addingCat:false })); }
-  toggleCatMenu(id){ this.setState(st=>({ catMenuId: st.catMenuId===id?null:id })); }
-  // Supprime une catégorie sans toucher aux tâches : elles repassent en "Sans catégorie" (cat='').
-  deleteCategory(id){ this.setState(st=>{ const cat={...st.filters.cat}; delete cat[id]; const collapsed={...st.collapsed}; delete collapsed['ca:'+id]; const catDep='cat:'+id; return { categories: st.categories.filter(c=>c.id!==id), tasks: st.tasks.map(t=>{ const nt=(t.cat||'')===id ? {...t, cat:''} : t; return (nt.deps && nt.deps.indexOf(catDep)>=0) ? {...nt, deps: nt.deps.filter(d=>d!==catDep)} : nt; }), filters:{...st.filters, cat}, collapsed, catMenuId:null, labelEdit:{type:null,id:null} }; }); }
-  togglePersonMenu(id){ this.setState(st=>({ personMenuId: st.personMenuId===id?null:id })); }
+  // ▼ reorderCheck — réordonne les sous-tâches d'une tâche par drag (insertion avant beforeId). Cross-projet via patchCheck.
+  reorderCheck(id, dragId, beforeId){ if(!dragId||dragId===beforeId){ this.setState({subDragId:null,subDragOverId:null}); return; } this.patchCheck(id, arr=>{ const a=[...arr]; const di=a.findIndex(x=>x.id===dragId); if(di<0) return arr; const [m]=a.splice(di,1); const bi=beforeId?a.findIndex(x=>x.id===beforeId):-1; a.splice(bi<0?a.length:bi,0,m); return a; }); this.setState({subDragId:null,subDragOverId:null}); }
   // Supprime une personne sans toucher aux tâches : elles repassent en "Non assigné" (person='').
   deletePerson(id){ this.setState(st=>{ const person={...st.filters.person}; delete person[id]; const collapsed={...st.collapsed}; delete collapsed['pe:'+id]; return { people: st.people.filter(p=>p.id!==id), tasks: st.tasks.map(t=> t.person===id ? {...t, person:''} : t), filters:{...st.filters, person}, collapsed, personMenuId:null, labelEdit:{type:null,id:null} }; }); }
 
   // ---- inline rename of category / person labels (sidebar + group headers) ----
-  startLabelEdit(type,id,fromRail){ this.setState({ labelEdit:{type,id,rail:!!fromRail} }); }
   stopLabelEdit(){ this.setState({ labelEdit:{type:null,id:null} }); }
   renameCategory(id,name){ const n=(name||'').trim(); this.setState(st=>({ categories: n ? st.categories.map(c=> c.id===id?{...c,name:n}:c) : st.categories })); }
   renamePerson(id,name){ const n=(name||'').trim(); this.setState(st=>({ people: n ? st.people.map(p=> p.id===id?{...p,name:n}:p) : st.people })); }
   commitLabelEdit(type,id,value){ if(type==='cat') this.renameCategory(id,value); else if(type==='person') this.renamePerson(id,value); else if(type==='proj') this.renameProject(id,value); this.stopLabelEdit(); }
 
-  reorder(dragId, beforeId, catId){
-    if(!dragId || dragId===beforeId) { this.setState({dragId:null,dragOverId:null}); return; }
-    this.setState(st=>{
-      const tasks=[...st.tasks];
-      const di=tasks.findIndex(t=>t.id===dragId);
-      if(di<0) return { dragId:null, dragOverId:null };
-      const d={...tasks[di], cat:catId};
-      tasks.splice(di,1);
-      if(beforeId){ const ti=tasks.findIndex(t=>t.id===beforeId); tasks.splice(ti<0?tasks.length:ti,0,d); }
-      else { let last=-1; tasks.forEach((t,i)=>{ if((t.cat||'')===catId) last=i; }); tasks.splice(last+1,0,d); }
-      return { tasks, dragId:null, dragOverId:null };
-    });
-  }
-  // Réordonne le tableau st.categories (= ordre des groupes au centre). N'affecte PAS la sidebar (qui re-trie par nom). Drop = insérer avant beforeId.
-  moveCategory(dragId, beforeId){
-    if(!dragId || dragId===beforeId){ this.setState({dragCatId:null,dragOverCatId:null}); return; }
-    this.setState(st=>{
-      const cats=[...st.categories];
-      const di=cats.findIndex(c=>c.id===dragId); if(di<0) return {dragCatId:null,dragOverCatId:null};
-      const [moved]=cats.splice(di,1);
-      const ti=cats.findIndex(c=>c.id===beforeId);
-      if(ti<0) cats.push(moved); else cats.splice(ti,0,moved);
-      return { categories:cats, dragCatId:null, dragOverCatId:null };
-    });
-  }
-  setStatusByDrag(dragId,status){
-    if(!dragId){ this.setState({dragId:null}); return; }
-    this.setState(st=>({ tasks: st.tasks.map(t=> t.id===dragId?{...t,status}:t), dragId:null }));
-  }
 
   // ---- Aujourd'hui (vue globale tous projets ; ordre propre via todayOrder, n'affecte JAMAIS l'ordre de Flux) ----
   // Toutes les tâches marquées today, à travers tous les projets, ordonnées par todayOrder.
@@ -3355,7 +3381,7 @@ class Flux extends React.Component {
       const isCur = p.id===st.currentProjectId;
       const tasks  = isCur ? st.tasks  : (p.tasks||[]);
       const people = isCur ? st.people : (p.people||[]);
-      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; if((t.today||_sched||_rel) && t.status!=='done') out.push({ task:t, projId:p.id, projName:p.name, people, sched:_sched, relanceDue:_rel }); });
+      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; if((t.today||_sched||_rel) && t.status!=='done') out.push({ task:t, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people, sched:_sched, relanceDue:_rel }); });
     });
     const order = Array.isArray(st.todayOrder)?st.todayOrder:[];
     const rank = id => { const i=order.indexOf(id); return i<0?1e9:i; };
@@ -3383,11 +3409,30 @@ class Flux extends React.Component {
     this.setState(st=>{
       const found = st.tasks.find(t=>t.id===id) || (st.projects||[]).map(p=>(p.tasks||[]).find(t=>t.id===id)).find(Boolean);
       const toDone = !(found && found.status==='done');
-      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, focus:false, doneAt:Date.now()}:{})} : t;
+      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, doneAt:Date.now()}:{})} : t;
       const _order = toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {};
       if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip), ..._order };
       return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p), ..._order };
     });
+  }
+  // Complétion depuis Aujourd'hui, réversible : capture l'état avant, puis propose « Annuler » (restaure statut/aujourd'hui + position).
+  toggleDoneAnyUndo(id){
+    const cur=this.taskByIdAny(id); if(!cur){ this.toggleDoneAny(id); return; }
+    const wasDone=cur.task.status==='done';
+    const snap={ status:cur.task.status, today:!!cur.task.today };
+    const order=Array.isArray(this.state.todayOrder)?this.state.todayOrder:[]; const pos=order.indexOf(id);
+    this.toggleDoneAny(id);
+    if(!wasDone) this.showUndo('« '+cur.task.title+' » terminée', ()=>{
+      this.patch(id,{ status:snap.status, today:snap.today, doneAt:0 });
+      this.setState(st=>{ const o=(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id); o.splice(pos<0?o.length:Math.min(pos,o.length),0,id); return { todayOrder:o }; });
+    });
+  }
+  // Retrait d'Aujourd'hui en 1 clic (sans modale), réversible via « Annuler ».
+  unmarkTodayUndo(id){
+    const cur=this.taskByIdAny(id); if(!cur) return;
+    const wasToday=!!cur.task.today, title=cur.task.title;
+    if(wasToday) this.toggleToday(id);
+    this.showUndo('« '+title+' » retirée d\'aujourd\'hui', ()=>{ if(wasToday) this.toggleToday(id); });
   }
   // Réordonne UNIQUEMENT la vue Aujourd'hui (todayOrder). N'affecte jamais l'ordre de Flux (st.tasks).
   reorderToday(dragId, beforeId){
@@ -3401,36 +3446,26 @@ class Flux extends React.Component {
       return { todayOrder:ids, todayDragId:null, todayDragOverId:null };
     });
   }
-  // ▼ applyTodayDrop — dépose la tâche glissée sur un groupe de la vue Aujourd'hui : zone Focus (flag focus, max 3) ou groupe de statut (setStatus + sortie du Focus). « À relancer » ≡ En attente (relance dérivée de la date).
+  // ▼ applyTodayDrop — dépose la tâche glissée sur un groupe de statut de la vue Aujourd'hui (setStatus). « À relancer » ≡ En attente (relance dérivée de la date).
   applyTodayDrop(key){
-    const id = this.state.todayDragId;
+    const id = this._todayDrag || this.state.todayDragId;
+    this._todayDrag = null;
     const reset = { todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
     if(!id){ this.setState(reset); return; }
     const cur = this.taskByIdAny(id);
     if(!cur){ this.setState(reset); return; }
-    if(key==='focus'){
-      const full = this.todayTasks().filter(e=>e.task.focus).length >= 3;
-      if(!cur.task.focus && !full) this.patch(id,{focus:true});
-      this.setState(reset); return;
-    }
-    if(cur.task.focus) this.patch(id,{focus:false});
     const status = key==='relance' ? 'wait' : key;
     if(cur.task.status!==status) this.setStatus(id,status);   // wait → ouvre le popover de relance (comportement setStatus)
     this.setState(reset);
   }
   // ▼ dropTodayOnRow — dépôt sur une ligne : adopte le groupe de la ligne cible si différent, puis réordonne (todayOrder).
   dropTodayOnRow(dragId, beforeId, key){
+    this._todayDrag = null;
     if(!dragId || dragId===beforeId){ this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}); return; }
     const cur = this.taskByIdAny(dragId);
-    if(cur){
-      if(key==='focus'){
-        const full = this.todayTasks().filter(e=>e.task.focus).length >= 3;
-        if(!cur.task.focus && !full) this.patch(dragId,{focus:true});
-      } else if(key){
-        if(cur.task.focus) this.patch(dragId,{focus:false});
-        const status = key==='relance' ? 'wait' : key;
-        if(cur.task.status!==status) this.setStatus(dragId,status);
-      }
+    if(cur && key){
+      const status = key==='relance' ? 'wait' : key;
+      if(cur.task.status!==status) this.setStatus(dragId,status);
     }
     this.reorderToday(dragId, beforeId);
     this.setState({ todayDragOverKey:null });
@@ -3440,15 +3475,14 @@ class Flux extends React.Component {
   // Ajoute une personne à un projet précis (courant ou autre), renvoie son id. Pour assigner depuis la vue Aujourd'hui (multi-projets).
   addPersonTo(projId,name,color){ const id=this.uid(); const palette=['#3b5bdb','#d6643f','#2c9c6a','#8a5cd6','#c79a1e','#0f9bb0','#c0497e','#5566d6']; this.setState(st=>{ if(projId===st.currentProjectId){ const c=color||palette[st.people.length % palette.length]; return { people:[...st.people,{id,name:(name||'').trim(),color:c}] }; } return { projects:(st.projects||[]).map(p=> p.id===projId ? {...p, people:[...(p.people||[]),{id,name:(name||'').trim(),color:color||palette[(p.people||[]).length % palette.length]}]} : p) }; }); return id; }
   // ---- Aujourd'hui : filtres propres à l'onglet (transient, non persistés) + ajout rapide cross-project ----
-  toggleTodayFilter(axis,id){ this.setState(st=>{ const cur=st.todayFilters||{status:{},proj:{},person:{}}; const ax={...(cur[axis]||{})}; if(ax[id]) delete ax[id]; else ax[id]=true; return { todayFilters:{...cur,[axis]:ax} }; }); }
   clearTodayFilters(){ this.setState({ todayFilters:{status:{},proj:{},person:{}} }); }
   // ---- Tous les projets : filtres cross-project (transient) : statut + catégorie/personne par NOM ----
-  toggleAllFilter(axis,id){ this.setState(st=>{ const cur=st.allFilters||{status:{},cat:{},person:{}}; const ax={...(cur[axis]||{})}; if(ax[id]) delete ax[id]; else ax[id]=true; return { allFilters:{...cur,[axis]:ax} }; }); }
-  clearAllFilters(){ this.setState({ allFilters:{status:{},cat:{},person:{}} }); }
-  // Capture rapide depuis Aujourd'hui : tâche étoilée (today:true) créée SANS projet → va dans l'inbox « Sans projet », à trier ensuite via la cellule Projet.
-  addTodayTask(title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const nt={ id, title:tx, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const projects=this._withInbox(st.projects||[]).map(p=> p.id==='__inbox' ? {...p, tasks:[...(p.tasks||[]), nt]} : p); return { projects, todayOrder:norder }; }); }
+  // Capture rapide depuis Aujourd'hui : tâche étoilée (today:true) créée SANS projet → inbox « Sans projet ». Statut = onglet de statut actif (sinon À faire) pour rester visible sous le filtre courant.
+  addTodayTask(title){ const tfS=Object.keys((this.state.todayFilters&&this.state.todayFilters.status)||{}); this.addTodayTaskStatus(tfS.length===1?tfS[0]:'todo', title); }
+  // ▼ addTodayTaskStatus — ajoute une tâche today:true avec un statut donné (ajout par groupe d'Aujourd'hui), dans l'inbox « Sans projet ».
+  addTodayTaskStatus(status,title){ const tx=(title||'').trim(); if(!tx) return; const id=this.uid(); const st0=(status==='relance'||status==='done')?'wait':(status||'todo'); const nt={ id, title:tx, cat:'', status:st0, due:'', person:'', notes:'', deps:[], checklist:[], today:true }; this.setState(st=>{ const order=Array.isArray(st.todayOrder)?st.todayOrder:[]; const norder=order.indexOf(id)<0?[...order,id]:order.slice(); const projects=this._withInbox(st.projects||[]).map(p=> p.id==='__inbox' ? {...p, tasks:[...(p.tasks||[]), nt]} : p); return { projects, todayOrder:norder }; }); }
   // Projet réservé « Sans projet » (id __inbox) : créé à la volée, masqué du sélecteur/facettes, auto-purgé quand vide.
-  _withInbox(projects){ const arr=projects||[]; return arr.some(p=>p.id==='__inbox') ? arr : [...arr, { id:'__inbox', name:'Sans projet', deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }]; }
+  _withInbox(projects){ const arr=projects||[]; return arr.some(p=>p.id==='__inbox') ? arr : [...arr, { id:'__inbox', name:'Sans projet', number:'', color:'var(--cbox)', deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }]; }
   setProjPickQuery(v){ this.setState({ projPickQuery:v }); }
   // Déplace une tâche vers un autre projet (ou l'inbox '__inbox'). Réinitialise ses deps (résolues par projet), retire les liens qui la visaient, purge l'inbox si vidée.
   moveTaskToProject(id, toProjId){
@@ -3482,7 +3516,7 @@ class Flux extends React.Component {
       const strip=arr=> arr.filter(t=>t.id!==id).map(t=> (t.deps&&t.deps.indexOf(id)>=0)?{...t,deps:t.deps.filter(d=>d!==id)}:t);
       let tasks=st.tasks; let projects=st.projects||[];
       if(fromPid===st.currentProjectId){ tasks=strip(tasks); } else { projects=projects.map(p=> p.id===fromPid?{...p,tasks:strip(p.tasks||[])}:p); }
-      const newProj={ id:pid, name:nm, deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[moved], collapsed:{}, filters:{status:{},cat:{},person:{}} };
+      const newProj={ id:pid, name:nm, number:'', color:projColorFor(pid), deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[moved], collapsed:{}, filters:{status:{},cat:{},person:{}} };
       projects=[...projects, newProj].filter(p=> p.id!=='__inbox' || (Array.isArray(p.tasks)&&p.tasks.length>0));
       return { tasks, projects, ..._close };
     });
@@ -3512,23 +3546,12 @@ class Flux extends React.Component {
     if(done) return `width:${s}px;height:${s}px;border-radius:5px;background:${a};border:1.5px solid ${a};display:flex;align-items:center;justify-content:center;color:#fff;font-size:${s-5}px;flex:none;cursor:pointer;`;
     return `width:${s}px;height:${s}px;border-radius:5px;border:1.6px solid var(--cbox);background:var(--panel);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;`;
   }
-  facetBox(active, accent){
-    const a = accent||'#3b5bdb';
-    if(active) return `width:15px;height:15px;border-radius:4px;background:${a};border:1.5px solid ${a};color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none;`;
-    return 'width:15px;height:15px;border-radius:4px;border:1.6px solid var(--cbox);background:var(--panel);flex:none;';
-  }
 
   // -------- view model (port of renderVals) --------
   buildVM(){
     const st = this.state;
-    const f = st.filters; const ed = st.editing;
-    const actS = Object.keys(f.status), actC = Object.keys(f.cat), actP = Object.keys(f.person);
-    const anyFilter = actS.length || actC.length || actP.length;
-    const allOn = st.bulk==='all';                       // master : toutes les cases cochées
-    const showEmpty = !anyFilter && st.bulk!=='none';     // groupes vides visibles seulement hors filtrage
-    const showingAll = allOn || (st.bulk!=='none' && !anyFilter);
-    const match = t => (!actS.length||actS.includes(t.status)) && (!actC.length||actC.includes(t.cat)) && (!actP.length||actP.includes(t.person));
-    const filtered = st.tasks;   // filtres facettes retirés (onglets de statut à la place) ; st.filters/bulk dormants
+    const ed = st.editing;
+    const _projPF = st.projPersonFilter||'';   // filtre Personne transient de l'écran Projet (mono-sélection)
     const taskById = id => st.tasks.find(t=>t.id===id);
     const stop = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
 
@@ -3544,7 +3567,6 @@ class Flux extends React.Component {
     const fillA = isDark ? '26' : '1a';
     const lighten = (hex,amt)=>{ const h=(hex||'').replace('#',''); if(h.length!==6) return hex; let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt); return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); };
     const D = DEN[st.density] || DEN.confortable;
-    const groupBy = 'status';   // groupement par statut (maquette Ekopak) — st.groupBy ignoré, dormant
     const le = st.labelEdit || {type:null,id:null};
     const labelEditing = (type,id)=> le.type===type && le.id===id;
     const byName = (a,b)=> (a.name||'').localeCompare(b.name||'', 'fr', {sensitivity:'base'});
@@ -3554,172 +3576,12 @@ class Flux extends React.Component {
     const chipBase = `display:inline-flex;align-items:center;line-height:1;border-radius:20px;padding:${D.stPad};font-size:12px;font-weight:500;white-space:nowrap;`;
     const _todayISO = this._isoFromDays(0);
 
-    const vm = (t) => {
-      const sm = STATUS[t.status];
-      const done = t.status==='done';
-      const sel = st.selectedId===t.id;
-      const isEd = (fld)=> ed.id===t.id && ed.field===fld;
-      // « effectivement aujourd'hui » (goutte + ligne surlignée) : flag today, programmée (due ≤ auj.) ou relance atteinte — même règle que todayTasks.
-      const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:'';
-      const _relDue=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayISO);
-      const _sched=!!_due && _due<=_todayISO && t.status!=='done' && t.status!=='wait';
-      const effToday = !done && (!!t.today || _sched || _relDue);
-      const isRel = t.status==='wait' && !!t.relance;
-      const subs = Array.isArray(t.checklist)?t.checklist:[];
-      let rowStyle = 'position:relative;flex-wrap:nowrap;cursor:grab;';
-      if(sel && !effToday) rowStyle += 'background:#f2f5fb;';
-      if(isEd('status')||isEd('person')||isEd('relance')) rowStyle += 'z-index:25;';
-      if(st.dragOverId===t.id) rowStyle += 'box-shadow:inset 0 2.5px 0 #81d0f5;';
-      // Couleurs d'échéance : « Aujourd'hui » light-blue, dépassé corail, le reste gris (règle de l'écran Aujourd'hui).
-      const _duRaw = this.formatDue(t.due);
-      const du = { text:_duRaw.text, color: _duRaw.text==="Aujourd'hui" ? '#3aaae8' : ((_duRaw.color==='#f0746d'||_duRaw.color==='#d04a45') ? '#d8442b' : 'var(--muted)') };
-      const p = this.person(t.person);
-      const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
-        return { key:k, label:m.label, dot:m.dot,
-          style:'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);'+(on?'font-weight:600;':''),
-          checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'),
-          onPick:(e)=>{ stop(e); this.setStatus(t.id,k); } }; });
-      let personMenu=[];
-      if(isEd('person')){
-        const mrow=(on)=>'display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;'+(on?`background:${aTint(selA)};`:'');
-        const q=(st.personQuery||'').trim(); const ql=q.toLowerCase();
-        const curNames=new Set(st.people.map(pp=>(pp.name||'').trim().toLowerCase()));
-        const known=this.knownPeople();
-        if(!ql || 'non assigné'.indexOf(ql)>=0) personMenu.push({ label:'Non assigné', initials:'', avatarStyle:'width:18px;height:18px;border-radius:50%;border:1.5px dashed var(--cbox);flex:none;', labelStyle:'font-size:12.5px;color:var(--text3);', checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(t.person===''?'':'visibility:hidden;'), style:mrow(t.person===''), onPick:(e)=>{ stop(e); this.updatePerson(t.id,''); this.stopPersonEdit(); } });
-        st.people.filter(pp=>pp.name.toLowerCase().indexOf(ql)>=0).forEach(pp=>{ const on=t.person===pp.id; personMenu.push({ label:pp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${pp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);'+(on?'font-weight:600;':''), checkStyle:`margin-left:auto;color:${accent};font-size:11px;`+(on?'':'visibility:hidden;'), style:mrow(on), onPick:(e)=>{ stop(e); this.updatePerson(t.id,pp.id); this.stopPersonEdit(); }, onDel:(e)=>{ stop(e); this.stopPersonEdit(); this.setState({personDelId:pp.id}); } }); });
-        Array.from(known.values()).filter(kp=>{ const k=(kp.name||'').trim().toLowerCase(); return !curNames.has(k) && kp.name.toLowerCase().indexOf(ql)>=0; }).forEach(kp=>{ personMenu.push({ label:kp.name, initials:'', avatarStyle:`width:10px;height:10px;border-radius:50%;background:${kp.color};flex:none;`, labelStyle:'font-size:12.5px;color:var(--text);', checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(kp.name,kp.color); this.updatePerson(t.id,id); this.stopPersonEdit(); } }); });
-        const exact=ql && known.has(ql);
-        if(q && !exact) personMenu.push({ label:'Créer « '+q+' »', initials:'＋', avatarStyle:`width:18px;height:18px;border-radius:50%;background:${aTint(fillA)};color:${accent};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;`, labelStyle:`font-size:12.5px;color:${accent};font-weight:500;`, checkStyle:'visibility:hidden;', style:mrow(false), onPick:(e)=>{ stop(e); const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } });
-      }
-      return {
-        id:t.id, rowStyle, title:t.title,
-        rowCls: 'ek-trow'+(effToday?' today':'')+(done?' is-done':''),
-        dueISO:t.due||'', dueText:du.text, dueColor:du.color,
-        dueSlotText: isRel ? this.formatDue(t.relance).text : du.text,
-        dueSlotColor: isRel ? (_relDue ? '#d8442b' : 'var(--muted)') : du.color,
-        onDueSlotClick:(e)=>{ stop(e); this.startEdit(t.id, isRel?'relance':'due'); },
-        isRel, done, effToday,
-        personId:t.person||'', personQuery:st.personQuery, personMenu,
-        hasPerson: !!p,
-        personName: p ? p.name : '',
-        titleStyle: 'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;' + (done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'),
-        statusLabel: done?'Terminée':sm.label, statusDot: done?'#8fc02e':sm.dot, statusOptions,
-        edTitle:isEd('title'), showTitle:!isEd('title'),
-        edDue:isEd('due'), showDue:!isEd('due'),
-        edPerson:isEd('person'), showPerson:!isEd('person'),
-        edStatus:isEd('status'),
-        relanceISO:t.relance||'', edRelance:isEd('relance'),
-        onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
-        noteHas: !!(t.notes||'').trim(),
-        hasSubs: subs.length>0,
-        subCount: subs.filter(s=>s.done).length+'/'+subs.length,
-        subsOpen: !!(st.openSubs||{})[t.id],
-        chevCls: 'ek-chev'+((st.openSubs||{})[t.id]?' open':''),
-        onToggleSubs:(e)=>{ stop(e); this.setState(s=>({ openSubs:{...(s.openSubs||{}), [t.id]:!(s.openSubs||{})[t.id]}, subDraft:'' })); },
-        subs: subs.map(sb=>({ id:sb.id, txt:sb.text, cls:'ek-subrow'+(sb.done?' done':''), ckCls:'ek-sck'+(sb.done?' on':''),
-          onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); },
-          onDelete:(e)=>{ stop(e); this.delCheck(t.id, sb.id); } })),
-        subDraft: st.subDraft||'',
-        onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
-        onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:''}); e.target.blur(); } },
-        stop,
-        today: !!t.today,
-        tglCls:'ek-tgl'+(effToday?' on':''),
-        tglTitle: (effToday&&!t.today) ? "Échéance atteinte — dans Aujourd'hui jusqu'à résolution" : (t.today?"Retirer d'aujourd'hui":"Ajouter à aujourd'hui"),
-        onToggleToday:(e)=>{ stop(e); this.toggleToday(t.id); },
-        onOpenDetail:(e)=>{ stop(e); this.toggleSelect(t.id); },
-        onCheck: (e)=>{ stop(e); this.toggleDone(t.id); },
-        onDelete: (e)=>{ stop(e); this.askDelete(t.id); },
-        onTitleClick: (e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
-        onTitleDbl: (e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
-        onTitleInput: (e)=>this.updateTitle(t.id, e.target.value),
-        onTitleKey: (e)=>{ stop(e); if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } if(e.key==='Escape'){ e.target.blur(); } },
-        onTitleBlur: ()=>this.stopEdit(),
-        onDueChange: (e)=>{ this.updateDue(t.id, e.target.value); this.stopEdit(); },
-        onDueBlur: ()=>this.stopEdit(),
-        onPersonClick: (e)=>{ stop(e); this.startPersonEdit(t.id); },
-        onPersonQuery: (e)=>this.setPersonQuery(e.target.value),
-        onPersonKey: (e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const hit=st.people.find(pp=>pp.name.toLowerCase()===ql) || st.people.find(pp=>pp.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPerson(q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
-        onStatusClick: (e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
-        onDragStart: (e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({dragId:t.id}); },
-        onDragOver: (e)=>{ e.preventDefault(); },
-        onDragEnter: (e)=>{ e.preventDefault(); if(!st.dragCatId && st.dragOverId!==t.id) this.setState({dragOverId:t.id}); },
-        onDrop: (e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderAdopt(st.dragId, t.id, 'status', t); this.setState({dragOverGrp:null}); },
-        onDragEnd: ()=>this.setState({dragId:null,dragOverId:null,dragOverGrp:null}),
-      };
-    };
 
-    const grpHeaderStyle = `display:flex;align-items:center;gap:8px;height:${D.grpH+6}px;padding:0 ${D.padX}px;background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;`;
-    const grpNameStyle = `font-family:'Nunito',sans-serif;font-size:${Math.round((D.grpFs-1)*10)/10}px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);`;
-    const grpCountStyle = `font-family:'Nunito',sans-serif;font-size:10px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:1px 7px;`;
-    const addRowStyle = `display:flex;align-items:center;gap:8px;height:${D.addH}px;padding:0 ${D.padX}px;background:var(--soft);border-bottom:1px solid var(--divider);`;
-    const mkGroup = (gkey, id, name, filterFn, preset, marker)=>{
-      const list = filtered.filter(filterFn);
-      if(id==='done') list.sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
-      const collapsed = !!st.collapsed[gkey];
-      const labelType = groupBy==='cat' ? 'cat' : (groupBy==='person' ? 'person' : null);
-      const editable = !!labelType && id!=='';
-      return { key:gkey, id, name, count:list.length, open:!collapsed, caret: collapsed?'▸':'▾',
-        headerStyle:grpHeaderStyle, nameStyle:grpNameStyle, countStyle:grpCountStyle, marker:marker||accent, addRowStyle, addHint:'Ajouter dans '+name+'…',
-        tasks:list.map(vm),
-        editable, editing: editable && labelEditing(labelType, id) && !le.rail,
-        onNameClick: editable ? (e)=>{ stop(e); this.startLabelEdit(labelType, id); } : null,
-        onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit(labelType, id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
-        onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type===labelType&&cur.id===id) this.commitLabelEdit(labelType, id, e.target.value); },
-        onToggle:()=>this.toggleCollapse(gkey),
-        onAddKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
-        onAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ this.addTaskPreset(preset,v); e.target.value=''; } },
-        catDraggable: groupBy==='cat' && id!=='',
-        dropMark: (groupBy==='cat' && id!=='' && st.dragCatId && st.dragOverCatId===id && st.dragCatId!==id) ? `box-shadow:inset 0 2px 0 ${accent};` : '',
-        onGroupDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({dragCatId:id}); },
-        onGroupDragEnter:(e)=>{ if(st.dragCatId && groupBy==='cat' && id!=='' && st.dragCatId!==id){ e.preventDefault(); if(st.dragOverCatId!==id) this.setState({dragOverCatId:id}); } },
-        onGroupDragEnd:()=>this.setState({dragCatId:null,dragOverCatId:null}),
-        onDragOver:(e)=>{ e.preventDefault(); },
-        onDrop:(e)=>{ e.preventDefault();
-          if(st.dragCatId){ if(groupBy==='cat' && id!=='') this.moveCategory(st.dragCatId, id); else this.setState({dragCatId:null,dragOverCatId:null}); return; }
-          if(groupBy==='cat') this.reorder(st.dragId,null,id);
-          else if(groupBy==='status') this.setStatusByDrag(st.dragId,id);
-          else if(groupBy==='person'){ if(st.dragId){ this.updatePerson(st.dragId,id); this.setState({dragId:null,dragOverId:null}); } }
-        },
-      };
-    };
-    // Groupes par statut (maquette Ekopak) : En cours → À faire → En attente → Terminées. « Terminées » masqué si vide (tri par doneAt desc, fait dans mkGroup). L'onglet de statut (projStatusTab, transient) masque les autres groupes.
-    const projTab = st.projStatusTab || 'all';
-    let groups = ['doing','todo','wait','done'].map(k=> mkGroup('st:'+k, k, k==='done'?'Terminées':STATUS[k].label, t=> k==='done' ? t.status==='done' : t.status===k, {status:k}, STATUS[k].dot));
-    groups = groups.filter(g=> projTab==='all' ? !(g.id==='done' && g.count===0) : g.id===projTab);
-
-    const cnt = (pred)=> st.tasks.filter(pred).length;
-    const statusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot,
-      active:!!f.status[k], count:cnt(t=>t.status===k),
-      boxStyle:this.facetBox(allOn||!!f.status[k], accent), check:(allOn||!!f.status[k])?'✓':'',
-      onToggle:()=>this.toggleFilter('status',k) }));
-    const catFacets = st.categories.slice().sort(byName).map(c=>({ id:c.id, label:c.name, active:!!f.cat[c.id], count:cnt(t=>t.cat===c.id),
-      boxStyle:this.facetBox(allOn||!!f.cat[c.id], accent), check:(allOn||!!f.cat[c.id])?'✓':'',
-      editing: labelEditing('cat', c.id) && le.rail,
-      menuOpen: st.catMenuId===c.id,
-      onMenuToggle:(e)=>{ stop(e); this.toggleCatMenu(c.id); },
-      onRename:(e)=>{ stop(e); this.setState({ catMenuId:null, labelEdit:{type:'cat', id:c.id, rail:true} }); },
-      onDelete:(e)=>{ stop(e); this.deleteCategory(c.id); },
-      onToggle:()=>this.toggleFilter('cat',c.id),
-      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('cat', c.id, true); },
-      onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('cat', c.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
-      onLabelBlur:(e)=>{} }));
-    const personFacets = st.people.slice().sort(byName).map(p=>({ id:p.id, label:p.name,
-      avatarStyle:`width:9px;height:9px;border-radius:50%;background:${p.color};flex:none;`, active:!!f.person[p.id], count:cnt(t=>t.person===p.id),
-      boxStyle:this.facetBox(allOn||!!f.person[p.id], accent), check:(allOn||!!f.person[p.id])?'✓':'',
-      editing: labelEditing('person', p.id) && le.rail,
-      menuOpen: st.personMenuId===p.id,
-      onMenuToggle:(e)=>{ stop(e); this.togglePersonMenu(p.id); },
-      onRename:(e)=>{ stop(e); this.setState({ personMenuId:null, labelEdit:{type:'person', id:p.id, rail:true} }); },
-      onDelete:(e)=>{ stop(e); this.deletePerson(p.id); },
-      onToggle:()=>this.toggleFilter('person',p.id),
-      onLabelClick:(e)=>{ stop(e); this.startLabelEdit('person', p.id, true); },
-      onLabelKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('person', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
-      onLabelBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='person'&&cur.id===p.id) this.commitLabelEdit('person', p.id, e.target.value); } }));
 
     // ---- Vue Aujourd'hui (liste globale, ordre propre) ----
     const tvm = (entry, gkey)=>{
       const t = entry.task; const done = t.status==='done'; const sm = STATUS[t.status];
+      const _subs = Array.isArray(t.checklist)?t.checklist:[];
       const pp = (entry.people||[]).find(x=>x.id===t.person) || null;
       // Couleurs d'échéance Ekopak, fidèles à la maquette : seul « Aujourd'hui » est en light-blue, le dépassé en corail, tout le reste (Demain, futur, vide) en gris.
       const _duRaw = this.formatDue(t.due);
@@ -3762,6 +3624,7 @@ class Flux extends React.Component {
       }
       return {
         id:t.id, title:t.title, projName:entry.projName,
+        projNumber:entry.projNumber||'', projColor:entry.projColor||'#0f3f93',
         projId:entry.projId, isInbox:entry.projId==='__inbox', edProj:isEd('proj'), projQuery:st.projPickQuery, projMenu,
         onProjClick:(e)=>{ stop(e); if(isEd('proj')) this.stopEdit(); else this.setState({ editing:{id:t.id,field:'proj'}, projPickQuery:'' }); },
         onProjQuery:(e)=>this.setProjPickQuery(e.target.value),
@@ -3773,16 +3636,23 @@ class Flux extends React.Component {
         onDueSlotClick:(e)=>{ stop(e); this.startEdit(t.id, isRel?'relance':'due'); },
         statusLabel:sm.label, statusDot: done?'#8fc02e':sm.dot, statusOptions,
         hasPerson:!!pp, personName:pp?pp.name:'', personQuery:st.personQuery, personMenu,
-        noteHas: !!(t.notes||'').trim(),
+        noteHas: !!(t.notes||'').trim() || _subs.some(s=>(s.note||'').trim()),
+        hasSubs: _subs.length>0, subCount: _subs.filter(s=>s.done).length+'/'+_subs.length,
+        subsOpen: !!(st.openSubs||{})[t.id], chevCls: 'ek-chev'+((st.openSubs||{})[t.id]?' open':''),
+        onToggleSubs:(e)=>{ stop(e); this.setState(s=>({ openSubs:{...(s.openSubs||{}), [t.id]:!(s.openSubs||{})[t.id]}, subDraft:'' })); },
+        subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':'')+(st.subDragOverId===sb.id?' dragover':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.delCheck(t.id, sb.id); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({subDragId:sb.id}); }, onDragOver:(e)=>{ e.preventDefault(); e.stopPropagation(); if(st.subDragOverId!==sb.id) this.setState({subDragOverId:sb.id}); }, onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderCheck(t.id, st.subDragId, sb.id); }, onDragEnd:(e)=>{ e.stopPropagation(); this.setState({subDragId:null,subDragOverId:null}); } })),
+        subDraft: st.subDraft||'', onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
+        onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:''}); e.target.blur(); } },
         titleStyle:'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;'+(done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'),
         edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
         isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
         onRelanceClick:(e)=>{ stop(e); this.startEdit(t.id,'relance'); }, onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
-        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')||isEd('proj')),
+        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')||isEd('proj')||isEd('relance')),
         rowStyle, stop,
-        onCheck:(e)=>{ stop(e); this.toggleDoneAny(t.id); },
+        onCheck:(e)=>{ stop(e); this.toggleDoneAnyUndo(t.id); },
         today:!!t.today,
-        onUnmark:(e)=>{ stop(e); this.setState({ todayUnmarkId:t.id }); },
+        onUnmark:(e)=>{ stop(e); this.unmarkTodayUndo(t.id); },
+        onMark:(e)=>{ stop(e); this.toggleToday(t.id); },
         onOpenDetail:(e)=>{ stop(e); this.toggleSelect(t.id); },
         onTitleClick:(e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
         onTitleDbl:(e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
@@ -3797,59 +3667,39 @@ class Flux extends React.Component {
         onPersonKey:(e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const ppl=entry.people||[]; const hit=ppl.find(x=>x.name.toLowerCase()===ql) || ppl.find(x=>x.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPersonTo(entry.projId,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
         onStatusClick:(e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
         onDelete:(e)=>{ stop(e); this.askDelete(t.id); },
-        onDragStart:(e)=>{ e.dataTransfer.effectAllowed='move'; this.setState({todayDragId:t.id}); },
-        onDragEnter:(e)=>{ e.preventDefault(); if(st.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
-        onDragOver:(e)=>{ e.preventDefault(); },
-        onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.dropTodayOnRow(st.todayDragId, t.id, grpKey); },
-        onDragEnd:()=>this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}),
+        onDragStart:(e)=>{ this._todayDrag=t.id; e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain', t.id); }catch(_){} const id=t.id; requestAnimationFrame(()=>{ if(this._todayDrag===id) this.setState({todayDragId:id}); }); },
+        onDragEnter:(e)=>{ e.preventDefault(); if(this.state.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
+        onDragOver:(e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; },
+        onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.dropTodayOnRow(this._todayDrag||st.todayDragId, t.id, grpKey); },
+        onDragEnd:()=>{ this._todayDrag=null; this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}); },
       };
     };
     const todayEntriesAll = this.todayTasks(st);
     const tf = st.todayFilters || {status:{},proj:{},person:{}};
     const tfS=Object.keys(tf.status||{}), tfP=Object.keys(tf.proj||{}), tfN=Object.keys(tf.person||{});
-    const todayAnyFilter = !!(tfS.length||tfP.length||tfN.length);
-    // Onglets de statut (mono-sélection) de l'écran Aujourd'hui : Tous / En cours / À faire / En attente.
-    const _todayTab = tfS.length===1 ? tfS[0] : 'all';
-    const todayStatusTabs = [{k:'all',l:'Tous'},{k:'doing',l:'En cours'},{k:'todo',l:'À faire'},{k:'wait',l:'En attente'}].map(o=>({ k:o.k, label:o.l, active: o.k==='all' ? !tfS.length : (_todayTab===o.k) }));
-    const _dNow = new Date(); const _dLong = _dNow.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}); const todayDateLong = _dLong.charAt(0).toUpperCase()+_dLong.slice(1);
     const entryPName = e => { const pp=(e.people||[]).find(x=>x.id===e.task.person); return pp?(pp.name||'').trim().toLowerCase():''; };
     const tMatch = e => (!tfS.length||tfS.indexOf(e.task.status)>=0) && (!tfP.length||tfP.indexOf(e.projId)>=0) && (!tfN.length||tfN.indexOf(entryPName(e))>=0);
     const _relSort=(a,b)=>{ const ad=a.task.relance||'', bd=b.task.relance||''; return ad===bd?0:(ad<bd?-1:1); };
     const _flatToday=(e)=>{ const r=tvm(e,'relance'); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); };
     const _dragToday = !!st.todayDragId;
-    // ▼ todayFocus — zone « Focus du jour » (max 3) : tâches épinglées par drag & drop (flag focus, persisté), retirées des groupes de statut.
-    const _focusTotal = todayEntriesAll.filter(e=>e.task.focus).length;
-    const _focusList = todayEntriesAll.filter(e=>e.task.focus).filter(tMatch).map(e=>tvm(e,'focus'));
-    const todayFocus = {
-      items:_focusList, empty:_focusList.length===0, label:_focusTotal+' / 3', full:_focusTotal>=3,
-      show: _focusList.length>0 || _dragToday,
-      hi: st.todayDragOverKey==='focus',
-      onOver:(e)=>{ e.preventDefault(); if(this.state.todayDragOverKey!=='focus') this.setState({todayDragOverKey:'focus'}); },
-      onDrop:(e)=>{ e.preventDefault(); this.applyTodayDrop('focus'); },
-    };
     // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente. Les "terminé" sont exclues par todayTasks (auto-décochées). Pendant un drag, les groupes vides de l'onglet actif restent visibles comme zones de dépôt.
-    const _relList = todayEntriesAll.filter(e=>e.relanceDue && !e.task.focus).filter(tMatch).slice().sort(_relSort).map(_flatToday);
-    const _statusList = k => todayEntriesAll.filter(e=>!e.relanceDue && !e.task.focus && e.task.status===k).filter(tMatch).map(e=>tvm(e,k));
-    const _grpInTab = k => _todayTab==='all' ? true : (k==='relance' ? _todayTab==='wait' : _todayTab===k);
+    const _relList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
+    const _statusList = k => todayEntriesAll.filter(e=>!e.relanceDue && e.task.status===k).filter(tMatch).map(e=>tvm(e,k));
+    const _grpInTab = k => { const pt = st.projStatusTab||'all'; return pt==='all' ? true : (k==='relance' ? pt==='wait' : pt===k); };  // vue Aujourd'hui (dans Projet) : filtrée par les onglets de statut Projet
     const todayGroups = [
       { key:'relance', label:'À relancer' },
       { key:'doing',   label:STATUS.doing.label },
       { key:'todo',    label:STATUS.todo.label },
       { key:'wait',    label:STATUS.wait.label },
-    ].map(g=> Object.assign({}, g, {
-      items: g.key==='relance' ? _relList : _statusList(g.key),
+    ].map(g=> { const items = g.key==='relance' ? _relList : _statusList(g.key); return Object.assign({}, g, {
+      items,
+      // Groupe toujours monté (comme l'écran Projet) ; masqué en CSS s'il est vide hors drag. Évite l'insertion DOM au dragstart qui annule le drag natif.
+      hidden: items.length===0 && !_dragToday,
       hi: st.todayDragOverKey===g.key,
       onOver:(e)=>{ e.preventDefault(); if(this.state.todayDragOverKey!==g.key) this.setState({todayDragOverKey:g.key}); },
       onDrop:(e)=>{ e.preventDefault(); this.applyTodayDrop(g.key); },
-    })).filter(g=> g.items.length>0 || (_dragToday && _grpInTab(g.key)) );
-    const todayList = _focusList.concat(todayGroups.reduce((acc,g)=>acc.concat(g.items),[]));
-    // Facettes (comptées sur l'ensemble non filtré) — Statut / Projet / Personne (par nom, cross-project).
-    const todayStatusFacets = SORDER.filter(k=>k!=='done').map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot, active:!!tf.status[k], count:todayEntriesAll.filter(e=>e.task.status===k).length, boxStyle:this.facetBox(!!tf.status[k],accent), check:tf.status[k]?'✓':'', onToggle:()=>this.toggleTodayFilter('status',k) }));
-    const _projWithToday=[]; todayEntriesAll.forEach(e=>{ if(_projWithToday.indexOf(e.projId)<0) _projWithToday.push(e.projId); });
-    const todayProjFacets = (st.projects||[]).filter(p=>p.id!=='__inbox' && _projWithToday.indexOf(p.id)>=0).slice().sort(byName).map(p=>({ id:p.id, label:p.name, active:!!tf.proj[p.id], count:todayEntriesAll.filter(e=>e.projId===p.id).length, boxStyle:this.facetBox(!!tf.proj[p.id],accent), check:tf.proj[p.id]?'✓':'', onToggle:()=>this.toggleTodayFilter('proj',p.id) }));
-    const _nameMeta=new Map(); todayEntriesAll.forEach(e=>{ const pp=(e.people||[]).find(x=>x.id===e.task.person); if(pp){ const k=(pp.name||'').trim().toLowerCase(); if(k&&!_nameMeta.has(k)) _nameMeta.set(k,{name:pp.name,color:pp.color}); } });
-    const todayPersonFacets = Array.from(_nameMeta.entries()).map(([k,meta])=>({ id:k, label:meta.name, active:!!tf.person[k], count:todayEntriesAll.filter(e=>entryPName(e)===k).length, boxStyle:this.facetBox(!!tf.person[k],accent), check:tf.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${meta.color};flex:none;`, onToggle:()=>this.toggleTodayFilter('person',k) })).sort((a,b)=>(a.label||'').localeCompare(b.label||'','fr',{sensitivity:'base'}));
-    const todayAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(todayAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
+    }); }).filter(g=> _grpInTab(g.key) );
+    const todayList = todayGroups.reduce((acc,g)=>acc.concat(g.items),[]);
 
     const staskRes = st.selectedId ? this.taskByIdAny(st.selectedId) : null;
     const stask = staskRes ? staskRes.task : null;
@@ -3857,14 +3707,16 @@ class Flux extends React.Component {
     if(stask){
       const _selCat = (staskRes.categories||[]).find(c=>c.id===stask.cat);
       sel = { id:stask.id, title:stask.title, catLabel:_selCat?_selCat.name:'Sans catégorie', notes:stask.notes,
+        subs: (Array.isArray(stask.checklist)?stask.checklist:[]).map(sb=>({ id:sb.id, txt:sb.text, done:!!sb.done, note:sb.note||'', hasNote:!!(sb.note||'').trim(), panelOpen: st.panelSubId===sb.id, onPanelToggle:()=>this.setState(s=>({panelSubId:s.panelSubId===sb.id?null:sb.id})), onNoteChange:(e)=>this.updateCheckNote(stask.id, sb.id, e.target.value) })),
+        projId: staskRes.projId||'',
+        projOptions: (st.projects||[]).filter(p=>p.id!=='__inbox').slice().sort(byName).map(p=>({ id:p.id, name:p.name, number:p.number||'' })),
+        onMoveProj:(e)=>this.moveTaskToProject(stask.id, e.target.value),
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
         onTitleEdit:(e)=>this.updateTitle(stask.id, e.target.value),
         onDelete:()=>this.askDelete(stask.id) };
     }
     const confirmRes = st.confirmId ? this.taskByIdAny(st.confirmId) : null;
     const confirmTask = confirmRes ? confirmRes.task : null;
-    const _unmarkRes = st.todayUnmarkId ? this.taskByIdAny(st.todayUnmarkId) : null;
-    const _unmarkTask = _unmarkRes ? _unmarkRes.task : null;
     const _personDel = st.personDelId ? st.people.find(pp=>pp.id===st.personDelId) : null;
 
     // Sélecteur de projet (combobox recherche + créer-si-absent, façon picker Personne).
@@ -3876,7 +3728,7 @@ class Flux extends React.Component {
     const _projDays = dl => /^\d{4}-\d{2}-\d{2}$/.test(dl||'') ? Math.round((new Date(dl+'T00:00:00')-_allT0)/86400000) : Infinity;
     const _projDeadlineSort = (a,b)=>{ const da=_projDays(a.deadline), db=_projDays(b.deadline); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
     const projList = (st.projects||[]).filter(p=> p.id!=='__inbox' && p.name.toLowerCase().indexOf(pql)>=0)
-      .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col, dlCls:projDayBadge(p.deadline).cls,
+      .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col, dlCls:projDayBadge(p.deadline).cls,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
         confirmDel: st.projDelId===p.id,
@@ -3887,28 +3739,17 @@ class Flux extends React.Component {
         onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('proj', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
         onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }));
     const allMode = !!st.allMode;
-    const af = st.allFilters || {status:{},cat:{},person:{}};
-    const afS=Object.keys(af.status||{}), afC=Object.keys(af.cat||{}), afP=Object.keys(af.person||{});
-    const allAnyFilter = !!(afS.length||afC.length||afP.length);
-    const _catNameIn=(cats,catId)=>{ const c=(cats||[]).find(c=>c.id===catId); return c?(c.name||'').trim():''; };
-    const _personNameIn=(ppl,pid)=>{ const x=(ppl||[]).find(x=>x.id===pid); return x?(x.name||'').trim():''; };
-    const _allMatch=(t,cats,ppl)=> (!afS.length||afS.indexOf(t.status)>=0) && (!afC.length||afC.indexOf(_catNameIn(cats,t.cat).toLowerCase())>=0) && (!afP.length||afP.indexOf(_personNameIn(ppl,t.person).toLowerCase())>=0);
-    const _allStatusCount={}; const _allCatMeta=new Map(); const _allPersonMeta=new Map(); let allTotal=0;
-    (st.projects||[]).forEach(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]);
-      (tasks||[]).forEach(t=>{ allTotal++; _allStatusCount[t.status]=(_allStatusCount[t.status]||0)+1;
-        const cn=_catNameIn(cats,t.cat); if(cn){ const k=cn.toLowerCase(); const m=_allCatMeta.get(k)||{name:cn,count:0}; m.count++; _allCatMeta.set(k,m); }
-        const pn=_personNameIn(ppl,t.person); if(pn){ const k=pn.toLowerCase(); const px=(ppl||[]).find(x=>x.id===t.person); const m=_allPersonMeta.get(k)||{name:pn,color:px?px.color:'#7c8aa5',count:0}; m.count++; _allPersonMeta.set(k,m); } });
-    });
-    const allStatusFacets = SORDER.map(k=>({ id:k, label:STATUS[k].label, dot:STATUS[k].dot, count:_allStatusCount[k]||0, active:!!af.status[k], boxStyle:this.facetBox(!!af.status[k],accent), check:af.status[k]?'✓':'', onToggle:()=>this.toggleAllFilter('status',k) }));
-    const allCatFacets = Array.from(_allCatMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.cat[k], boxStyle:this.facetBox(!!af.cat[k],accent), check:af.cat[k]?'✓':'', onToggle:()=>this.toggleAllFilter('cat',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
-    const allPersonFacets = Array.from(_allPersonMeta.entries()).map(([k,m])=>({ id:k, label:m.name, count:m.count, active:!!af.person[k], boxStyle:this.facetBox(!!af.person[k],accent), check:af.person[k]?'✓':'', avatarStyle:`width:9px;height:9px;border-radius:50%;background:${m.color};flex:none;`, onToggle:()=>this.toggleAllFilter('person',k) })).sort((a,b)=>a.label.localeCompare(b.label,'fr',{sensitivity:'base'}));
-    const allAllStyle = 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(allAnyFilter?'color:var(--text2);':`background:${aTint(fillA)};color:${accent};`);
-    const allGroups = (st.projects||[]).map(p=>{ const isCur=p.id===st.currentProjectId; const tasks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); const cats=isCur?st.categories:(p.categories||[]); const dl=projDayBadge(p.deadline); const ftasks=(tasks||[]).filter(t=>_allMatch(t,cats,ppl)); const rows=ftasks.map(tk=>{ const r=tvm({task:tk, projId:p.id, projName:p.name, people:ppl}); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); }); return { projId:p.id, name:p.name, count:ftasks.length, dlJ:dl.j, dlCol:dl.col, dlCls:dl.cls, days:_projDays(p.deadline), rows }; }).filter(g=> (allAnyFilter ? g.count>0 : true) && !(g.projId==='__inbox' && g.count===0)).sort((a,b)=>{ if(a.days!==b.days) return a.days-b.days; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); });
     const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
 
+    // ▼ projTaskGroups (vue Tâches unifiée) — toutes les tâches du périmètre (tous projets, ou projet sélectionné via le sélecteur), lignes façon Aujourd'hui (nom du projet devant, `tvm`/`renderTodayRow`), groupées par statut. Filtré par les onglets de statut (projStatusTab).
+    const _taskScopeProjects = st.allMode ? (st.projects||[]) : (st.projects||[]).filter(p=> p.id===st.currentProjectId);
+    const _taskEntries = _taskScopeProjects.flatMap(p=>{ const isCur=p.id===st.currentProjectId; const tks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); return (tks||[]).map(tk=> ({ task:tk, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people:ppl })); });
+    const _projTab2 = st.projStatusTab || 'all';
+    const _taskPerson = (!st.allMode && st.projPersonFilter) ? st.projPersonFilter : '';
+    const projTaskGroups = [{ key:'doing', label:STATUS.doing.label },{ key:'todo', label:STATUS.todo.label },{ key:'wait', label:STATUS.wait.label },{ key:'done', label:'Terminées' }].map(g=>{ let list=_taskEntries.filter(e=> e.task.status===g.key && (!_taskPerson || e.task.person===_taskPerson)); if(g.key==='done') list=list.slice().sort((a,b)=>(b.task.doneAt||0)-(a.task.doneAt||0)); const items=list.map(e=>{ const r=tvm(e, g.key); const tid=e.task.id; return Object.assign({}, r, { onDrop:(ev)=>{ ev.preventDefault(); ev.stopPropagation(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, tid, g.key); } }); }); return Object.assign({}, g, { items, hidden: (_projTab2==='all') ? (items.length===0 && !(!!st.todayDragId && g.key!=='done')) : (g.key!==_projTab2), hi: st.todayDragOverKey===g.key, onOver:(e)=>{ e.preventDefault(); if(this.state.todayDragOverKey!==g.key) this.setState({todayDragOverKey:g.key}); }, onDrop:(e)=>{ e.preventDefault(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, null, g.key); } }); });
+
     return {
-      allMode, allGroups, onSelectAllProjects:()=>this.setState({allMode:true, allFilters:{status:{},cat:{},person:{}}, projOpen:false, projQuery:'', selectedId:null}),
-      allStatusFacets, allCatFacets, allPersonFacets, allTotal, allAnyFilter, allAllStyle, onClearAllFilters:()=>this.clearAllFilters(),
+      allMode, onSelectAllProjects:()=>this.setState({allMode:true, allFilters:{status:{},cat:{},person:{}}, projOpen:false, projQuery:'', selectedId:null}),
       theme, accent,
       planning: !!this.props.planning, projView: (st.projView==='planning')?'infos':(st.projView||'todo'),
       planSpan: st.planSpan||92, onSetSpan:(d)=>this.setPlanSpan(d),
@@ -3930,15 +3771,8 @@ class Flux extends React.Component {
       projDeadlineCls: curProj?projDayBadge(curProj.deadline).cls:'',
       projTodayCount: st.allMode ? todayEntriesAll.length : todayEntriesAll.filter(e=>e.projId===st.currentProjectId).length,
       projNotes: curProj ? (curProj.notes||'') : '',
-      projSteps: curProj ? (curProj.steps||[]).map(s=>({ id:s.id, name:s.name||'', date:s.date||'' })) : [],
       onSetProjView:(vw)=>this.setProjView(vw),
-      onProjDeadline:(e)=>this.setProjDeadline(e.target.value),
       onProjNotes:(e)=>this.setProjNotes(e.target.value),
-      onAddStep:()=>this.addProjStep(),
-      onStepName:(id,e)=>this.updateProjStep(id,{name:e.target.value}),
-      onStepDate:(id,e)=>this.updateProjStep(id,{date:e.target.value}),
-      onDelStep:(id)=>this.delProjStep(id),
-      stepEditId: st.stepEditId||null,
       projEdit: {
         onAddStep:(pid)=>this.addProjStepDatedFor(pid),
         onStepEdit:(id)=>this.setStepEdit(id),
@@ -3962,6 +3796,14 @@ class Flux extends React.Component {
       },
       onOpenProj:(pid)=>this.openProjectPlanning(pid),
       projName: curProj?curProj.name:'', hasProject: !!curProj,
+      projNumber: curProj?(curProj.number||''):'', projColor: curProj?(curProj.color||accent):accent, projNumEditing: !!curProj && !!st.projNumEdit,
+      onProjNumToggle:(e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); this.setState(s=>({ projNumEdit:!s.projNumEdit })); },
+      onProjNumKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.setProjNumber(st.currentProjectId, e.target.value); this.setState({projNumEdit:false}); } else if(e.key==='Escape'){ this.setState({projNumEdit:false}); } },
+      onProjNumBlur:(e)=>{ this.setProjNumber(st.currentProjectId, e.target.value); this.setState({projNumEdit:false}); },
+      projNameEditing: !!curProj && !!st.projNameEdit,
+      onProjNameToggle:(e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); this.setState(s=>({ projNameEdit:!s.projNameEdit })); },
+      onProjNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.renameProject(st.currentProjectId, e.target.value); this.setState({projNameEdit:false}); } else if(e.key==='Escape'){ this.setState({projNameEdit:false}); } },
+      onProjNameBlur:(e)=>{ this.renameProject(st.currentProjectId, e.target.value); this.setState({projNameEdit:false}); },
       projOpen: st.projOpen, projQuery: st.projQuery, projList, projCreate: !!pq && !projExact,
       onProjToggle:()=>this.setState(s=>({ projOpen:!s.projOpen, projQuery:'', npOpen:false, projDelId:null })),
       onProjQuery:(e)=>this.setState({ projQuery:e.target.value }),
@@ -3969,123 +3811,23 @@ class Flux extends React.Component {
       onProjCreate:(e)=>{ stop(e); const q=(this.state.projQuery||'').trim(); if(q) this.createProject(q); },
       headerStyle:`position:sticky;top:0;z-index:3;display:flex;flex-wrap:nowrap;align-items:center;height:${D.hdrH}px;padding:0 ${D.padX}px;background:var(--rail);border-bottom:1px solid var(--line);font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;`,
       listMinW: 720 + 2*D.padX,
-      onQuickAdd:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
-      onQuickAddBlur:(e)=>{ const v=e.target.value.trim(); if(v){ const ac=Object.keys(st.filters.cat); this.addTask(ac.length===1?ac[0]:'', v); e.target.value=''; } },
-      groups, statusFacets, catFacets, personFacets,
-      todayView: st.todayView, todayList, todayGroups, todayFocus, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0, todayAnyFilter, todayAllStyle,
-      todayStatusFacets, todayProjFacets, todayPersonFacets, todayStatusTabs, todayDateLong,
+      projPersonFilter: _projPF,
+      projPersonOptions: st.people.slice().sort(byName).map(pp=>({ id:pp.id, label:pp.name, color:pp.color, count: st.tasks.filter(t=>t.person===pp.id).length })),
+      onSetProjPerson:(pid)=>this.setState({ projPersonFilter:pid, filterOpen:null }),
+      todayView: st.todayView, todayList, todayGroups, projTaskGroups, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0,
       hasPersonDel: !!_personDel, personDelName: _personDel?_personDel.name:'',
       onPersonDelCancel:()=>this.setState({personDelId:null}),
       onPersonDelOk:()=>{ const id=this.state.personDelId; this.setState({personDelId:null}); if(id) this.deletePerson(id); },
-      hasUnmark: !!_unmarkTask, unmarkTitle: _unmarkTask?_unmarkTask.title:'',
-      onUnmarkCancel:()=>this.setState({todayUnmarkId:null}),
-      onUnmarkOk:()=>{ const id=this.state.todayUnmarkId; this.setState({todayUnmarkId:null}); if(!id) return; const cur=this.taskByIdAny(id); if(!cur) return; if(cur.task.focus) this.patch(id,{focus:false}); if(cur.task.today) this.toggleToday(id); },
-      onSetTodayStatus:(k)=>this.setState(s=>({ todayFilters:{...(s.todayFilters||{status:{},proj:{},person:{}}), status: k==='all'?{}:{[k]:true} } })),
       onTodayQuickAdd:(e)=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } },
       onTodayQuickAddBlur:(e)=>{ const val=e.target.value.trim(); if(val){ this.addTodayTask(val); e.target.value=''; } },
       onClearTodayFilters:()=>this.clearTodayFilters(),
-      totalCount: st.tasks.length,
-      allViewStyle: 'display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:500;'+(showingAll?`background:${aTint(fillA)};color:${accent};`:'color:var(--text2);'),
-      onAllTasks:()=>this.toggleBulk(),
-      addingCat: st.addingCat,
-      onStartAddCat:()=>this.setState({addingCat:true}),
-      onAddCatKey:(e)=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) this.addCategory(v); } else if(e.key==='Escape'){ this.setState({addingCat:false}); } },
-      onAddCatBlur:(e)=>{ const v=e.target.value.trim(); if(v) this.addCategory(v); else this.setState({addingCat:false}); },
       hasSel: !!sel, sel: sel||{}, onCloseDetail:()=>this.setState({selectedId:null}),
       hasConfirm: !!confirmTask, confirmTitle: confirmTask?confirmTask.title:'',
       onCancelDelete:()=>this.cancelDelete(), onConfirmDelete:()=>this.confirmDelete(), stopModal:(e)=>stop(e),
+      undo: st.undo||null, onUndo:()=>this.doUndo(),
     };
   }
 
-  renderRow(t){
-    return (
-      <React.Fragment>
-        <div className={t.rowCls} data-task="1" style={css(t.rowStyle)} draggable={!t.edTitle}
-          onDragStart={t.onDragStart} onDragOver={t.onDragOver} onDragEnter={t.onDragEnter} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
-          <button className={t.chevCls} onClick={t.onToggleSubs} title="Sous-tâches">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
-          </button>
-          <span className={'ek-ck'+(t.done?' on':'')} onClick={t.onCheck} title={t.done?'Rouvrir la tâche':'Marquer comme terminée'}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
-          </span>
-          <span style={css('position:relative;flex:none;display:flex;')}>
-            <button className="ek-sdot" onClick={t.onStatusClick} title={t.statusLabel+' — changer le statut'}>
-              <span style={css('width:9px;height:9px;border-radius:50%;background:'+t.statusDot+';display:block;')}></span>
-            </button>
-            {t.edStatus &&
-              <div style={css('position:absolute;top:26px;left:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:45;')}>
-                {t.statusOptions.map(so=>
-                  <div className="stopt" key={so.key} onClick={so.onPick} style={css(so.style)}>
-                    <span style={css('width:9px;height:9px;border-radius:50%;background:'+so.dot+';flex:none;')}></span>
-                    {so.label}
-                    <span style={css(so.checkStyle)}>✓</span>
-                  </div>)}
-              </div>}
-            {t.edRelance &&
-              <div style={css('position:absolute;top:26px;left:0;min-width:204px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:9px;z-index:45;')}>
-                <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;")}>Date de relance</div>
-                <input autoFocus type="date" value={t.relanceISO} onChange={t.onRelanceChange} onBlur={t.onRelanceBlur} onClick={t.stop} style={css('width:100%;border:1.5px solid #c2cbd9;border-radius:8px;padding:6px 9px;font-size:12.5px;background:var(--panel);color:var(--text);outline:none;')} />
-              </div>}
-          </span>
-          {t.edTitle
-            ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
-            : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
-          {t.hasSubs && !t.edTitle &&
-            <button className="ek-subchip" onClick={t.onToggleSubs} title="Sous-tâches">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg>
-              {t.subCount}
-            </button>}
-          <span style={css('display:flex;align-items:center;gap:14px;flex:none;')}>
-            <span style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
-              {t.edDue
-                ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css('width:100%;font-size:11px;')} />
-                : <span onClick={t.onDueSlotClick} title={t.isRel?'Modifier la date de relance':'Modifier la date'} style={css("font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;border-radius:6px;padding:2px 4px;color:"+t.dueSlotColor+";")}>{t.dueSlotText}</span>}
-            </span>
-            <span style={css('width:128px;flex:none;position:relative;display:flex;')} onClick={t.onPersonClick} title="Modifier la personne assignée">
-              {t.edPerson
-                ? <React.Fragment>
-                    <input className="ied" data-edit="1" value={t.personQuery} onChange={t.onPersonQuery} onKeyDown={t.onPersonKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
-                    <div style={css('position:absolute;top:30px;right:0;min-width:196px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:40;max-height:228px;overflow:auto;')}>
-                      {t.personMenu.map((o,i)=>
-                        <div className="stopt" key={i} onClick={o.onPick} style={css(o.style)}>
-                          <span style={css(o.avatarStyle)}>{o.initials}</span>
-                          <span style={css(o.labelStyle)}>{o.label}</span>
-                          <span style={css(o.checkStyle)}>✓</span>
-                          {o.onDel && <button className="ek-pmx" onClick={o.onDel} title="Supprimer la personne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>}
-                        </div>)}
-                    </div>
-                  </React.Fragment>
-                : <span className={'ek-mchip'+(t.hasPerson?'':' none')}>
-                    <span style={css('overflow:hidden;text-overflow:ellipsis;')}>{t.hasPerson?t.personName:'Non assigné'}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-                  </span>}
-            </span>
-          </span>
-          <button className={'ek-x note'+(t.noteHas?' has':'')} onClick={t.onOpenDetail} title="Note">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg>
-          </button>
-          <button className={t.tglCls} onClick={t.onToggleToday} title={t.tglTitle}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
-          </button>
-          <button className="ek-x del" onClick={t.onDelete} title="Supprimer la tâche">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
-          </button>
-        </div>
-        {t.subsOpen &&
-          <div className="ek-subwrap">
-            {t.subs.map(s=>
-              <div key={s.id} className={s.cls}>
-                <span className={s.ckCls} onClick={s.onCheck}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
-                <span className="ek-stxt">{s.txt}</span>
-                <button className="ek-xsubdel" onClick={s.onDelete} title="Supprimer la sous-tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
-              </div>)}
-            <div className="ek-subrow"><input className="ek-subaddin" placeholder="+ Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} /></div>
-          </div>}
-      </React.Fragment>
-    );
-  }
-
-  // ===== Planning (vue d'ensemble des échéances) =====
   planGeo(list, opts){
     opts = opts || {};
     const st = this.state;
@@ -4252,25 +3994,6 @@ class Flux extends React.Component {
     );
   }
 
-  renderProjectInfos(v){
-    const lbl = "font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;";
-    return (
-      <div style={css('padding:16px 0 70px;')}>
-
-        {/* Timeline du projet — éditable directement */}
-        <div style={css('display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 16px;')}>
-          <span style={css(lbl)}>Échéance & étapes</span>
-          <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;')}>
-            {[{d:30,l:'1 mois'},{d:92,l:'3 mois'},{d:183,l:'6 mois'},{d:365,l:'1 an'}].map(o=>
-              <span key={o.d} onClick={()=>v.onSetSpan(o.d)} style={css('cursor:pointer;font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;'+(v.planSpan===o.d?('background:'+v.accent+';color:#fff;'):'color:var(--text2);'))}>{o.l}</span>)}
-          </div>
-        </div>
-        {this.renderTimeline(v.projPlanning, { minW:1000, edit:v.projEdit, empty:"" })}
-
-      </div>
-    );
-  }
-
   renderProjectNotes(v){
     const lbl = "font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;";
     return (
@@ -4281,18 +4004,31 @@ class Flux extends React.Component {
     );
   }
 
-  renderAllProjects(v){
+  // ▼ renderThinAdd — champ d'ajout fin (une ligne) en haut de la vue Tâches Projet et de la vue Aujourd'hui. Ajoute au statut de l'onglet de statut actif (À faire par défaut). kind:'proj' → tâche du projet courant ; kind:'today' → tâche du jour (inbox, today:true).
+  renderThinAdd(kind, v){
+    const tab = this.state.projStatusTab;
+    const addStatus = (tab && tab!=='all') ? tab : 'todo';
+    const submit = (el)=>{ const val=(el.value||'').trim(); if(!val) return; if(kind==='today') this.addTodayTaskStatus(addStatus, val); else this.addTaskPreset({status:addStatus}, val); el.value=''; };
     return (
-      <div style={css('min-width:860px;padding:22px 32px 40px;')}>
-        {(!v.allGroups || !v.allGroups.length)
-          ? <div style={css('padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Aucun projet.</div>
-          : v.allGroups.map(g=>
-            <div key={g.projId} className="ek-grp">
-              <div className="ek-glabel"><b>{g.name}</b>{g.dlJ && <span className={'ek-jbadge '+g.dlCls} title="Jours avant l'échéance">{g.dlJ}</span>}<span className="c">{g.count}</span></div>
-              {g.count===0
-                ? <div style={css('padding:9px 8px 11px 30px;font-size:12.5px;color:var(--muted);')}>Aucune tâche.</div>
-                : g.rows.map(t=> <React.Fragment key={t.id}>{this.renderTodayRow(t)}</React.Fragment>)}
-            </div>)}
+      <div style={css('flex:none;padding:8px 32px 2px;background:var(--bg);')}>
+        <div className="ek-thinadd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          <input onKeyDown={e=>{ if(e.key==='Enter'){ submit(e.target); } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} placeholder="Ajouter une tâche…" />
+        </div>
+      </div>
+    );
+  }
+
+  // ▼ renderProjTaskView — vue Tâches unifiée (checkpoint 2) : groupes par statut, lignes façon Aujourd'hui (renderTodayRow, nom du projet devant). Groupes vides masqués (révélés pendant un glisser). Ajout via le champ fin en haut.
+  renderProjTaskView(v){
+    return (
+      <div style={css('min-width:860px;padding:12px 32px 40px;')}>
+        {v.projTaskGroups.map(g=>
+          <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
+            <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>
+            {g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+            {!g.items.length && <div className="ek-droppad"></div>}
+          </div>)}
       </div>
     );
   }
@@ -4301,6 +4037,9 @@ class Flux extends React.Component {
     return (
       <div key={t.id} className="ek-trow" data-task="1" draggable={t.draggable} style={css(t.rowStyle)}
         onDragStart={t.onDragStart} onDragEnter={t.onDragEnter} onDragOver={t.onDragOver} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
+        <button className={t.chevCls} onClick={t.onToggleSubs} title="Sous-tâches">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
         <span className={'ek-ck'+(t.done?' on':'')} onClick={t.onCheck} title={t.done?'Rouvrir la tâche':'Marquer comme terminée'}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
         </span>
@@ -4323,26 +4062,41 @@ class Flux extends React.Component {
               <input autoFocus type="date" value={t.relanceISO} onChange={t.onRelanceChange} onBlur={t.onRelanceBlur} onClick={t.stop} style={css('width:100%;border:1.5px solid #c2cbd9;border-radius:8px;padding:6px 9px;font-size:12.5px;background:var(--panel);color:var(--text);outline:none;')} />
             </div>}
         </span>
+        <span style={css('width:158px;flex:none;position:relative;display:flex;align-items:center;justify-content:flex-start;')} onClick={t.onProjClick} title="Changer le projet de la tâche">
+          {t.edProj
+            ? <React.Fragment>
+                <input className="ied" data-edit="1" autoFocus value={t.projQuery} onChange={t.onProjQuery} onKeyDown={t.onProjKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
+                <div style={css('position:absolute;top:30px;left:0;min-width:220px;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:40;max-height:264px;overflow:auto;')}>
+                  {t.projMenu.map(o=>
+                    <div className="stopt" key={o.key} onClick={o.onPick} style={css(o.style)}>
+                      <span style={css(o.dotStyle)}></span>
+                      <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.label}</span>
+                      <span style={css(o.checkStyle)}>✓</span>
+                    </div>)}
+                  {!t.projMenu.length && <div style={css('padding:7px 9px;font-size:12px;color:var(--muted);')}>Aucun projet.</div>}
+                </div>
+              </React.Fragment>
+            : <span className="ek-projcell">
+                {!t.isInbox && <span className="ek-projbar" style={css('background:'+t.projColor)}></span>}
+                {t.isInbox
+                  ? <span className="ek-projadd">＋ projet</span>
+                  : (t.projNumber
+                      ? <span className="ek-projtwo">
+                          <span className="ek-projnum" style={css('color:'+t.projColor)}>{t.projNumber}</span>
+                          <span className="ek-projname">{t.projName}</span>
+                        </span>
+                      : <span className="solo">{t.projName}</span>)}
+              </span>}
+        </span>
         {t.edTitle
           ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
           : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
+        {t.hasSubs && !t.edTitle &&
+          <button className="ek-subchip" onClick={t.onToggleSubs} title="Sous-tâches">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+            {t.subCount}
+          </button>}
         <span style={css('display:flex;align-items:center;gap:14px;flex:none;')}>
-          <span style={css('width:148px;flex:none;position:relative;display:flex;justify-content:flex-end;')} onClick={t.onProjClick} title="Changer le projet de la tâche">
-            {t.edProj
-              ? <React.Fragment>
-                  <input className="ied" data-edit="1" autoFocus value={t.projQuery} onChange={t.onProjQuery} onKeyDown={t.onProjKey} onClick={t.stop} placeholder="Chercher ou créer…" style={css('width:100%;')} />
-                  <div style={css('position:absolute;top:30px;right:0;min-width:220px;max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:40;max-height:264px;overflow:auto;')}>
-                    {t.projMenu.map(o=>
-                      <div className="stopt" key={o.key} onClick={o.onPick} style={css(o.style)}>
-                        <span style={css(o.dotStyle)}></span>
-                        <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.label}</span>
-                        <span style={css(o.checkStyle)}>✓</span>
-                      </div>)}
-                    {!t.projMenu.length && <div style={css('padding:7px 9px;font-size:12px;color:var(--muted);')}>Aucun projet.</div>}
-                  </div>
-                </React.Fragment>
-              : <span style={css('font-size:12px;color:'+(t.isInbox?'#95a0b3':'var(--muted)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;')}>{t.isInbox?'＋ projet':t.projName}</span>}
-          </span>
           <span style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
             {t.edDue
               ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css('width:100%;font-size:11px;')} />
@@ -4374,72 +4128,77 @@ class Flux extends React.Component {
           ? <button className="ek-x today" onClick={t.onUnmark} title="Retirer d'aujourd'hui (sans supprimer)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path><path d="M9 14h6"></path></svg>
             </button>
-          : <span style={css('width:26px;flex:none;')}></span>}
+          : <button className="ek-x addtoday" onClick={t.onMark} title="Ajouter à aujourd'hui">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
+            </button>}
         <button className="ek-x del" onClick={t.onDelete} title="Supprimer la tâche">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
         </button>
       </div>
     );
   }
-
-  // Barre de filtres (Direction B) : remplace le rail latéral. mode = 'proj' | 'all' | 'today'
-  // ▼ renderProjTabs — barre d'onglets de l'écran Projet (thème clair Ekopak) : statut en onglets mono-sélection (transient projStatusTab) + segment Tâches | Planning | Notes.
-  renderProjTabs(v){
-    const cur = this.state.projStatusTab || 'all';
+  // ▼ renderTodaySubs — bloc sous-tâches (déplié) rendu comme FRÈRE séparé de la ligne (jamais dans un Fragment enveloppant : cela casserait le drag natif de la ligne). Sous-tâches réordonnables par drag.
+  renderTodaySubs(t){
     return (
-      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:24px;padding:0 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:4;min-height:47px;')}>
-        {v.projView==='todo' && [['all','Tous'],['doing','En cours'],['todo','À faire'],['wait','En attente']].map(([k,l])=>
-          <button key={k} className={'ek-tab'+(cur===k?' on':'')} onClick={()=>this.setState({projStatusTab:k})}>{l}</button>)}
-        <div style={css('margin-left:auto;display:flex;align-items:center;')}>
-          <div className="ek-pseg">
-            {[{k:'todo',l:'Tâches'},{k:'infos',l:'Planning'},{k:'notes',l:'Notes'}].map(o=>
-              <button key={o.k} className={v.projView===o.k?'on':''} onClick={()=>v.onSetProjView(o.k)}>{o.l}</button>)}
-          </div>
-        </div>
+      <div key={t.id+'_s'} className="ek-subwrap">
+        {t.subs.map(s=>
+          <React.Fragment key={s.id}>
+            <div className={s.cls} draggable={!s.editing} onDragStart={s.onDragStart} onDragOver={s.onDragOver} onDrop={s.onDrop} onDragEnd={s.onDragEnd} title="Glisser pour réordonner">
+              <span className={s.ckCls} onClick={s.onCheck}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              {s.editing
+                ? <input className="ek-subedit" autoFocus defaultValue={s.txt} onKeyDown={s.onTextKey} onBlur={s.onTextBlur} onClick={t.stop} />
+                : <span className="ek-stxt" onClick={s.onTextClick} title="Cliquer pour renommer">{s.txt}</span>}
+              <button className={'ek-xsub note'+(s.hasNote?' has':'')+(s.noteOpen?' open':'')} onClick={s.onNoteToggle} title="Note sur cette sous-tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg></button>
+              <button className="ek-xsubdel" onClick={s.onDelete} title="Supprimer la sous-tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
+            </div>
+            {s.noteOpen && <div className="ek-subnote"><textarea autoFocus className="ek-subnotein" placeholder="Note sur cette sous-tâche…" value={s.note} onChange={s.onNoteChange} onClick={t.stop} /></div>}
+          </React.Fragment>)}
+        <div className="ek-subrow"><input className="ek-subaddin" placeholder="+ Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} /></div>
       </div>
     );
   }
 
-  // Barre d'onglets de l'écran Aujourd'hui (thème clair Ekopak) : statut en onglets mono-sélection + filtres Projet/Personne en menus. Fermeture via _docClick (hors [data-filterbar]).
-  renderTodayTabs(v){
+  // Barre de filtres (Direction B) : remplace le rail latéral. mode = 'proj' | 'all' | 'today'
+  // ▼ renderProjStatusTabs — onglets de statut de l'écran Projet, désormais intégrés à l'en-tête (à droite du titre). Mono-sélection (transient projStatusTab).
+  renderProjStatusTabs(v){
+    const cur = this.state.projStatusTab || 'all';
+    return (
+      <div style={css('flex:none;display:flex;align-items:center;gap:24px;')}>
+        {[['all','Tous'],['doing','En cours'],['todo','À faire'],['wait','En attente']].map(([k,l])=>
+          <button key={k} className={'ek-htab'+(cur===k?' on':'')} onClick={()=>this.setState({projStatusTab:k})}>{l}</button>)}
+      </div>
+    );
+  }
+
+  // ▼ renderProjRightCluster — bloc de droite de l'en-tête Projet : filtre Personne (vue Tâches) + segment Tâches | Planning | Notes + pastille « pour aujourd'hui ».
+  renderProjRightCluster(v){
     const fOpen = this.state.filterOpen;
-    const setOpen = (k)=> this.setState(s=>({ filterOpen: s.filterOpen===k?null:k }));
-    const clearAxis = (axis)=> this.setState(s=>({ todayFilters:{...(s.todayFilters||{status:{},proj:{},person:{}}), [axis]:{}}, filterOpen:null }));
-    const projSel = (v.todayProjFacets||[]).filter(f=>f.active);
-    const personSel = (v.todayPersonFacets||[]).filter(f=>f.active);
-    const projLabel = projSel.length===1?projSel[0].label : projSel.length>1?('Projet · '+projSel.length) : 'Projet';
-    const personLabel = personSel.length===1?personSel[0].label : personSel.length>1?('Personne · '+personSel.length) : 'Personne';
+    const pf = v.projPersonFilter||'';
+    const selP = (v.projPersonOptions||[]).find(o=>o.id===pf);
     const dd = "position:absolute;top:calc(100% + 8px);right:0;min-width:214px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:6px;z-index:60;max-height:340px;overflow-y:auto;";
     const item = (active)=> 'display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:'+(active?'#0f3f93':'var(--text2)')+';white-space:nowrap;';
     const chk = <span style={css('margin-left:auto;color:#0f3f93;display:flex;font-size:12px;')}>✓</span>;
     const dropBtn = (active,open)=> "font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;background:none;border:none;padding:0;display:inline-flex;align-items:center;gap:7px;color:"+((active||open)?'#0f3f93':'var(--muted)')+";";
     const chev = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;color:#95a0b3;flex:none;')}><path d="M6 9l6 6 6-6"></path></svg>;
     return (
-      <div data-filterbar style={css('flex:none;display:flex;align-items:center;gap:24px;padding:0 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:4;')}>
-        {v.todayStatusTabs.map(tb=>
-          <button key={tb.k} className={'ek-tab'+(tb.active?' on':'')} onClick={()=>v.onSetTodayStatus(tb.k)}>{tb.label}</button>)}
-        {/* Filtres alignés au-dessus des colonnes méta (largeurs maquette : 148/82/106/67, gap 14) */}
-        <div style={css('margin-left:auto;display:flex;align-items:center;gap:14px;margin-right:6px;')}>
-          <div data-fchip style={css('position:relative;width:148px;display:flex;justify-content:flex-end;')}>
-            <button style={css(dropBtn(projSel.length>0, fOpen==='proj'))} onClick={()=>setOpen('proj')}>{projLabel}{chev}</button>
-            {fOpen==='proj' &&
+      <div style={css('flex:none;display:flex;align-items:center;gap:20px;')}>
+        {v.projView==='todo' && !v.allMode && !v.todayView &&
+          <div data-filterbar data-fchip style={css('position:relative;')}>
+            <button style={css(dropBtn(!!pf, fOpen==='pperson'))} onClick={()=>this.setState(s=>({filterOpen:s.filterOpen==='pperson'?null:'pperson'}))}>{selP?selP.label:'Personne'}{chev}</button>
+            {fOpen==='pperson' &&
               <div style={css(dd)}>
-                <div onClick={()=>clearAxis('proj')} style={css(item(projSel.length===0))}><span style={css('flex:1;')}>Tous les projets</span>{projSel.length===0 && chk}</div>
-                {(v.todayProjFacets||[]).map(ff=> <div key={ff.id} onClick={ff.onToggle} style={css(item(ff.active))}><span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>{ff.active && chk}</div>)}
-                {!(v.todayProjFacets||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
+                <div onClick={()=>v.onSetProjPerson('')} style={css(item(!pf))}><span style={css('flex:1;')}>Toutes les personnes</span>{!pf && chk}</div>
+                {(v.projPersonOptions||[]).map(o=> <div key={o.id} onClick={()=>v.onSetProjPerson(o.id)} style={css(item(pf===o.id))}><span style={css('width:9px;height:9px;border-radius:50%;background:'+o.color+';flex:none;')}></span><span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{o.label}</span><span style={css('color:var(--muted);font-size:11px;')}>{o.count}</span>{pf===o.id && chk}</div>)}
+                {!(v.projPersonOptions||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
               </div>}
-          </div>
-          <span style={css('width:82px;flex:none;')}></span>
-          <div data-fchip style={css('position:relative;width:106px;display:flex;justify-content:flex-start;')}>
-            <button style={css(dropBtn(personSel.length>0, fOpen==='person'))} onClick={()=>setOpen('person')}>{personLabel}{chev}</button>
-            {fOpen==='person' &&
-              <div style={css(dd)}>
-                <div onClick={()=>clearAxis('person')} style={css(item(personSel.length===0))}><span style={css('flex:1;')}>Toutes les personnes</span>{personSel.length===0 && chk}</div>
-                {(v.todayPersonFacets||[]).map(ff=> <div key={ff.id} onClick={ff.onToggle} style={css(item(ff.active))}>{ff.avatarStyle && <span style={css(ff.avatarStyle)}></span>}<span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{ff.label}</span>{ff.active && chk}</div>)}
-                {!(v.todayPersonFacets||[]).length && <div style={css('padding:6px 10px;font-size:12px;color:var(--muted);')}>—</div>}
-              </div>}
-          </div>
-          <span style={css('width:67px;flex:none;')}></span>
+          </div>}
+        <div className="ek-pseg">
+          {[{k:'todo',l:'Tâches'},{k:'infos',l:'Planning'},{k:'notes',l:'Notes'}].map(o=>
+            <button key={o.k} className={(!v.todayView && v.projView===o.k)?'on':''} onClick={()=>v.onSetProjView(o.k)}>{o.l}</button>)}
+        </div>
+        <div className={'ek-todaypill'+(v.todayView?' on':'')} onClick={()=>this.setState(s=>({todayView:!s.todayView, projView:'todo'}))} title="Voir les tâches du jour, tous projets" style={css('cursor:pointer;')}>
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
+          {v.todayTotal} pour aujourd'hui
         </div>
       </div>
     );
@@ -4457,9 +4216,17 @@ class Flux extends React.Component {
         {!todayOnly && !v.planning &&
         <div style={css('flex:none;display:flex;align-items:center;gap:20px;padding:14px 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div data-projsel style={css('flex:none;min-width:0;')}>
-            <div className="ek-ov">Projet</div>
+            {(v.allMode || !v.hasProject)
+              ? <div className="ek-ov">Projet</div>
+              : (v.projNumEditing
+                  ? <input className="ek-ov" autoFocus defaultValue={v.projNumber} onKeyDown={v.onProjNumKey} onBlur={v.onProjNumBlur} onClick={e=>e.stopPropagation()} placeholder="N° / Réf." style={css('border:1px solid '+v.projColor+';border-radius:5px;padding:1px 5px;background:var(--panel);font-family:inherit;font-weight:700;color:'+v.projColor+';min-width:120px;outline:none;')} />
+                  : <div className="ek-ov" onClick={v.onProjNumToggle} title="Numéro / référence du projet — cliquer pour éditer" style={css('cursor:text;'+(v.projNumber?('color:'+v.projColor+';font-weight:700;'):''))}>{v.projNumber||'＋ N° / Réf.'}</div>)}
             <div className="ek-projpick" onClick={v.onProjToggle} title="Changer de projet">
-              <h1>{v.allMode?'Tous les projets':(v.hasProject?v.projName:'Aucun projet')}</h1>
+              {(v.allMode || !v.hasProject)
+                ? <h1>{v.allMode?'Tous les projets':'Aucun projet'}</h1>
+                : (v.projNameEditing
+                    ? <input autoFocus defaultValue={v.projName} onKeyDown={v.onProjNameKey} onBlur={v.onProjNameBlur} onClick={e=>e.stopPropagation()} style={css("font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.01em;border:1px solid "+v.projColor+";border-radius:7px;padding:1px 8px;background:var(--panel);outline:none;max-width:430px;")} />
+                    : <h1 onClick={v.onProjNameToggle} title="Cliquer pour renommer — le chevron change de projet">{v.projName}</h1>)}
               {!v.allMode && v.hasProject && v.projDeadlineJ &&
                 <span className={'ek-jbadge '+v.projDeadlineCls} title="Jours avant l'échéance du projet">{v.projDeadlineJ}</span>}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
@@ -4474,9 +4241,11 @@ class Flux extends React.Component {
                     o.editing
                       ? <div key={o.id} style={css('padding:4px 6px;')}><input data-labeledit="1" autoFocus onFocus={selectAll} defaultValue={o.name} onKeyDown={o.onNameKey} onBlur={o.onNameBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} /></div>
                       : <div key={o.id} className={'ek-fitem'+((o.current&&!v.allMode)?' on':'')} onClick={o.onPick} onDoubleClick={o.onRename} title="Clic : ouvrir · double-clic : renommer">
+                          {o.number && <span className="ek-pnum" style={css('color:'+o.color+';margin-right:6px;')}>{o.number}</span>}
                           <span style={css('flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;')}>{o.name}</span>
                           {o.dlJ && <span className={'ek-jbadge '+o.dlCls} title="Jours avant l'échéance">{o.dlJ}</span>}
                           {(o.current&&!v.allMode) && <span className="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>}
+                          <button className="ek-pmx edit" onClick={o.onRename} title="Renommer le projet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg></button>
                           <button className={'ek-pmx'+(o.confirmDel?' arm':'')} onClick={o.onDelete} title={o.confirmDel?'Cliquer à nouveau pour confirmer':'Supprimer le projet'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                         </div>)}
                   {this.state.npOpen
@@ -4488,29 +4257,9 @@ class Flux extends React.Component {
                 </div>}
             </div>
           </div>
-          {!v.allMode && v.hasProject &&
-          <div className="qadd-ek" style={css('flex:1;max-width:400px;display:flex;align-items:center;gap:11px;height:42px;padding:0 4px;margin:0 10px;')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#3aaae8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={css('width:17px;height:17px;flex:none;')}><path d="M12 5v14M5 12h14"></path></svg>
-            <input onKeyDown={e=>{ if(e.key==='Enter'){ const val=e.target.value.trim(); if(val){ this.addTask('', val); e.target.value=''; } } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} placeholder="Ajouter une tâche…" style={css('flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13.5px;font-weight:500;color:var(--text);')} />
-          </div>}
+          {v.projView==='todo' && this.renderProjStatusTabs(v)}
           <div style={css('flex:1;')}></div>
-          <div className="ek-todaypill" title="Tâches dans l'onglet Aujourd'hui">
-            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
-            {v.projTodayCount} pour aujourd'hui
-          </div>
-        </div>}
-
-        {/* ===================== EN-TÊTE (Aujourd'hui — thème clair Ekopak) ===================== */}
-        {todayOnly &&
-        <div style={css('flex:none;display:flex;align-items:center;gap:24px;padding:22px 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
-          <div style={css('flex:none;')}>
-            <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3aaae8;")}>{v.todayDateLong}</div>
-            <div style={css("font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-top:4px;")}>Aujourd'hui</div>
-          </div>
-          <div className="qadd-ek" style={css('flex:1;max-width:420px;display:flex;align-items:center;gap:11px;height:42px;padding:0 4px;')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#3aaae8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={css('width:17px;height:17px;flex:none;')}><path d="M12 5v14M5 12h14"></path></svg>
-            <input onKeyDown={v.onTodayQuickAdd} onBlur={v.onTodayQuickAddBlur} placeholder="Ajouter une tâche…" style={css('flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13.5px;font-weight:500;color:var(--text);')} />
-          </div>
+          {this.renderProjRightCluster(v)}
         </div>}
 
         {v.planning &&
@@ -4523,160 +4272,18 @@ class Flux extends React.Component {
           </div>
         </div>}
 
-        {todayOnly && this.renderTodayTabs(v)}
-        {!todayOnly && !v.planning && this.renderProjTabs(v)}
+
+        {/* Ajout de tâche : champ fin, commun Aujourd'hui et vue Tâches Projet */}
+        {v.todayView && this.renderThinAdd('today', v)}
+        {!v.todayView && !v.planning && v.projView==='todo' && !v.allMode && v.hasProject && this.renderThinAdd('proj', v)}
 
         {/* ===================== BODY ===================== */}
         <div style={css('flex:1;display:flex;min-height:0;position:relative;')}>
 
-          {/* ---------- LEFT FACET RAIL ---------- */}
-          {false && !todayOnly && !v.planning && v.projView==='todo' && !v.allMode &&
-          <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
-
-            <div onClick={v.onAllTasks} style={css(v.allViewStyle)}>
-              <span style={css('font-size:13px;')}>Toutes les tâches</span>
-              <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{v.totalCount}</span>
-            </div>
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
-            {v.statusFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css('width:7px;height:7px;border-radius:50%;background:'+f.dot+';')}></span>
-                <span>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
-              </div>)}
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>CATÉGORIES</div>
-            {v.catFacets.map(f=>
-              <div key={f.id} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;font-size:13px;color:var(--text2);')}>
-                <span onClick={f.onToggle} title="Filtrer" style={css(f.boxStyle+'cursor:pointer;')}>{f.check}</span>
-                {f.editing
-                  ? <input data-labeledit="1" onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
-                  : <span onClick={f.onLabelClick} title="Cliquer pour renommer" style={css('flex:1;cursor:text;')}>{f.label}</span>}
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
-                <span data-catmenu style={css('position:relative;display:flex;align-items:center;')}>
-                  <span onClick={f.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
-                  {f.menuOpen &&
-                    <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:50;')}>
-                      <div className="stopt" onClick={f.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
-                      <div className="stopt" onClick={f.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
-                    </div>}
-                </span>
-              </div>)}
-            {v.addingCat &&
-              <input autoFocus onKeyDown={v.onAddCatKey} onBlur={v.onAddCatBlur} placeholder="Nom de la catégorie…" style={css('width:100%;margin-top:4px;border:1px solid var(--cbox);border-radius:7px;padding:6px 9px;font-size:13px;background:var(--panel);color:var(--text);')} />}
-            <div onClick={v.onStartAddCat} style={css('display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text3);')}>＋ Nouvelle catégorie</div>
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PERSONNES</div>
-            {v.personFacets.map(f=>
-              <div key={f.id} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;font-size:13px;color:var(--text2);')}>
-                <span onClick={f.onToggle} title="Filtrer" style={css(f.boxStyle+'cursor:pointer;')}>{f.check}</span>
-                <span style={css(f.avatarStyle)}></span>
-                {f.editing
-                  ? <input data-labeledit="1" onFocus={selectAll} defaultValue={f.label} onKeyDown={f.onLabelKey} onBlur={f.onLabelBlur} onClick={e=>e.stopPropagation()} style={css(renameInput)} />
-                  : <span onClick={f.onLabelClick} title="Cliquer pour renommer" style={css('flex:1;cursor:text;')}>{f.label}</span>}
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
-                <span data-personmenu style={css('position:relative;display:flex;align-items:center;')}>
-                  <span onClick={f.onMenuToggle} title="Modifier ou supprimer" style={css('cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 2px;')}>⋮</span>
-                  {f.menuOpen &&
-                    <div style={css('position:absolute;top:24px;right:0;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px rgba(20,22,28,.18);padding:5px;z-index:50;')}>
-                      <div className="stopt" onClick={f.onRename} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>Renommer</div>
-                      <div className="stopt" onClick={f.onDelete} style={css('padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#e0746d;')}>Supprimer</div>
-                    </div>}
-                </span>
-              </div>)}
-
-          </div>}
-
-          {/* ---------- LEFT FILTER RAIL (Aujourd'hui) ---------- */}
-          {false && todayOnly &&
-          <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
-
-            <div onClick={v.onClearTodayFilters} title="Afficher toutes les tâches du jour" style={css(v.todayAllStyle)}>
-              <span style={css('font-size:13px;')}>Toutes les tâches</span>
-              <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{v.todayTotal}</span>
-            </div>
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
-            {v.todayStatusFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css('width:7px;height:7px;border-radius:50%;background:'+f.dot+';')}></span>
-                <span>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
-              </div>)}
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PROJETS</div>
-            {v.todayProjFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
-              </div>)}
-            {!v.todayProjFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PERSONNES</div>
-            {v.todayPersonFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css(f.avatarStyle)}></span>
-                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
-              </div>)}
-            {!v.todayPersonFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
-
-          </div>}
-
-          {/* ---------- LEFT FILTER RAIL (Tous les projets) ---------- */}
-          {false && !todayOnly && !v.planning && v.projView==='todo' && v.allMode &&
-          <div className="fxcol scrl" style={css('width:236px;flex:none;background:var(--rail);border-right:1px solid var(--line);overflow-y:auto;padding:16px 12px;animation-delay:.02s;')}>
-
-            <div onClick={v.onClearAllFilters} title="Afficher toutes les tâches" style={css(v.allAllStyle)}>
-              <span style={css('font-size:13px;')}>Toutes les tâches</span>
-              <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{v.allTotal}</span>
-            </div>
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>STATUT</div>
-            {v.allStatusFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css('width:7px;height:7px;border-radius:50%;background:'+f.dot+';')}></span>
-                <span>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);")}>{f.count}</span>
-              </div>)}
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>CATÉGORIES</div>
-            {v.allCatFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
-              </div>)}
-            {!v.allCatFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
-
-            <div style={css("font-family:'Nunito',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted);margin:18px 8px 8px;")}>PERSONNES</div>
-            {v.allPersonFacets.map(f=>
-              <div key={f.id} onClick={f.onToggle} style={css('display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);')}>
-                <span style={css(f.boxStyle)}>{f.check}</span>
-                <span style={css(f.avatarStyle)}></span>
-                <span style={css('flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;')}>{f.label}</span>
-                <span style={css("margin-left:auto;font-family:'Nunito',sans-serif;font-size:10.5px;color:var(--muted);flex:none;")}>{f.count}</span>
-              </div>)}
-            {!v.allPersonFacets.length && <div style={css('padding:2px 8px;font-size:12px;color:var(--muted);')}>—</div>}
-
-          </div>}
-
           {/* ---------- CENTER ---------- */}
           <div className="fxcol scrl" style={css('flex:1;min-width:0;overflow:auto;background:var(--bg);animation-delay:.08s;')}>
             {(todayOnly || v.todayView) ? (
-            <div style={css('min-width:860px;padding:24px 30px 40px;')}>
-              {v.todayFocus.show &&
-                <div className={'ek-focusgrp'+(v.todayFocus.hi?' drop-hi':'')} onDragOver={v.todayFocus.onOver} onDragEnter={v.todayFocus.onOver} onDrop={v.todayFocus.onDrop}>
-                  <div className="ek-glabel"><b>Focus du jour</b><span className="c">{v.todayFocus.label}</span></div>
-                  {v.todayFocus.items.map(t=> this.renderTodayRow(t))}
-                  {v.todayFocus.empty && <div className="ek-dropslot">{v.todayFocus.full?'Focus complet (3 max)':'Déposer ici — 3 tâches max'}</div>}
-                </div>}
+            <div style={css('min-width:860px;padding:12px 30px 40px;')}>
               {v.todayCount===0 && !v.todayDragging
                 ? <div style={css('display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 24px;gap:10px;color:#95a0b3;text-align:center;')}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="#81d0f5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={css('width:34px;height:34px;')}><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
@@ -4687,14 +4294,14 @@ class Flux extends React.Component {
                         </React.Fragment>
                       : <React.Fragment>
                           <b style={css("font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--text2);")}>Aucune tâche pour aujourd'hui</b>
-                          <span style={css('font-size:12.5px;')}>Ajoute une tâche ci-dessus, ou marque une tâche « Aujourd'hui » depuis l'onglet Projet.</span>
+                          <span style={css('font-size:12.5px;')}>Ajoute une tâche ci-dessus, ou marque une tâche avec la goutte 💧 dans la vue Tâches.</span>
                         </React.Fragment>}
                   </div>
                 : v.todayGroups.map(g=>
-                    <div key={g.key} className={'ek-grp'+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
+                    <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
                       <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>
-                      {g.items.map(t=> this.renderTodayRow(t))}
-                      {!g.items.length && <div className="ek-dropslot">Déposer ici</div>}
+                      {g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+                      {!g.items.length && <div className="ek-droppad"></div>}
                     </div>)}
             </div>
             ) : v.planning ? (
@@ -4703,29 +4310,8 @@ class Flux extends React.Component {
               this.renderGlobalPlanning(v)   /* Planning = vue globale tous projets (maquette) ; renderProjectInfos (timeline solo) n'est plus branché */
             ) : v.projView==='notes' ? (
               v.allMode ? (<div style={css('max-width:920px;margin:0 auto;padding:48px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7;')}>Les notes sont propres à chaque projet.<br/>Sélectionne un projet (en haut à gauche) pour voir et modifier ses notes.</div>) : this.renderProjectNotes(v)
-            ) : v.allMode ? (
-              this.renderAllProjects(v)
             ) : (
-            <div style={css('min-width:860px;padding:22px 32px 40px;')}>
-              {v.groups.map(g=>
-                <div key={g.key} className={'ek-grp'+(this.state.dragOverGrp===g.id?' drop-hi':'')}
-                  onDragOver={e=>{ e.preventDefault(); if(this.state.dragOverGrp!==g.id) this.setState({dragOverGrp:g.id}); }}
-                  onDrop={e=>{ g.onDrop(e); this.setState({dragOverGrp:null}); }}>
-                  <div className="ek-glabel"><b>{g.name}</b><span className="c">{g.count}</span></div>
-                  {g.tasks.map(t=> <React.Fragment key={t.id}>{this.renderRow(t)}</React.Fragment>)}
-                  {g.id!=='done' && (this.state.grpTaskAdd===g.id
-                    ? <div className="ek-paddbox">
-                        <input className="nm" autoFocus placeholder="Nouvelle tâche…" value={this.state.grpTaskName||''} onChange={e=>this.setState({grpTaskName:e.target.value})}
-                          onKeyDown={e=>{ if(e.key==='Enter'){ const val=(this.state.grpTaskName||'').trim(); if(val){ this.addTaskPreset({status:g.id}, val); this.setState({grpTaskName:''}); } } else if(e.key==='Escape'){ this.setState({grpTaskAdd:null, grpTaskName:''}); } }} />
-                        <button className="ok" onClick={()=>{ const val=(this.state.grpTaskName||'').trim(); if(val){ this.addTaskPreset({status:g.id}, val); this.setState({grpTaskName:''}); } }}>OK</button>
-                        <button className="nn" onClick={()=>this.setState({grpTaskAdd:null, grpTaskName:''})}>✕</button>
-                      </div>
-                    : <button className="ek-paddlnk" onClick={()=>this.setState({grpTaskAdd:g.id, grpTaskName:''})}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-                        Ajouter une tâche
-                      </button>)}
-                </div>)}
-            </div>
+              this.renderProjTaskView(v)
             )}
           </div>
 
@@ -4737,8 +4323,27 @@ class Flux extends React.Component {
                 <button className="ek-dx trash" onClick={v.sel.onDelete} title="Supprimer la tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                 <button className="ek-dx close" onClick={v.onCloseDetail} title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
               </div>
+              <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Projet</div>
+              <select value={v.sel.projId} onChange={v.sel.onMoveProj} title="Déplacer la tâche vers un autre projet" style={css("width:100%;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Montserrat',sans-serif;color:var(--text);background:var(--panel);outline:none;cursor:pointer;")}>
+                <option value="__inbox">Sans projet</option>
+                {v.sel.projOptions.map(o=> <option key={o.id} value={o.id}>{o.number?(o.number+' · '+o.name):o.name}</option>)}
+              </select>
               <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Note</div>
-              <textarea className="ek-dnote" style={css('flex:1;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
+              <textarea className="ek-dnote" style={css('min-height:140px;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
+              {v.sel.subs && v.sel.subs.length>0 &&
+                <div style={css('margin-top:18px;')}>
+                  <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;")}>Sous-tâches</div>
+                  {v.sel.subs.map(s=>
+                    <div key={s.id} style={css('border-bottom:1px solid var(--divider);')}>
+                      <div onClick={s.onPanelToggle} style={css('display:flex;align-items:center;gap:9px;padding:9px 2px;cursor:pointer;')}>
+                        <span style={css('width:14px;height:14px;border-radius:4px;flex:none;border:1.6px solid '+(s.done?'#8fc02e':'#c2cbd9')+';background:'+(s.done?'#8fc02e':'transparent')+';')}></span>
+                        <span style={css('flex:1;min-width:0;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(s.done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'))}>{s.txt}</span>
+                        {s.hasNote && !s.panelOpen && <span title="A une note" style={css('width:6px;height:6px;border-radius:50%;background:#3aaae8;flex:none;')}></span>}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#95a0b3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;flex:none;'+(s.panelOpen?'transform:rotate(180deg);':''))}><path d="M6 9l6 6 6-6"></path></svg>
+                      </div>
+                      {s.panelOpen && <textarea className="ek-dnote" style={css('min-height:66px;margin:0 0 10px;')} placeholder="Note sur cette sous-tâche…" value={s.note} onChange={s.onNoteChange}></textarea>}
+                    </div>)}
+                </div>}
             </div>}
 
         </div>
@@ -4769,17 +4374,11 @@ class Flux extends React.Component {
             </div>
           </div>}
 
-        {/* ===================== RETIRER D'AUJOURD'HUI — CONFIRM ===================== */}
-        {todayOnly && v.hasUnmark &&
-          <div onClick={v.onUnmarkCancel} style={css('position:fixed;inset:0;background:rgba(26,40,83,.28);display:flex;align-items:center;justify-content:center;z-index:70;')}>
-            <div onClick={v.stopModal} style={css('width:370px;background:var(--panel);border-radius:16px;box-shadow:0 18px 44px rgba(15,63,147,.18);padding:20px;')}>
-              <h3 style={css("font-family:'Montserrat',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 6px;")}>Retirer d'aujourd'hui ?</h3>
-              <p style={css('font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 16px;')}>« <b style={css('color:var(--text);')}>{v.unmarkTitle}</b> » ne sera plus dans votre journée, mais restera dans son projet.</p>
-              <div style={css('display:flex;gap:10px;justify-content:flex-end;')}>
-                <button onClick={v.onUnmarkCancel} style={css("height:36px;padding:0 14px;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border-radius:9px;")}>Annuler</button>
-                <button onClick={v.onUnmarkOk} style={css("height:36px;padding:0 16px;border:none;border-radius:9px;background:#0f3f93;color:#fff;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(15,63,147,.24);")}>Retirer</button>
-              </div>
-            </div>
+        {/* ===================== TOAST « ANNULER » (complétion / retrait d'Aujourd'hui) ===================== */}
+        {v.undo &&
+          <div style={css("position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:16px;background:#1a2853;color:#fff;padding:11px 18px;border-radius:12px;box-shadow:0 14px 34px rgba(15,63,147,.32);font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;")}>
+            <span>{v.undo.msg}</span>
+            <button onClick={v.onUndo} style={css("border:none;background:none;color:#81d0f5;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;padding:0;")}>Annuler</button>
           </div>}
 
       </div>
