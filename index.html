@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌊 Ma Todolist</title>
+<title>MyTodo</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -575,6 +575,21 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .cf .row{display:flex;gap:10px;justify-content:flex-end}
 .c2wrap .cf .del{height:36px;padding:0 16px;border:none;border-radius:9px;background:var(--ekopak-coral);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
 .c2wrap .cf .no{height:36px;padding:0 14px;border:none;background:none;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+/* Projets (CRM projets / technos) — réutilise le thème .c2wrap du CRM fournisseurs */
+.c2wrap .pc-num{width:88px;flex:none;font-size:12.5px;font-weight:700;color:var(--ekopak-deep-blue);border:none;background:none;outline:none;padding:2px 0;border-bottom:1.5px solid transparent;font-family:inherit}
+.c2wrap .pc-num:focus{border-color:var(--ekopak-light-blue)}
+.c2wrap .pc-num::placeholder{color:var(--neutral-400);font-weight:500}
+.c2wrap .splink{width:26px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--ekopak-deep-blue)}
+.c2wrap .splink:hover{background:var(--deep-blue-50)}
+.c2wrap .splink svg{width:14px;height:14px}
+.c2wrap .pc-sp{display:flex;align-items:center;gap:9px;margin:10px 0 2px}
+.c2wrap .pc-sp>svg{width:15px;height:15px;color:var(--light-blue-600);flex:none}
+.c2wrap .pc-sp input{flex:1;height:30px;border:1.5px solid var(--border-default);border-radius:8px;padding:0 10px;font-size:12px;font-weight:500;font-family:inherit;color:var(--text-body);outline:none;background:var(--surface-card)}
+.c2wrap .pc-sp input:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.c2wrap .pc-sp input::placeholder{color:var(--neutral-400)}
+.c2wrap .pc-debit{width:118px;flex:none;height:26px;border:1.5px solid var(--border-default);border-radius:7px;padding:0 8px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text-strong);outline:none;background:var(--surface-card);text-align:right}
+.c2wrap .pc-debit:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.c2wrap .pc-debit::placeholder{color:var(--neutral-400);font-weight:500}
 /* Notes (feedback) — thème clair Ekopak (scopé .n2wrap) */
 .n2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
 .n2wrap .htop{display:flex;align-items:center;gap:20px;padding:20px 32px;border-bottom:1px solid var(--border-subtle);background:var(--surface-card)}
@@ -856,7 +871,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0B1120">
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Ma%20Todolist%22%2C%22short_name%22%3A%22Todolist%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B1120%22%2C%22theme_color%22%3A%22%230B1120%22%7D">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22MyTodo%22%2C%22short_name%22%3A%22MyTodo%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B1120%22%2C%22theme_color%22%3A%22%230B1120%22%7D">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1045,7 +1060,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 <link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap">
 </head>
 <body>
-<div id="login-screen" class="login-screen"><div class="login-box"><div class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg></div><h1>Ma Todolist</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-2.9.8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8 2.1-6.3 0-11.7-3.8-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
+<div id="login-screen" class="login-screen"><div class="login-box"><div class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg></div><h1>MyTodo</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-2.9.8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8 2.1-6.3 0-11.7-3.8-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
 <script>
 /* ── Firebase Init ── */
 firebase.initializeApp({
@@ -1108,7 +1123,7 @@ async function loadFromCloud(){
       if(src.crm){S.crm=src.crm}else{initCRM()}
       S.feedback=src.feedback&&Array.isArray(src.feedback.items)?src.feedback:{items:[]};
       S.priceLib=src.priceLib&&typeof src.priceLib==='object'?{schemas:src.priceLib.schemas||{},quotes:Array.isArray(src.priceLib.quotes)?src.priceLib.quotes:[]}:{schemas:{},quotes:[]};
-      S.flux=src.flux||null;S.timesheet=tsNorm(src.timesheet);
+      S.flux=src.flux||null;S.timesheet=tsNorm(src.timesheet);S.projCrm=pcNorm(src.projCrm);
       S._dataTs=src._ts||Date.now();
       localStorage.setItem(SK,JSON.stringify(dataSnapshot()));
       if(useLocal&&currentUser){saveToCloudNow();} /* re-pousse la version locale récupérée */
@@ -1120,7 +1135,7 @@ async function loadFromCloud(){
         S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];
         if(p.crm){S.crm=p.crm}else{initCRM()}
         S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);
+        S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S.projCrm=pcNorm(p.projCrm);
         S._dataTs=p._ts||Date.now();
         await saveToCloudNow();
       }
@@ -1143,13 +1158,13 @@ async function loadFromCloud(){
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
     S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S._dataTs=p._ts||Date.now();
+    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S.projCrm=pcNorm(p.projCrm);S._dataTs=p._ts||Date.now();
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
 // Source unique du payload persisté + horodatage `_ts` (sert au "plus récent gagne" au chargement → localStorage = filet de sécurité si une écriture cloud est ratée/raccourcie).
-function dataSnapshot(){ return {projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet,_ts:S._dataTs||0}; }
+function dataSnapshot(){ return {projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,projCrm:S.projCrm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet,_ts:S._dataTs||0}; }
 async function saveToCloudNow(){
   if(!currentUser)return;
   const data=dataSnapshot();
@@ -1175,7 +1190,7 @@ window.addEventListener('pagehide',flushSave);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden')flushSave(); });
 
 const SK="todolist-data-v3";
-let S={projects:[],tab:"flux",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,timesheet:{projects:[],weeks:{}},tsCol:{},tsAdd:null,tsEdit:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
+let S={projects:[],tab:"flux",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",projCrm:{technos:[],projects:[]},pjView:"proj",pjQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,timesheet:{projects:[],weeks:{}},tsCol:{},tsAdd:null,tsEdit:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
 const FN=[{n:"Nunito",v:"'Nunito',sans-serif"},{n:"Georgia",v:"Georgia,serif"},{n:"Courier",v:"'Courier New',monospace"}];
 const HF=["#FF3B30","#FF9500","#FFCC00","#34C759","#007AFF","#5856D6","#FF2D55"];
 const HP=["#FECACA","#FED7AA","#FEF08A","#BBF7D0","#BFDBFE","#C4B5FD","#FBCFE8"];
@@ -1286,7 +1301,7 @@ document.addEventListener('mousedown',e=>{if(aHB&&!e.target.closest('.hp')&&!e.t
 function oEF(el){document.querySelectorAll('.ab.ed').forEach(b=>b.classList.remove('ed'));el.closest('.ab').classList.add('ed')}
 function oEB(el){setTimeout(()=>{if(document.activeElement===el)return;const b=el.closest('.ab');if(b&&!b.contains(document.activeElement))b.classList.remove('ed')},200)}
 function sEd(){document.querySelectorAll('.atx[contenteditable]').forEach(el=>{if(el._r)return;el._r=true;el.addEventListener('focus',()=>oEF(el));el.addEventListener('blur',()=>oEB(el));el.addEventListener('paste',function(e){const it=e.clipboardData&&e.clipboardData.items;if(!it)return;for(let i=0;i<it.length;i++){if(it[i].type.indexOf('image')!==-1){e.preventDefault();const f=it[i].getAsFile();const r=new FileReader();r.onload=function(ev){const img=document.createElement('img');img.src=ev.target.result;const s=window.getSelection();if(s.rangeCount){const rr=s.getRangeAt(0);rr.deleteContents();rr.insertNode(img);rr.collapse(false)}else el.appendChild(img);const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}};r.readAsDataURL(f);break}}});el.addEventListener('input',function(){const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}})})}
-function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="todolist-backup.json";a.click();URL.revokeObjectURL(u)}
+function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="mytodo-backup.json";a.click();URL.revokeObjectURL(u)}
 function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
 
 function sortA(acts){return acts.filter(x=>x.status!=="done")}
@@ -1327,8 +1342,8 @@ const SB_ICONS={planning:`<svg width="16" height="16" viewBox="0 0 16 16" fill="
 const SB_LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3C12 3 5.5 10.4 5.5 15.5a6.5 6.5 0 0 0 13 0C18.5 10.4 12 3 12 3z" fill="#eaf7fe"/><path d="M9.4 14.6c.15 1.7 1.35 3 3.05 3.25" fill="none" stroke="#81d0f5" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 function render(){
   /* Sidebar */
-  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"planning",l:"Planning",i:SB_ICONS.planning},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"CRM",i:SB_ICONS.crm},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
-  let sb=`<div class="sidebar"><div class="sb-logo" title="Ma Todolist">${SB_LOGO}</div>`;
+  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"planning",l:"Planning",i:SB_ICONS.planning},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"Fournisseurs",i:SB_ICONS.crm},{k:"projets",l:"Projets",i:SB_ICONS.projects},{k:"price",l:"Prix",i:SB_ICONS.price},{k:"feedback",l:"Notes",i:SB_ICONS.feedback},{k:"trash",l:"Corbeille",i:SB_ICONS.trash}];
+  let sb=`<div class="sidebar"><div class="sb-logo" title="MyTodo">${SB_LOGO}</div>`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
   if(currentUser){const _un=(currentUser.displayName||currentUser.email||"").trim();const _ini=((_un.split(/[\s@._-]+/).filter(Boolean).slice(0,2).map(s=>s[0]).join(""))||_un.slice(0,2)||"?").toUpperCase();sb+=`<div class="avatar-wrap"><div class="sb-avatar">${esc(_ini)}</div><div class="avatar-menu"><div class="am-name">${esc(currentUser.displayName||currentUser.email)}</div><div class="am-sync"><span id="sync-ind" class="sync-indicator">✓</span> Synchronisé</div><button onclick="doLogout()">Déconnexion</button></div></div>`;}
@@ -1336,8 +1351,8 @@ function render(){
   /* Main */
   let h="";
   if(S.tab==="projects"||S.tab==="global"||S.tab==="done"||S.tab==="today")S.tab="flux";  // « today » (ancien onglet Aujourd'hui) fusionné dans Projet
-  if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
-  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="trash"||S.tab==="feedback")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
+  if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="projets")h+=rPC();else if(S.tab==="price")h+=rPL();else if(S.tab==="feedback")h+=rFB();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
+  const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="projets"||S.tab==="trash"||S.tab==="feedback")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
   const _comboActive=document.activeElement;
   const _comboFocusId=(_comboActive&&_comboActive.id&&_comboActive.id.startsWith('pl-combo-'))?_comboActive.id:null;
@@ -1624,7 +1639,7 @@ function rCRM(){
   const q=S.crmQ.toLowerCase().trim();
   const qt=S.crmQ.trim();
   const searchPh=isSup?"Rechercher / ajouter un fournisseur…":"Rechercher / ajouter un produit…";
-  let h=`<div class="c2wrap"><div class="htop"><div><div class="ov">Fournisseurs &amp; produits</div><h1>CRM</h1></div>`;
+  let h=`<div class="c2wrap"><div class="htop"><div><div class="ov">CRM fournisseurs</div><h1>Fournisseurs</h1></div>`;
   h+=`<div class="qadd">${CRM_ICO.search}<input id="crm-search" placeholder="${searchPh}" value="${esc(S.crmQ)}" oninput="S.crmQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('crm-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})" onkeydown="if(event.key==='Enter'){event.preventDefault();crmAdd()}"></div>`;
   h+=`<div class="grow"></div>`;
   h+=`<div class="seg"><button class="${isSup?"on":""}" onclick="S.crmView='sup';S.crmQ='';render()">Fournisseurs</button><button class="${!isSup?"on":""}" onclick="S.crmView='prod';S.crmQ='';render()">Produits</button></div>`;
@@ -1745,6 +1760,129 @@ function crmSupFilter(pname,pid,rawQ){
 }
 function crmCreateSupForProd(pname,sname){const s={id:gid(),name:sname,products:[pname]};S.crm.suppliers.push(s);save();render()}
 function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.preferred[pname])S.crm.preferred[pname]=[];const i=S.crm.preferred[pname].indexOf(sid);if(i===-1)S.crm.preferred[pname].push(sid);else S.crm.preferred[pname].splice(i,1);save();render()}
+
+/* ── Projets (CRM projets / technos) ── */
+// ▼ pcNorm — normalise S.projCrm (garde anti-corruption, appelée aux 3 points de chargement)
+function pcNorm(x){
+  const o=x&&typeof x==='object'?x:{};
+  const technos=Array.isArray(o.technos)?o.technos.filter(t=>typeof t==='string'&&t):[];
+  const projects=Array.isArray(o.projects)?o.projects.map(p=>({id:p.id||gid(),number:p.number||"",name:p.name||"",sharepoint:p.sharepoint||"",technos:Array.isArray(p.technos)?p.technos.map(t=>({name:t.name||"",debit:t.debit||""})):[]})):[];
+  return {technos,projects};
+}
+// ▼ pcProj / pcTid / pcLabel — accès projet par id, clé DOM-safe d'une techno, libellé « N° — Nom »
+function pcProj(id){return S.projCrm.projects.find(p=>p.id===id)}
+function pcTid(name){return "t_"+name.replace(/\W/g,"_")}
+function pcLabel(p){return (p.number?p.number+" — ":"")+(p.name||"Sans nom")}
+function pcSortProjs(arr){return arr.sort((a,b)=>{const an=a.number||"",bn=b.number||"";if(!!an!==!!bn)return an?-1:1;const c=bn.localeCompare(an,'fr',{numeric:true});return c||a.name.localeCompare(b.name,'fr')})}
+// ▼ pcAdd — Entrée dans la recherche : crée projet ou techno selon la vue
+function pcAdd(){const q=S.pjQ.trim();if(!q)return;if(S.pjView==="tech")pcAddTech(q);else pcAddProj(q)}
+function pcAddProj(name){if(S.projCrm.projects.some(p=>p.name.toLowerCase()===name.toLowerCase()))return;const p={id:gid(),number:"",name:name,sharepoint:"",technos:[]};S.projCrm.projects.push(p);S.ex["pc_p_"+p.id]=true;save();S.pjQ="";render()}
+function pcDelProj(id){S.projCrm.projects=S.projCrm.projects.filter(p=>p.id!==id);save();render()}
+function pcRenProj(id,v){const p=pcProj(id);if(!p)return;p.name=v;save()}
+function pcSetNum(id,v){const p=pcProj(id);if(!p)return;p.number=v.trim();save()}
+function pcSetSp(id,v){const p=pcProj(id);if(!p)return;p.sharepoint=v.trim();save()}
+function pcSetDebit(pid,tname,v){const p=pcProj(pid);if(!p)return;const t=p.technos.find(x=>x.name===tname);if(!t)return;t.debit=v;save()}
+function pcAddTech(name){if(S.projCrm.technos.some(t=>t.toLowerCase()===name.toLowerCase()))return;S.projCrm.technos.push(name);save();S.pjQ="";render()}
+function pcDelTech(name){S.projCrm.technos=S.projCrm.technos.filter(t=>t!==name);S.projCrm.projects.forEach(p=>{p.technos=p.technos.filter(t=>t.name!==name)});save();render()}
+// ▼ pcRenTech — rename d'une techno : catalogue + occurrences dans tous les projets + clé d'expansion S.ex
+function pcRenTech(oldName,newName){newName=(newName||"").trim();if(!newName||newName===oldName)return render();if(S.projCrm.technos.some(t=>t!==oldName&&t.toLowerCase()===newName.toLowerCase()))return render();const i=S.projCrm.technos.indexOf(oldName);if(i!==-1)S.projCrm.technos[i]=newName;S.projCrm.projects.forEach(p=>{p.technos.forEach(t=>{if(t.name===oldName)t.name=newName})});const ok="pc_"+pcTid(oldName),nk="pc_"+pcTid(newName);if(S.ex[ok]){S.ex[nk]=S.ex[ok];delete S.ex[ok]}save();render()}
+function pcAddTechToProj(pid,tname){const p=pcProj(pid);if(!p)return;if(p.technos.some(t=>t.name===tname))return;p.technos.push({name:tname,debit:""});if(!S.projCrm.technos.includes(tname))S.projCrm.technos.push(tname);save();render()}
+function pcRemTechFromProj(pid,tname){const p=pcProj(pid);if(!p)return;p.technos=p.technos.filter(t=>t.name!==tname);save();render()}
+function pcCreateProjForTech(tname,pname){pname=(pname||"").trim();if(!pname)return;let p=S.projCrm.projects.find(x=>x.name.toLowerCase()===pname.toLowerCase());if(!p){p={id:gid(),number:"",name:pname,sharepoint:"",technos:[]};S.projCrm.projects.push(p)}if(!p.technos.some(t=>t.name===tname))p.technos.push({name:tname,debit:""});if(!S.projCrm.technos.includes(tname))S.projCrm.technos.push(tname);save();render()}
+// ▼ Autocomplete « Ajouter une techno » (carte projet) — open custom (pas acOpen : liste remplie dès le focus)
+function pcTechOpen(pid){const w=document.getElementById('acw-pct-'+pid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcTechFilter(pid,inp?inp.value:"")}
+function pcTechFilter(pid,rawQ){
+  const list=document.querySelector('#acw-pct-'+pid+' .ac-list');if(!list)return;
+  const p=pcProj(pid);if(!p)return;
+  const q=(rawQ||"").toLowerCase().trim();let html="";
+  const used=new Set(p.technos.map(t=>t.name));
+  S.projCrm.technos.filter(t=>!used.has(t)&&(!q||t.toLowerCase().includes(q))).sort((a,b)=>a.localeCompare(b)).slice(0,15).forEach(t=>{html+=`<div class="ac-item" onmousedown="pcAddTechToProj('${pid}',${esc(JSON.stringify(t))})">${esc(t)}</div>`});
+  if(q&&!S.projCrm.technos.some(t=>t.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="pcAddTechToProj('${pid}',${esc(JSON.stringify(rawQ.trim()))})">＋ Créer "${esc(rawQ.trim())}"</div>`;
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
+  document.getElementById('acw-pct-'+pid).classList.add('open');
+}
+// ▼ Autocomplete « Ajouter un projet » (carte techno)
+function pcProjOpen(tname,tid){const w=document.getElementById('acw-pcp-'+tid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcProjFilter(tname,tid,inp?inp.value:"")}
+function pcProjFilter(tname,tid,rawQ){
+  const list=document.querySelector('#acw-pcp-'+tid+' .ac-list');if(!list)return;
+  const q=(rawQ||"").toLowerCase().trim();let html="";
+  const avail=S.projCrm.projects.filter(p=>!p.technos.some(t=>t.name===tname)&&(!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q)));
+  pcSortProjs(avail).slice(0,15).forEach(p=>{html+=`<div class="ac-item" onmousedown="pcAddTechToProj('${p.id}',${esc(JSON.stringify(tname))})">${esc(pcLabel(p))}</div>`});
+  if(q&&!S.projCrm.projects.some(p=>p.name.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="pcCreateProjForTech(${esc(JSON.stringify(tname))},${esc(JSON.stringify(rawQ.trim()))})">＋ Créer "${esc(rawQ.trim())}"</div>`;
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
+  document.getElementById('acw-pcp-'+tid).classList.add('open');
+}
+// ▼ Confirmation de suppression Projets (modale thémée, transient)
+let pcDelC=null; // {kind:'proj'|'tech', id?, name?, label}
+function pcAskDelProj(id){const p=pcProj(id);pcDelC={kind:'proj',id,label:p?pcLabel(p):''};render()}
+function pcAskDelTech(name){pcDelC={kind:'tech',name,label:name};render()}
+function pcDelCancel(){pcDelC=null;render()}
+function pcDelOk(){const c=pcDelC;pcDelC=null;if(!c)return;if(c.kind==='proj')pcDelProj(c.id);else pcDelTech(c.name)}
+const PC_ICO={link:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg>`};
+// ▼ rPC — Projets (CRM projets / technos), réutilise le thème .c2wrap du CRM fournisseurs
+function rPC(){
+  const isProj=S.pjView!=="tech";
+  const q=S.pjQ.toLowerCase().trim();
+  const qt=S.pjQ.trim();
+  const searchPh=isProj?"Rechercher / ajouter un projet…":"Rechercher / ajouter une techno…";
+  let h=`<div class="c2wrap"><div class="htop"><div><div class="ov">CRM projets</div><h1>Projets</h1></div>`;
+  h+=`<div class="qadd">${CRM_ICO.search}<input id="pc-search" placeholder="${searchPh}" value="${esc(S.pjQ)}" oninput="S.pjQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('pc-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})" onkeydown="if(event.key==='Enter'){event.preventDefault();pcAdd()}"></div>`;
+  h+=`<div class="grow"></div>`;
+  h+=`<div class="seg"><button class="${isProj?"on":""}" onclick="S.pjView='proj';S.pjQ='';render()">Projets</button><button class="${!isProj?"on":""}" onclick="S.pjView='tech';S.pjQ='';render()">Technos</button></div></div>`;
+  h+=`<div class="list">`;
+  if(isProj){
+    let ps=S.projCrm.projects.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q));
+    pcSortProjs(ps);
+    if(!ps.length&&qt)h+=`<div class="createrow" onclick="pcAddProj(${esc(JSON.stringify(qt))})">＋ Créer « ${esc(qt)} »</div>`;
+    h+=`<div class="count">${ps.length} projet${ps.length>1?"s":""}</div>`;
+    if(!ps.length&&!qt)h+=`<div class="empty">Aucun projet.</div>`;
+    ps.forEach(p=>{
+      const open=S.ex["pc_p_"+p.id];
+      const nt=p.technos.length;
+      const spOk=/^https?:\/\//i.test(p.sharepoint||"");
+      h+=`<div class="card"><div class="card-hd" onclick="S.ex['pc_p_${p.id}']=!S.ex['pc_p_${p.id}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="pc-num" value="${esc(p.number||"")}" placeholder="N° projet" onclick="event.stopPropagation()" oninput="pcSetNum('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><input class="cname" value="${esc(p.name)}" placeholder="Nom du projet…" onclick="event.stopPropagation()" oninput="pcRenProj('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><span class="badge">${nt} techno${nt>1?"s":""}</span>${spOk?`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier SharePoint" onclick="event.stopPropagation()">${PC_ICO.link}</a>`:""}<button class="xdel" onclick="event.stopPropagation();pcAskDelProj('${p.id}')" title="Supprimer">${CRM_ICO.trash}</button></div>`;
+      if(open){
+        h+=`<div class="card-bd">`;
+        h+=`<div class="pc-sp">${PC_ICO.link}<input value="${esc(p.sharepoint||"")}" placeholder="Lien SharePoint du dossier projet…" onclick="event.stopPropagation()" onchange="pcSetSp('${p.id}',this.value);render()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div>`;
+        h+=`<div class="iadd"><div class="ac-wrap" id="acw-pct-${p.id}"><input placeholder="Ajouter une techno…" onfocus="pcTechOpen('${p.id}')" oninput="pcTechFilter('${p.id}',this.value)" onclick="event.stopPropagation()"><div class="ac-list"></div></div></div>`;
+        p.technos.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(t=>{
+          h+=`<div class="item"><span>${esc(t.name)}</span><input class="pc-debit" value="${esc(t.debit||"")}" placeholder="Débit (m³/h)" onclick="event.stopPropagation()" oninput="pcSetDebit('${p.id}',${esc(JSON.stringify(t.name))},this.value)"><button class="xdel" onclick="event.stopPropagation();pcRemTechFromProj('${p.id}',${esc(JSON.stringify(t.name))})" title="Retirer">${CRM_ICO.x}</button></div>`;
+        });
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    });
+  }else{
+    let ts=S.projCrm.technos.filter(t=>!q||t.toLowerCase().includes(q));
+    ts.sort((a,b)=>a.localeCompare(b));
+    if(!ts.length&&qt)h+=`<div class="createrow" onclick="pcAddTech(${esc(JSON.stringify(qt))})">＋ Créer « ${esc(qt)} »</div>`;
+    h+=`<div class="count">${ts.length} techno${ts.length>1?"s":""}</div>`;
+    if(!ts.length&&!qt)h+=`<div class="empty">Aucune techno.</div>`;
+    ts.forEach(t=>{
+      const tid=pcTid(t);
+      const ps=pcSortProjs(S.projCrm.projects.filter(p=>p.technos.some(x=>x.name===t)));
+      const open=S.ex["pc_"+tid];
+      h+=`<div class="card"><div class="card-hd" onclick="S.ex['pc_${tid}']=!S.ex['pc_${tid}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="cname" value="${esc(t)}" placeholder="Nom de la techno…" onclick="event.stopPropagation()" onchange="pcRenTech(${esc(JSON.stringify(t))},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=${esc(JSON.stringify(t))};this.blur()}"><span class="badge">${ps.length} projet${ps.length>1?"s":""}</span><button class="xdel" onclick="event.stopPropagation();pcAskDelTech(${esc(JSON.stringify(t))})" title="Supprimer">${CRM_ICO.trash}</button></div>`;
+      if(open){
+        h+=`<div class="card-bd">`;
+        h+=`<div class="iadd"><div class="ac-wrap" id="acw-pcp-${tid}"><input placeholder="Ajouter un projet…" onfocus="pcProjOpen(${esc(JSON.stringify(t))},'${tid}')" oninput="pcProjFilter(${esc(JSON.stringify(t))},'${tid}',this.value)" onclick="event.stopPropagation()"><div class="ac-list"></div></div></div>`;
+        ps.forEach(p=>{
+          const pt=p.technos.find(x=>x.name===t);
+          h+=`<div class="item"><span>${esc(pcLabel(p))}</span><input class="pc-debit" value="${esc((pt&&pt.debit)||"")}" placeholder="Débit (m³/h)" onclick="event.stopPropagation()" oninput="pcSetDebit('${p.id}',${esc(JSON.stringify(t))},this.value)"><button class="xdel" onclick="event.stopPropagation();pcRemTechFromProj('${p.id}',${esc(JSON.stringify(t))})" title="Retirer">${CRM_ICO.x}</button></div>`;
+        });
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    });
+  }
+  h+=`</div>`;
+  if(pcDelC){
+    const what=pcDelC.kind==='proj'?'le projet':'la techno';
+    const txt='« '+esc(pcDelC.label)+' »'+(pcDelC.kind==='proj'?' — ses technos resteront dans la bibliothèque.':' — elle sera retirée de tous les projets.');
+    h+=`<div class="cf-back" onclick="pcDelCancel()"><div class="cf" onclick="event.stopPropagation()"><h3>Supprimer ${what} ?</h3><p>${txt}</p><div class="row"><button class="no" onclick="pcDelCancel()">Annuler</button><button class="del" onclick="pcDelOk()">Supprimer</button></div></div></div>`;
+  }
+  h+=`</div>`;
+  return h}
 
 /* ── Bibliothèque de prix ── */
 // ▼ plEnsure — garde anti-corruption sur S.priceLib + migration vers le modèle devis→lignes (un devis porte N lignes d'équipement, cf. plMigrateLines)
