@@ -576,20 +576,62 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .cf .del{height:36px;padding:0 16px;border:none;border-radius:9px;background:var(--ekopak-coral);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
 .c2wrap .cf .no{height:36px;padding:0 14px;border:none;background:none;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 /* Projets (CRM projets / technos) — réutilise le thème .c2wrap du CRM fournisseurs */
-.c2wrap .pc-num{width:88px;flex:none;font-size:12.5px;font-weight:700;color:var(--ekopak-deep-blue);border:none;background:none;outline:none;padding:2px 0;border-bottom:1.5px solid transparent;font-family:inherit}
-.c2wrap .pc-num:focus{border-color:var(--ekopak-light-blue)}
-.c2wrap .pc-num::placeholder{color:var(--neutral-400);font-weight:500}
-.c2wrap .splink{width:26px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--ekopak-deep-blue)}
-.c2wrap .splink:hover{background:var(--deep-blue-50)}
+.c2wrap .splink{width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--ekopak-deep-blue);background:var(--deep-blue-50)}
+.c2wrap .splink:hover{background:var(--deep-blue-100)}
 .c2wrap .splink svg{width:14px;height:14px}
-.c2wrap .pc-sp{display:flex;align-items:center;gap:9px;margin:10px 0 2px}
-.c2wrap .pc-sp>svg{width:15px;height:15px;color:var(--light-blue-600);flex:none}
-.c2wrap .pc-sp input{flex:1;height:30px;border:1.5px solid var(--border-default);border-radius:8px;padding:0 10px;font-size:12px;font-weight:500;font-family:inherit;color:var(--text-body);outline:none;background:var(--surface-card)}
-.c2wrap .pc-sp input:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
-.c2wrap .pc-sp input::placeholder{color:var(--neutral-400)}
-.c2wrap .pc-debit{width:118px;flex:none;height:26px;border:1.5px solid var(--border-default);border-radius:7px;padding:0 8px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text-strong);outline:none;background:var(--surface-card);text-align:right}
-.c2wrap .pc-debit:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
-.c2wrap .pc-debit::placeholder{color:var(--neutral-400);font-weight:500}
+.c2wrap .splink.off{background:none;color:var(--neutral-300);cursor:default}
+/* liste : une ligne = un projet */
+.c2wrap .prow{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:12px;margin-bottom:7px;box-shadow:var(--shadow-xs);cursor:pointer;transition:border-color .12s,background .12s}
+.c2wrap .prow:hover{border-color:var(--deep-blue-200);background:var(--deep-blue-50)}
+.c2wrap .prow .pnum{width:130px;flex:none;font-size:12.5px;font-weight:700;color:var(--ekopak-deep-blue);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c2wrap .prow .pnum.none{color:var(--neutral-400);font-weight:500;font-style:italic}
+.c2wrap .prow .pname{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c2wrap .prow .ptech{font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;flex:none}
+.c2wrap .ptype{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--light-blue-100);color:var(--light-blue-600);flex:none;white-space:nowrap}
+.c2wrap .prow:hover .xdel,.c2wrap .trow:hover .xdel{opacity:1}
+/* carte projet (modale) */
+.c2wrap .pc-back{position:fixed;inset:0;background:rgba(26,40,83,.28);z-index:120;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
+.c2wrap .pc-card{width:700px;max-width:96vw;background:var(--surface-card);border-radius:16px;box-shadow:var(--shadow-lg);padding:22px 24px 20px}
+.c2wrap .pc-card .mh{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.c2wrap .pc-card .mh h3{font-size:16px;font-weight:700;color:var(--text-strong);margin:3px 0 0}
+.c2wrap .pc-card .mx{width:30px;height:30px;flex:none;border:none;background:none;border-radius:8px;color:var(--neutral-300);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.c2wrap .pc-card .mx:hover{background:var(--neutral-100);color:var(--text-strong)}
+.c2wrap .pc-card .mx svg{width:15px;height:15px}
+.c2wrap .frow{display:flex;gap:12px;align-items:flex-end;margin-bottom:14px}
+.c2wrap .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.c2wrap .fld.grow{flex:1}
+.c2wrap .fld label{font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--text-muted)}
+.c2wrap .fld input{height:38px;border:1.5px solid var(--border-default);border-radius:9px;padding:0 11px;font-size:13px;font-weight:600;font-family:inherit;color:var(--text-strong);background:var(--surface-card);outline:none;min-width:0}
+.c2wrap .fld input:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.c2wrap .fld input::placeholder{color:var(--neutral-400);font-weight:500}
+.c2wrap .fld .seg{height:38px;align-items:center}
+.c2wrap .lnkrow{display:flex;gap:10px;align-items:flex-end}
+.c2wrap .lnkrow .splink{width:38px;height:38px;border-radius:9px}
+.c2wrap .lnkrow .splink svg{width:16px;height:16px}
+/* technos de la carte : Type / Lignes / Capacité */
+.c2wrap .tsec{margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:16px}
+.c2wrap .tsec .th{font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.c2wrap .thd{display:flex;gap:10px;padding:0 34px 6px 24px;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--neutral-400)}
+.c2wrap .thd .c1{flex:1}
+.c2wrap .thd .c2{width:96px;flex:none}
+.c2wrap .thd .c3{width:126px;flex:none}
+.c2wrap .trow{display:flex;align-items:center;gap:10px;padding:3px 0}
+.c2wrap .trow.drag{opacity:.4}
+.c2wrap .trow.over{box-shadow:0 -2px 0 var(--ekopak-light-blue)}
+.c2wrap .grip{width:14px;flex:none;color:var(--neutral-300);cursor:grab;display:flex;align-items:center;justify-content:center}
+.c2wrap .grip:active{cursor:grabbing}
+.c2wrap .grip svg{width:12px;height:12px}
+.c2wrap .trow .tin{height:34px;border:1.5px solid var(--border-default);border-radius:8px;padding:0 10px;font-size:12.5px;font-weight:600;font-family:inherit;color:var(--text-strong);background:var(--surface-card);outline:none;min-width:0;width:100%}
+.c2wrap .trow .tin:focus{border-color:var(--ekopak-light-blue);box-shadow:var(--pl-ring)}
+.c2wrap .trow .tin::placeholder{color:var(--neutral-400);font-weight:500}
+.c2wrap .trow .c1{flex:1;min-width:0;position:relative}
+.c2wrap .trow .c2{width:96px;flex:none}
+.c2wrap .trow .c3{width:126px;flex:none}
+.c2wrap .trow .ac-list{z-index:140}
+.c2wrap .taddrow{display:flex;align-items:center;gap:8px;margin-top:8px;padding-left:24px}
+.c2wrap .tadd{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border:1.5px dashed var(--deep-blue-200);border-radius:9px;background:none;color:var(--ekopak-deep-blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.c2wrap .tadd:hover{background:var(--deep-blue-50)}
+.c2wrap .tempty{font-size:12px;color:var(--neutral-400);padding:6px 0 2px 24px}
 /* Notes (feedback) — thème clair Ekopak (scopé .n2wrap) */
 .n2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
 .n2wrap .htop{display:flex;align-items:center;gap:20px;padding:20px 32px;border-bottom:1px solid var(--border-subtle);background:var(--surface-card)}
@@ -1762,11 +1804,16 @@ function crmCreateSupForProd(pname,sname){const s={id:gid(),name:sname,products:
 function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.preferred[pname])S.crm.preferred[pname]=[];const i=S.crm.preferred[pname].indexOf(sid);if(i===-1)S.crm.preferred[pname].push(sid);else S.crm.preferred[pname].splice(i,1);save();render()}
 
 /* ── Projets (CRM projets / technos) ── */
-// ▼ pcNorm — normalise S.projCrm (garde anti-corruption, appelée aux 3 points de chargement)
+const PC_TYPES=["WaaS","Capex","Rental"];
+// ▼ pcNorm — normalise S.projCrm (garde anti-corruption, appelée aux 3 points de chargement).
+// Migration additive idempotente des technos : ancien {name,debit} → {id,type,lignes,capacite}.
 function pcNorm(x){
   const o=x&&typeof x==='object'?x:{};
   const technos=Array.isArray(o.technos)?o.technos.filter(t=>typeof t==='string'&&t):[];
-  const projects=Array.isArray(o.projects)?o.projects.map(p=>({id:p.id||gid(),number:p.number||"",name:p.name||"",sharepoint:p.sharepoint||"",technos:Array.isArray(p.technos)?p.technos.map(t=>({name:t.name||"",debit:t.debit||""})):[]})):[];
+  const projects=Array.isArray(o.projects)?o.projects.filter(p=>p&&typeof p==='object').map(p=>({
+    id:p.id||gid(),number:p.number||"",name:p.name||"",type:p.type||"",sharepoint:p.sharepoint||"",
+    technos:Array.isArray(p.technos)?p.technos.filter(t=>t&&typeof t==='object').map(t=>({id:t.id||gid(),type:t.type||t.name||"",lignes:t.lignes||"",capacite:t.capacite||t.debit||""})):[]
+  })):[];
   return {technos,projects};
 }
 // ▼ pcProj / pcTid / pcLabel — accès projet par id, clé DOM-safe d'une techno, libellé « N° — Nom »
@@ -1774,43 +1821,71 @@ function pcProj(id){return S.projCrm.projects.find(p=>p.id===id)}
 function pcTid(name){return "t_"+name.replace(/\W/g,"_")}
 function pcLabel(p){return (p.number?p.number+" — ":"")+(p.name||"Sans nom")}
 function pcSortProjs(arr){return arr.sort((a,b)=>{const an=a.number||"",bn=b.number||"";if(!!an!==!!bn)return an?-1:1;const c=bn.localeCompare(an,'fr',{numeric:true});return c||a.name.localeCompare(b.name,'fr')})}
+// ▼ pcTechLabel — résumé des technos d'un projet pour la ligne de liste (« UF 50 · ROSP 35 »)
+function pcTechLabel(p){return p.technos.map(t=>[t.type||"?",t.capacite].filter(Boolean).join(" ")).join(" · ")}
 // ▼ pcAdd — Entrée dans la recherche : crée projet ou techno selon la vue
 function pcAdd(){const q=S.pjQ.trim();if(!q)return;if(S.pjView==="tech")pcAddTech(q);else pcAddProj(q)}
-function pcAddProj(name){if(S.projCrm.projects.some(p=>p.name.toLowerCase()===name.toLowerCase()))return;const p={id:gid(),number:"",name:name,sharepoint:"",technos:[]};S.projCrm.projects.push(p);S.ex["pc_p_"+p.id]=true;save();S.pjQ="";render()}
-function pcDelProj(id){S.projCrm.projects=S.projCrm.projects.filter(p=>p.id!==id);save();render()}
+// ▼ pcOpenId — carte projet ouverte (transient, NON persisté). pcAddProj ouvre la carte sur le projet créé.
+let pcOpenId=null;
+function pcOpen(id){pcOpenId=id;render()}
+function pcClose(){pcOpenId=null;render()}
+function pcAddProj(name){if(S.projCrm.projects.some(p=>p.name.toLowerCase()===name.toLowerCase()))return;const p={id:gid(),number:"",name:name,type:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p);save();S.pjQ="";pcOpenId=p.id;render()}
+function pcDelProj(id){S.projCrm.projects=S.projCrm.projects.filter(p=>p.id!==id);if(pcOpenId===id)pcOpenId=null;save();render()}
 function pcRenProj(id,v){const p=pcProj(id);if(!p)return;p.name=v;save()}
 function pcSetNum(id,v){const p=pcProj(id);if(!p)return;p.number=v.trim();save()}
 function pcSetSp(id,v){const p=pcProj(id);if(!p)return;p.sharepoint=v.trim();save()}
-function pcSetDebit(pid,tname,v){const p=pcProj(pid);if(!p)return;const t=p.technos.find(x=>x.name===tname);if(!t)return;t.debit=v;save()}
+// ▼ pcSetType — type de projet (WaaS/Capex/Rental) ; recliquer le type actif le retire
+function pcSetType(id,v){const p=pcProj(id);if(!p)return;p.type=p.type===v?"":v;save();render()}
+function pcSpOk(u){return /^https?:\/\//i.test(u||"")}
+// ▼ Technos d'un projet — {id,type,lignes,capacite}. Saisie texte : oninput SANS re-render (focus).
+function pcTech(pid,tid){const p=pcProj(pid);return p&&p.technos.find(t=>t.id===tid)}
+function pcSetT(pid,tid,f,v){const t=pcTech(pid,tid);if(!t)return;t[f]=v;save()}
+// ▼ pcSetTType — type d'une techno : texte libre, mémorisé au catalogue quand la saisie s'arrête (onchange)
+function pcLearnType(pid,tid){const t=pcTech(pid,tid);if(!t)return;const v=(t.type||"").trim();t.type=v;if(v&&!S.projCrm.technos.some(x=>x.toLowerCase()===v.toLowerCase()))S.projCrm.technos.push(v);save()}
+function pcAddTechRow(pid){const p=pcProj(pid);if(!p)return;const t={id:gid(),type:"",lignes:"",capacite:""};p.technos.push(t);save();render();requestAnimationFrame(()=>{const el=document.getElementById('pct-'+t.id);if(el)el.focus()})}
+function pcDelTechRow(pid,tid){const p=pcProj(pid);if(!p)return;p.technos=p.technos.filter(t=>t.id!==tid);save();render()}
+// ▼ Réordonnancement des technos par drag (poignée uniquement ; drop = insertion avant la ligne cible)
+let pcDrag=null; // {pid,idx} — transient
+function pcTDS(e,pid,idx){pcDrag={pid,idx};e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','')}catch(_){}const r=e.target.closest('.trow');if(r)r.classList.add('drag')}
+function pcTDE(){pcDrag=null;document.querySelectorAll('.trow.drag,.trow.over').forEach(r=>r.classList.remove('drag','over'))}
+function pcTDO(e,pid){if(!pcDrag||pcDrag.pid!==pid)return;e.preventDefault();e.dataTransfer.dropEffect='move';const r=e.currentTarget;document.querySelectorAll('.trow.over').forEach(x=>{if(x!==r)x.classList.remove('over')});r.classList.add('over')}
+function pcTDL(e){e.currentTarget.classList.remove('over')}
+function pcTDrop(e,pid,idx){if(!pcDrag||pcDrag.pid!==pid)return;e.preventDefault();const p=pcProj(pid),from=pcDrag.idx;pcDrag=null;if(!p||from===idx)return render();const[it]=p.technos.splice(from,1);p.technos.splice(idx>from?idx-1:idx,0,it);save();render()}
+// ▼ Catalogue de types (vue Technos)
 function pcAddTech(name){if(S.projCrm.technos.some(t=>t.toLowerCase()===name.toLowerCase()))return;S.projCrm.technos.push(name);save();S.pjQ="";render()}
-function pcDelTech(name){S.projCrm.technos=S.projCrm.technos.filter(t=>t!==name);S.projCrm.projects.forEach(p=>{p.technos=p.technos.filter(t=>t.name!==name)});save();render()}
-// ▼ pcRenTech — rename d'une techno : catalogue + occurrences dans tous les projets + clé d'expansion S.ex
-function pcRenTech(oldName,newName){newName=(newName||"").trim();if(!newName||newName===oldName)return render();if(S.projCrm.technos.some(t=>t!==oldName&&t.toLowerCase()===newName.toLowerCase()))return render();const i=S.projCrm.technos.indexOf(oldName);if(i!==-1)S.projCrm.technos[i]=newName;S.projCrm.projects.forEach(p=>{p.technos.forEach(t=>{if(t.name===oldName)t.name=newName})});const ok="pc_"+pcTid(oldName),nk="pc_"+pcTid(newName);if(S.ex[ok]){S.ex[nk]=S.ex[ok];delete S.ex[ok]}save();render()}
-function pcAddTechToProj(pid,tname){const p=pcProj(pid);if(!p)return;if(p.technos.some(t=>t.name===tname))return;p.technos.push({name:tname,debit:""});if(!S.projCrm.technos.includes(tname))S.projCrm.technos.push(tname);save();render()}
-function pcRemTechFromProj(pid,tname){const p=pcProj(pid);if(!p)return;p.technos=p.technos.filter(t=>t.name!==tname);save();render()}
-function pcCreateProjForTech(tname,pname){pname=(pname||"").trim();if(!pname)return;let p=S.projCrm.projects.find(x=>x.name.toLowerCase()===pname.toLowerCase());if(!p){p={id:gid(),number:"",name:pname,sharepoint:"",technos:[]};S.projCrm.projects.push(p)}if(!p.technos.some(t=>t.name===tname))p.technos.push({name:tname,debit:""});if(!S.projCrm.technos.includes(tname))S.projCrm.technos.push(tname);save();render()}
-// ▼ Autocomplete « Ajouter une techno » (carte projet) — open custom (pas acOpen : liste remplie dès le focus)
-function pcTechOpen(pid){const w=document.getElementById('acw-pct-'+pid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcTechFilter(pid,inp?inp.value:"")}
-function pcTechFilter(pid,rawQ){
-  const list=document.querySelector('#acw-pct-'+pid+' .ac-list');if(!list)return;
+function pcDelTech(name){S.projCrm.technos=S.projCrm.technos.filter(t=>t!==name);S.projCrm.projects.forEach(p=>{p.technos=p.technos.filter(t=>t.type!==name)});save();render()}
+// ▼ pcRenTech — rename d'un type : catalogue + occurrences dans tous les projets + clé d'expansion S.ex
+function pcRenTech(oldName,newName){newName=(newName||"").trim();if(!newName||newName===oldName)return render();if(S.projCrm.technos.some(t=>t!==oldName&&t.toLowerCase()===newName.toLowerCase()))return render();const i=S.projCrm.technos.indexOf(oldName);if(i!==-1)S.projCrm.technos[i]=newName;S.projCrm.projects.forEach(p=>{p.technos.forEach(t=>{if(t.type===oldName)t.type=newName})});const ok="pc_"+pcTid(oldName),nk="pc_"+pcTid(newName);if(S.ex[ok]){S.ex[nk]=S.ex[ok];delete S.ex[ok]}save();render()}
+function pcAddTechToProj(pid,type){const p=pcProj(pid);if(!p)return;if(p.technos.some(t=>t.type===type))return;p.technos.push({id:gid(),type:type,lignes:"",capacite:""});if(!S.projCrm.technos.includes(type))S.projCrm.technos.push(type);save();render()}
+function pcRemTechFromProj(pid,type){const p=pcProj(pid);if(!p)return;p.technos=p.technos.filter(t=>t.type!==type);save();render()}
+function pcCreateProjForTech(type,pname){pname=(pname||"").trim();if(!pname)return;let p=S.projCrm.projects.find(x=>x.name.toLowerCase()===pname.toLowerCase());if(!p){p={id:gid(),number:"",name:pname,type:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p)}if(!p.technos.some(t=>t.type===type))p.technos.push({id:gid(),type:type,lignes:"",capacite:""});if(!S.projCrm.technos.includes(type))S.projCrm.technos.push(type);save();render()}
+// ▼ Suggestions de type (carte projet) — filtrées à la frappe, « Créer » si aucune correspondance exacte.
+// Autocomplete custom : PAS acOpen (qui rendrait la liste legacy). La saisie reste libre, la liste ne re-render jamais l'app.
+function pcTypeOpen(pid,tid){const w=document.getElementById('acw-pctt-'+tid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcTypeFilter(pid,tid,inp?inp.value:"")}
+function pcTypeFilter(pid,tid,rawQ){
+  const w=document.getElementById('acw-pctt-'+tid);if(!w)return;
+  const list=w.querySelector('.ac-list');if(!list)return;
   const p=pcProj(pid);if(!p)return;
   const q=(rawQ||"").toLowerCase().trim();let html="";
-  const used=new Set(p.technos.map(t=>t.name));
-  S.projCrm.technos.filter(t=>!used.has(t)&&(!q||t.toLowerCase().includes(q))).sort((a,b)=>a.localeCompare(b)).slice(0,15).forEach(t=>{html+=`<div class="ac-item" onmousedown="pcAddTechToProj('${pid}',${esc(JSON.stringify(t))})">${esc(t)}</div>`});
-  if(q&&!S.projCrm.technos.some(t=>t.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="pcAddTechToProj('${pid}',${esc(JSON.stringify(rawQ.trim()))})">＋ Créer "${esc(rawQ.trim())}"</div>`;
-  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
-  document.getElementById('acw-pct-'+pid).classList.add('open');
+  const used=new Set(p.technos.filter(t=>t.id!==tid).map(t=>t.type));
+  S.projCrm.technos.filter(t=>!used.has(t)&&(!q||t.toLowerCase().includes(q))).sort((a,b)=>a.localeCompare(b)).slice(0,15).forEach(t=>{
+    html+=`<div class="ac-item" onmousedown="pcPickType('${pid}','${tid}',${esc(JSON.stringify(t))})">${esc(t)}</div>`});
+  if(q&&!S.projCrm.technos.some(t=>t.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="pcPickType('${pid}','${tid}',${esc(JSON.stringify(rawQ.trim()))},1)">＋ Créer "${esc(rawQ.trim())}"</div>`;
+  list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun type — continue de taper pour le créer</div>';
+  w.classList.add('open');
 }
-// ▼ Autocomplete « Ajouter un projet » (carte techno)
+function pcPickType(pid,tid,type,create){const t=pcTech(pid,tid);if(!t)return;t.type=type;if(create&&!S.projCrm.technos.some(x=>x.toLowerCase()===type.toLowerCase()))S.projCrm.technos.push(type);save();acClose();render()}
+// ▼ Autocomplete « Ajouter un projet » (vue Technos)
 function pcProjOpen(tname,tid){const w=document.getElementById('acw-pcp-'+tid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcProjFilter(tname,tid,inp?inp.value:"")}
 function pcProjFilter(tname,tid,rawQ){
-  const list=document.querySelector('#acw-pcp-'+tid+' .ac-list');if(!list)return;
+  const w=document.getElementById('acw-pcp-'+tid);if(!w)return;
+  const list=w.querySelector('.ac-list');if(!list)return;
   const q=(rawQ||"").toLowerCase().trim();let html="";
-  const avail=S.projCrm.projects.filter(p=>!p.technos.some(t=>t.name===tname)&&(!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q)));
+  const avail=S.projCrm.projects.filter(p=>!p.technos.some(t=>t.type===tname)&&(!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q)));
   pcSortProjs(avail).slice(0,15).forEach(p=>{html+=`<div class="ac-item" onmousedown="pcAddTechToProj('${p.id}',${esc(JSON.stringify(tname))})">${esc(pcLabel(p))}</div>`});
   if(q&&!S.projCrm.projects.some(p=>p.name.toLowerCase()===q))html+=`<div class="ac-item create" onmousedown="pcCreateProjForTech(${esc(JSON.stringify(tname))},${esc(JSON.stringify(rawQ.trim()))})">＋ Créer "${esc(rawQ.trim())}"</div>`;
   list.innerHTML=html||'<div class="ac-item" style="color:#334155">Aucun résultat</div>';
-  document.getElementById('acw-pcp-'+tid).classList.add('open');
+  w.classList.add('open');
 }
 // ▼ Confirmation de suppression Projets (modale thémée, transient)
 let pcDelC=null; // {kind:'proj'|'tech', id?, name?, label}
@@ -1818,57 +1893,77 @@ function pcAskDelProj(id){const p=pcProj(id);pcDelC={kind:'proj',id,label:p?pcLa
 function pcAskDelTech(name){pcDelC={kind:'tech',name,label:name};render()}
 function pcDelCancel(){pcDelC=null;render()}
 function pcDelOk(){const c=pcDelC;pcDelC=null;if(!c)return;if(c.kind==='proj')pcDelProj(c.id);else pcDelTech(c.name)}
-const PC_ICO={link:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg>`};
+const PC_ICO={
+  link:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg>`,
+  plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+};
+// ▼ rPCCard — carte projet (modale) : n°, nom, type, lien SharePoint, technos éditables + réordonnables
+function rPCCard(p){
+  let h=`<div class="pc-back" onclick="pcClose()"><div class="pc-card" onclick="event.stopPropagation()">`;
+  h+=`<div class="mh"><div class="grow"><div class="ov">Fiche projet</div><h3>${esc(pcLabel(p))}</h3></div><button class="mx" onclick="pcClose()" title="Fermer">${CRM_ICO.x}</button></div>`;
+  h+=`<div class="frow"><div class="fld" style="width:150px"><label>N° projet</label><input value="${esc(p.number||"")}" placeholder="BE001.P250021" oninput="pcSetNum('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div>`;
+  h+=`<div class="fld grow"><label>Nom du projet</label><input value="${esc(p.name||"")}" placeholder="Nom du projet…" oninput="pcRenProj('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div></div>`;
+  h+=`<div class="frow"><div class="fld"><label>Type</label><div class="seg">${PC_TYPES.map(t=>`<button class="${p.type===t?"on":""}" onclick="pcSetType('${p.id}',${esc(JSON.stringify(t))})">${esc(t)}</button>`).join("")}</div></div>`;
+  const ok=pcSpOk(p.sharepoint);
+  h+=`<div class="fld grow"><label>Lien du dossier</label><div class="lnkrow"><input style="flex:1" value="${esc(p.sharepoint||"")}" placeholder="Coller le lien SharePoint…" onchange="pcSetSp('${p.id}',this.value);render()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${ok?`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier">${PC_ICO.link}</a>`:`<span class="splink off" title="Renseigne un lien pour l'ouvrir">${PC_ICO.link}</span>`}</div></div></div>`;
+  h+=`<div class="tsec"><div class="th">Technos</div>`;
+  if(p.technos.length)h+=`<div class="thd"><span class="c1">Type</span><span class="c2">Lignes</span><span class="c3">Capacité</span></div>`;
+  else h+=`<div class="tempty">Aucune techno pour ce projet.</div>`;
+  p.technos.forEach((t,i)=>{
+    h+=`<div class="trow" ondragover="pcTDO(event,'${p.id}')" ondragleave="pcTDL(event)" ondrop="pcTDrop(event,'${p.id}',${i})">`;
+    h+=`<span class="grip" draggable="true" ondragstart="pcTDS(event,'${p.id}',${i})" ondragend="pcTDE()" title="Réordonner">${I.grip}</span>`;
+    h+=`<div class="c1"><div class="ac-wrap" id="acw-pctt-${t.id}"><input class="tin" id="pct-${t.id}" value="${esc(t.type||"")}" placeholder="Type…" autocomplete="off" onfocus="pcTypeOpen('${p.id}','${t.id}')" oninput="pcSetT('${p.id}','${t.id}','type',this.value);pcTypeFilter('${p.id}','${t.id}',this.value)" onchange="pcLearnType('${p.id}','${t.id}')" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><div class="ac-list"></div></div></div>`;
+    h+=`<div class="c2"><input class="tin" value="${esc(t.lignes||"")}" placeholder="Nb" oninput="pcSetT('${p.id}','${t.id}','lignes',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div>`;
+    h+=`<div class="c3"><input class="tin" value="${esc(t.capacite||"")}" placeholder="m³/h" oninput="pcSetT('${p.id}','${t.id}','capacite',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div>`;
+    h+=`<button class="xdel" onclick="pcDelTechRow('${p.id}','${t.id}')" title="Retirer">${CRM_ICO.x}</button></div>`;
+  });
+  h+=`<div class="taddrow"><button class="tadd" onclick="pcAddTechRow('${p.id}')">${PC_ICO.plus}Ajouter une techno</button></div>`;
+  h+=`</div></div></div>`;
+  return h}
 // ▼ rPC — Projets (CRM projets / technos), réutilise le thème .c2wrap du CRM fournisseurs
 function rPC(){
   const isProj=S.pjView!=="tech";
   const q=S.pjQ.toLowerCase().trim();
   const qt=S.pjQ.trim();
-  const searchPh=isProj?"Rechercher / ajouter un projet…":"Rechercher / ajouter une techno…";
+  const searchPh=isProj?"Rechercher / ajouter un projet…":"Rechercher / ajouter un type de techno…";
   let h=`<div class="c2wrap"><div class="htop"><div><div class="ov">CRM projets</div><h1>Projets</h1></div>`;
   h+=`<div class="qadd">${CRM_ICO.search}<input id="pc-search" placeholder="${searchPh}" value="${esc(S.pjQ)}" oninput="S.pjQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('pc-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})" onkeydown="if(event.key==='Enter'){event.preventDefault();pcAdd()}"></div>`;
   h+=`<div class="grow"></div>`;
   h+=`<div class="seg"><button class="${isProj?"on":""}" onclick="S.pjView='proj';S.pjQ='';render()">Projets</button><button class="${!isProj?"on":""}" onclick="S.pjView='tech';S.pjQ='';render()">Technos</button></div></div>`;
   h+=`<div class="list">`;
   if(isProj){
-    let ps=S.projCrm.projects.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q));
+    let ps=S.projCrm.projects.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q)||p.technos.some(t=>(t.type||"").toLowerCase().includes(q)));
     pcSortProjs(ps);
     if(!ps.length&&qt)h+=`<div class="createrow" onclick="pcAddProj(${esc(JSON.stringify(qt))})">＋ Créer « ${esc(qt)} »</div>`;
     h+=`<div class="count">${ps.length} projet${ps.length>1?"s":""}</div>`;
     if(!ps.length&&!qt)h+=`<div class="empty">Aucun projet.</div>`;
     ps.forEach(p=>{
-      const open=S.ex["pc_p_"+p.id];
-      const nt=p.technos.length;
-      const spOk=/^https?:\/\//i.test(p.sharepoint||"");
-      h+=`<div class="card"><div class="card-hd" onclick="S.ex['pc_p_${p.id}']=!S.ex['pc_p_${p.id}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="pc-num" value="${esc(p.number||"")}" placeholder="N° projet" onclick="event.stopPropagation()" oninput="pcSetNum('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><input class="cname" value="${esc(p.name)}" placeholder="Nom du projet…" onclick="event.stopPropagation()" oninput="pcRenProj('${p.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"><span class="badge">${nt} techno${nt>1?"s":""}</span>${spOk?`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier SharePoint" onclick="event.stopPropagation()">${PC_ICO.link}</a>`:""}<button class="xdel" onclick="event.stopPropagation();pcAskDelProj('${p.id}')" title="Supprimer">${CRM_ICO.trash}</button></div>`;
-      if(open){
-        h+=`<div class="card-bd">`;
-        h+=`<div class="pc-sp">${PC_ICO.link}<input value="${esc(p.sharepoint||"")}" placeholder="Lien SharePoint du dossier projet…" onclick="event.stopPropagation()" onchange="pcSetSp('${p.id}',this.value);render()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></div>`;
-        h+=`<div class="iadd"><div class="ac-wrap" id="acw-pct-${p.id}"><input placeholder="Ajouter une techno…" onfocus="pcTechOpen('${p.id}')" oninput="pcTechFilter('${p.id}',this.value)" onclick="event.stopPropagation()"><div class="ac-list"></div></div></div>`;
-        p.technos.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(t=>{
-          h+=`<div class="item"><span>${esc(t.name)}</span><input class="pc-debit" value="${esc(t.debit||"")}" placeholder="Débit (m³/h)" onclick="event.stopPropagation()" oninput="pcSetDebit('${p.id}',${esc(JSON.stringify(t.name))},this.value)"><button class="xdel" onclick="event.stopPropagation();pcRemTechFromProj('${p.id}',${esc(JSON.stringify(t.name))})" title="Retirer">${CRM_ICO.x}</button></div>`;
-        });
-        h+=`</div>`;
-      }
-      h+=`</div>`;
+      const tl=pcTechLabel(p);
+      h+=`<div class="prow" onclick="pcOpen('${p.id}')">`;
+      h+=`<span class="pnum ${p.number?"":"none"}">${esc(p.number||"sans n°")}</span>`;
+      h+=`<span class="pname">${esc(p.name||"Sans nom")}</span>`;
+      if(p.type)h+=`<span class="ptype">${esc(p.type)}</span>`;
+      if(tl)h+=`<span class="ptech">${esc(tl)}</span>`;
+      if(pcSpOk(p.sharepoint))h+=`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier" onclick="event.stopPropagation()">${PC_ICO.link}</a>`;
+      h+=`<button class="xdel" onclick="event.stopPropagation();pcAskDelProj('${p.id}')" title="Supprimer">${CRM_ICO.trash}</button></div>`;
     });
   }else{
     let ts=S.projCrm.technos.filter(t=>!q||t.toLowerCase().includes(q));
     ts.sort((a,b)=>a.localeCompare(b));
     if(!ts.length&&qt)h+=`<div class="createrow" onclick="pcAddTech(${esc(JSON.stringify(qt))})">＋ Créer « ${esc(qt)} »</div>`;
-    h+=`<div class="count">${ts.length} techno${ts.length>1?"s":""}</div>`;
+    h+=`<div class="count">${ts.length} type${ts.length>1?"s":""} de techno</div>`;
     if(!ts.length&&!qt)h+=`<div class="empty">Aucune techno.</div>`;
     ts.forEach(t=>{
       const tid=pcTid(t);
-      const ps=pcSortProjs(S.projCrm.projects.filter(p=>p.technos.some(x=>x.name===t)));
+      const ps=pcSortProjs(S.projCrm.projects.filter(p=>p.technos.some(x=>x.type===t)));
       const open=S.ex["pc_"+tid];
-      h+=`<div class="card"><div class="card-hd" onclick="S.ex['pc_${tid}']=!S.ex['pc_${tid}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="cname" value="${esc(t)}" placeholder="Nom de la techno…" onclick="event.stopPropagation()" onchange="pcRenTech(${esc(JSON.stringify(t))},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=${esc(JSON.stringify(t))};this.blur()}"><span class="badge">${ps.length} projet${ps.length>1?"s":""}</span><button class="xdel" onclick="event.stopPropagation();pcAskDelTech(${esc(JSON.stringify(t))})" title="Supprimer">${CRM_ICO.trash}</button></div>`;
+      h+=`<div class="card"><div class="card-hd" onclick="S.ex['pc_${tid}']=!S.ex['pc_${tid}'];render()"><span class="cv ${open?"op":""}">${I.chev}</span><input class="cname" value="${esc(t)}" placeholder="Nom du type…" onclick="event.stopPropagation()" onchange="pcRenTech(${esc(JSON.stringify(t))},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=${esc(JSON.stringify(t))};this.blur()}"><span class="badge">${ps.length} projet${ps.length>1?"s":""}</span><button class="xdel" onclick="event.stopPropagation();pcAskDelTech(${esc(JSON.stringify(t))})" title="Supprimer">${CRM_ICO.trash}</button></div>`;
       if(open){
         h+=`<div class="card-bd">`;
-        h+=`<div class="iadd"><div class="ac-wrap" id="acw-pcp-${tid}"><input placeholder="Ajouter un projet…" onfocus="pcProjOpen(${esc(JSON.stringify(t))},'${tid}')" oninput="pcProjFilter(${esc(JSON.stringify(t))},'${tid}',this.value)" onclick="event.stopPropagation()"><div class="ac-list"></div></div></div>`;
+        h+=`<div class="iadd"><div class="ac-wrap" id="acw-pcp-${tid}"><input placeholder="Ajouter un projet…" autocomplete="off" onfocus="pcProjOpen(${esc(JSON.stringify(t))},'${tid}')" oninput="pcProjFilter(${esc(JSON.stringify(t))},'${tid}',this.value)" onclick="event.stopPropagation()"><div class="ac-list"></div></div></div>`;
         ps.forEach(p=>{
-          const pt=p.technos.find(x=>x.name===t);
-          h+=`<div class="item"><span>${esc(pcLabel(p))}</span><input class="pc-debit" value="${esc((pt&&pt.debit)||"")}" placeholder="Débit (m³/h)" onclick="event.stopPropagation()" oninput="pcSetDebit('${p.id}',${esc(JSON.stringify(t))},this.value)"><button class="xdel" onclick="event.stopPropagation();pcRemTechFromProj('${p.id}',${esc(JSON.stringify(t))})" title="Retirer">${CRM_ICO.x}</button></div>`;
+          const pt=p.technos.find(x=>x.type===t);
+          h+=`<div class="item"><span onclick="pcOpen('${p.id}')" style="cursor:pointer">${esc(pcLabel(p))}</span>${pt&&pt.lignes?`<span class="badge">${esc(pt.lignes)} ligne${pt.lignes>1?"s":""}</span>`:""}${pt&&pt.capacite?`<span class="badge">${esc(pt.capacite)}</span>`:""}<button class="xdel" onclick="event.stopPropagation();pcRemTechFromProj('${p.id}',${esc(JSON.stringify(t))})" title="Retirer">${CRM_ICO.x}</button></div>`;
         });
         h+=`</div>`;
       }
@@ -1876,6 +1971,8 @@ function rPC(){
     });
   }
   h+=`</div>`;
+  const openP=pcOpenId?pcProj(pcOpenId):null;
+  if(openP)h+=rPCCard(openP);
   if(pcDelC){
     const what=pcDelC.kind==='proj'?'le projet':'la techno';
     const txt='« '+esc(pcDelC.label)+' »'+(pcDelC.kind==='proj'?' — ses technos resteront dans la bibliothèque.':' — elle sera retirée de tous les projets.');
