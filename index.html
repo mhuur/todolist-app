@@ -586,8 +586,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .prow .pnum{width:130px;flex:none;font-size:12.5px;font-weight:700;color:var(--ekopak-deep-blue);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c2wrap .prow .pnum.none{color:var(--neutral-400);font-weight:500;font-style:italic}
 .c2wrap .prow .pname{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.c2wrap .prow .ptech{font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;flex:none}
+.c2wrap .prow .ptech{font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;flex:none}
 .c2wrap .ptype{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--light-blue-100);color:var(--light-blue-600);flex:none;white-space:nowrap}
+.c2wrap .ptype.sol{background:var(--deep-blue-50);color:var(--ekopak-deep-blue)}
 .c2wrap .prow:hover .xdel,.c2wrap .trow:hover .xdel{opacity:1}
 /* carte projet (modale) */
 .c2wrap .pc-back{position:fixed;inset:0;background:rgba(26,40,83,.28);z-index:120;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
@@ -628,9 +629,10 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .trow .c2{width:96px;flex:none}
 .c2wrap .trow .c3{width:126px;flex:none}
 .c2wrap .trow .ac-list{z-index:140}
-.c2wrap .taddrow{display:flex;align-items:center;gap:8px;margin-top:8px;padding-left:24px}
-.c2wrap .tadd{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border:1.5px dashed var(--deep-blue-200);border-radius:9px;background:none;color:var(--ekopak-deep-blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.c2wrap .tadd:hover{background:var(--deep-blue-50)}
+.c2wrap .taddrow{display:flex;align-items:center;gap:8px;margin-top:6px;padding-left:24px}
+.c2wrap .tadd{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:none;border-radius:8px;background:none;color:var(--neutral-400);font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer;font-family:inherit;transition:color .12s,background .12s}
+.c2wrap .tadd svg{width:13px;height:13px;flex:none}
+.c2wrap .tadd:hover{background:var(--deep-blue-50);color:var(--ekopak-deep-blue)}
 .c2wrap .tempty{font-size:12px;color:var(--neutral-400);padding:6px 0 2px 24px}
 /* Notes (feedback) — thème clair Ekopak (scopé .n2wrap) */
 .n2wrap{height:100vh;overflow:hidden;display:flex;flex-direction:column;font-family:'Montserrat','Nunito',sans-serif}
@@ -1805,13 +1807,14 @@ function crmTogPref(pname,sid){if(!S.crm.preferred)S.crm.preferred={};if(!S.crm.
 
 /* ── Projets (CRM projets / technos) ── */
 const PC_TYPES=["WaaS","Capex","Rental"];
+const PC_SOLUTIONS=["eFix","eCube","eBrix","eFlex"];
 // ▼ pcNorm — normalise S.projCrm (garde anti-corruption, appelée aux 3 points de chargement).
 // Migration additive idempotente des technos : ancien {name,debit} → {id,type,lignes,capacite}.
 function pcNorm(x){
   const o=x&&typeof x==='object'?x:{};
   const technos=Array.isArray(o.technos)?o.technos.filter(t=>typeof t==='string'&&t):[];
   const projects=Array.isArray(o.projects)?o.projects.filter(p=>p&&typeof p==='object').map(p=>({
-    id:p.id||gid(),number:p.number||"",name:p.name||"",type:p.type||"",sharepoint:p.sharepoint||"",
+    id:p.id||gid(),number:p.number||"",name:p.name||"",type:p.type||"",solution:p.solution||"",sharepoint:p.sharepoint||"",
     technos:Array.isArray(p.technos)?p.technos.filter(t=>t&&typeof t==='object').map(t=>({id:t.id||gid(),type:t.type||t.name||"",lignes:t.lignes||"",capacite:t.capacite||t.debit||""})):[]
   })):[];
   return {technos,projects};
@@ -1821,21 +1824,26 @@ function pcProj(id){return S.projCrm.projects.find(p=>p.id===id)}
 function pcTid(name){return "t_"+name.replace(/\W/g,"_")}
 function pcLabel(p){return (p.number?p.number+" — ":"")+(p.name||"Sans nom")}
 function pcSortProjs(arr){return arr.sort((a,b)=>{const an=a.number||"",bn=b.number||"";if(!!an!==!!bn)return an?-1:1;const c=bn.localeCompare(an,'fr',{numeric:true});return c||a.name.localeCompare(b.name,'fr')})}
-// ▼ pcTechLabel — résumé des technos d'un projet pour la ligne de liste (« UF 50 · ROSP 35 »)
-function pcTechLabel(p){return p.technos.map(t=>[t.type||"?",t.capacite].filter(Boolean).join(" ")).join(" · ")}
+// ▼ pcTechLabel — résumé des technos d'un projet pour la ligne de liste (« UF 3×50 · ROSP 3×35 »)
+function pcTechLabel(p){return p.technos.map(t=>{
+  const n=String(t.lignes||"").trim(),c=String(t.capacite||"").trim();
+  const v=n&&c?n+"×"+c:(c||(n?n+" ligne"+(+n>1?"s":""):""));
+  return [t.type||"?",v].filter(Boolean).join(" ")}).join(" · ")}
 // ▼ pcAdd — Entrée dans la recherche : crée projet ou techno selon la vue
 function pcAdd(){const q=S.pjQ.trim();if(!q)return;if(S.pjView==="tech")pcAddTech(q);else pcAddProj(q)}
 // ▼ pcOpenId — carte projet ouverte (transient, NON persisté). pcAddProj ouvre la carte sur le projet créé.
 let pcOpenId=null;
 function pcOpen(id){pcOpenId=id;render()}
 function pcClose(){pcOpenId=null;render()}
-function pcAddProj(name){if(S.projCrm.projects.some(p=>p.name.toLowerCase()===name.toLowerCase()))return;const p={id:gid(),number:"",name:name,type:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p);save();S.pjQ="";pcOpenId=p.id;render()}
+function pcAddProj(name){if(S.projCrm.projects.some(p=>p.name.toLowerCase()===name.toLowerCase()))return;const p={id:gid(),number:"",name:name,type:"",solution:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p);save();S.pjQ="";pcOpenId=p.id;render()}
 function pcDelProj(id){S.projCrm.projects=S.projCrm.projects.filter(p=>p.id!==id);if(pcOpenId===id)pcOpenId=null;save();render()}
 function pcRenProj(id,v){const p=pcProj(id);if(!p)return;p.name=v;save()}
 function pcSetNum(id,v){const p=pcProj(id);if(!p)return;p.number=v.trim();save()}
 function pcSetSp(id,v){const p=pcProj(id);if(!p)return;p.sharepoint=v.trim();save()}
-// ▼ pcSetType — type de projet (WaaS/Capex/Rental) ; recliquer le type actif le retire
+// ▼ pcSetType / pcSetSol — type contractuel (WaaS/Capex/Rental) et solution (eFix/eCube/eBrix/eFlex),
+// deux dimensions indépendantes ; recliquer la valeur active la retire
 function pcSetType(id,v){const p=pcProj(id);if(!p)return;p.type=p.type===v?"":v;save();render()}
+function pcSetSol(id,v){const p=pcProj(id);if(!p)return;p.solution=p.solution===v?"":v;save();render()}
 function pcSpOk(u){return /^https?:\/\//i.test(u||"")}
 // ▼ Technos d'un projet — {id,type,lignes,capacite}. Saisie texte : oninput SANS re-render (focus).
 function pcTech(pid,tid){const p=pcProj(pid);return p&&p.technos.find(t=>t.id===tid)}
@@ -1858,7 +1866,7 @@ function pcDelTech(name){S.projCrm.technos=S.projCrm.technos.filter(t=>t!==name)
 function pcRenTech(oldName,newName){newName=(newName||"").trim();if(!newName||newName===oldName)return render();if(S.projCrm.technos.some(t=>t!==oldName&&t.toLowerCase()===newName.toLowerCase()))return render();const i=S.projCrm.technos.indexOf(oldName);if(i!==-1)S.projCrm.technos[i]=newName;S.projCrm.projects.forEach(p=>{p.technos.forEach(t=>{if(t.type===oldName)t.type=newName})});const ok="pc_"+pcTid(oldName),nk="pc_"+pcTid(newName);if(S.ex[ok]){S.ex[nk]=S.ex[ok];delete S.ex[ok]}save();render()}
 function pcAddTechToProj(pid,type){const p=pcProj(pid);if(!p)return;if(p.technos.some(t=>t.type===type))return;p.technos.push({id:gid(),type:type,lignes:"",capacite:""});if(!S.projCrm.technos.includes(type))S.projCrm.technos.push(type);save();render()}
 function pcRemTechFromProj(pid,type){const p=pcProj(pid);if(!p)return;p.technos=p.technos.filter(t=>t.type!==type);save();render()}
-function pcCreateProjForTech(type,pname){pname=(pname||"").trim();if(!pname)return;let p=S.projCrm.projects.find(x=>x.name.toLowerCase()===pname.toLowerCase());if(!p){p={id:gid(),number:"",name:pname,type:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p)}if(!p.technos.some(t=>t.type===type))p.technos.push({id:gid(),type:type,lignes:"",capacite:""});if(!S.projCrm.technos.includes(type))S.projCrm.technos.push(type);save();render()}
+function pcCreateProjForTech(type,pname){pname=(pname||"").trim();if(!pname)return;let p=S.projCrm.projects.find(x=>x.name.toLowerCase()===pname.toLowerCase());if(!p){p={id:gid(),number:"",name:pname,type:"",solution:"",sharepoint:"",technos:[]};S.projCrm.projects.push(p)}if(!p.technos.some(t=>t.type===type))p.technos.push({id:gid(),type:type,lignes:"",capacite:""});if(!S.projCrm.technos.includes(type))S.projCrm.technos.push(type);save();render()}
 // ▼ Suggestions de type (carte projet) — filtrées à la frappe, « Créer » si aucune correspondance exacte.
 // Autocomplete custom : PAS acOpen (qui rendrait la liste legacy). La saisie reste libre, la liste ne re-render jamais l'app.
 function pcTypeOpen(pid,tid){const w=document.getElementById('acw-pctt-'+tid);if(!w)return;w.classList.add('open');const inp=w.querySelector('input');pcTypeFilter(pid,tid,inp?inp.value:"")}
@@ -1906,6 +1914,7 @@ function rPCCard(p){
   h+=`<div class="frow"><div class="fld"><label>Type</label><div class="seg">${PC_TYPES.map(t=>`<button class="${p.type===t?"on":""}" onclick="pcSetType('${p.id}',${esc(JSON.stringify(t))})">${esc(t)}</button>`).join("")}</div></div>`;
   const ok=pcSpOk(p.sharepoint);
   h+=`<div class="fld grow"><label>Lien du dossier</label><div class="lnkrow"><input style="flex:1" value="${esc(p.sharepoint||"")}" placeholder="Coller le lien SharePoint…" onchange="pcSetSp('${p.id}',this.value);render()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${ok?`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier">${PC_ICO.link}</a>`:`<span class="splink off" title="Renseigne un lien pour l'ouvrir">${PC_ICO.link}</span>`}</div></div></div>`;
+  h+=`<div class="frow"><div class="fld"><label>Solution</label><div class="seg">${PC_SOLUTIONS.map(t=>`<button class="${p.solution===t?"on":""}" onclick="pcSetSol('${p.id}',${esc(JSON.stringify(t))})">${esc(t)}</button>`).join("")}</div></div></div>`;
   h+=`<div class="tsec"><div class="th">Technos</div>`;
   if(p.technos.length)h+=`<div class="thd"><span class="c1">Type</span><span class="c2">Lignes</span><span class="c3">Capacité</span></div>`;
   else h+=`<div class="tempty">Aucune techno pour ce projet.</div>`;
@@ -1943,6 +1952,7 @@ function rPC(){
       h+=`<span class="pnum ${p.number?"":"none"}">${esc(p.number||"sans n°")}</span>`;
       h+=`<span class="pname">${esc(p.name||"Sans nom")}</span>`;
       if(p.type)h+=`<span class="ptype">${esc(p.type)}</span>`;
+      if(p.solution)h+=`<span class="ptype sol">${esc(p.solution)}</span>`;
       if(tl)h+=`<span class="ptech">${esc(tl)}</span>`;
       if(pcSpOk(p.sharepoint))h+=`<a class="splink" href="${esc(p.sharepoint)}" target="_blank" rel="noopener" title="Ouvrir le dossier" onclick="event.stopPropagation()">${PC_ICO.link}</a>`;
       h+=`<button class="xdel" onclick="event.stopPropagation();pcAskDelProj('${p.id}')" title="Supprimer">${CRM_ICO.trash}</button></div>`;
