@@ -589,6 +589,11 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .c2wrap .prow .ptech{font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;flex:none}
 .c2wrap .ptype{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--light-blue-100);color:var(--light-blue-600);flex:none;white-space:nowrap}
 .c2wrap .ptype.sol{background:var(--deep-blue-50);color:var(--ekopak-deep-blue)}
+/* raccourcis outils externes (en-tête) */
+.c2wrap .xlnks{display:flex;align-items:center;gap:8px;flex:none}
+.c2wrap .xlnk{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;flex:none;border-radius:9px;border:1.5px solid var(--deep-blue-200);background:var(--surface-card);color:var(--ekopak-deep-blue);font-size:11.5px;font-weight:700;white-space:nowrap;text-decoration:none;transition:background .12s}
+.c2wrap .xlnk:hover{background:var(--deep-blue-50)}
+.c2wrap .xlnk svg{width:12px;height:12px;flex:none}
 .c2wrap .prow:hover .xdel,.c2wrap .trow:hover .xdel{opacity:1}
 /* carte projet (modale) */
 .c2wrap .pc-back{position:fixed;inset:0;background:rgba(26,40,83,.28);z-index:120;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
@@ -1904,7 +1909,13 @@ function pcDelOk(){const c=pcDelC;pcDelC=null;if(!c)return;if(c.kind==='proj')pc
 const PC_ICO={
   link:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg>`,
   plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  ext:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 14v5a1.9 1.9 0 0 1-1.9 1.9H5.1A1.9 1.9 0 0 1 3.2 19V8a1.9 1.9 0 0 1 1.9-1.9h5"/></svg>`,
 };
+// ▼ PC_LINKS — raccourcis outils externes de l'onglet Projets (en-tête)
+const PC_LINKS=[
+  {label:"BC",title:"Business Central — Ekopak Belgium",url:"https://businesscentral.dynamics.com/EkopakBelgium"},
+  {label:"SharePoint",title:"SharePoint — Project Team",url:"https://ekopakwater.sharepoint.com/sites/ProjectTeam/Shared%20Documents/Forms/AllItems.aspx?viewid=243d6b43%2D885e%2D4701%2D96bd%2D869e02b45db1&ovuser=30a13f7c%2Dfe34%2D4dec%2D93e8%2De1e0ea74046f%2Cromain%2Esaintilan%40ekopakwater%2Ecom&OR=Teams%2DHL&CT=1744117834533&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNTAzMTMyMTAxNCIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D"},
+];
 // ▼ rPCCard — carte projet (modale) : n°, nom, type, lien SharePoint, technos éditables + réordonnables
 function rPCCard(p){
   let h=`<div class="pc-back" onclick="pcClose()"><div class="pc-card" onclick="event.stopPropagation()">`;
@@ -1938,7 +1949,9 @@ function rPC(){
   let h=`<div class="c2wrap"><div class="htop"><div><div class="ov">CRM projets</div><h1>Projets</h1></div>`;
   h+=`<div class="qadd">${CRM_ICO.search}<input id="pc-search" placeholder="${searchPh}" value="${esc(S.pjQ)}" oninput="S.pjQ=this.value;render();requestAnimationFrame(()=>{const el=document.getElementById('pc-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}})" onkeydown="if(event.key==='Enter'){event.preventDefault();pcAdd()}"></div>`;
   h+=`<div class="grow"></div>`;
-  h+=`<div class="seg"><button class="${isProj?"on":""}" onclick="S.pjView='proj';S.pjQ='';render()">Projets</button><button class="${!isProj?"on":""}" onclick="S.pjView='tech';S.pjQ='';render()">Technos</button></div></div>`;
+  h+=`<div class="seg"><button class="${isProj?"on":""}" onclick="S.pjView='proj';S.pjQ='';render()">Projets</button><button class="${!isProj?"on":""}" onclick="S.pjView='tech';S.pjQ='';render()">Technos</button></div>`;
+  h+=`<div class="xlnks">${PC_LINKS.map(l=>`<a class="xlnk" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.title)}">${PC_ICO.ext}${esc(l.label)}</a>`).join("")}</div>`;
+  h+=`</div>`;
   h+=`<div class="list">`;
   if(isProj){
     let ps=S.projCrm.projects.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.number||"").toLowerCase().includes(q)||p.technos.some(t=>(t.type||"").toLowerCase().includes(q)));
