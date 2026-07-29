@@ -3976,8 +3976,8 @@ class Flux extends React.Component {
     const projDayBadge = dl => { if(!/^\d{4}-\d{2}-\d{2}$/.test(dl||'')) return { j:'', col:'var(--muted)', cls:'' }; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(dl+'T00:00:00')-t)/86400000); const cls=j<=10?'hot':j<=28?'mid':'far'; return { j: j<0?('J+'+(-j)):j===0?'Auj.':('J‑'+j), col: j<=10?'#d8442b':j<=28?'#0f3f93':'#8fc02e', cls }; };
     const _allT0=new Date(); _allT0.setHours(0,0,0,0);
     const _projDays = dl => /^\d{4}-\d{2}-\d{2}$/.test(dl||'') ? Math.round((new Date(dl+'T00:00:00')-_allT0)/86400000) : Infinity;
-    // « Prochaine échéance » : date la plus proche ≥ aujourd'hui parmi l'échéance finale + les étapes datées (`steps`) ; si aucune à venir, la plus récente échue (projet en retard → en tête) ; '' si aucune date. Le sélecteur trie ET affiche son badge sur cette date, pas sur la seule échéance finale.
-    const _projNextDate = p => { const ds=[p.deadline, ...((p.steps||[]).map(s=>s.date))].filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')); if(!ds.length) return ''; const fut=ds.filter(d=>_projDays(d)>=0); return (fut.length?fut:ds).reduce((a,b)=> _projDays(b)<_projDays(a)?b:a); };
+    // « Prochaine échéance » : date la plus proche ≥ aujourd'hui parmi l'échéance finale `deadline` + les étapes datées `steps` + les **dates d'échéance des tâches non terminées** (`t.due`) ; si aucune à venir, la plus récente échue (retard → en tête) ; '' si aucune date. Le sélecteur trie ET affiche son badge sur cette date. ⚠️ Projet courant : tâches lues dans `st.tasks` (état de travail), pas `p.tasks` (copie figée).
+    const _projNextDate = p => { const tks=(p.id===st.currentProjectId)?st.tasks:(p.tasks||[]); const ds=[p.deadline, ...((p.steps||[]).map(s=>s.date)), ...((tks||[]).filter(t=>t.status!=='done').map(t=>t.due))].filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')); if(!ds.length) return ''; const fut=ds.filter(d=>_projDays(d)>=0); return (fut.length?fut:ds).reduce((a,b)=> _projDays(b)<_projDays(a)?b:a); };
     const _projNextSort = (a,b)=>{ const da=_projDays(_projNextDate(a)), db=_projDays(_projNextDate(b)); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
     const projList = (st.projects||[]).filter(p=> p.id!=='__inbox' && p.name.toLowerCase().indexOf(pql)>=0)
       .sort(_projNextSort).map(p=>{ const _nd=_projNextDate(p); return ({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, current:p.id===st.currentProjectId, dlJ:projDayBadge(_nd).j, dlCol:projDayBadge(_nd).col, dlCls:projDayBadge(_nd).cls,
@@ -3989,6 +3989,8 @@ class Flux extends React.Component {
         onDelete:(e)=>{ stop(e); this.setState({ projDelConfirmId:p.id, projOpen:false, projMenuId:null }); },
         onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('proj', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
         onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }); });
+    // Badge d'échéance de l'en-tête : échéance finale `deadline` si posée, sinon la PROCHAINE échéance (étapes + tâches non terminées, `_projNextDate`) — un projet sans date limite mais avec des échéances (tâches datées) affiche donc bien un badge.
+    const _hdrDeadline = curProj ? (/^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'') ? curProj.deadline : _projNextDate(curProj)) : '';
     const allMode = !!st.allMode;
     const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
 
@@ -4020,9 +4022,9 @@ class Flux extends React.Component {
       projPlanning: curProj ? this.planGeo([curProj], {sort:false}) : {months:[],projects:[],accent},
       projDeadline: curProj ? (curProj.deadline||'') : '',
       projHasDeadline: !!(curProj && /^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')),
-      projDeadlineJ: curProj?projDayBadge(this._projEffDeadline(curProj)).j:'',
-      projDeadlineCol: curProj?projDayBadge(this._projEffDeadline(curProj)).col:'var(--muted)',
-      projDeadlineCls: curProj?projDayBadge(this._projEffDeadline(curProj)).cls:'',
+      projDeadlineJ: projDayBadge(_hdrDeadline).j,
+      projDeadlineCol: projDayBadge(_hdrDeadline).col,
+      projDeadlineCls: projDayBadge(_hdrDeadline).cls,
       projTodayCount: st.allMode ? todayEntriesAll.length : todayEntriesAll.filter(e=>e.projId===st.currentProjectId).length,
       projEdit: {
         onAddStep:(pid)=>this.addProjStepDatedFor(pid),
