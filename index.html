@@ -3919,8 +3919,7 @@ class Flux extends React.Component {
       sel = { id:stask.id, title:stask.title, catLabel:_selCat?_selCat.name:'Sans catégorie', notes:stask.notes,
         subs: (Array.isArray(stask.checklist)?stask.checklist:[]).map(sb=>({ id:sb.id, txt:sb.text, done:!!sb.done, note:sb.note||'', hasNote:!!(sb.note||'').trim(), panelOpen: st.panelSubId===sb.id, onPanelToggle:()=>this.setState(s=>({panelSubId:s.panelSubId===sb.id?null:sb.id})), onNoteChange:(e)=>this.updateCheckNote(stask.id, sb.id, e.target.value) })),
         projId: staskRes.projId||'',
-        projOptions: (st.projects||[]).filter(p=>p.id!=='__inbox').slice().sort(byName).map(p=>({ id:p.id, name:p.name, number:p.number||'' })),
-        onMoveProj:(e)=>this.moveTaskToProject(stask.id, e.target.value),
+        projLabel: (()=>{ const p=(st.projects||[]).find(x=>x.id===staskRes.projId); return (!p||p.id==='__inbox')?'Sans projet':(p.number?p.number+' · '+p.name:p.name); })(),
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
         onTitleEdit:(e)=>this.updateTitle(stask.id, e.target.value),
         onDelete:()=>this.askDelete(stask.id) };
@@ -4526,11 +4525,8 @@ class Flux extends React.Component {
                 <button className="ek-dx trash" onClick={v.sel.onDelete} title="Supprimer la tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                 <button className="ek-dx close" onClick={v.onCloseDetail} title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
               </div>
-              <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Projet</div>
-              <select value={v.sel.projId} onChange={v.sel.onMoveProj} title="Déplacer la tâche vers un autre projet" style={css("width:100%;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Montserrat',sans-serif;color:var(--text);background:var(--panel);outline:none;cursor:pointer;")}>
-                <option value="__inbox">Sans projet</option>
-                {v.sel.projOptions.map(o=> <option key={o.id} value={o.id}>{o.number?(o.number+' · '+o.name):o.name}</option>)}
-              </select>
+              <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Projets</div>
+              <div title="Le projet se change depuis la ligne de la tâche, pas ici" style={css("width:100%;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Montserrat',sans-serif;color:var(--text);background:var(--soft);")}>{v.sel.projLabel}</div>
               <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Note</div>
               <textarea className="ek-dnote" style={css('min-height:140px;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
               {v.sel.subs && v.sel.subs.length>0 &&
