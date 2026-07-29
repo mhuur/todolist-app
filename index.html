@@ -4020,9 +4020,9 @@ class Flux extends React.Component {
       projPlanning: curProj ? this.planGeo([curProj], {sort:false}) : {months:[],projects:[],accent},
       projDeadline: curProj ? (curProj.deadline||'') : '',
       projHasDeadline: !!(curProj && /^\d{4}-\d{2}-\d{2}$/.test(curProj.deadline||'')),
-      projDeadlineJ: curProj?projDayBadge(curProj.deadline).j:'',
-      projDeadlineCol: curProj?projDayBadge(curProj.deadline).col:'var(--muted)',
-      projDeadlineCls: curProj?projDayBadge(curProj.deadline).cls:'',
+      projDeadlineJ: curProj?projDayBadge(this._projEffDeadline(curProj)).j:'',
+      projDeadlineCol: curProj?projDayBadge(this._projEffDeadline(curProj)).col:'var(--muted)',
+      projDeadlineCls: curProj?projDayBadge(this._projEffDeadline(curProj)).cls:'',
       projTodayCount: st.allMode ? todayEntriesAll.length : todayEntriesAll.filter(e=>e.projId===st.currentProjectId).length,
       projEdit: {
         onAddStep:(pid)=>this.addProjStepDatedFor(pid),
@@ -4088,6 +4088,8 @@ class Flux extends React.Component {
 
   // ▼ _projPlanned — un projet « a un planning » s'il a une échéance ISO ou au moins une tâche datée (due ISO). Sert au filtre de l'onglet Planning (masquer les projets sans date) et à leur comptage.
   _projPlanned(p){ if(!p||p.id==='__inbox') return false; if(/^\d{4}-\d{2}-\d{2}$/.test(p.deadline||'')) return true; const tks=(p.id===this.state.currentProjectId)?this.state.tasks:(p.tasks||[]); return (tks||[]).some(t=>/^\d{4}-\d{2}-\d{2}$/.test(t.due||'')); }
+  // ▼ _projEffDeadline — « date limite effective » : l'échéance finale `deadline` si posée, sinon la DERNIÈRE étape datée (`steps`) qui en fait office par défaut ; '' si aucune. Sert au badge d'échéance de l'en-tête et au Planning (le sélecteur, lui, affiche la *prochaine* échéance via `_projNextDate`).
+  _projEffDeadline(p){ if(!p) return ''; if(/^\d{4}-\d{2}-\d{2}$/.test(p.deadline||'')) return p.deadline; const ds=(p.steps||[]).map(s=>s.date).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')); return ds.length ? ds.reduce((a,b)=> b>a?b:a) : ''; }
   planGeo(list, opts){
     opts = opts || {};
     const st = this.state;
@@ -4108,12 +4110,14 @@ class Flux extends React.Component {
     while(cur < end){ const iso = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-01'; months.push({ label:MONTHS[cur.getMonth()], leftPct:pct(iso) }); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
     const projects = (list||[]).map(p=>{
       const tasks = (p.id===st.currentProjectId) ? st.tasks : (p.tasks||[]);
-      const hasDL = ISO(p.deadline);
-      const j = hasDL ? dayN(p.deadline) : null;
+      const _dl = this._projEffDeadline(p);
+      const _dlFromStep = !ISO(p.deadline) && ISO(_dl);   // date limite dérivée de la dernière étape (aucune échéance finale posée)
+      const hasDL = ISO(_dl);
+      const j = hasDL ? dayN(_dl) : null;
       const col = hasDL ? urg(j) : 'var(--cbox)';
-      const dp = hasDL ? Math.max(1.5, pct(p.deadline)) : 100;
+      const dp = hasDL ? Math.max(1.5, pct(_dl)) : 100;
       const jLabel = !hasDL ? '—' : (j<0 ? ('J+'+(-j)) : j===0 ? 'Auj.' : ('J‑'+j));
-      let steps = (p.steps||[]).filter(s=>ISO(s.date)).map(s=>{ const lp=pct(s.date); return { id:s.id, name:(s.name||'Étape'), date:s.date, leftPct:lp, within: dp>0?clamp(lp/dp*100):0, dateLabel:fmt(s.date) }; });
+      let steps = (p.steps||[]).filter(s=>ISO(s.date) && !(_dlFromStep && s.date===_dl)).map(s=>{ const lp=pct(s.date); return { id:s.id, name:(s.name||'Étape'), date:s.date, leftPct:lp, within: dp>0?clamp(lp/dp*100):0, dateLabel:fmt(s.date) }; });
       steps.sort((a,b)=>a.leftPct-b.leftPct);
       const laneRight=[];
       steps.forEach(s=>{ const w=(s.name+' '+s.dateLabel).length*0.85+2; let lane=0; while(lane<laneRight.length && laneRight[lane] > s.leftPct-0.4) lane++; s.lane=lane; laneRight[lane]=s.leftPct+w; });
@@ -4122,7 +4126,7 @@ class Flux extends React.Component {
       const tLaneRight=[];
       tks.forEach(t=>{ const w=((t.title||'').length+t.dateLabel.length)*0.82+4; let lane=0; while(lane<tLaneRight.length && tLaneRight[lane] > t.leftPct-0.4) lane++; t.lane=lane; tLaneRight[lane]=t.leftPct+w; });
       return {
-        id:p.id, name:p.name, hasDL, j, jLabel, col, dp, deadlineLabel: hasDL?fmt(p.deadline):'', deadlineISO: hasDL?p.deadline:'',
+        id:p.id, name:p.name, hasDL, j, jLabel, col, dp, deadlineLabel: hasDL?fmt(_dl):'', deadlineISO: hasDL?_dl:'',
         steps, tasks:tks, maxLane: laneRight.length||1, maxTaskLane: tLaneRight.length||1,
         capStyle:`position:absolute;left:0;width:${dp}%;top:50%;transform:translateY(-50%);height:20px;border-radius:10px;background:linear-gradient(90deg,var(--soft),${hasDL?col+'2e':'var(--soft)'});border:1px solid ${hasDL?col+'66':'var(--line)'};overflow:hidden;`,
         endStyle: hasDL ? `position:absolute;left:${dp}%;top:50%;transform:translate(-50%,-50%);height:23px;display:flex;align-items:center;padding:0 9px;border-radius:7px;background:${col};color:#0b1626;font-weight:800;font-size:11px;box-shadow:0 0 16px ${col}66;white-space:nowrap;z-index:4;` : ''
