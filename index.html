@@ -2964,7 +2964,8 @@ function plRenderModal(){
     const sup=S.crm.suppliers.find(s=>s.id===st.supplierId);
     h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(sup?sup.name:"?")}</span><button class="pl-pill-clear" onclick="plClearSupplier()" title="Changer">×</button></span></div>`;
   }else{
-    const q=(st.supplierQuery||"").trim();
+    const raw=st.supplierQuery||"";
+    const q=raw.trim();
     const ql=q.toLowerCase();
     const presetProd=((st.lines||[]).find(l=>(l.product||"").trim())||{}).product||"";
     const presetProdL=presetProd.toLowerCase();
@@ -2981,7 +2982,7 @@ function plRenderModal(){
     secondary.sort((a,b)=>a.name.localeCompare(b.name));
     const totalMatches=primary.length+secondary.length;
     const exact=q&&S.crm.suppliers.some(s=>s.name.toLowerCase()===ql);
-    h+=`<input id="pl-sup-search" type="text" class="pl-input" placeholder="${presetProd?`Fournisseurs qui proposent « ${esc(presetProd)} »…`:'Rechercher ou créer un fournisseur…'}" value="${esc(q)}" oninput="plSearchSupplier(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickSupplierEnter()}" autocomplete="off">`;
+    h+=`<input id="pl-sup-search" type="text" class="pl-input" placeholder="${presetProd?`Fournisseurs qui proposent « ${esc(presetProd)} »…`:'Rechercher ou créer un fournisseur…'}" value="${esc(raw)}" oninput="plSearchSupplier(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickSupplierEnter()}" autocomplete="off">`;
     h+=`<div class="pl-search-list">`;
     if(!totalMatches&&!q)h+=`<div class="pl-search-list-empty">Aucun fournisseur. Tape un nom pour en créer un.</div>`;
     /* Groupe 1 : proposent déjà */
@@ -3132,11 +3133,11 @@ function plRenderReclass(){
     toSchema.forEach(f=>{h+=`<div class="pl-rcl-existing">${esc(f.name)}${f.unit?` <span style="color:var(--text-muted)">(${esc(f.unit)})</span>`:''}</div>`});
     h+=`</div>`;
   }else{
-    const q=(st.toQuery||"").trim();const ql=q.toLowerCase();
+    const raw=st.toQuery||"";const q=raw.trim();const ql=q.toLowerCase();
     const prods=plListAllProducts().filter(p=>p.toLowerCase()!==st.fromProduct.toLowerCase());
     const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql));
     const exact=q&&prods.some(p=>p.toLowerCase()===ql);
-    h+=`<input id="pl-rcl-search" type="text" class="pl-input" placeholder="Choisir ou créer une sous-catégorie…" value="${esc(q)}" oninput="plReclassSetQuery(this.value)" autocomplete="off">`;
+    h+=`<input id="pl-rcl-search" type="text" class="pl-input" placeholder="Choisir ou créer une sous-catégorie…" value="${esc(raw)}" oninput="plReclassSetQuery(this.value)" autocomplete="off">`;
     h+=`<div class="pl-search-list">`;
     if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Tape un nom pour créer une catégorie.</div>`;
     matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plReclassPickTarget(${esc(JSON.stringify(p))})">${esc(p)}</div>`});
@@ -3163,12 +3164,13 @@ function plRenderLineCard(line,idx,st){
   if(line.product){
     h+=`<div class="pl-pill-row"><span class="pl-pill"><span>${esc(line.product)}</span><button class="pl-pill-clear" onclick="plClearProduct('${line.id}')" title="Changer (les valeurs sont conservées)">×</button></span><button class="pl-mini-btn" onclick="plOpenReclass('${line.id}')" title="Reclasser dans une autre sous-catégorie en transférant les champs choisis">↪ Reclasser</button></div>`;
   }else{
-    const q=(line.productQuery||"").trim();
+    const raw=line.productQuery||"";
+    const q=raw.trim();
     const ql=q.toLowerCase();
     const prods=sup?sup.products:[];
     const matches=prods.filter(p=>!ql||p.toLowerCase().includes(ql)).sort((a,b)=>a.localeCompare(b));
     const exact=q&&prods.some(p=>p.toLowerCase()===ql);
-    h+=`<input id="pl-prod-search-${line.id}" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(q)}" oninput="plSearchProduct('${line.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter('${line.id}')}" autocomplete="off">`;
+    h+=`<input id="pl-prod-search-${line.id}" type="text" class="pl-input" placeholder="Rechercher ou créer une sous-catégorie…" value="${esc(raw)}" oninput="plSearchProduct('${line.id}',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();plPickProductEnter('${line.id}')}" autocomplete="off">`;
     h+=`<div class="pl-search-list">`;
     if(!matches.length&&!q)h+=`<div class="pl-search-list-empty">Aucune sous-catégorie pour ce fournisseur. Tape un nom pour en créer une.</div>`;
     matches.slice(0,8).forEach(p=>{h+=`<div class="pl-search-item" onmousedown="event.preventDefault();plPickProduct('${line.id}',${esc(JSON.stringify(p))})">${esc(p)}</div>`});
