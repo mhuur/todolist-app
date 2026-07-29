@@ -3426,6 +3426,22 @@ class Flux extends React.Component {
     this._docDown = (e)=>{ this._downEl = e.target; };
     document.addEventListener('mousedown', this._docDown, true);
     document.addEventListener('click', this._docClick, true);
+    this._purgeStaleTodayDone();
+  }
+  // ▼ _purgeStaleTodayDone — au démarrage, retire d'Aujourd'hui les tâches validées un AUTRE jour (nettoie le flag today + la position). L'affichage reste correct sans ça — todayTasks filtre déjà sur doneAt=aujourd'hui — mais évite que le flag today ne s'accumule.
+  _purgeStaleTodayDone(){
+    this.setState(st=>{
+      const isStale = t => t.status==='done' && !!t.today && !this._doneAtToday(t);
+      const staleIds = new Set();
+      (st.tasks||[]).forEach(t=>{ if(isStale(t)) staleIds.add(t.id); });
+      (st.projects||[]).forEach(p=>{ if(p.id!==st.currentProjectId) (p.tasks||[]).forEach(t=>{ if(isStale(t)) staleIds.add(t.id); }); });
+      if(!staleIds.size) return null;
+      const clean = arr => arr.map(t=> staleIds.has(t.id) ? {...t, today:false} : t);
+      const tasks = clean(st.tasks);
+      const projects = (st.projects||[]).map(p=> p.id===st.currentProjectId ? p : {...p, tasks: clean(p.tasks||[])});
+      const order = (Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>!staleIds.has(x));
+      return { tasks, projects, todayOrder:order };
+    });
   }
   componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
   // ▼ toast d'annulation (undo) : action réversible en 1 clic pendant ~5s (complétion / retrait d'Aujourd'hui). Remplace les modales de confirmation.
@@ -3471,7 +3487,7 @@ class Flux extends React.Component {
   stopEdit(){ this.setState({ editing:{id:null,field:null} }); }
   // ---- mutations ----
   toggleDone(id){ this.setState(st=>{ const cur=st.tasks.find(t=>t.id===id); const toDone=!(cur&&cur.status==='done'); const _order= toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return { tasks: st.tasks.map(t=> t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, doneAt:Date.now()}:{})} : t), ..._order }; }); }
-  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:false, doneAt:Date.now()}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = done ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
+  setStatus(id,status){ this.setState(st=>{ const done=status==='done'; const _found = st.tasks.find(t=>t.id===id) || (st.projects||[]).map(p=>(p.tasks||[]).find(t=>t.id===id)).find(Boolean); const keepToday = done && this._taskInToday(_found); const flip=arr=>arr.map(t=> t.id===id?{...t,status,...(done?{today:keepToday, doneAt:Date.now()}:{})}:t); const _ed = status==='wait'?{id,field:'relance'}:{id:null,field:null}; const _order = (done && !keepToday) ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {}; return st.tasks.some(t=>t.id===id)
     ? { tasks: flip(st.tasks), editing:_ed, ..._order }
     : { projects:(st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:flip(p.tasks)} : p), editing:_ed, ..._order }; }); }
 
@@ -3583,6 +3599,9 @@ class Flux extends React.Component {
   // ---- Aujourd'hui (vue globale tous projets ; ordre propre via todayOrder, n'affecte JAMAIS l'ordre de Flux) ----
   // Toutes les tâches marquées today, à travers tous les projets, ordonnées par todayOrder.
   // Projet courant : on lit l'état de travail (st.tasks), pas la copie figée dans st.projects.
+  // ▼ _doneAtToday / _taskInToday — support « une tâche validée reste dans Aujourd'hui (cochée) jusqu'au lendemain ».
+  _doneAtToday(t){ if(!t||!t.doneAt) return false; const d=new Date(t.doneAt); const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); return iso===this._isoFromDays(0); }
+  _taskInToday(t){ if(!t) return false; const today=this._isoFromDays(0); const due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const sched=!!due && due<=today && t.status!=='done' && t.status!=='wait'; const rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=today); return !!t.today || sched || rel; }
   todayTasks(st){
     st = st || this.state;
     const _todayStr = this._isoFromDays(0);
@@ -3591,7 +3610,7 @@ class Flux extends React.Component {
       const isCur = p.id===st.currentProjectId;
       const tasks  = isCur ? st.tasks  : (p.tasks||[]);
       const people = isCur ? st.people : (p.people||[]);
-      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; if((t.today||_sched||_rel) && t.status!=='done') out.push({ task:t, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people, sched:_sched, relanceDue:_rel }); });
+      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; const _doneToday=t.status==='done' && !!t.today && this._doneAtToday(t); if(((t.today||_sched||_rel) && t.status!=='done') || _doneToday) out.push({ task:t, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people, sched:_sched, relanceDue:_rel }); });
     });
     const order = Array.isArray(st.todayOrder)?st.todayOrder:[];
     const rank = id => { const i=order.indexOf(id); return i<0?1e9:i; };
@@ -3619,8 +3638,9 @@ class Flux extends React.Component {
     this.setState(st=>{
       const found = st.tasks.find(t=>t.id===id) || (st.projects||[]).map(p=>(p.tasks||[]).find(t=>t.id===id)).find(Boolean);
       const toDone = !(found && found.status==='done');
-      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:false, doneAt:Date.now()}:{})} : t;
-      const _order = toDone ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {};
+      const keepToday = toDone && this._taskInToday(found);   // valider une tâche d'Aujourd'hui : elle y reste (cochée) jusqu'au lendemain
+      const flip = t => t.id===id ? {...t, status: toDone?'done':'todo', ...(toDone?{today:keepToday, doneAt:Date.now()}:{})} : t;
+      const _order = (toDone && !keepToday) ? { todayOrder:(Array.isArray(st.todayOrder)?st.todayOrder:[]).filter(x=>x!==id) } : {};
       if(st.tasks.some(t=>t.id===id)) return { tasks: st.tasks.map(flip), ..._order };
       return { projects: (st.projects||[]).map(p=> (p.id!==st.currentProjectId && (p.tasks||[]).some(t=>t.id===id)) ? {...p, tasks:p.tasks.map(flip)} : p), ..._order };
     });
@@ -3892,7 +3912,7 @@ class Flux extends React.Component {
     const _relSort=(a,b)=>{ const ad=a.task.relance||'', bd=b.task.relance||''; return ad===bd?0:(ad<bd?-1:1); };
     const _flatToday=(e)=>{ const r=tvm(e,'relance'); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); };
     const _dragToday = !!st.todayDragId;
-    // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente. Les "terminé" sont exclues par todayTasks (auto-décochées). Pendant un drag, les groupes vides de l'onglet actif restent visibles comme zones de dépôt.
+    // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente → Terminé. Les tâches validées AUJOURD'HUI restent visibles (cochées) dans le groupe « Terminé » jusqu'au lendemain (todayTasks les inclut si today && doneAt=aujourd'hui) ; le groupe « done » n'apparaît que sous l'onglet « Tous » (_grpInTab). Pendant un drag, les groupes vides de l'onglet actif restent visibles comme zones de dépôt.
     const _relList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
     const _statusList = k => todayEntriesAll.filter(e=>!e.relanceDue && e.task.status===k).filter(tMatch).map(e=>tvm(e,k));
     const _grpInTab = k => { const pt = st.projStatusTab||'all'; return pt==='all' ? true : (k==='relance' ? pt==='wait' : pt===k); };  // vue Aujourd'hui (dans Projet) : filtrée par les onglets de statut Projet
@@ -3901,6 +3921,7 @@ class Flux extends React.Component {
       { key:'doing',   label:STATUS.doing.label },
       { key:'todo',    label:STATUS.todo.label },
       { key:'wait',    label:STATUS.wait.label },
+      { key:'done',    label:STATUS.done.label },
     ].map(g=> { const items = g.key==='relance' ? _relList : _statusList(g.key); return Object.assign({}, g, {
       items,
       // Groupe toujours monté (comme l'écran Projet) ; masqué en CSS s'il est vide hors drag. Évite l'insertion DOM au dragstart qui annule le drag natif.
@@ -4023,7 +4044,7 @@ class Flux extends React.Component {
       projPersonFilter: _projPF,
       projPersonOptions: st.people.slice().sort(byName).map(pp=>({ id:pp.id, label:pp.name, color:pp.color, count: st.tasks.filter(t=>t.person===pp.id).length })),
       onSetProjPerson:(pid)=>this.setState({ projPersonFilter:pid, filterOpen:null }),
-      todayView: st.todayView, todayList, todayGroups, projTaskGroups, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.length, todayHasAny: todayEntriesAll.length>0,
+      todayView: st.todayView, todayList, todayGroups, projTaskGroups, todayDragging:_dragToday, todayCount: todayList.length, todayTotal: todayEntriesAll.filter(e=>e.task.status!=='done').length, todayHasAny: todayEntriesAll.length>0,
       hasPersonDel: !!_personDel, personDelName: _personDel?_personDel.name:'',
       onPersonDelCancel:()=>this.setState({personDelId:null}),
       onPersonDelOk:()=>{ const id=this.state.personDelId; this.setState({personDelId:null}); if(id) this.deletePerson(id); },
