@@ -3960,8 +3960,6 @@ class Flux extends React.Component {
       const _selCat = (staskRes.categories||[]).find(c=>c.id===stask.cat);
       sel = { id:stask.id, title:stask.title, catLabel:_selCat?_selCat.name:'Sans catégorie', notes:stask.notes,
         subs: (Array.isArray(stask.checklist)?stask.checklist:[]).map(sb=>({ id:sb.id, txt:sb.text, done:!!sb.done, note:sb.note||'', hasNote:!!(sb.note||'').trim(), panelOpen: st.panelSubId===sb.id, onPanelToggle:()=>this.setState(s=>({panelSubId:s.panelSubId===sb.id?null:sb.id})), onNoteChange:(e)=>this.updateCheckNote(stask.id, sb.id, e.target.value) })),
-        projId: staskRes.projId||'',
-        projLabel: (()=>{ const p=(st.projects||[]).find(x=>x.id===staskRes.projId); return (!p||p.id==='__inbox')?'Sans projet':(p.number?p.number+' · '+p.name:p.name); })(),
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
         onTitleEdit:(e)=>this.updateTitle(stask.id, e.target.value),
         onDelete:()=>this.askDelete(stask.id) };
@@ -3978,9 +3976,11 @@ class Flux extends React.Component {
     const projDayBadge = dl => { if(!/^\d{4}-\d{2}-\d{2}$/.test(dl||'')) return { j:'', col:'var(--muted)', cls:'' }; const t=new Date(); t.setHours(0,0,0,0); const j=Math.round((new Date(dl+'T00:00:00')-t)/86400000); const cls=j<=10?'hot':j<=28?'mid':'far'; return { j: j<0?('J+'+(-j)):j===0?'Auj.':('J‑'+j), col: j<=10?'#d8442b':j<=28?'#0f3f93':'#8fc02e', cls }; };
     const _allT0=new Date(); _allT0.setHours(0,0,0,0);
     const _projDays = dl => /^\d{4}-\d{2}-\d{2}$/.test(dl||'') ? Math.round((new Date(dl+'T00:00:00')-_allT0)/86400000) : Infinity;
-    const _projDeadlineSort = (a,b)=>{ const da=_projDays(a.deadline), db=_projDays(b.deadline); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
+    // « Prochaine échéance » : date la plus proche ≥ aujourd'hui parmi l'échéance finale + les étapes datées (`steps`) ; si aucune à venir, la plus récente échue (projet en retard → en tête) ; '' si aucune date. Le sélecteur trie ET affiche son badge sur cette date, pas sur la seule échéance finale.
+    const _projNextDate = p => { const ds=[p.deadline, ...((p.steps||[]).map(s=>s.date))].filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')); if(!ds.length) return ''; const fut=ds.filter(d=>_projDays(d)>=0); return (fut.length?fut:ds).reduce((a,b)=> _projDays(b)<_projDays(a)?b:a); };
+    const _projNextSort = (a,b)=>{ const da=_projDays(_projNextDate(a)), db=_projDays(_projNextDate(b)); if(da!==db) return da-db; return a.name.localeCompare(b.name,'fr',{sensitivity:'base'}); };
     const projList = (st.projects||[]).filter(p=> p.id!=='__inbox' && p.name.toLowerCase().indexOf(pql)>=0)
-      .sort(_projDeadlineSort).map(p=>({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, current:p.id===st.currentProjectId, dlJ:projDayBadge(p.deadline).j, dlCol:projDayBadge(p.deadline).col, dlCls:projDayBadge(p.deadline).cls,
+      .sort(_projNextSort).map(p=>{ const _nd=_projNextDate(p); return ({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, current:p.id===st.currentProjectId, dlJ:projDayBadge(_nd).j, dlCol:projDayBadge(_nd).col, dlCls:projDayBadge(_nd).cls,
         editing: labelEditing('proj', p.id),
         menuOpen: st.projMenuId===p.id,
         onPick:(e)=>{ stop(e); this.switchProject(p.id); },
@@ -3988,7 +3988,7 @@ class Flux extends React.Component {
         onRename:(e)=>{ stop(e); this.setState({ projMenuId:null, projDelId:null, labelEdit:{type:'proj', id:p.id} }); },
         onDelete:(e)=>{ stop(e); this.setState({ projDelConfirmId:p.id, projOpen:false, projMenuId:null }); },
         onNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.commitLabelEdit('proj', p.id, e.target.value); } else if(e.key==='Escape'){ this.stopLabelEdit(); } },
-        onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }));
+        onNameBlur:(e)=>{ const cur=this.state.labelEdit; if(cur&&cur.type==='proj'&&cur.id===p.id) this.commitLabelEdit('proj', p.id, e.target.value); } }); });
     const allMode = !!st.allMode;
     const projExact = (st.projects||[]).some(p=>p.name.toLowerCase()===pql);
 
@@ -4572,8 +4572,6 @@ class Flux extends React.Component {
                 <button className="ek-dx trash" onClick={v.sel.onDelete} title="Supprimer la tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                 <button className="ek-dx close" onClick={v.onCloseDetail} title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
               </div>
-              <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Projets</div>
-              <div title="Le projet se change depuis la ligne de la tâche, pas ici" style={css("width:100%;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Montserrat',sans-serif;color:var(--text);background:var(--soft);")}>{v.sel.projLabel}</div>
               <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Note</div>
               <textarea className="ek-dnote" style={css('min-height:140px;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
               {v.sel.subs && v.sel.subs.length>0 &&
