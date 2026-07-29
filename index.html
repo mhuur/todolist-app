@@ -964,6 +964,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-dx svg{width:19px;height:19px}
 #flux-root .ek-dx.trash:hover{color:#d8442b}
 #flux-root .ek-dx.close:hover{color:var(--text2)}
+#flux-root .ek-projdel{flex:none;width:32px;height:32px;margin-top:5px;border:none;background:none;border-radius:8px;color:#95a0b3;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s,color .12s}
+#flux-root .ek-projdel:hover{background:#fef1ed;color:#d8442b}
+#flux-root .ek-projdel svg{width:17px;height:17px}
 /* ── Écran Projet (thème clair Ekopak) : top bar, sélecteur, badges J-n, groupes de statut, sous-tâches, goutte Aujourd'hui ── */
 #flux-root .ek-ov{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3aaae8}
 #flux-root .ek-projpick{display:inline-flex;align-items:center;gap:10px;margin-top:5px;cursor:pointer;position:relative}
@@ -3424,8 +3427,26 @@ class Flux extends React.Component {
       this.setState({ selectedId:null });
     };
     this._docDown = (e)=>{ this._downEl = e.target; };
+    // ▼ Entrée = valider le bouton principal / Échap = annuler, sur les modales de confirmation (suppression tâche/projet/personne/sous-tâche).
+    this._docKey = (e)=>{
+      if(e.key!=='Enter' && e.key!=='Escape') return;
+      const st=this.state;
+      const modal = st.confirmId ? 'task' : st.projDelConfirmId ? 'proj' : st.personDelId ? 'person' : st.subDelConfirm ? 'sub' : null;
+      if(!modal) return;
+      const tag=(e.target && e.target.tagName)||''; if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+      e.preventDefault(); e.stopPropagation();
+      if(e.key==='Escape'){
+        if(modal==='task') this.cancelDelete(); else if(modal==='proj') this.setState({projDelConfirmId:null}); else if(modal==='person') this.setState({personDelId:null}); else this.setState({subDelConfirm:null});
+        return;
+      }
+      if(modal==='task') this.confirmDelete();
+      else if(modal==='proj'){ const id=st.projDelConfirmId; this.setState({projDelConfirmId:null}); this.deleteProject(id); }
+      else if(modal==='person'){ const id=st.personDelId; this.setState({personDelId:null}); this.deletePerson(id); }
+      else { const c=st.subDelConfirm; this.setState({subDelConfirm:null}); this.delCheck(c.taskId, c.checkId); }
+    };
     document.addEventListener('mousedown', this._docDown, true);
     document.addEventListener('click', this._docClick, true);
+    document.addEventListener('keydown', this._docKey, true);
     this._purgeStaleTodayDone();
   }
   // ▼ _purgeStaleTodayDone — au démarrage, retire d'Aujourd'hui les tâches validées un AUTRE jour (nettoie le flag today + la position). L'affichage reste correct sans ça — todayTasks filtre déjà sur doneAt=aujourd'hui — mais évite que le flag today ne s'accumule.
@@ -3443,7 +3464,7 @@ class Flux extends React.Component {
       return { tasks, projects, todayOrder:order };
     });
   }
-  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); document.removeEventListener('keydown', this._docKey, true); if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
   // ▼ toast d'annulation (undo) : action réversible en 1 clic pendant ~5s (complétion / retrait d'Aujourd'hui). Remplace les modales de confirmation.
   showUndo(msg, action){ if(this._undoTimer) clearTimeout(this._undoTimer); this.setState({ undo:{ msg, action } }); this._undoTimer=setTimeout(()=>{ this._undoTimer=null; this.setState({ undo:null }); }, 5000); }
   doUndo(){ const u=this.state.undo; if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } this.setState({ undo:null }); if(u&&u.action) u.action(); }
@@ -4036,6 +4057,7 @@ class Flux extends React.Component {
       onProjNameBlur:(e)=>{ this.renameProject(st.currentProjectId, e.target.value); this.setState({projNameEdit:false}); },
       projOpen: st.projOpen, projQuery: st.projQuery, projList, projCreate: !!pq && !projExact,
       onProjToggle:()=>this.setState(s=>({ projOpen:!s.projOpen, projQuery:'', npOpen:false, projDelId:null })),
+      onProjDelCurrent:()=>{ if(!this.state.allMode && this.state.currentProjectId) this.setState({ projDelConfirmId:this.state.currentProjectId, projOpen:false, projMenuId:null }); },
       onProjQuery:(e)=>this.setState({ projQuery:e.target.value }),
       onProjKey:(e)=>{ if(e.key==='Escape'){ this.setState({projOpen:false,projQuery:''}); } else if(e.key==='Enter'){ const q=(this.state.projQuery||'').trim(); if(!q) return; const ql=q.toLowerCase(); const hit=this.state.projects.find(p=>p.name.toLowerCase()===ql) || this.state.projects.find(p=>p.name.toLowerCase().indexOf(ql)>=0); if(hit) this.switchProject(hit.id); else this.createProject(q); } },
       onProjCreate:(e)=>{ stop(e); const q=(this.state.projQuery||'').trim(); if(q) this.createProject(q); },
@@ -4477,6 +4499,10 @@ class Flux extends React.Component {
                 </div>}
             </div>
           </div>
+          {!v.allMode && v.hasProject &&
+            <button className="ek-projdel" onClick={v.onProjDelCurrent} title="Supprimer ce projet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
+            </button>}
           {v.projView==='todo' && this.renderProjStatusTabs(v)}
           <div style={css('flex:1;')}></div>
           {this.renderProjRightCluster(v)}
