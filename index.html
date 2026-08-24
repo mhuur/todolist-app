@@ -1358,7 +1358,8 @@ const SB_ICONS={planning:`<svg width="16" height="16" viewBox="0 0 16 16" fill="
 const SB_LOGO=`<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3C12 3 5.5 10.4 5.5 15.5a6.5 6.5 0 0 0 13 0C18.5 10.4 12 3 12 3z" fill="#eaf7fe"/><path d="M9.4 14.6c.15 1.7 1.35 3 3.05 3.25" fill="none" stroke="#81d0f5" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 function render(){
   /* Sidebar */
-  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"planning",l:"Planning",i:SB_ICONS.planning},{k:"time",l:"Temps",i:SB_ICONS.time},{k:"crm",l:"Fournisseurs",i:SB_ICONS.crm},{k:"projets",l:"Projets",i:SB_ICONS.projects},{k:"price",l:"Prix",i:SB_ICONS.price}];
+  // Onglet Temps désactivé (août 2026) — pour le réactiver : remettre {k:"time",l:"Temps",i:SB_ICONS.time} ci-dessous et retirer "time" de la redirection plus bas. rTS, le CSS et S.timesheet sont conservés intacts.
+  const tabs=[{k:"flux",l:"Projet",i:SB_ICONS.flux},{k:"planning",l:"Planning",i:SB_ICONS.planning},{k:"crm",l:"Fournisseurs",i:SB_ICONS.crm},{k:"projets",l:"Projets",i:SB_ICONS.projects},{k:"price",l:"Prix",i:SB_ICONS.price}];
   let sb=`<div class="sidebar"><div class="sb-logo" title="MyTodo">${SB_LOGO}</div>`;
   tabs.forEach(t=>{sb+=`<button class="sb-btn ${S.tab===t.k?"on":""}" onclick="sT('${t.k}')">${t.i}<span>${t.l}</span></button>`});
   sb+=`<div class="sb-spacer"></div>`;
@@ -1370,7 +1371,7 @@ function render(){
   sb+=`</div>`;
   /* Main */
   let h="";
-  if(S.tab==="projects"||S.tab==="global"||S.tab==="done"||S.tab==="today"||S.tab==="feedback")S.tab="flux";  // « today » (ancien onglet Aujourd'hui) fusionné dans Projet ; « feedback » (Notes) retiré
+  if(S.tab==="projects"||S.tab==="global"||S.tab==="done"||S.tab==="today"||S.tab==="feedback"||S.tab==="time")S.tab="flux";  // « today » (ancien onglet Aujourd'hui) fusionné dans Projet ; « feedback » (Notes) retiré ; « time » (Temps) masqué, code conservé
   if(S.tab==="time")h+=rTS();else if(S.tab==="crm")h+=rCRM();else if(S.tab==="projets")h+=rPC();else if(S.tab==="price")h+=rPL();else if(S.tab==="flux"||S.tab==="today"||S.tab==="planning")h+=`<div id="flux-root"></div>`;else h+=rTR();
   const mainCls=(S.tab==="price"||S.tab==="time"||S.tab==="crm"||S.tab==="projets"||S.tab==="trash")?"main main-wide":((S.tab==="flux"||S.tab==="today"||S.tab==="planning")?"main main-flux":"main");
   /* Focus capture pour les comboboxes pl-combo-* (filtres toolbar) */
