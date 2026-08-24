@@ -1070,6 +1070,168 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ckdel:hover{opacity:1 !important;color:#d04a45 !important;}
 #flux-root .ckbox:hover{border-color:#22C55E !important;box-shadow:0 0 8px rgba(34,197,94,.35);}
 #flux-root input::placeholder,#flux-root textarea::placeholder{color:var(--muted);}
+
+/* ── Planning sur téléphone : une carte par projet (renderMobilePlanning). Ces classes ne sont rendues que si isMob() ; le Gantt (renderTimeline) reste la vue ordinateur. ── */
+#flux-root .mp-wrap{padding:8px 12px 40px}
+#flux-root .mp-axis{position:relative;height:16px;margin:0 15px 8px;font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted)}
+#flux-root .mp-axis b{position:absolute;left:0;bottom:0;font-weight:700}
+#flux-root .mp-axis i{position:absolute;bottom:0;transform:translateX(-50%);font-style:normal}
+#flux-root .mp-empty{padding:46px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6}
+#flux-root .mp-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-xs);padding:12px 14px 4px;margin-bottom:10px}
+#flux-root .mp-hd{display:flex;align-items:center;gap:9px;min-height:28px;cursor:pointer}
+#flux-root .mp-sq{width:8px;height:8px;border-radius:2px;flex:none}
+#flux-root .mp-num{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--text2);flex:none}
+#flux-root .mp-nm{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flux-root .mp-j{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap;flex:none;color:var(--muted);border:1px solid var(--line)}
+#flux-root .mp-track{position:relative;height:26px;margin:10px 0 2px}
+#flux-root .mp-grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);opacity:.7}
+#flux-root .mp-bar{position:absolute;left:0;top:50%;transform:translateY(-50%);height:14px;border-radius:8px}
+#flux-root .mp-mk{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--text);transform:translate(-50%,-50%);box-shadow:0 0 0 3px var(--panel);z-index:3;box-sizing:border-box;cursor:pointer}
+#flux-root .mp-cap{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;color:#0b1626;border-radius:5px;padding:3px 7px;white-space:nowrap;z-index:4;cursor:pointer}
+#flux-root .mp-setdl{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;margin:8px 0 4px;border:1px dashed;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer}
+#flux-root .mp-row{display:flex;align-items:center;gap:10px;min-height:40px;border-top:1px solid var(--divider);cursor:pointer}
+#flux-root .mp-date{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;color:var(--muted);width:44px;flex:none}
+#flux-root .mp-ic{width:10px;flex:none;display:flex;justify-content:center}
+#flux-root .mp-ic b{width:9px;height:9px;border-radius:50%;border:2px solid var(--text);background:var(--bg);display:block;box-sizing:border-box}
+#flux-root .mp-ic i{width:3px;height:12px;border-radius:2px;display:block}
+#flux-root .mp-tx{flex:1;min-width:0;font-size:12.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flux-root .mp-tx.step{font-weight:600;color:var(--text)}
+#flux-root .mp-row.done .mp-tx{color:var(--muted);text-decoration:line-through}
+#flux-root .mp-add{display:flex;gap:8px;border-top:1px solid var(--divider);padding:6px 0}
+#flux-root .mp-add span{display:inline-flex;align-items:center;height:38px;padding:0 12px;border-radius:8px;background:var(--soft);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer}
+#flux-root .mp-pop{margin:8px 0;padding:11px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-md)}
+#flux-root .mp-poplab{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:7px}
+#flux-root .mp-poprow{display:flex;align-items:center;gap:8px;margin-top:7px}
+#flux-root .mp-in{width:100%;height:40px;border:1.5px solid var(--line);border-radius:8px;padding:0 10px;font-size:13px;background:var(--panel);color:var(--text);outline:none;font-family:'Nunito',sans-serif;min-width:0}
+#flux-root .mp-poprow .mp-in{flex:1}
+#flux-root .mp-in:focus{border-color:#81d0f5}
+#flux-root .mp-del{flex:none;height:40px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-radius:8px;color:#d8442b;font-size:12.5px;font-weight:600;cursor:pointer}
+#flux-root .mp-ok{flex:none;height:40px;display:inline-flex;align-items:center;padding:0 16px;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer}
+
+/* ══ Téléphone (≤600 px) — mise en page mobile. Tout ce bloc est enfermé dans la media query : le rendu ordinateur est inchangé. Complète le bloc « Mobile responsive » plus haut (qui vise surtout les écrans legacy) et doit rester APRÈS lui + après les styles .c2wrap / #flux-root pour gagner en cascade. ══ */
+@media(max-width:600px){
+  /* ── Barre d'onglets en bas : 50 px de boutons + ~20 px réservés à la barre d'accueil du téléphone ── */
+  .sidebar{height:auto;align-items:flex-start;justify-content:flex-start;gap:2px;padding:6px 6px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -6px 18px rgba(15,63,147,.16)}
+  .sb-btn{height:50px;border-radius:12px;gap:3px;padding:0}
+  .sb-btn span{font-size:9.5px}
+  .sb-btn svg{width:20px;height:20px}
+  .avatar-wrap{margin:0;flex:none;width:56px;height:50px;display:flex;align-items:center;justify-content:center}
+  .sb-avatar{width:34px;height:34px;font-size:12px}
+  .avatar-menu{bottom:calc(100% + 6px);top:auto;left:auto;right:0}
+  /* ── Hauteur des écrans pleine page : 100dvh suit la barre d'URL mobile ; le calc invalide retombe sur la règle précédente si dvh n'est pas connu ── */
+  /* Chaque écran mobile est une feuille pleine hauteur qui gère son propre rembourrage : .main n'en ajoute plus */
+  .main{padding:0!important;max-width:none}
+  .main.main-flux{height:calc(100vh - 76px);overflow:hidden}
+  .main.main-flux{height:calc(100dvh - 76px - env(safe-area-inset-bottom))}
+  .c2wrap,.k2wrap,.t2wrap{height:calc(100vh - 76px)}
+  .c2wrap,.k2wrap,.t2wrap{height:calc(100dvh - 76px - env(safe-area-inset-bottom))}
+  #flux-root>div{height:100%!important}
+  /* iOS zoome sur un champ dont le texte fait moins de 16 px : on force 16 px à la saisie */
+  #flux-root input,#flux-root textarea,.c2wrap input,.c2wrap textarea,.k2wrap input{font-size:16px!important}
+
+  /* ══ Écran Projet (React) ══ */
+  /* En-tête empilé : nom du projet, puis onglets de statut, puis filtre Personne + pastille du jour */
+  #flux-root>div>div:first-child{flex-wrap:wrap!important;gap:8px 12px!important;padding:10px 12px!important;height:auto!important}
+  #flux-root [data-projsel]{flex:1 1 auto!important;min-width:0}
+  #flux-root .ek-projpick h1{font-size:17px!important;max-width:none!important}
+  #flux-root .ek-projdel{display:none}
+  #flux-root div:has(>.ek-htab){order:3;flex:1 1 100%!important;gap:16px!important;overflow-x:auto}
+  #flux-root .ek-htab{font-size:12.5px;padding:5px 0}
+  #flux-root div:has(>.ek-todaypill){order:4;flex:1 1 100%!important;gap:12px!important}
+  #flux-root .ek-todaypill{flex:1!important;height:40px;justify-content:center}
+  #flux-root [data-fchip]{flex:none}
+  #flux-root .ek-pmenu{min-width:0!important;width:calc(100vw - 24px)!important;max-width:none!important}
+  /* En-tête du Planning : titre seul, puis « Sans date » + choix de la fenêtre de temps */
+  #flux-root .ek-planbar{height:auto!important;flex-wrap:wrap;padding:10px 12px!important;gap:8px 10px!important}
+  #flux-root .ek-planbar>span:nth-child(2){display:none}
+  #flux-root .ek-planbar>div{flex:1 1 100%;justify-content:space-between}
+  #flux-root .ek-planbar>div>div{flex:1;justify-content:space-between}
+  #flux-root .ek-planbar>div>div>span{flex:1;text-align:center;white-space:nowrap;padding-left:4px;padding-right:4px}
+  /* Listes : plus de largeur mini de 860 px, plus de défilement horizontal (le panneau détail est exclu, il porte les mêmes classes) */
+  #flux-root .fxcol.scrl:not([data-panel])>div{min-width:0!important;padding-left:12px!important;padding-right:12px!important}
+  #flux-root div:has(>.ek-thinadd){padding:8px 12px 2px!important}
+  #flux-root .ek-thinadd{max-width:none;height:44px}
+  /* Ligne de tâche en 2 étages : case + statut + titre + ⋮, puis projet + date + personne + goutte */
+  #flux-root .ek-trow{flex-wrap:wrap!important;gap:0;padding:3px 4px 5px;align-items:center}
+  #flux-root .ek-trow::after{content:"";flex-basis:100%;height:0;order:5}
+  #flux-root .ek-trow>:nth-child(1){order:1;margin-right:14px}
+  #flux-root .ek-trow>:nth-child(2){order:2;margin-right:8px}
+  #flux-root .ek-trow>:nth-child(3){order:6;width:auto!important;flex:1 1 30%!important;min-width:0;margin:2px 0 0 28px}
+  #flux-root .ek-mchip{max-width:100px}
+  #flux-root .ek-trow>:nth-child(4){order:3;flex:1 1 auto;min-width:0}
+  #flux-root .ek-trow>:nth-child(5){order:7;gap:6px!important;margin-top:2px}
+  #flux-root .ek-trow>:nth-child(5)>span{width:auto!important;max-width:130px}
+  #flux-root .ek-trow>[data-rowmenu]{order:4}
+  #flux-root .ek-trow>.ek-x{order:8;margin-top:2px}
+  /* Cibles tactiles : la zone cliquable est étendue par un ::after transparent, sans changer le dessin */
+  #flux-root .ek-ck{width:22px;height:22px;border-radius:7px;position:relative}
+  #flux-root .ek-ck::after,#flux-root .ek-sdot::after,#flux-root .ek-x::after,#flux-root .ek-tgl::after{content:"";position:absolute;inset:-10px}
+  #flux-root .ek-sdot,#flux-root .ek-x,#flux-root .ek-tgl{position:relative}
+  /* Pas de survol sur un téléphone : ce qui n'apparaissait qu'au survol devient permanent */
+  #flux-root .ek-x,#flux-root .ek-tgl,#flux-root .ek-xsub,#flux-root .ek-xsubdel,#flux-root .ek-pmx{opacity:1!important}
+  #flux-root .ek-x.addtoday{opacity:.55!important}
+  #flux-root .ek-subrow{min-height:40px}
+  /* Panneau détail : feuille plein écran */
+  #flux-root [data-panel]{width:100%!important;padding:16px!important;border-left:none!important;box-shadow:none!important}
+
+  /* ══ CRM Fournisseurs & Projets (.c2wrap) ══ */
+  .c2wrap .htop{flex-wrap:wrap;gap:10px;padding:12px 16px}
+  .c2wrap .htop>div:first-child{flex:1;min-width:0}
+  .c2wrap .htop h1{font-size:17px}
+  .c2wrap .htop>.grow{display:none}
+  .c2wrap .qadd{order:2;flex:1 1 100%;max-width:none;height:44px;padding:0 12px;border:1.5px solid var(--border-default);border-radius:10px}
+  .c2wrap .seg{order:3;flex:1 1 100%}
+  .c2wrap .seg button{flex:1;padding:9px 0}
+  .c2wrap .resync{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0}
+  .c2wrap .resync svg{width:17px;height:17px}
+  .c2wrap .xlnks{gap:6px}
+  .c2wrap .xlnk{height:44px}
+  .c2wrap .list{padding:16px}
+  /* Cartes fournisseur */
+  .c2wrap .card-hd{min-height:56px;gap:8px;padding:0 6px 0 8px}
+  .c2wrap .card-bd{padding:4px 6px 12px 16px}
+  .c2wrap .xdel{opacity:1;width:40px;height:40px}
+  .c2wrap .item{min-height:46px;gap:6px}
+  .c2wrap .star{width:40px;height:40px}
+  .c2wrap .contact{gap:8px}
+  .c2wrap .contact .nm{flex:1 1 100%;min-width:0}
+  .c2wrap .contact a{min-height:40px;padding:0 12px;background:var(--deep-blue-50);border-radius:8px}
+  .c2wrap .contact .ctmv{width:100%}
+  .c2wrap .ac-wrap input{height:40px}
+  /* Ligne projet en 2 étages : n° + nom + lien + corbeille, puis badges + technos */
+  .c2wrap .prow{flex-wrap:wrap;gap:0 10px;padding:2px 10px 8px 14px}
+  .c2wrap .prow::after{content:"";flex-basis:100%;height:0;order:5}
+  .c2wrap .prow .pnum{order:1;width:auto;flex:none;line-height:40px}
+  .c2wrap .prow .pname{order:2;flex:1 1 auto;line-height:40px}
+  .c2wrap .prow .splink{order:3;width:40px;height:40px}
+  .c2wrap .prow .xdel{order:4}
+  .c2wrap .prow .ptype{order:6}
+  .c2wrap .prow .ptech{order:7;flex:1 1 auto;max-width:none;text-align:right}
+  /* Fiche projet : la modale passe en feuille plein écran */
+  .c2wrap .pc-back{padding:0;align-items:stretch}
+  .c2wrap .pc-card{width:100%;max-width:none;min-height:100%;border-radius:0;padding:16px 16px 40px}
+  .c2wrap .frow{flex-direction:column;align-items:stretch;gap:14px}
+  .c2wrap .fld{width:auto!important}
+  .c2wrap .fld input{height:44px}
+  .c2wrap .fld .seg{height:auto}
+  .c2wrap .fld .seg button{flex:1;padding:11px 0}
+  .c2wrap .lnkrow .splink{width:44px;height:44px}
+  .c2wrap .thd{display:none}
+  .c2wrap .trow{flex-wrap:wrap;gap:8px;padding:8px 6px;margin-bottom:8px;background:var(--surface-sunken);border:1px solid var(--border-subtle);border-radius:10px}
+  .c2wrap .trow::after{content:"";flex-basis:100%;height:0;order:3}
+  .c2wrap .trow .grip{order:1}
+  .c2wrap .trow .c1{order:2;flex:1 1 auto}
+  .c2wrap .trow .c2,.c2wrap .trow .c3{order:4;width:auto;flex:1 1 40%}
+  .c2wrap .trow .xdel{order:6}
+  .c2wrap .trow .tin{height:40px}
+  .c2wrap .taddrow{padding-left:6px}
+  .c2wrap .tadd{height:44px}
+
+  /* ══ Corbeille ══ */
+  .k2wrap .htop{gap:12px;padding:12px 16px}
+  .k2wrap .bvider{height:44px}
+  .k2wrap .brs{height:40px}
+}
 </style>
 <link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap">
 </head>
@@ -3429,7 +3591,12 @@ class Flux extends React.Component {
     return { ...ui, projects, currentProjectId: cur?cur.id:null, ...flat, ...runtime };
   }
 
+  // ▼ isMob — largeur téléphone (même seuil que le bloc @media du CSS). Seul le Planning change de rendu en JS ; le reste de l'adaptation mobile est en CSS.
+  isMob(){ return this._mq ? this._mq.matches : (typeof window!=='undefined' && window.innerWidth<=600); }
   componentDidMount(){
+    this._mq = window.matchMedia('(max-width:600px)');
+    this._onMq = ()=>this.forceUpdate();
+    if(this._mq.addEventListener) this._mq.addEventListener('change', this._onMq); else this._mq.addListener(this._onMq);
     this._docClick = (e)=>{
       const tg = e.target;
       const inTask = tg && tg.closest && tg.closest('[data-task]');
@@ -3493,7 +3660,7 @@ class Flux extends React.Component {
       return { tasks, projects, todayOrder:order };
     });
   }
-  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); document.removeEventListener('keydown', this._docKey, true); if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); document.removeEventListener('keydown', this._docKey, true); if(this._mq&&this._onMq){ if(this._mq.removeEventListener) this._mq.removeEventListener('change', this._onMq); else this._mq.removeListener(this._onMq); } if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
   // ▼ toast d'annulation (undo) : action réversible en 1 clic pendant ~5s (complétion / retrait d'Aujourd'hui). Remplace les modales de confirmation.
   showUndo(msg, action){ if(this._undoTimer) clearTimeout(this._undoTimer); this.setState({ undo:{ msg, action } }); this._undoTimer=setTimeout(()=>{ this._undoTimer=null; this.setState({ undo:null }); }, 5000); }
   doUndo(){ const u=this.state.undo; if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } this.setState({ undo:null }); if(u&&u.action) u.action(); }
@@ -4163,7 +4330,7 @@ class Flux extends React.Component {
       const tLaneRight=[];
       tks.forEach(t=>{ const w=((t.title||'').length+t.dateLabel.length)*0.82+4; let lane=0; while(lane<tLaneRight.length && tLaneRight[lane] > t.leftPct-0.4) lane++; t.lane=lane; tLaneRight[lane]=t.leftPct+w; });
       return {
-        id:p.id, name:p.name, hasDL, j, jLabel, col, dp, deadlineLabel: hasDL?fmt(_dl):'', deadlineISO: hasDL?_dl:'',
+        id:p.id, name:p.name, number:p.number||'', hasDL, j, jLabel, col, dp, deadlineLabel: hasDL?fmt(_dl):'', deadlineISO: hasDL?_dl:'',
         steps, tasks:tks, maxLane: laneRight.length||1, maxTaskLane: tLaneRight.length||1,
         capStyle:`position:absolute;left:0;width:${dp}%;top:50%;transform:translateY(-50%);height:20px;border-radius:10px;background:linear-gradient(90deg,var(--soft),${hasDL?col+'2e':'var(--soft)'});border:1px solid ${hasDL?col+'66':'var(--line)'};overflow:hidden;`,
         endStyle: hasDL ? `position:absolute;left:${dp}%;top:50%;transform:translate(-50%,-50%);height:23px;display:flex;align-items:center;padding:0 9px;border-radius:7px;background:${col};color:#0b1626;font-weight:800;font-size:11px;box-shadow:0 0 16px ${col}66;white-space:nowrap;z-index:4;` : ''
@@ -4280,10 +4447,93 @@ class Flux extends React.Component {
     );
   }
 
+  // ▼ renderMobilePlanning — Planning sur téléphone : une carte par projet (mini-barre de temps, même échelle pour toutes les cartes, puis étapes et tâches datées en liste chronologique). Le Gantt de renderTimeline reste la vue ordinateur — il demande 1000 px de large.
+  renderMobilePlanning(v, empty){
+    const geo = v.globalPlanning, ed = v.projEdit, accent = geo.accent;
+    return (
+      <div className="mp-wrap">
+        <div className="mp-axis">
+          <b style={css('color:'+accent+';')}>Auj.</b>
+          {geo.months.map((m,i)=> <i key={i} style={css('left:'+m.leftPct+'%;')}>{m.label}</i>)}
+        </div>
+        {geo.projects.length===0
+          ? <div className="mp-empty">{empty}</div>
+          : geo.projects.map(p=>{
+              const rows = p.steps.map(s=>({ key:'s'+s.id, step:true, done:false, label:s.name, date:s.dateLabel, lp:s.leftPct, onPick: ed?(()=>ed.onStepEdit(s.id)):undefined }))
+                .concat(p.tasks.map(t=>({ key:'t'+t.id, step:false, done:t.done, label:t.title, date:t.dateLabel, lp:t.leftPct, onPick:(ed&&ed.onSelectTask)?(()=>ed.onSelectTask(t.id,p.id)):undefined })));
+              rows.sort((a,b)=>a.lp-b.lp);
+              const stepEd = (ed && ed.stepEditId) ? p.steps.find(s=>s.id===ed.stepEditId) : null;
+              const dlOpen = !!(ed && ed.deadlinePid===p.id);
+              const taskOpen = !!(ed && ed.taskAddPid===p.id);
+              // la pastille d'échéance se pose AU BOUT de la barre (à droite, ou à gauche si la barre va trop loin) — sinon elle recouvre les cercles d'étape
+              const capPct = Math.min(p.dp, 100);
+              const capT = (p.dp > 62) ? 'translate(-100%,-50%)' : 'translate(6px,-50%)';
+              return (
+                <div key={p.id} className="mp-card">
+                  <div className="mp-hd" onClick={v.onOpenProj?(()=>v.onOpenProj(p.id)):undefined}>
+                    <span className="mp-sq" style={css('background:'+(p.hasDL?p.col:'var(--line)')+';')}></span>
+                    {p.number ? <span className="mp-num">{p.number}</span> : null}
+                    <span className="mp-nm">{p.name}</span>
+                    <span className="mp-j" style={css(p.hasDL?('background:'+p.col+';border-color:'+p.col+';color:#0b1626;'):'')}>{p.jLabel}</span>
+                  </div>
+                  {p.hasDL
+                    ? <div className="mp-track">
+                        {geo.months.map((m,i)=> <span key={'g'+i} className="mp-grid" style={css('left:'+m.leftPct+'%;')}></span>)}
+                        <span className="mp-bar" style={css('width:'+p.dp+'%;background:linear-gradient(90deg,var(--soft),'+p.col+'55);border:1px solid '+p.col+'66;')}></span>
+                        {p.steps.map((s,i)=> <span key={'k'+i} className="mp-mk" style={css('left:'+s.leftPct+'%;')} onClick={ed?((e)=>{e.stopPropagation();ed.onStepEdit(s.id);}):undefined}></span>)}
+                        <span className="mp-cap" style={css('left:'+capPct+'%;transform:'+capT+';background:'+p.col+';')} onClick={ed?((e)=>{e.stopPropagation();ed.onDeadlineToggle(p.id);}):undefined}>{p.deadlineLabel}</span>
+                      </div>
+                    : (ed ? <div className="mp-setdl" style={css('color:'+accent+';border-color:'+accent+'66;background:'+accent+'12;')} onClick={(e)=>{e.stopPropagation();ed.onDeadlineToggle(p.id);}}>＋ Définir l’échéance</div> : null)}
+                  {dlOpen &&
+                    <div className="mp-pop" onClick={(e)=>e.stopPropagation()}>
+                      <div className="mp-poplab">Échéance du projet</div>
+                      <div className="mp-poprow">
+                        <input autoFocus type="date" className="mp-in" value={p.deadlineISO} onChange={(e)=>ed.onProjDeadline(p.id,e)} />
+                        {p.hasDL && <span className="mp-del" onClick={()=>ed.onClearDeadline(p.id)}>Effacer</span>}
+                        <span className="mp-ok" style={css('background:'+accent+';')} onClick={()=>ed.onDeadlineToggle(p.id)}>OK</span>
+                      </div>
+                    </div>}
+                  {rows.map(r=>
+                    <div key={r.key} className={'mp-row'+(r.done?' done':'')} onClick={r.onPick}>
+                      <span className="mp-date">{r.date}</span>
+                      <span className="mp-ic">{r.step ? <b></b> : <i style={css('background:'+(r.done?'var(--cbox)':accent)+';')}></i>}</span>
+                      <span className={'mp-tx'+(r.step?' step':'')}>{r.label}</span>
+                    </div>)}
+                  {stepEd &&
+                    <div className="mp-pop" onClick={(e)=>e.stopPropagation()}>
+                      <div className="mp-poplab">Étape clé</div>
+                      <input autoFocus className="mp-in" value={stepEd.name==='Étape'?'':stepEd.name} onChange={(e)=>ed.onStepName(p.id,stepEd.id,e)} placeholder="Nom de l’étape" />
+                      <div className="mp-poprow">
+                        <input type="date" className="mp-in" value={stepEd.date} onChange={(e)=>ed.onStepDate(p.id,stepEd.id,e)} />
+                        <span className="mp-del" onClick={()=>ed.onDelStep(p.id,stepEd.id)}>Suppr.</span>
+                        <span className="mp-ok" style={css('background:'+accent+';')} onClick={()=>ed.onCloseStepEdit()}>OK</span>
+                      </div>
+                    </div>}
+                  {taskOpen &&
+                    <div className="mp-pop" onClick={(e)=>e.stopPropagation()}>
+                      <div className="mp-poplab">Nouvelle tâche datée</div>
+                      <input autoFocus className="mp-in" value={ed.taskAddName} onChange={ed.onTaskAddName} onKeyDown={(e)=>{ if(e.key==='Enter') ed.onTaskAddSubmit(p.id); else if(e.key==='Escape') ed.onTaskAddToggle(p.id); }} placeholder="Nom de la tâche" />
+                      <div className="mp-poprow">
+                        <input type="date" className="mp-in" value={ed.taskAddDate} onChange={ed.onTaskAddDate} />
+                        <span className="mp-ok" style={css(((ed.taskAddName||'').trim()&&ed.taskAddDate)?('background:'+accent+';'):'background:var(--soft);color:var(--muted);')} onClick={((ed.taskAddName||'').trim()&&ed.taskAddDate)?(()=>ed.onTaskAddSubmit(p.id)):undefined}>OK</span>
+                      </div>
+                    </div>}
+                  {ed &&
+                    <div className="mp-add">
+                      {p.hasDL && <span onClick={(e)=>{e.stopPropagation();ed.onAddStep(p.id);}}>＋ Étape</span>}
+                      {ed.onTaskAddToggle && <span onClick={(e)=>{e.stopPropagation();ed.onTaskAddToggle(p.id);}}>＋ Tâche datée</span>}
+                    </div>}
+                </div>);
+            })}
+      </div>
+    );
+  }
+
   renderGlobalPlanning(v){
     const empty = (v.planUndatedCount>0)
       ? "Aucun projet daté pour l'instant. Clique sur « Sans date » (en haut à droite) pour afficher tes projets et leur poser une échéance."
       : "Aucun projet. Crée-en un dans l'onglet Projet : il apparaîtra ici pour recevoir une échéance, des étapes et des tâches datées.";
+    if(this.isMob()) return this.renderMobilePlanning(v, empty);
     return (
       <div style={css('padding:16px 0 0;')}>
         {this.renderTimeline(v.globalPlanning, { minW:1000, onOpen:v.onOpenProj, edit:v.projEdit, empty })}
@@ -4556,7 +4806,7 @@ class Flux extends React.Component {
         </div>}
 
         {v.planning &&
-        <div style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
+        <div className="ek-planbar" style={css('height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <span style={css('font-size:14px;font-weight:600;color:var(--text);flex:none;')}>Planning</span>
           <span style={css('font-size:12px;color:var(--muted);')}>Vue d'ensemble, triée par urgence</span>
           <div style={css('margin-left:auto;flex:none;display:flex;align-items:center;gap:12px;')}>
