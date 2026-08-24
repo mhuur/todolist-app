@@ -937,6 +937,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-pnum{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;flex:none}
 #flux-root .ek-x{width:26px;height:26px;flex:none;border:none;background:none;border-radius:7px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;padding:0;transition:opacity .12s,background .12s,color .12s}
 #flux-root .ek-trow:hover .ek-x{opacity:1}
+#flux-root .ek-x.menu.open{opacity:1;background:#f2f5fb;color:#0f3f93}
 #flux-root .ek-x svg{width:15px;height:15px}
 #flux-root .ek-x.note.has{opacity:1;color:#0f3f93}
 #flux-root .ek-x.note:hover{background:#f2f5fb;color:#0f3f93}
@@ -995,14 +996,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-todaypill.on{background:#3aaae8;color:#fff}
 #flux-root .ek-todaypill.on:hover{background:#2f9fdd}
 #flux-root .ek-todaypill svg{width:16px;height:16px}
-#flux-root .ek-chev{width:22px;height:22px;flex:none;border:none;background:none;border-radius:6px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
-#flux-root .ek-chev:hover{background:#f2f5fb;color:#0f3f93}
-#flux-root .ek-chev svg{width:15px;height:15px;transition:transform .14s}
-#flux-root .ek-chev.open svg{transform:rotate(90deg);color:#0f3f93}
-#flux-root .ek-subchip{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;color:#0f3f93;background:#f2f5fb;border:none;border-radius:999px;padding:3px 9px;cursor:pointer;flex:none;display:inline-flex;align-items:center;gap:5px}
-#flux-root .ek-subchip:hover{filter:brightness(0.96)}
-#flux-root .ek-subchip svg{width:11px;height:11px}
-#flux-root .ek-subwrap{padding:2px 0 8px 58px;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--divider)}
+#flux-root .ek-subwrap{padding:2px 0 8px 21px;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--divider)}
 #flux-root .ek-subrow{display:flex;align-items:center;gap:9px;padding:4px 0}
 #flux-root .ek-subwrap .ek-subrow[draggable="true"]{cursor:grab}
 #flux-root .ek-subwrap .ek-subrow[draggable="true"]:active{cursor:grabbing}
@@ -3418,6 +3412,8 @@ class Flux extends React.Component {
       if(this.state.filterOpen && !inFilter){ this.setState({ filterOpen:null }); }
       const inProjMenu = tg && tg.closest && tg.closest('[data-projmenu]');
       if(this.state.projMenuId && !inProjMenu){ this.setState({ projMenuId:null, projDelId:null }); }
+      const inRowMenu = tg && tg.closest && tg.closest('[data-rowmenu]');
+      if(this.state.rowMenuId && !inRowMenu){ this.setState({ rowMenuId:null }); }
       const inLabelEdit = tg && tg.closest && tg.closest('[data-labeledit="1"]');
       if(this.state.labelEdit && this.state.labelEdit.type==='cat' && this.state.labelEdit.rail && !inLabelEdit){ const inp=document.querySelector('[data-labeledit="1"]'); this.commitLabelEdit('cat', this.state.labelEdit.id, inp?inp.value:''); }
       const downIn = (sel)=> this._downEl && this._downEl.closest && this._downEl.closest(sel);
@@ -3889,13 +3885,14 @@ class Flux extends React.Component {
         statusLabel:sm.label, statusDot: done?'#8fc02e':sm.dot, statusOptions,
         hasPerson:!!pp, personName:pp?pp.name:'', personQuery:st.personQuery, personMenu,
         noteHas: !!(t.notes||'').trim() || _subs.some(s=>(s.note||'').trim()),
-        hasSubs: _subs.length>0, subCount: _subs.filter(s=>s.done).length+'/'+_subs.length,
-        // Ouvert par défaut si la tâche a des sous-tâches ; openSubs ne stocke que le choix explicite (chevron), qui prime sur le défaut.
-        subsOpen: (st.openSubs||{})[t.id]!==undefined ? !!(st.openSubs||{})[t.id] : _subs.length>0, chevCls: 'ek-chev'+(((st.openSubs||{})[t.id]!==undefined ? !!(st.openSubs||{})[t.id] : _subs.length>0)?' open':''),
-        onToggleSubs:(e)=>{ stop(e); this.setState(s=>{ const cur=(s.openSubs||{})[t.id]; const eff=cur!==undefined?!!cur:_subs.length>0; return { openSubs:{...(s.openSubs||{}), [t.id]:!eff}, subDraft:'' }; }); },
+        // Sous-tâches toujours dépliées dès qu'il y en a (plus de chevron) ; dépliée aussi pendant l'ajout via le menu ⋮ (subAddId).
+        subsOpen: _subs.length>0 || st.subAddId===t.id,
+        subAdding: st.subAddId===t.id,
         subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':'')+(st.subDragOverId===sb.id?' dragover':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.setState({ subDelConfirm:{ taskId:t.id, checkId:sb.id, text:sb.text||'' } }); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({subDragId:sb.id}); }, onDragOver:(e)=>{ e.preventDefault(); e.stopPropagation(); if(st.subDragOverId!==sb.id) this.setState({subDragOverId:sb.id}); }, onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderCheck(t.id, st.subDragId, sb.id); }, onDragEnd:(e)=>{ e.stopPropagation(); this.setState({subDragId:null,subDragOverId:null}); } })),
         subDraft: st.subDraft||'', onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
-        onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:''}); e.target.blur(); } },
+        // Entrée = ajoute la sous-tâche et garde un champ vide pour enchaîner ; Échap ou clic ailleurs (blur) = le champ vide disparaît.
+        onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:'', subAddId:null}); e.target.blur(); } },
+        onSubBlur:()=>{ this.setState({subDraft:'', subAddId:null}); },
         titleStyle:'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;'+(done?'color:#95a0b3;text-decoration:line-through;':'color:var(--text);'),
         edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
         isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
@@ -3906,7 +3903,6 @@ class Flux extends React.Component {
         today:!!t.today,
         onUnmark:(e)=>{ stop(e); this.unmarkTodayUndo(t.id); },
         onMark:(e)=>{ stop(e); this.toggleToday(t.id); },
-        onOpenDetail:(e)=>{ stop(e); this.toggleSelect(t.id); },
         onTitleClick:(e)=>{ stop(e); clearTimeout(this._tc); this._tc=setTimeout(()=>this.toggleSelect(t.id),200); },
         onTitleDbl:(e)=>{ stop(e); clearTimeout(this._tc); this.startEdit(t.id,'title'); },
         onTitleInput:(e)=>this.updateTitle(t.id, e.target.value),
@@ -3919,7 +3915,12 @@ class Flux extends React.Component {
         onPersonQuery:(e)=>this.setPersonQuery(e.target.value),
         onPersonKey:(e)=>{ stop(e); if(e.key==='Escape'){ this.stopPersonEdit(); return; } if(e.key==='Enter'){ e.preventDefault(); const q=(st.personQuery||'').trim(); if(!q){ this.stopPersonEdit(); return; } const ql=q.toLowerCase(); const ppl=entry.people||[]; const hit=ppl.find(x=>x.name.toLowerCase()===ql) || ppl.find(x=>x.name.toLowerCase().indexOf(ql)>=0); if(hit){ this.updatePerson(t.id,hit.id); this.stopPersonEdit(); } else { const id=this.addPersonTo(entry.projId,q); this.updatePerson(t.id,id); this.stopPersonEdit(); } } },
         onStatusClick:(e)=>{ stop(e); if(isEd('status')) this.stopEdit(); else this.startEdit(t.id,'status'); },
-        onDelete:(e)=>{ stop(e); this.askDelete(t.id); },
+        // Menu ⋮ de la ligne (façon Google Tasks) : Ajouter une sous-tâche / Note / Supprimer. Transient rowMenuId, fermé au clic hors [data-rowmenu] (_docClick).
+        menuOpen: st.rowMenuId===t.id,
+        onMenuToggle:(e)=>{ stop(e); this.setState(s=>({ rowMenuId: s.rowMenuId===t.id?null:t.id })); },
+        onMenuAddSub:(e)=>{ stop(e); this.setState({ rowMenuId:null, subAddId:t.id, subDraft:'' }); },
+        onMenuNote:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.toggleSelect(t.id); },
+        onMenuDelete:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.askDelete(t.id); },
         onDragStart:(e)=>{ this._todayDrag=t.id; e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain', t.id); }catch(_){} const id=t.id; requestAnimationFrame(()=>{ if(this._todayDrag===id) this.setState({todayDragId:id}); }); },
         onDragEnter:(e)=>{ e.preventDefault(); if(this.state.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
         onDragOver:(e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; },
@@ -4291,9 +4292,6 @@ class Flux extends React.Component {
     return (
       <div key={t.id} className="ek-trow" data-task="1" draggable={t.draggable} style={css(t.rowStyle)}
         onDragStart={t.onDragStart} onDragEnter={t.onDragEnter} onDragOver={t.onDragOver} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
-        <button className={t.chevCls} onClick={t.onToggleSubs} title="Sous-tâches">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
-        </button>
         <span className={'ek-ck'+(t.done?' on':'')} onClick={t.onCheck} title={t.done?'Rouvrir la tâche':'Marquer comme terminée'}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
         </span>
@@ -4345,11 +4343,6 @@ class Flux extends React.Component {
         {t.edTitle
           ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
           : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
-        {t.hasSubs && !t.edTitle &&
-          <button className="ek-subchip" onClick={t.onToggleSubs} title="Sous-tâches">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"></path></svg>
-            {t.subCount}
-          </button>}
         <span style={css('display:flex;align-items:center;gap:14px;flex:none;')}>
           <span style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
             {t.edDue
@@ -4375,9 +4368,6 @@ class Flux extends React.Component {
                 </span>}
           </span>
         </span>
-        <button className={'ek-x note'+(t.noteHas?' has':'')} onClick={t.onOpenDetail} title="Note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg>
-        </button>
         {t.today
           ? <button className="ek-x today" onClick={t.onUnmark} title="Retirer d'aujourd'hui (sans supprimer)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path><path d="M9 14h6"></path></svg>
@@ -4385,9 +4375,26 @@ class Flux extends React.Component {
           : <button className="ek-x addtoday" onClick={t.onMark} title="Ajouter à aujourd'hui">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
             </button>}
-        <button className="ek-x del" onClick={t.onDelete} title="Supprimer la tâche">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
-        </button>
+        <span style={css('position:relative;flex:none;display:flex;')} data-rowmenu="1">
+          <button className={'ek-x menu'+(t.menuOpen?' open':'')} onClick={t.onMenuToggle} title="Actions">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg>
+          </button>
+          {t.menuOpen &&
+            <div style={css('position:absolute;top:28px;right:0;min-width:208px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(15,63,147,.16);padding:5px;z-index:45;')}>
+              <div className="stopt" onClick={t.onMenuAddSub} style={css('display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;flex:none;')}><path d="M9 6h11M9 12h11M9 18h6M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+                Ajouter une sous-tâche
+              </div>
+              <div className="stopt" onClick={t.onMenuNote} style={css('display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);')}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;flex:none;')}><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg>
+                Note{t.noteHas?' ●':''}
+              </div>
+              <div className="stopt" onClick={t.onMenuDelete} style={css('display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:#d8442b;')}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={css('width:14px;height:14px;flex:none;')}><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
+                Supprimer
+              </div>
+            </div>}
+        </span>
       </div>
     );
   }
@@ -4407,7 +4414,7 @@ class Flux extends React.Component {
             </div>
             {s.noteOpen && <div className="ek-subnote"><textarea autoFocus className="ek-subnotein" placeholder="Note sur cette sous-tâche…" value={s.note} onChange={s.onNoteChange} onClick={t.stop} /></div>}
           </React.Fragment>)}
-        <div className="ek-subrow"><input className="ek-subaddin" placeholder="+ Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} /></div>
+        {t.subAdding && <div className="ek-subrow"><input className="ek-subaddin" autoFocus placeholder="Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} onBlur={t.onSubBlur} /></div>}
       </div>
     );
   }
