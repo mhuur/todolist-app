@@ -1093,13 +1093,20 @@ let syncEl=null;
 
 function doLogin(){
   document.getElementById('login-msg').innerHTML='<div class="login-loading">Connexion…</div>';
-  const provider=new firebase.auth.GoogleAuthProvider();
-  provider.addScope(GC_SCOPE);
   const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if(isMobile){auth.signInWithRedirect(provider)}
-  else{auth.signInWithPopup(provider).then(r=>{gcCaptureCred(r);gcSyncContacts().then(x=>{if(x&&x.ok)render()})}).catch(e=>{
-    document.getElementById('login-msg').innerHTML=`<div class="login-err">${e.message}</div>`;
-  })}
+  const provider=new firebase.auth.GoogleAuthProvider();
+  // Scope Contacts sur desktop seulement : la sync CRM est un usage desktop, et ce scope
+  // sensible ajoute 2 écrans de consentement au flux mobile sans rien apporter.
+  if(!isMobile)provider.addScope(GC_SCOPE);
+  // Popup et non redirect, y compris sur mobile : le redirect a besoin du stockage de
+  // totolist-mhuur2.firebaseapp.com depuis mhuur.github.io, que les navigateurs mobiles
+  // bloquent (cookies tiers) — getRedirectResult revient vide et la connexion boucle.
+  auth.signInWithPopup(provider).then(r=>{gcCaptureCred(r);gcSyncContacts().then(x=>{if(x&&x.ok)render()})}).catch(e=>{
+    const code=(e&&e.code)||"";
+    if(code==="auth/popup-closed-by-user"||code==="auth/cancelled-popup-request"){document.getElementById('login-msg').innerHTML='';return}
+    if(code==="auth/popup-blocked"||code==="auth/operation-not-supported-in-this-environment"){auth.signInWithRedirect(provider);return}
+    document.getElementById('login-msg').innerHTML=`<div class="login-err">${esc(e.message||code)}</div>`;
+  });
 }
 function doLogout(){if(confirm("Se déconnecter ?"))auth.signOut()}
 
@@ -1118,7 +1125,10 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('app').style.display='none';
   }
 });
-auth.getRedirectResult().then(r=>{if(r&&r.user)gcCaptureCred(r)}).catch(()=>{});
+auth.getRedirectResult().then(r=>{if(r&&r.user)gcCaptureCred(r)}).catch(e=>{
+  const el=document.getElementById('login-msg');
+  if(el)el.innerHTML=`<div class="login-err">${esc((e&&e.message)||"Échec de la connexion")}</div>`;
+});
 
 function stripImgs(d){
   try{const o=JSON.parse(d);o.projects.forEach(p=>{p.actions.forEach(a=>{if(a.text)a.text=a.text.replace(/src="data:image\/[^"]+"/g,'src="[image]"')})});return JSON.stringify(o)}catch{return d}
