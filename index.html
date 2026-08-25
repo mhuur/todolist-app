@@ -1149,16 +1149,36 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root input,#flux-root textarea,.c2wrap input,.c2wrap textarea,.k2wrap input{font-size:16px!important}
 
   /* ══ Écran Projet (React) ══ */
-  /* En-tête empilé : nom du projet, puis onglets de statut, puis filtre Personne + pastille du jour */
-  #flux-root>div>div:first-child{flex-wrap:wrap!important;gap:8px 12px!important;padding:10px 12px!important;height:auto!important}
-  #flux-root [data-projsel]{flex:1 1 auto!important;min-width:0}
-  #flux-root .ek-projpick h1{font-size:17px!important;max-width:none!important}
+  /* En-tête sur UNE seule ligne : n° + nom du projet + badge d'échéance + chevron, puis la goutte du
+     jour réduite à son icône et son compte. Les onglets de statut et le filtre Personne sont masqués
+     sur téléphone (demande de Romain, août 2026) : le code reste intact, seul l'affichage est coupé.
+     Sur ordinateur, l'en-tête ne bouge pas — tout ceci est dans la media query. */
+  /* :has([data-projsel]) restreint la règle à l'en-tête de l'écran Projet — sans lui, le sélecteur
+     :first-child attrape aussi la barre d'outils du Planning et son flex-wrap:wrap saute. */
+  #flux-root>div>div:first-child:has([data-projsel]){flex-wrap:nowrap!important;gap:7px!important;padding:8px 9px!important;height:auto!important}
+  #flux-root [data-projsel]{flex:1 1 auto!important;min-width:0;display:flex;align-items:baseline;gap:8px}
+  #flux-root [data-projsel]>.ek-ov{flex:none;font-size:9.5px!important;letter-spacing:.08em!important}
+  #flux-root .ek-projpick{margin-top:0!important;min-width:0;flex:1 1 auto;gap:4px!important}
+  #flux-root .ek-projpick h1{font-size:15px!important;max-width:none!important;min-width:0;flex:0 1 auto}
+  /* le chevron rétrécit mais reste facile à toucher : c'est toute la zone .ek-projpick qui est cliquable */
+  #flux-root .ek-projpick>svg{width:14px!important;height:14px!important}
+  #flux-root .ek-projpick .ek-jbadge{padding-left:6px!important;padding-right:6px!important}
+  /* La cellule projet des lignes ne sert qu'à distinguer les projets entre eux : en mono-projet elle
+     répète l'en-tête à chaque ligne. Masquée sur téléphone seulement, et seulement là — elle reste
+     en vue Aujourd'hui et « Tous les projets », qui mélangent les projets (et servent à réassigner). */
+  #flux-root [data-mono="1"] .ek-projcell{display:none}
+  #flux-root [data-mono="1"] .ek-trow>:nth-child(3){flex:0 0 0!important;margin:0!important}
+  /* la cellule projet partie, la date/personne/goutte se cale sous le titre (mesuré : 66 px du bord
+     de la ligne, soit case + pastille de statut et leurs marges) */
+  #flux-root [data-mono="1"] .ek-trow>:nth-child(5){margin-left:66px}
   #flux-root .ek-projdel{display:none}
-  #flux-root div:has(>.ek-htab){order:3;flex:1 1 100%!important;gap:16px!important;overflow-x:auto}
-  #flux-root .ek-htab{font-size:12.5px;padding:5px 0}
-  #flux-root div:has(>.ek-todaypill){order:4;flex:1 1 100%!important;gap:12px!important}
-  #flux-root .ek-todaypill{flex:1!important;height:40px;justify-content:center}
-  #flux-root [data-fchip]{flex:none}
+  /* masqués, pas supprimés : retirer ces deux lignes les fait réapparaître.
+     !important sur les onglets : leur conteneur porte display:flex en style inline. */
+  #flux-root div:has(>.ek-htab){display:none!important}
+  #flux-root [data-fchip]{display:none!important}
+  #flux-root div:has(>.ek-todaypill){flex:none!important;gap:0!important}
+  #flux-root .ek-todaypill{flex:none!important;height:34px;padding:0 9px!important;gap:4px!important;font-size:13px}
+  #flux-root .ek-todaylab{display:none}
   #flux-root .ek-pmenu{min-width:0!important;width:calc(100vw - 24px)!important;max-width:none!important}
   /* En-tête du Planning : titre seul, puis « Sans date » + choix de la fenêtre de temps */
   #flux-root .ek-planbar{height:auto!important;flex-wrap:wrap;padding:10px 12px!important;gap:8px 10px!important}
@@ -4785,7 +4805,7 @@ class Flux extends React.Component {
           </div>}
         <div className={'ek-todaypill'+(v.todayView?' on':'')} onClick={()=>this.setState(s=>({todayView:!s.todayView, projView:'todo'}))} title="Voir les tâches du jour, tous projets" style={css('cursor:pointer;')}>
           <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
-          {v.todayTotal} pour aujourd'hui
+          <span>{v.todayTotal}<span className="ek-todaylab"> pour aujourd'hui</span></span>
         </div>
       </div>
     );
@@ -4796,8 +4816,11 @@ class Flux extends React.Component {
     const todayOnly = !!this.props.todayOnly;   // onglet « Aujourd'hui » dédié : pas de top bar ni de rail de filtres
     const selectAll = (e)=>{ try{ e.target.select(); }catch(_){} };
     const renameInput = 'flex:1;min-width:0;border:1px solid '+v.accent+';border-radius:6px;background:var(--panel);font-size:13px;color:var(--text);padding:3px 8px;';
+    // data-mono (posé plus bas sur la racine) : toutes les tâches affichées appartiennent au projet de
+    // l'en-tête. Sur téléphone, le CSS s'en sert pour masquer la cellule projet des lignes, qui ne
+    // ferait que répéter l'en-tête. Absent en vue Aujourd'hui et « Tous les projets ».
     return (
-      <div data-theme={v.theme} style={css("height:100vh;display:flex;flex-direction:column;font-family:'"+(todayOnly?'Montserrat':'Nunito')+"',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
+      <div data-theme={v.theme} data-mono={(!v.allMode && !v.todayView && v.hasProject) ? '1' : undefined} style={css("height:100vh;display:flex;flex-direction:column;font-family:'"+(todayOnly?'Montserrat':'Nunito')+"',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;")}>
 
         {/* ===================== TOP BAR (Projet — thème clair Ekopak) ===================== */}
         {!todayOnly && !v.planning &&
