@@ -1117,23 +1117,33 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .mp-del{flex:none;height:40px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-radius:8px;color:#d8442b;font-size:12.5px;font-weight:600;cursor:pointer}
 #flux-root .mp-ok{flex:none;height:40px;display:inline-flex;align-items:center;padding:0 16px;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer}
 
+/* ── Bouton ＋ flottant du téléphone (renderThinAdd, rendu seulement si isMob()) : ramène le champ
+      d'ajout à l'écran et lui donne le focus, une fois la liste défilée. Même logique que les .mp-*
+      ci-dessus — la classe n'existe que sur téléphone, son style vit donc hors de la media query. ── */
+#flux-root .ek-fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;width:56px;height:56px;border:none;border-radius:18px;background:var(--ekopak-deep-blue);color:#fff;box-shadow:0 6px 18px rgba(15,63,147,.34);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#flux-root .ek-fab svg{width:26px;height:26px}
+#flux-root .ek-fab:active{transform:scale(.94)}
+
 /* ══ Téléphone (≤600 px) — mise en page mobile. Tout ce bloc est enfermé dans la media query : le rendu ordinateur est inchangé. Complète le bloc « Mobile responsive » plus haut (qui vise surtout les écrans legacy) et doit rester APRÈS lui + après les styles .c2wrap / #flux-root pour gagner en cascade. ══ */
 @media(max-width:600px){
-  /* ── Barre d'onglets en bas : 50 px de boutons + ~20 px réservés à la barre d'accueil du téléphone ── */
-  .sidebar{height:auto;align-items:flex-start;justify-content:flex-start;gap:2px;padding:6px 6px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -6px 18px rgba(15,63,147,.16)}
+  /* ── Barre d'onglets en HAUT (façon Google Tasks) : 50 px de boutons entre 6 px de marge,
+        plus la réserve d'encoche du téléphone. --tabbar-h sert aussi à la hauteur des écrans. ── */
+  :root{--tabbar-h:calc(63px + env(safe-area-inset-top))}  /* 6 + 50 + 6 de marges, + 1 px de bordure basse */
+  .sidebar{height:auto;top:0;bottom:auto;align-items:flex-start;justify-content:flex-start;gap:2px;padding:calc(6px + env(safe-area-inset-top)) 6px 6px;border-top:none;border-bottom:1px solid #33437a;box-shadow:0 6px 18px rgba(15,63,147,.16)}
   .sb-btn{height:50px;border-radius:12px;gap:3px;padding:0}
   .sb-btn span{font-size:9.5px}
   .sb-btn svg{width:20px;height:20px}
   .avatar-wrap{margin:0;flex:none;width:56px;height:50px;display:flex;align-items:center;justify-content:center}
   .sb-avatar{width:34px;height:34px;font-size:12px}
-  .avatar-menu{bottom:calc(100% + 6px);top:auto;left:auto;right:0}
+  /* le menu du rond d'initiales s'ouvre maintenant vers le bas, la barre étant en haut */
+  .avatar-menu{top:calc(100% + 6px);bottom:auto;left:auto;right:0}
   /* ── Hauteur des écrans pleine page : 100dvh suit la barre d'URL mobile ; le calc invalide retombe sur la règle précédente si dvh n'est pas connu ── */
   /* Chaque écran mobile est une feuille pleine hauteur qui gère son propre rembourrage : .main n'en ajoute plus */
-  .main{padding:0!important;max-width:none}
-  .main.main-flux{height:calc(100vh - 76px);overflow:hidden}
-  .main.main-flux{height:calc(100dvh - 76px - env(safe-area-inset-bottom))}
-  .c2wrap,.k2wrap,.t2wrap{height:calc(100vh - 76px)}
-  .c2wrap,.k2wrap,.t2wrap{height:calc(100dvh - 76px - env(safe-area-inset-bottom))}
+  .main{padding:0!important;max-width:none;margin-top:var(--tabbar-h)}
+  .main.main-flux{height:calc(100vh - 62px);overflow:hidden}
+  .main.main-flux{height:calc(100dvh - var(--tabbar-h))}
+  .c2wrap,.k2wrap,.t2wrap{height:calc(100vh - 62px)}
+  .c2wrap,.k2wrap,.t2wrap{height:calc(100dvh - var(--tabbar-h))}
   #flux-root>div{height:100%!important}
   /* iOS zoome sur un champ dont le texte fait moins de 16 px : on force 16 px à la saisie */
   #flux-root input,#flux-root textarea,.c2wrap input,.c2wrap textarea,.k2wrap input{font-size:16px!important}
@@ -1160,17 +1170,20 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root .ek-planbar>div>div>span{flex:0 1 auto;text-align:center;white-space:nowrap;padding-left:6px!important;padding-right:6px!important}
   /* Listes : plus de largeur mini de 860 px, plus de défilement horizontal (le panneau détail est exclu, il porte les mêmes classes) */
   #flux-root .fxcol.scrl:not([data-panel])>div{min-width:0!important;padding-left:12px!important;padding-right:12px!important}
+  /* réserve sous la liste de tâches : sans elle le bouton ＋ flottant recouvre la goutte de la dernière ligne */
+  #flux-root .fxcol.scrl:not([data-panel])>div:has(.ek-trow){padding-bottom:96px!important}
   #flux-root div:has(>.ek-thinadd){padding:8px 12px 2px!important}
   #flux-root .ek-thinadd{max-width:none;height:44px}
-  /* Ligne de tâche en 2 étages : case + statut + titre + ⋮, puis projet + date + personne + goutte */
-  #flux-root .ek-trow{flex-wrap:wrap!important;gap:0;padding:3px 4px 5px;align-items:center}
+  /* Ligne de tâche en 2 étages : case + statut + titre + ⋮, puis projet + date + personne + goutte.
+     Aérée façon Google Tasks (~76 px) : le titre respire, la ligne de contexte se détache dessous. */
+  #flux-root .ek-trow{flex-wrap:wrap!important;gap:0;padding:8px 4px 10px;align-items:center}
   #flux-root .ek-trow::after{content:"";flex-basis:100%;height:0;order:5}
   #flux-root .ek-trow>:nth-child(1){order:1;margin-right:14px}
   #flux-root .ek-trow>:nth-child(2){order:2;margin-right:8px}
-  #flux-root .ek-trow>:nth-child(3){order:6;width:auto!important;flex:1 1 30%!important;min-width:0;margin:2px 0 0 28px}
+  #flux-root .ek-trow>:nth-child(3){order:6;width:auto!important;flex:1 1 30%!important;min-width:0;margin:5px 0 0 28px}
   #flux-root .ek-mchip{max-width:100px}
-  #flux-root .ek-trow>:nth-child(4){order:3;flex:1 1 auto;min-width:0}
-  #flux-root .ek-trow>:nth-child(5){order:7;gap:6px!important;margin-top:2px}
+  #flux-root .ek-trow>:nth-child(4){order:3;flex:1 1 auto;min-width:0;font-size:15px!important;line-height:1.35!important}
+  #flux-root .ek-trow>:nth-child(5){order:7;gap:6px!important;margin-top:5px}
   #flux-root .ek-trow>:nth-child(5)>span{width:auto!important;max-width:130px}
   #flux-root .ek-trow>[data-rowmenu]{order:4}
   #flux-root .ek-trow>.ek-x{order:8;margin-top:2px}
@@ -4574,12 +4587,19 @@ class Flux extends React.Component {
     const tab = this.state.projStatusTab;
     const addStatus = (tab && tab!=='all') ? tab : 'todo';
     const submit = (el)=>{ const val=(el.value||'').trim(); if(!val) return; if(kind==='today') this.addTodayTaskStatus(addStatus, val); else this.addTaskPreset({status:addStatus}, val); el.value=''; };
+    // sur téléphone, un bouton ＋ flottant reste à portée du pouce quand la liste est défilée :
+    // il ramène ce même champ à l'écran et lui donne le focus (pas de second chemin d'ajout)
+    const focusAdd = ()=>{ const el = document.querySelector('#flux-root .ek-thinadd input'); if(!el) return; el.scrollIntoView({block:'center'}); el.focus(); };
     return (
       <div style={css('flex:none;padding:8px 32px 2px;background:var(--bg);')}>
         <div className="ek-thinadd">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
           <input onKeyDown={e=>{ if(e.key==='Enter'){ submit(e.target); } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} placeholder="Ajouter une tâche…" />
         </div>
+        {this.isMob() &&
+          <button className="ek-fab" title="Ajouter une tâche" onClick={focusAdd}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>}
       </div>
     );
   }
