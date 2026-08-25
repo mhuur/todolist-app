@@ -1153,9 +1153,11 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   /* En-tête du Planning : titre seul, puis « Sans date » + choix de la fenêtre de temps */
   #flux-root .ek-planbar{height:auto!important;flex-wrap:wrap;padding:10px 12px!important;gap:8px 10px!important}
   #flux-root .ek-planbar>span:nth-child(2){display:none}
-  #flux-root .ek-planbar>div{flex:1 1 100%;justify-content:space-between}
-  #flux-root .ek-planbar>div>div{flex:1;justify-content:space-between}
-  #flux-root .ek-planbar>div>div>span{flex:1;text-align:center;white-space:nowrap;padding-left:4px;padding-right:4px}
+  /* !important obligatoire : ces trois éléments portent flex/padding en style inline, qui gagne sinon.
+     Sans lui la ligne mesure 409 px sur 390 et « 1 an » sort de l'écran quand « Sans date » est déplié. */
+  #flux-root .ek-planbar>div{flex:1 1 100%!important;margin-left:0!important;min-width:0;justify-content:space-between}
+  #flux-root .ek-planbar>div>div{flex:0 1 auto!important;min-width:0;justify-content:space-between}
+  #flux-root .ek-planbar>div>div>span{flex:0 1 auto;text-align:center;white-space:nowrap;padding-left:6px!important;padding-right:6px!important}
   /* Listes : plus de largeur mini de 860 px, plus de défilement horizontal (le panneau détail est exclu, il porte les mêmes classes) */
   #flux-root .fxcol.scrl:not([data-panel])>div{min-width:0!important;padding-left:12px!important;padding-right:12px!important}
   #flux-root div:has(>.ek-thinadd){padding:8px 12px 2px!important}
