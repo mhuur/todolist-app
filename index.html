@@ -1192,7 +1192,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root .fxcol.scrl:not([data-panel])>div{min-width:0!important;padding-left:12px!important;padding-right:12px!important}
   /* réserve sous la liste de tâches : sans elle le bouton ＋ flottant recouvre la goutte de la dernière ligne */
   #flux-root .fxcol.scrl:not([data-panel])>div:has(.ek-trow){padding-bottom:96px!important}
-  #flux-root div:has(>.ek-thinadd){padding:8px 12px 2px!important}
+  /* Le champ d'ajout s'ouvre en bandeau bas, au-dessus de la liste plutôt que dans son flux : sinon
+     sa fermeture (au premier appui ailleurs) décale la liste sous le doigt et avale l'appui. */
+  #flux-root div:has(>.ek-thinadd){position:fixed!important;left:0;right:0;bottom:0;z-index:70;padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;background:var(--panel)!important;box-shadow:0 -6px 18px rgba(15,63,147,.16)}
   #flux-root .ek-thinadd{max-width:none;height:44px}
   /* Ligne de tâche en 2 étages : case + statut + titre + ⋮, puis projet + date + personne + goutte.
      Aérée façon Google Tasks (~76 px) : le titre respire, la ligne de contexte se détache dessous. */
@@ -1202,11 +1204,18 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root .ek-trow>:nth-child(2){order:2;margin-right:8px}
   #flux-root .ek-trow>:nth-child(3){order:6;width:auto!important;flex:1 1 30%!important;min-width:0;margin:5px 0 0 28px}
   #flux-root .ek-mchip{max-width:100px}
-  #flux-root .ek-trow>:nth-child(4){order:3;flex:1 1 auto;min-width:0;font-size:15px!important;line-height:1.35!important}
+  /* le titre revient à la ligne au lieu d'être tronqué (les trois propriétés sont en style inline) */
+  #flux-root .ek-trow>:nth-child(4){order:3;flex:1 1 auto;min-width:0;font-size:15px!important;line-height:1.35!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
   #flux-root .ek-trow>:nth-child(5){order:7;gap:6px!important;margin-top:5px}
   #flux-root .ek-trow>:nth-child(5)>span{width:auto!important;max-width:130px}
-  #flux-root .ek-trow>[data-rowmenu]{order:4}
-  #flux-root .ek-trow>.ek-x{order:8;margin-top:2px}
+  /* une case vide n'apprend rien et mange une ligne : ni « — » ni « Non assigné » sur téléphone.
+     ⚠️ En contrepartie, une tâche sans date ni personne ne peut plus en recevoir depuis la liste. */
+  #flux-root .ek-trow>:nth-child(5)>span[data-due="vide"]{display:none!important}
+  #flux-root .ek-trow>:nth-child(5)>span:has(>.ek-mchip.none){display:none!important}
+  /* la goutte prend la place du menu ⋮, qui disparaît : on ouvre une tâche en cliquant dessus.
+     Le panneau détail porte déjà la note, les sous-tâches et la corbeille. */
+  #flux-root .ek-trow>[data-rowmenu]{display:none!important}
+  #flux-root .ek-trow>.ek-x{order:4;margin-top:0}
   /* Cibles tactiles : la zone cliquable est étendue par un ::after transparent, sans changer le dessin */
   #flux-root .ek-ck{width:22px;height:22px;border-radius:7px;position:relative}
   #flux-root .ek-ck::after,#flux-root .ek-sdot::after,#flux-root .ek-x::after,#flux-root .ek-tgl::after{content:"";position:absolute;inset:-10px}
@@ -3620,7 +3629,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null, mobAdd:false };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       number: (typeof p.number==='string')?p.number:'',
@@ -4607,20 +4616,28 @@ class Flux extends React.Component {
     const tab = this.state.projStatusTab;
     const addStatus = (tab && tab!=='all') ? tab : 'todo';
     const submit = (el)=>{ const val=(el.value||'').trim(); if(!val) return; if(kind==='today') this.addTodayTaskStatus(addStatus, val); else this.addTaskPreset({status:addStatus}, val); el.value=''; };
-    // sur téléphone, un bouton ＋ flottant reste à portée du pouce quand la liste est défilée :
-    // il ramène ce même champ à l'écran et lui donne le focus (pas de second chemin d'ajout)
-    const focusAdd = ()=>{ const el = document.querySelector('#flux-root .ek-thinadd input'); if(!el) return; el.scrollIntoView({block:'center'}); el.focus(); };
+    // Sur téléphone le champ ne s'affiche pas en permanence (il mangeait une ligne pour rien) : c'est
+    // le bouton ＋ flottant qui l'ouvre et lui donne le focus. Il se referme dès qu'on le quitte vide.
+    const mob = this.isMob();
+    const ouvert = !mob || !!this.state.mobAdd;
+    const ouvrir = ()=>this.setState({mobAdd:true}, ()=>{ const el=document.querySelector('#flux-root .ek-thinadd input'); if(el){ el.scrollIntoView({block:'nearest'}); el.focus(); } });
+    const fermerSiVide = (el)=>{ if(mob && !(el.value||'').trim()) this.setState({mobAdd:false}); };
     return (
-      <div style={css('flex:none;padding:8px 32px 2px;background:var(--bg);')}>
-        <div className="ek-thinadd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
-          <input onKeyDown={e=>{ if(e.key==='Enter'){ submit(e.target); } else if(e.key==='Escape'){ e.target.value=''; e.target.blur(); } }} placeholder="Ajouter une tâche…" />
-        </div>
-        {this.isMob() &&
-          <button className="ek-fab" title="Ajouter une tâche" onClick={focusAdd}>
+      <React.Fragment>
+        {ouvert &&
+          <div style={css('flex:none;padding:8px 32px 2px;background:var(--bg);')}>
+            <div className="ek-thinadd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+              <input autoFocus={mob} onBlur={e=>fermerSiVide(e.target)}
+                onKeyDown={e=>{ if(e.key==='Enter'){ submit(e.target); } else if(e.key==='Escape'){ e.target.value=''; if(mob) this.setState({mobAdd:false}); else e.target.blur(); } }}
+                placeholder="Ajouter une tâche…" />
+            </div>
+          </div>}
+        {mob && !ouvert &&
+          <button className="ek-fab" title="Ajouter une tâche" onClick={ouvrir}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
           </button>}
-      </div>
+      </React.Fragment>
     );
   }
 
@@ -4694,7 +4711,7 @@ class Flux extends React.Component {
           ? <input className="ied" data-edit="1" value={t.title} onChange={t.onTitleInput} onKeyDown={t.onTitleKey} onBlur={t.onTitleBlur} onClick={t.stop} style={css('flex:1;min-width:0;')} />
           : <span onClick={t.onTitleClick} onDoubleClick={t.onTitleDbl} title="Clic : ouvrir le détail · double-clic : renommer" style={css(t.titleStyle)}>{t.title}</span>}
         <span style={css('display:flex;align-items:center;gap:14px;flex:none;')}>
-          <span style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
+          <span data-due={(!t.edDue && t.dueSlotText==='—') ? 'vide' : undefined} style={css('width:82px;flex:none;position:relative;display:flex;justify-content:flex-end;')}>
             {t.edDue
               ? <input className="ied" type="date" data-edit="1" value={t.dueISO} onChange={t.onDueChange} onBlur={t.onDueBlur} onClick={t.stop} style={css('width:100%;font-size:11px;')} />
               : <span onClick={t.onDueSlotClick} title={t.isRel?'Modifier la date de relance':'Modifier la date'} style={css("font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;border-radius:6px;padding:2px 4px;color:"+t.dueSlotColor+";")}>{t.dueSlotText}</span>}
