@@ -1124,6 +1124,22 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-fab svg{width:26px;height:26px}
 #flux-root .ek-fab:active{transform:scale(.94)}
 
+/* ── Feuille de détail d'une tâche sur téléphone (façon Google Tasks) : goutte et corbeille en haut
+      à droite, note sur une ligne, puis les tâches secondaires et leur champ d'ajout. Ces classes
+      ne sont rendues que si isMob() — même principe que les .mp-* ci-dessus. ── */
+#flux-root .ek-dx.drop.on{color:#3aaae8}
+#flux-root .ek-dsubs{margin-top:14px}
+#flux-root .ek-dsub{display:flex;align-items:center;gap:11px;min-height:44px;border-bottom:1px solid var(--divider)}
+#flux-root .ek-dsubck{flex:none;width:22px;height:22px;border-radius:7px;border:1.8px solid #c2cbd9;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer}
+#flux-root .ek-dsubck.on{background:#8fc02e;border-color:#8fc02e;color:#fff}
+#flux-root .ek-dsubck svg{width:13px;height:13px}
+#flux-root .ek-dsubtx{flex:1;min-width:0;font-size:15px;font-weight:500;color:var(--text);cursor:pointer;overflow-wrap:anywhere}
+#flux-root .ek-dsubtx.done{color:#95a0b3;text-decoration:line-through}
+#flux-root .ek-dsubadd{display:flex;align-items:center;gap:11px;min-height:44px;color:#3aaae8}
+#flux-root .ek-dsubadd svg{width:20px;height:20px;flex:none}
+#flux-root .ek-dsubadd input{flex:1;min-width:0;border:none;background:none;outline:none;font-family:inherit;font-size:15px;color:var(--text)}
+#flux-root .ek-dsubadd input::placeholder{color:var(--muted)}
+
 /* ══ Téléphone (≤600 px) — mise en page mobile. Tout ce bloc est enfermé dans la media query : le rendu ordinateur est inchangé. Complète le bloc « Mobile responsive » plus haut (qui vise surtout les écrans legacy) et doit rester APRÈS lui + après les styles .c2wrap / #flux-root pour gagner en cascade. ══ */
 @media(max-width:600px){
   /* ── Barre d'onglets en HAUT (façon Google Tasks) : 50 px de boutons entre 6 px de marge,
@@ -1226,6 +1242,11 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root .ek-subrow{min-height:40px}
   /* Panneau détail : feuille plein écran */
   #flux-root [data-panel]{width:100%!important;padding:16px!important;border-left:none!important;box-shadow:none!important}
+  /* la note devient un encadré d'une ligne, qui grandit si on écrit — pas un pavé de 140 px */
+  #flux-root [data-panel] .ek-dnote{min-height:44px!important}
+  #flux-root [data-panel]>div:has(+.ek-dnote){display:none}
+  /* pendant qu'une tâche est ouverte, le ＋ (qui ajoute une tâche principale) n'a rien à faire là */
+  #flux-root>div:has([data-panel]) .ek-fab{display:none}
 
   /* ══ CRM Fournisseurs & Projets (.c2wrap) ══ */
   .c2wrap .htop{flex-wrap:wrap;gap:10px;padding:12px 16px}
@@ -3629,7 +3650,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null, mobAdd:false };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null, mobAdd:false, panelSubDraft:'' };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       number: (typeof p.number==='string')?p.number:'',
@@ -4234,6 +4255,14 @@ class Flux extends React.Component {
         subs: (Array.isArray(stask.checklist)?stask.checklist:[]).map(sb=>({ id:sb.id, txt:sb.text, done:!!sb.done, note:sb.note||'', hasNote:!!(sb.note||'').trim(), panelOpen: st.panelSubId===sb.id, onPanelToggle:()=>this.setState(s=>({panelSubId:s.panelSubId===sb.id?null:sb.id})), onNoteChange:(e)=>this.updateCheckNote(stask.id, sb.id, e.target.value) })),
         onNotes:(e)=>this.updateNotes(stask.id, e.target.value),
         onTitleEdit:(e)=>this.updateTitle(stask.id, e.target.value),
+        // goutte et ajout de sous-tâche : rendus dans le panneau sur téléphone seulement, où la ligne
+        // n'a plus de menu ⋮ (cf. le bloc @media). Sur ordinateur le ⋮ de la ligne reste le chemin.
+        today: !!stask.today,
+        onToggleToday:()=>this.toggleToday(stask.id),
+        onSubToggle:(sid)=>this.toggleCheck(stask.id, sid),
+        subDraft: st.panelSubDraft||'',
+        onSubDraft:(e)=>this.setState({panelSubDraft:e.target.value}),
+        onSubAdd:()=>{ const tx=(this.state.panelSubDraft||'').trim(); if(!tx) return; this.addCheck(stask.id, tx); this.setState({panelSubDraft:''}); },
         onDelete:()=>this.askDelete(stask.id) };
     }
     const confirmRes = st.confirmId ? this.taskByIdAny(st.confirmId) : null;
@@ -4954,12 +4983,36 @@ class Flux extends React.Component {
             <div data-panel="1" className="fxcol scrl" style={css('position:absolute;top:0;right:0;bottom:0;width:360px;z-index:20;background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 32px -18px rgba(15,63,147,.4);display:flex;flex-direction:column;padding:26px;overflow-y:auto;animation-delay:0s;')}>
               <div style={css('display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;')}>
                 <textarea className="ek-dtitle" rows={1} value={v.sel.title} onChange={v.sel.onTitleEdit} ref={el=>{ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} placeholder="Titre de la tâche"></textarea>
+                {this.isMob() &&
+                  <button className={'ek-dx drop'+(v.sel.today?' on':'')} onClick={v.sel.onToggleToday} title={v.sel.today?"Retirer d'aujourd'hui":"Ajouter à aujourd'hui"}>
+                    <svg viewBox="0 0 24 24" fill={v.sel.today?'currentColor':'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg>
+                  </button>}
                 <button className="ek-dx trash" onClick={v.sel.onDelete} title="Supprimer la tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                 <button className="ek-dx close" onClick={v.onCloseDetail} title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
               </div>
               <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Note</div>
-              <textarea className="ek-dnote" style={css('min-height:140px;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
-              {v.sel.subs && v.sel.subs.length>0 &&
+              {/* rows=1 + auto-hauteur : sur téléphone la note est un encadré d'une ligne qui grandit
+                  à l'écriture. Sur ordinateur le min-height:220px de .ek-dnote reste plus grand, donc
+                  le rendu n'y change pas. */}
+              <textarea className="ek-dnote" rows={1} ref={el=>{ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} style={css('min-height:140px;')} placeholder="Écrire une note pour cette tâche…" value={v.sel.notes} onChange={v.sel.onNotes}></textarea>
+              {/* Téléphone : la ligne n'a plus de menu ⋮, c'est ici qu'on coche et qu'on ajoute une
+                  tâche secondaire. Sur ordinateur cette section reste en lecture seule (le ⋮ est là). */}
+              {this.isMob() &&
+                <div className="ek-dsubs">
+                  {v.sel.subs && v.sel.subs.map(s=>
+                    <div key={s.id} className="ek-dsub">
+                      <span className={'ek-dsubck'+(s.done?' on':'')} onClick={()=>v.sel.onSubToggle(s.id)} title={s.done?'Rouvrir':'Terminer'}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                      </span>
+                      <span className={'ek-dsubtx'+(s.done?' done':'')} onClick={s.onPanelToggle}>{s.txt}</span>
+                    </div>)}
+                  <div className="ek-dsubadd">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    <input value={v.sel.subDraft} onChange={v.sel.onSubDraft} placeholder="Ajouter une tâche secondaire"
+                      onKeyDown={e=>{ if(e.key==='Enter') v.sel.onSubAdd(); else if(e.key==='Escape') e.target.blur(); }} />
+                  </div>
+                </div>}
+              {!this.isMob() && v.sel.subs && v.sel.subs.length>0 &&
                 <div style={css('margin-top:18px;')}>
                   <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;")}>Sous-tâches</div>
                   {v.sel.subs.map(s=>
