@@ -963,6 +963,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-glabel b{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 #flux-root .ek-glabel b.rel{color:#d8442b}
 #flux-root .ek-glabel .c{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;color:#95a0b3}
+#flux-root .ek-glabel.ek-gfold{cursor:pointer;user-select:none}
+#flux-root .ek-glabel.ek-gfold .cv{color:#95a0b3}
+#flux-root .ek-glabel.ek-gfold:hover b,#flux-root .ek-glabel.ek-gfold:hover .cv{color:var(--text-strong)}
 #flux-root .ek-grp{margin-bottom:14px;border-radius:12px;transition:background .12s}
 /* Groupe monté mais masqué au repos (drop-zone révélée pendant le drag) — display:none garde le nœud dans le DOM, donc le drag natif n'est pas annulé. */
 #flux-root .ek-grp.ek-hidden{display:none}
@@ -3650,7 +3653,7 @@ class Flux extends React.Component {
     let s = null;
     try { s = (window.__fluxLoad && window.__fluxLoad()) || JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
     const base = this.defaults();
-    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null, mobAdd:false, panelSubDraft:'' };
+    const runtime = { selectedId:null, editing:{id:null,field:null}, personQuery:'', confirmId:null, dragId:null, dragOverId:null, addingCat:false, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, bulk:null, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, dragCatId:null, dragOverCatId:null, todayView:false, todayDragId:null, todayDragOverId:null, todayFilters:{status:{},proj:{},person:{}}, projPickQuery:'', allFilters:{status:{},cat:{},person:{}}, filterOpen:null, mobAdd:false, panelSubDraft:'', doneOpen:false };
     const normFilters = fl => ({ status:(fl&&fl.status)||{}, cat:(fl&&fl.cat)||{}, person:(fl&&fl.person)||{} });
     const normProj = p => ({ id:p.id||this.uid(), name:p.name||'Sans nom',
       number: (typeof p.number==='string')?p.number:'',
@@ -3803,7 +3806,7 @@ class Flux extends React.Component {
   // Réécrit l'état plat de travail (catégories/personnes/tâches/collapsed/filters) dans le projet courant de la liste.
   _snapshotCurrent(st){ return (st.projects||[]).map(p=> p.id===st.currentProjectId ? {...p, categories:st.categories, people:st.people, tasks:st.tasks, collapsed:st.collapsed, filters:st.filters} : p); }
   // Réinitialise tout l'état de vue transient en entrant dans un projet.
-  _enterProject(extra){ return { allMode:false, selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, projNumEdit:false, projNameEdit:false, projPersonFilter:'', dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, ...extra }; }
+  _enterProject(extra){ return { allMode:false, selectedId:null, editing:{id:null,field:null}, bulk:null, labelEdit:{type:null,id:null}, catMenuId:null, personMenuId:null, addingCat:false, projOpen:false, projQuery:'', projMenuId:null, projDelId:null, projNumEdit:false, projNameEdit:false, projPersonFilter:'', dragCatId:null, dragOverCatId:null, personQuery:'', confirmId:null, dragId:null, dragOverId:null, todayView:false, todayDragId:null, todayDragOverId:null, doneOpen:false, ...extra }; }
   switchProject(id){ this.setState(st=>{ if(id===st.currentProjectId) return { allMode:false, projOpen:false, projQuery:'' }; const projects=this._snapshotCurrent(st); const t=projects.find(p=>p.id===id); if(!t) return { allMode:false, projOpen:false, projQuery:'' }; return this._enterProject({ projects, currentProjectId:id, categories:t.categories, people:t.people, tasks:t.tasks, collapsed:t.collapsed, filters:t.filters }); }); }
   createProject(name){ const id=this.uid(); const nm=(name||'').trim()||'Sans nom'; this.setState(st=>{ const projects=this._snapshotCurrent(st); projects.push({ id, name:nm, number:'', color:projColorFor(id), deadline:'', steps:[], notes:'', categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); return this._enterProject({ projects, currentProjectId:id, categories:[], people:[], tasks:[], collapsed:{}, filters:{status:{},cat:{},person:{}} }); }); }
   renameProject(id,name){ const n=(name||'').trim(); this.setState(st=>({ projects: n ? st.projects.map(p=> p.id===id?{...p,name:n}:p) : st.projects, projMenuId:null, projDelId:null })); }
@@ -4670,16 +4673,26 @@ class Flux extends React.Component {
     );
   }
 
-  // ▼ renderProjTaskView — vue Tâches unifiée (checkpoint 2) : groupes par statut, lignes façon Aujourd'hui (renderTodayRow, nom du projet devant). Groupes vides masqués (révélés pendant un glisser). Ajout via le champ fin en haut.
+  // ▼ renderProjTaskView — vue Tâches unifiée (checkpoint 2) : groupes par statut, lignes façon Aujourd'hui (renderTodayRow, nom du projet devant). Groupes vides masqués (révélés pendant un glisser). Ajout via le champ fin en haut. Groupe « Terminées » REPLIÉ par défaut (état transient doneOpen) : en-tête cliquable avec chevron, lignes rendues seulement une fois déplié.
   renderProjTaskView(v){
+    const doneOpen = !!this.state.doneOpen;
     return (
       <div style={css('min-width:860px;padding:12px 32px 40px;')}>
-        {v.projTaskGroups.map(g=>
+        {v.projTaskGroups.map(g=>{
+          const fold = g.key==='done';
+          const open = !fold || doneOpen;
+          return (
           <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
-            <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>
-            {g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
-            {!g.items.length && <div className="ek-droppad"></div>}
-          </div>)}
+            {fold
+              ? <div className="ek-glabel ek-gfold" onClick={()=>this.setState(s=>({doneOpen:!s.doneOpen}))} title={doneOpen?'Replier':'Déplier'}>
+                  <span className={'cv'+(doneOpen?' op':'')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={css('width:12px;height:12px;display:block;')}><path d="M9 6l6 6-6 6"></path></svg></span>
+                  <b>{g.label}</b><span className="c">{g.items.length}</span>
+                </div>
+              : <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>}
+            {open && g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+            {open && !g.items.length && <div className="ek-droppad"></div>}
+          </div>);
+        })}
       </div>
     );
   }
