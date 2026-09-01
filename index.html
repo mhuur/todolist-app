@@ -1256,6 +1256,31 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   /* pendant qu'une tâche est ouverte, le ＋ (qui ajoute une tâche principale) n'a rien à faire là */
   #flux-root>div:has([data-panel]) .ek-fab{display:none}
 
+  /* ── Vues multi-projets (Aujourd'hui, « Tous les projets ») : UNE CARTE PAR TÂCHE (sept. 2026, choix de
+     Romain parmi trois maquettes). Ordre visuel : projet en tête de carte (point coloré + n° + nom, goutte
+     à droite), puis case + statut + titre, puis date/personne en pied (masqué quand vide). La vue
+     mono-projet ([data-mono="1"]) garde ses lignes : sa cellule projet est masquée, l'en-tête serait vide.
+     Seuls les `order` et le style de boîte changent — le DOM de renderTodayRow est intact. ── */
+  #flux-root>div:not([data-mono="1"]) .ek-glabel{margin-bottom:6px}
+  #flux-root>div:not([data-mono="1"]) .ek-trow{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(15,63,147,.06);padding:9px 10px 10px;margin-bottom:8px}
+  #flux-root>div:not([data-mono="1"]) .ek-trow::after{order:3}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(3){order:1;flex:1 1 auto!important;width:auto!important;margin:0 0 6px;min-width:0}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>.ek-x{order:2;margin:0 0 6px auto}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(1){order:4}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(2){order:5}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(4){order:6;flex:1 1 0}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5){order:7;flex:0 0 100%!important;justify-content:flex-end;margin-top:0;padding-left:66px;box-sizing:border-box}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5)>span{margin-top:6px}
+  /* cellule projet : le liseré devient un point, n° et nom passent sur une seule ligne */
+  #flux-root>div:not([data-mono="1"]) .ek-projcell{gap:7px;padding-left:1px}
+  #flux-root>div:not([data-mono="1"]) .ek-projbar{width:8px;height:8px;border-radius:50%}
+  #flux-root>div:not([data-mono="1"]) .ek-projtwo{flex-direction:row;align-items:center;gap:7px;min-width:0}
+  #flux-root>div:not([data-mono="1"]) .ek-projnum{font-size:11px;letter-spacing:.02em;flex:none}
+  #flux-root>div:not([data-mono="1"]) .ek-projname{font-size:11.5px;flex:1 1 auto;min-width:0}
+  /* sous-tâches : bloc frère de la ligne, dessiné comme le bas de la même carte */
+  #flux-root>div:not([data-mono="1"]) .ek-trow:has(+.ek-subwrap){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;margin-bottom:0}
+  #flux-root>div:not([data-mono="1"]) .ek-subwrap{background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;box-shadow:0 1px 2px rgba(15,63,147,.06);padding:0 10px 8px 76px;margin-bottom:8px}
+
   /* ══ CRM Fournisseurs & Projets (.c2wrap) ══ */
   .c2wrap .htop{flex-wrap:wrap;gap:10px;padding:12px 16px}
   .c2wrap .htop>div:first-child{flex:1;min-width:0}
