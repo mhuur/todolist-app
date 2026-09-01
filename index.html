@@ -3907,8 +3907,9 @@ class Flux extends React.Component {
   commitLabelEdit(type,id,value){ if(type==='cat') this.renameCategory(id,value); else if(type==='person') this.renamePerson(id,value); else if(type==='proj') this.renameProject(id,value); this.stopLabelEdit(); }
 
 
-  // ---- Aujourd'hui (vue globale tous projets ; ordre propre via todayOrder, n'affecte JAMAIS l'ordre de Flux) ----
-  // Toutes les tâches marquées today, à travers tous les projets, ordonnées par todayOrder.
+  // ---- Aujourd'hui (vue globale tous projets ; todayOrder = entrelacement ENTRE projets uniquement :
+  // l'ordre relatif de deux tâches d'un MÊME projet est toujours celui du tableau projet, dans les deux vues) ----
+  // Toutes les tâches marquées today, à travers tous les projets, ordonnées par todayOrder puis normalisées.
   // Projet courant : on lit l'état de travail (st.tasks), pas la copie figée dans st.projects.
   // ▼ _doneAtToday / _taskInToday — support « une tâche validée reste dans Aujourd'hui (cochée) jusqu'au lendemain ».
   _doneAtToday(t){ if(!t||!t.doneAt) return false; const d=new Date(t.doneAt); const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); return iso===this._isoFromDays(0); }
@@ -3921,11 +3922,16 @@ class Flux extends React.Component {
       const isCur = p.id===st.currentProjectId;
       const tasks  = isCur ? st.tasks  : (p.tasks||[]);
       const people = isCur ? st.people : (p.people||[]);
-      tasks.forEach(t=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; const _doneToday=t.status==='done' && !!t.today && this._doneAtToday(t); if(((t.today||_sched||_rel) && t.status!=='done') || _doneToday) out.push({ task:t, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people, sched:_sched, relanceDue:_rel }); });
+      tasks.forEach((t,_ai)=>{ const _due=(typeof t.due==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.due))?t.due:''; const _rel=(t.status==='wait'&&typeof t.relance==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.relance)&&t.relance<=_todayStr); const _sched=!!_due && _due<=_todayStr && t.status!=='done' && t.status!=='wait'; const _doneToday=t.status==='done' && !!t.today && this._doneAtToday(t); if(((t.today||_sched||_rel) && t.status!=='done') || _doneToday) out.push({ task:t, ai:_ai, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people, sched:_sched, relanceDue:_rel }); });
     });
     const order = Array.isArray(st.todayOrder)?st.todayOrder:[];
     const rank = id => { const i=order.indexOf(id); return i<0?1e9:i; };
     out.sort((a,b)=> rank(a.task.id)-rank(b.task.id));   // tri stable : les nouvelles étoilées (rank ∞) gardent l'ordre de découverte
+    // Normalisation intra-projet : les tâches d'un même projet sont redistribuées sur leurs positions
+    // (« slots ») dans l'ordre du tableau projet (ai). Un réordonnancement fait dans la vue Tâches se
+    // reflète donc ici sans rien propager ; todayOrder ne pilote que l'entrelacement entre projets.
+    const _slots={}; out.forEach((e,i)=>{ (_slots[e.projId]=_slots[e.projId]||[]).push(i); });
+    Object.keys(_slots).forEach(k=>{ const pos=_slots[k]; if(pos.length<2) return; const ents=pos.map(i=>out[i]).sort((a,b)=>a.ai-b.ai); pos.forEach((pi,j)=>{ out[pi]=ents[j]; }); });
     return out;
   }
   // Bascule l'étoile "today" d'une tâche, où qu'elle soit (projet courant ou autre). Maintient todayOrder.
@@ -3975,16 +3981,27 @@ class Flux extends React.Component {
     if(wasToday) this.toggleToday(id);
     this.showUndo('« '+title+' » retirée d\'aujourd\'hui', ()=>{ if(wasToday) this.toggleToday(id); });
   }
-  // Réordonne UNIQUEMENT la vue Aujourd'hui (todayOrder). N'affecte jamais l'ordre de Flux (st.tasks).
+  // ▼ reorderToday — réordonne la vue Aujourd'hui (todayOrder) ET propage au tableau projet : la tâche
+  // glissée est réinsérée dans SON projet avant/après sa voisine du même projet dans le nouvel ordre,
+  // pour que les deux vues gardent le même ordre relatif intra-projet (cf. normalisation todayTasks).
   reorderToday(dragId, beforeId){
     if(!dragId || dragId===beforeId){ this.setState({todayDragId:null,todayDragOverId:null}); return; }
     this.setState(st=>{
-      const ids = this.todayTasks(st).filter(e=>!e.relanceDue).map(x=>x.task.id);
+      const ents = this.todayTasks(st).filter(e=>!e.relanceDue);
+      const ids = ents.map(x=>x.task.id);
       const di = ids.indexOf(dragId); if(di<0) return { todayDragId:null, todayDragOverId:null };
+      const myProj = ents[di].projId;
       ids.splice(di,1);
       if(beforeId){ const bi=ids.indexOf(beforeId); ids.splice(bi<0?ids.length:bi,0,dragId); }
       else ids.push(dragId);
-      return { todayOrder:ids, todayDragId:null, todayDragOverId:null };
+      // voisines du même projet dans le nouvel ordre → position cible dans le tableau projet
+      const projOf={}; ents.forEach(e=>{ projOf[e.task.id]=e.projId; });
+      const pos=ids.indexOf(dragId); let prevSame=null, nextSame=null;
+      for(let i=pos+1;i<ids.length;i++){ if(projOf[ids[i]]===myProj){ nextSame=ids[i]; break; } }
+      for(let i=pos-1;i>=0;i--){ if(projOf[ids[i]]===myProj){ prevSame=ids[i]; break; } }
+      const moveIn = arr => { const a=[...arr]; const dI=a.findIndex(t=>t.id===dragId); if(dI<0) return arr; const [m]=a.splice(dI,1); const iI = nextSame ? a.findIndex(t=>t.id===nextSame) : (a.findIndex(t=>t.id===prevSame)+1); a.splice(iI<0?a.length:iI,0,m); return a; };
+      const extra = (nextSame||prevSame) ? ( myProj===st.currentProjectId ? { tasks: moveIn(st.tasks) } : { projects:(st.projects||[]).map(p=> p.id===myProj ? {...p, tasks: moveIn(p.tasks||[])} : p) } ) : {};
+      return { todayOrder:ids, ...extra, todayDragId:null, todayDragOverId:null };
     });
   }
   // ▼ applyTodayDrop — dépose la tâche glissée sur un groupe de statut de la vue Aujourd'hui (setStatus). « À relancer » ≡ En attente (relance dérivée de la date).
