@@ -1131,6 +1131,14 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;width:56px;height:56px;border:none;border-radius:18px;background:var(--ekopak-deep-blue);color:#fff;box-shadow:0 6px 18px rgba(15,63,147,.34);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #flux-root .ek-fab svg{width:26px;height:26px}
 #flux-root .ek-fab:active{transform:scale(.94)}
+/* En-tête de projet des listes multi-projets sur téléphone (renderRowsByProject) — rendu seulement sur téléphone, donc CSS hors media query comme .ek-fab */
+#flux-root .ek-phead{display:flex;align-items:center;gap:7px;padding:8px 4px 3px 11px;min-width:0}
+#flux-root .ek-phdot{flex:none;width:8px;height:8px;border-radius:50%}
+#flux-root .ek-phdot.none{box-sizing:border-box;border:1.5px dashed #c2cbd9}
+#flux-root .ek-phnum{flex:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+#flux-root .ek-phnum.none{color:#95a0b3;font-weight:600}
+#flux-root .ek-phname{flex:1 1 auto;min-width:0;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#flux-root .ek-phname.solo{font-size:12px;font-weight:700;color:var(--text)}
 
 /* ── Feuille de détail d'une tâche sur téléphone (façon Google Tasks) : goutte et corbeille en haut
       à droite, note sur une ligne, puis les tâches secondaires et leur champ d'ajout. Ces classes
@@ -1256,30 +1264,20 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   /* pendant qu'une tâche est ouverte, le ＋ (qui ajoute une tâche principale) n'a rien à faire là */
   #flux-root>div:has([data-panel]) .ek-fab{display:none}
 
-  /* ── Vues multi-projets (Aujourd'hui, « Tous les projets ») : UNE CARTE PAR TÂCHE (sept. 2026, choix de
-     Romain parmi trois maquettes). Ordre visuel : projet en tête de carte (point coloré + n° + nom, goutte
-     à droite), puis case + statut + titre, puis date/personne en pied (masqué quand vide). La vue
-     mono-projet ([data-mono="1"]) garde ses lignes : sa cellule projet est masquée, l'en-tête serait vide.
-     Seuls les `order` et le style de boîte changent — le DOM de renderTodayRow est intact. ── */
-  #flux-root>div:not([data-mono="1"]) .ek-glabel{margin-bottom:6px}
-  #flux-root>div:not([data-mono="1"]) .ek-trow{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(15,63,147,.06);padding:9px 10px 10px;margin-bottom:8px}
-  #flux-root>div:not([data-mono="1"]) .ek-trow::after{order:3}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(3){order:1;flex:1 1 auto!important;width:auto!important;margin:0 0 6px;min-width:0}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>.ek-x{order:2;margin:0 0 6px auto}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(1){order:4}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(2){order:5}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(4){order:6;flex:1 1 0}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5){order:7;flex:0 0 100%!important;justify-content:flex-end;margin-top:0;padding-left:66px;box-sizing:border-box}
-  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5)>span{margin-top:6px}
-  /* cellule projet : le liseré devient un point, n° et nom passent sur une seule ligne */
-  #flux-root>div:not([data-mono="1"]) .ek-projcell{gap:7px;padding-left:1px}
-  #flux-root>div:not([data-mono="1"]) .ek-projbar{width:8px;height:8px;border-radius:50%}
-  #flux-root>div:not([data-mono="1"]) .ek-projtwo{flex-direction:row;align-items:center;gap:7px;min-width:0}
-  #flux-root>div:not([data-mono="1"]) .ek-projnum{font-size:11px;letter-spacing:.02em;flex:none}
-  #flux-root>div:not([data-mono="1"]) .ek-projname{font-size:11.5px;flex:1 1 auto;min-width:0}
-  /* sous-tâches : bloc frère de la ligne, dessiné comme le bas de la même carte */
-  #flux-root>div:not([data-mono="1"]) .ek-trow:has(+.ek-subwrap){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;margin-bottom:0}
-  #flux-root>div:not([data-mono="1"]) .ek-subwrap{background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;box-shadow:0 1px 2px rgba(15,63,147,.06);padding:0 10px 8px 76px;margin-bottom:8px}
+  /* ── Vues multi-projets (Aujourd'hui, « Tous les projets ») : LIGNES REGROUPÉES PAR PROJET (sept. 2026,
+     choix de Romain parmi trois maquettes). Le JSX (renderRowsByProject, téléphone seulement) écrit un
+     en-tête .ek-phead par projet ; les lignes redeviennent d'UNE seule ligne : case + statut + titre +
+     date/personne + goutte. La cellule projet de la ligne est masquée — l'en-tête la porte. ⚠️ Conséquence
+     assumée : sur téléphone on ne peut plus réassigner le projet d'une tâche depuis la liste.
+     La vue mono-projet ([data-mono="1"]) est inchangée. ── */
+  /* !important : la ligne porte flex-wrap et la cellule projet display:flex en style inline */
+  #flux-root>div:not([data-mono="1"]) .ek-trow{padding:10px 4px;flex-wrap:nowrap!important}
+  #flux-root>div:not([data-mono="1"]) .ek-trow::after{display:none}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(3){display:none!important}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(4){flex:1 1 0!important}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5){order:4;flex:none!important;margin-top:0}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>:nth-child(5)>span{margin-left:8px}
+  #flux-root>div:not([data-mono="1"]) .ek-trow>.ek-x{order:5;margin-left:8px}
 
   /* ══ CRM Fournisseurs & Projets (.c2wrap) ══ */
   .c2wrap .htop{flex-wrap:wrap;gap:10px;padding:12px 16px}
@@ -4736,12 +4734,33 @@ class Flux extends React.Component {
                   <b>{g.label}</b><span className="c">{g.items.length}</span>
                 </div>
               : <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>}
-            {open && g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+            {open && ((this.isMob() && v.allMode) ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)]))}
             {open && !g.items.length && <div className="ek-droppad"></div>}
           </div>);
         })}
       </div>
     );
+  }
+
+  // ▼ renderRowsByProject — TÉLÉPHONE, vues multi-projets (Aujourd'hui, « Tous les projets ») : les lignes d'un groupe de statut sont regroupées par projet, sous un en-tête de projet (.ek-phead) écrit une seule fois. Tri stable par première apparition du projet dans la liste ; l'ordre au sein d'un projet est conservé. Sur ordinateur les lignes restent à plat (flatMap direct). La cellule projet des lignes est masquée par le CSS téléphone : l'en-tête la porte.
+  renderRowsByProject(gkey, items){
+    const first={}; items.forEach((t,i)=>{ if(!(t.projId in first)) first[t.projId]=i; });
+    const sorted=items.slice().sort((a,b)=> first[a.projId]-first[b.projId]);
+    const out=[]; let prev=null;
+    sorted.forEach(t=>{
+      if(t.projId!==prev){ prev=t.projId; out.push(
+        <div key={'ph_'+gkey+'_'+t.projId} className="ek-phead">
+          <span className={'ek-phdot'+(t.isInbox?' none':'')} style={css(t.isInbox?'':'background:'+t.projColor+';')}></span>
+          {t.isInbox
+            ? <span className="ek-phnum none">Sans projet</span>
+            : <React.Fragment>
+                {t.projNumber && <span className="ek-phnum" style={css('color:'+t.projColor+';')}>{t.projNumber}</span>}
+                <span className={'ek-phname'+(t.projNumber?'':' solo')}>{t.projName}</span>
+              </React.Fragment>}
+        </div>); }
+      out.push(this.renderTodayRow(t)); if(t.subsOpen) out.push(this.renderTodaySubs(t));
+    });
+    return out;
   }
 
   renderTodayRow(t){
@@ -5027,7 +5046,7 @@ class Flux extends React.Component {
                 : v.todayGroups.map(g=>
                     <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
                       <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>
-                      {g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+                      {this.isMob() ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
                       {!g.items.length && <div className="ek-droppad"></div>}
                     </div>)}
             </div>
