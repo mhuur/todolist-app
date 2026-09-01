@@ -4719,6 +4719,17 @@ class Flux extends React.Component {
   }
 
   // ▼ renderProjTaskView — vue Tâches unifiée (checkpoint 2) : groupes par statut, lignes façon Aujourd'hui (renderTodayRow, nom du projet devant). Groupes vides masqués (révélés pendant un glisser). Ajout via le champ fin en haut. Groupe « Terminées » REPLIÉ par défaut (état transient doneOpen) : en-tête cliquable avec chevron, lignes rendues seulement une fois déplié.
+  // ▼ renderDoneLabel — en-tête cliquable du groupe « Terminé(es) », partagé par la vue Tâches et la vue Aujourd'hui : chevron + compteur, bascule l'état transient doneOpen (replié par défaut).
+  renderDoneLabel(g){
+    const open = !!this.state.doneOpen;
+    return (
+      <div className="ek-glabel ek-gfold" onClick={()=>this.setState(s=>({doneOpen:!s.doneOpen}))} title={open?'Replier':'Déplier'}>
+        <span className={'cv'+(open?' op':'')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={css('width:12px;height:12px;display:block;')}><path d="M9 6l6 6-6 6"></path></svg></span>
+        <b>{g.label}</b><span className="c">{g.items.length}</span>
+      </div>
+    );
+  }
+
   renderProjTaskView(v){
     const doneOpen = !!this.state.doneOpen;
     return (
@@ -4729,10 +4740,7 @@ class Flux extends React.Component {
           return (
           <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
             {fold
-              ? <div className="ek-glabel ek-gfold" onClick={()=>this.setState(s=>({doneOpen:!s.doneOpen}))} title={doneOpen?'Replier':'Déplier'}>
-                  <span className={'cv'+(doneOpen?' op':'')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={css('width:12px;height:12px;display:block;')}><path d="M9 6l6 6-6 6"></path></svg></span>
-                  <b>{g.label}</b><span className="c">{g.items.length}</span>
-                </div>
+              ? this.renderDoneLabel(g)
               : <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>}
             {open && ((this.isMob() && v.allMode) ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)]))}
             {open && !g.items.length && <div className="ek-droppad"></div>}
@@ -5045,8 +5053,10 @@ class Flux extends React.Component {
                   </div>
                 : v.todayGroups.map(g=>
                     <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
-                      <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>
-                      {this.isMob() ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)])}
+                      {g.key==='done'
+                        ? this.renderDoneLabel(g)
+                        : <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>}
+                      {(g.key!=='done' || !!this.state.doneOpen) && (this.isMob() ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)]))}
                       {!g.items.length && <div className="ek-droppad"></div>}
                     </div>)}
             </div>
