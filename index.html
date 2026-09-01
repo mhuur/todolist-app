@@ -3888,18 +3888,19 @@ class Flux extends React.Component {
     const t = { id:this.uid(), title, cat:'', status:'todo', due:'', person:'', notes:'', deps:[], checklist:[], ...(preset||{}) };
     this.setState(st=>({ tasks:[...st.tasks, t] }));
   }
-  // ▼ reorderTaskAny — vue Tâches : réordonne une tâche dans le tableau de SON projet (ordre projet, persistant) et adopte le statut du groupe de dépôt. Cross-project : le réordonnancement fin n'a lieu qu'au sein d'un même projet ; déposée dans un autre projet, la tâche ne change que de statut (et va en fin de sa liste).
+  // ▼ reorderTaskAny — vue Tâches : réordonne une tâche dans le tableau de SON projet (ordre projet, persistant). Depuis sept. 2026 le glisser ne sert QU'À réordonner (décision Romain) : jamais de changement de statut ni de projet — déposée sur une ligne d'un autre statut ou d'un autre projet, ou dans le vide d'un autre groupe (`status` ≠ le sien), la tâche ne bouge pas ; déposée dans le vide de son propre groupe (beforeId null), elle va en fin de liste.
   reorderTaskAny(dragId, beforeId, status){
     const clear = { dragId:null, dragOverId:null, todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
     this._todayDrag=null;
     if(!dragId || dragId===beforeId){ this.setState(clear); return; }
     this.setState(st=>{
       const apply = arr => {
-        const a=[...arr];
-        const di=a.findIndex(t=>t.id===dragId); if(di<0) return arr;
-        const d={...a[di]};
-        if(status && status!=='relance' && d.status!==status){ d.status=status; if(status==='done'){ d.today=false; d.doneAt=Date.now(); } }
-        a.splice(di,1);
+        const di=arr.findIndex(t=>t.id===dragId); if(di<0) return arr;
+        const d=arr[di];
+        if(status && status!==d.status) return arr;
+        const bi0 = beforeId ? arr.findIndex(t=>t.id===beforeId) : -1;
+        if(beforeId && (bi0<0 || arr[bi0].status!==d.status)) return arr;
+        const a=[...arr]; a.splice(di,1);
         const bi = beforeId ? a.findIndex(t=>t.id===beforeId) : -1;
         a.splice(bi<0?a.length:bi, 0, d);
         return a;
@@ -4048,27 +4049,22 @@ class Flux extends React.Component {
       return { todayOrder:ids, ...extra, todayDragId:null, todayDragOverId:null };
     });
   }
-  // ▼ applyTodayDrop — dépose la tâche glissée sur un groupe de statut de la vue Aujourd'hui (setStatus). « À relancer » ≡ En attente (relance dérivée de la date).
+  // ▼ applyTodayDrop — dépôt dans le vide d'un groupe de la vue Aujourd'hui : renvoie la tâche en fin de SON groupe ; un autre groupe ne fait rien (plus de changement de statut par glisser depuis sept. 2026).
   applyTodayDrop(key){
     const id = this._todayDrag || this.state.todayDragId;
     this._todayDrag = null;
     const reset = { todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
-    if(!id){ this.setState(reset); return; }
-    const cur = this.taskByIdAny(id);
-    if(!cur){ this.setState(reset); return; }
-    const status = key==='relance' ? 'wait' : key;
-    if(cur.task.status!==status) this.setStatus(id,status);   // wait → ouvre le popover de relance (comportement setStatus)
+    const cur = id ? this.taskByIdAny(id) : null;
+    if(!cur || key!==cur.task.status){ this.setState(reset); return; }
+    this.reorderToday(id, null);
     this.setState(reset);
   }
-  // ▼ dropTodayOnRow — dépôt sur une ligne : adopte le groupe de la ligne cible si différent, puis réordonne (todayOrder).
+  // ▼ dropTodayOnRow — dépôt sur une ligne d'Aujourd'hui : réordonne (todayOrder) seulement si la ligne cible est dans le groupe de la tâche glissée (`key` = groupe de la cible) ; sinon rien — jamais de changement de statut.
   dropTodayOnRow(dragId, beforeId, key){
     this._todayDrag = null;
-    if(!dragId || dragId===beforeId){ this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}); return; }
-    const cur = this.taskByIdAny(dragId);
-    if(cur && key){
-      const status = key==='relance' ? 'wait' : key;
-      if(cur.task.status!==status) this.setStatus(dragId,status);
-    }
+    const reset = { todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
+    const cur = dragId ? this.taskByIdAny(dragId) : null;
+    if(!cur || dragId===beforeId || (key && key!==cur.task.status)){ this.setState(reset); return; }
     this.reorderToday(dragId, beforeId);
     this.setState({ todayDragOverKey:null });
   }
@@ -4276,7 +4272,8 @@ class Flux extends React.Component {
         onMenuNote:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.toggleSelect(t.id); },
         onMenuDelete:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.askDelete(t.id); },
         onDragStart:(e)=>{ this._todayDrag=t.id; e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain', t.id); }catch(_){} const id=t.id; requestAnimationFrame(()=>{ if(this._todayDrag===id) this.setState({todayDragId:id}); }); },
-        onDragEnter:(e)=>{ e.preventDefault(); if(this.state.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); },
+        // Indicateur d'insertion seulement là où le dépôt est possible : même statut (et même groupe — une ligne « À relancer » n'en est pas), même projet, sauf en Aujourd'hui sur ordinateur où l'entrelacement entre projets est libre.
+        onDragEnter:(e)=>{ e.preventDefault(); const did=this._todayDrag||this.state.todayDragId; if(!did||did===t.id) return; const cur=this.taskByIdAny(did); const ok=!!cur && cur.task.status===t.status && grpKey===cur.task.status && (cur.projId===entry.projId || (st.todayView && !this.isMob())); if(ok){ if(this.state.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); } else if(this.state.todayDragOverId){ this.setState({todayDragOverId:null}); } },
         onDragOver:(e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; },
         onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.dropTodayOnRow(this._todayDrag||st.todayDragId, t.id, grpKey); },
         onDragEnd:()=>{ this._todayDrag=null; this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}); },
@@ -4290,7 +4287,7 @@ class Flux extends React.Component {
     const _relSort=(a,b)=>{ const ad=a.task.relance||'', bd=b.task.relance||''; return ad===bd?0:(ad<bd?-1:1); };
     const _flatToday=(e)=>{ const r=tvm(e,'relance'); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); };
     const _dragToday = !!st.todayDragId;
-    // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente → Terminé. Les tâches validées AUJOURD'HUI restent visibles (cochées) dans le groupe « Terminé » jusqu'au lendemain (todayTasks les inclut si today && doneAt=aujourd'hui) ; le groupe « done » n'apparaît que sous l'onglet « Tous » (_grpInTab). Pendant un drag, les groupes vides de l'onglet actif restent visibles comme zones de dépôt.
+    // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente → Terminé. Les tâches validées AUJOURD'HUI restent visibles (cochées) dans le groupe « Terminé » jusqu'au lendemain (todayTasks les inclut si today && doneAt=aujourd'hui) ; le groupe « done » n'apparaît que sous l'onglet « Tous » (_grpInTab). Les groupes vides restent masqués même pendant un glisser : le glisser ne change plus de groupe (sept. 2026).
     const _relList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
     const _statusList = k => todayEntriesAll.filter(e=>!e.relanceDue && e.task.status===k).filter(tMatch).map(e=>tvm(e,k));
     const _grpInTab = k => { const pt = st.projStatusTab||'all'; return pt==='all' ? true : (k==='relance' ? pt==='wait' : pt===k); };  // vue Aujourd'hui (dans Projet) : filtrée par les onglets de statut Projet
@@ -4302,10 +4299,9 @@ class Flux extends React.Component {
       { key:'done',    label:STATUS.done.label },
     ].map(g=> { const items = g.key==='relance' ? _relList : _statusList(g.key); return Object.assign({}, g, {
       items,
-      // Groupe toujours monté (comme l'écran Projet) ; masqué en CSS s'il est vide hors drag. Évite l'insertion DOM au dragstart qui annule le drag natif.
-      hidden: items.length===0 && !_dragToday,
-      hi: st.todayDragOverKey===g.key,
-      onOver:(e)=>{ e.preventDefault(); if(this.state.todayDragOverKey!==g.key) this.setState({todayDragOverKey:g.key}); },
+      // Groupe toujours monté (comme l'écran Projet) ; masqué en CSS s'il est vide.
+      hidden: items.length===0,
+      onOver:(e)=>{ e.preventDefault(); },
       onDrop:(e)=>{ e.preventDefault(); this.applyTodayDrop(g.key); },
     }); }).filter(g=> _grpInTab(g.key) );
     const todayList = todayGroups.reduce((acc,g)=>acc.concat(g.items),[]);
@@ -4364,7 +4360,7 @@ class Flux extends React.Component {
     const _taskEntries = _taskScopeProjects.flatMap(p=>{ const isCur=p.id===st.currentProjectId; const tks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); return (tks||[]).map(tk=> ({ task:tk, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people:ppl })); });
     const _projTab2 = st.projStatusTab || 'all';
     const _taskPerson = (!st.allMode && st.projPersonFilter) ? st.projPersonFilter : '';
-    const projTaskGroups = [{ key:'doing', label:STATUS.doing.label },{ key:'todo', label:STATUS.todo.label },{ key:'wait', label:STATUS.wait.label },{ key:'done', label:'Terminées' }].map(g=>{ let list=_taskEntries.filter(e=> e.task.status===g.key && (!_taskPerson || e.task.person===_taskPerson)); if(g.key==='done') list=list.slice().sort((a,b)=>(b.task.doneAt||0)-(a.task.doneAt||0)); const items=list.map(e=>{ const r=tvm(e, g.key); const tid=e.task.id; return Object.assign({}, r, { onDrop:(ev)=>{ ev.preventDefault(); ev.stopPropagation(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, tid, g.key); } }); }); return Object.assign({}, g, { items, hidden: (_projTab2==='all') ? (items.length===0 && !(!!st.todayDragId && g.key!=='done')) : (g.key!==_projTab2), hi: st.todayDragOverKey===g.key, onOver:(e)=>{ e.preventDefault(); if(this.state.todayDragOverKey!==g.key) this.setState({todayDragOverKey:g.key}); }, onDrop:(e)=>{ e.preventDefault(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, null, g.key); } }); });
+    const projTaskGroups = [{ key:'doing', label:STATUS.doing.label },{ key:'todo', label:STATUS.todo.label },{ key:'wait', label:STATUS.wait.label },{ key:'done', label:'Terminées' }].map(g=>{ let list=_taskEntries.filter(e=> e.task.status===g.key && (!_taskPerson || e.task.person===_taskPerson)); if(g.key==='done') list=list.slice().sort((a,b)=>(b.task.doneAt||0)-(a.task.doneAt||0)); const items=list.map(e=>{ const r=tvm(e, g.key); const tid=e.task.id; return Object.assign({}, r, { onDrop:(ev)=>{ ev.preventDefault(); ev.stopPropagation(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, tid, g.key); } }); }); return Object.assign({}, g, { items, hidden: (_projTab2==='all') ? (items.length===0) : (g.key!==_projTab2), onOver:(e)=>{ e.preventDefault(); }, onDrop:(e)=>{ e.preventDefault(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, null, g.key); } }); });
 
     return {
       allMode, onSelectAllProjects:()=>this.setState({allMode:true, allFilters:{status:{},cat:{},person:{}}, projOpen:false, projQuery:'', selectedId:null}),
