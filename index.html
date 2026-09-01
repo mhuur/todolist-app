@@ -953,6 +953,14 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-projcell .solo{font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #flux-root .ek-projadd{font-size:12px;color:#95a0b3;white-space:nowrap}
 #flux-root .ek-pnum{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;flex:none}
+/* Glisser-déposer maison (voir dragPointerDown) : poignée ordinateur, ligne évidée, clone flottant */
+#flux-root .ek-grip{position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:16px;height:26px;display:flex;align-items:center;justify-content:center;color:#c2cbd9;cursor:grab;opacity:0;transition:opacity .12s,color .12s;touch-action:none}
+#flux-root .ek-trow:hover .ek-grip{opacity:1}
+#flux-root .ek-grip:hover{color:#95a0b3}
+#flux-root .ek-grip svg{width:10px;height:16px}
+#flux-root .ek-trow.ek-hole,#flux-root .ek-subwrap.ek-hole{opacity:0}
+#flux-root .ek-dragclone{background:var(--panel);border-radius:10px;border-bottom-color:transparent;box-shadow:0 12px 28px rgba(15,63,147,.22),0 2px 6px rgba(15,63,147,.12);transform:scale(1.02)}
+#flux-root .ek-dragclone .ek-grip{opacity:1}
 #flux-root .ek-x{width:26px;height:26px;flex:none;border:none;background:none;border-radius:7px;color:#c2cbd9;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;padding:0;transition:opacity .12s,background .12s,color .12s}
 #flux-root .ek-trow:hover .ek-x{opacity:1}
 #flux-root .ek-x.menu.open{opacity:1;background:#f2f5fb;color:#0f3f93}
@@ -1248,6 +1256,10 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
      Le panneau détail porte déjà la note, les sous-tâches et la corbeille. */
   #flux-root .ek-trow>[data-rowmenu]{display:none!important}
   #flux-root .ek-trow>.ek-x{order:4;margin-top:0}
+  /* Glisser au doigt (appui long, dragPointerDown) : pas de poignée, et pas de sélection de texte ni de bulle
+     contextuelle pendant l'appui long sur une ligne */
+  #flux-root .ek-grip{display:none}
+  #flux-root .ek-trow{user-select:none;-webkit-touch-callout:none}
   /* Cibles tactiles : la zone cliquable est étendue par un ::after transparent, sans changer le dessin */
   #flux-root .ek-ck{width:22px;height:22px;border-radius:7px;position:relative}
   #flux-root .ek-ck::after,#flux-root .ek-sdot::after,#flux-root .ek-x::after,#flux-root .ek-tgl::after{content:"";position:absolute;inset:-10px}
@@ -4049,15 +4061,125 @@ class Flux extends React.Component {
       return { todayOrder:ids, ...extra, todayDragId:null, todayDragOverId:null };
     });
   }
-  // ▼ applyTodayDrop — dépôt dans le vide d'un groupe de la vue Aujourd'hui : renvoie la tâche en fin de SON groupe ; un autre groupe ne fait rien (plus de changement de statut par glisser depuis sept. 2026).
-  applyTodayDrop(key){
-    const id = this._todayDrag || this.state.todayDragId;
-    this._todayDrag = null;
-    const reset = { todayDragId:null, todayDragOverId:null, todayDragOverKey:null };
-    const cur = id ? this.taskByIdAny(id) : null;
-    if(!cur || key!==cur.task.status){ this.setState(reset); return; }
-    this.reorderToday(id, null);
-    this.setState(reset);
+  // ▼ Glisser-déposer maison (pointer events, sept. 2026) — remplace le drag natif HTML5, inutilisable au doigt sur
+  // Android (la ligne ne suivait pas). Téléphone : appui long 250 ms sans bouger (bouger avant = défilement normal),
+  // vibration, puis la ligne suit le doigt ; ordinateur : glisser depuis la poignée ⋮⋮ (.ek-grip, visible au survol).
+  // Pendant le glisser, tout se passe en DOM direct (aucun setState) : clone flottant .ek-dragclone qui suit le
+  // pointeur, ligne d'origine évidée (.ek-hole, garde sa place), voisines candidates décalées par transform avec
+  // transition (le creux se déplace en direct), défilement automatique de la liste près des bords. Candidates =
+  // unités (ligne + son bloc sous-tâches) du même groupe de statut ET du même projet — sauf Aujourd'hui sur
+  // ordinateur où l'entrelacement entre projets est libre ; elles sont toujours contiguës (Tâches : entrées groupées
+  // par projet ; téléphone : renderRowsByProject). Au relâcher, le clone rejoint le creux (150 ms) puis
+  // reorderTaskAny / dropTodayOnRow appliquent l'ordre ; relâché sans déplacement ou annulé, tout revient en place.
+  // Un clic capturé est bloqué 350 ms après le dépôt pour ne pas ouvrir la tâche relâchée.
+  dragPointerDown(e, tid, pid, gkey, ok){
+    if(!ok || this._pd) return;
+    if(e.button!==undefined && e.button!==0) return;
+    const touch = e.pointerType!=='mouse';
+    if(!touch && !e.target.closest('.ek-grip')) return;
+    if(touch && e.target.closest('button,input,textarea,.ek-ck,.ek-sdot,.ek-x,.ek-mchip,[data-rowmenu],.ek-projcell')) return;
+    if(!touch) e.preventDefault();
+    const pd = this._pd = { tid, pid, gkey, touch, rowEl:e.currentTarget, x0:e.clientX, y0:e.clientY, lastX:e.clientX, lastY:e.clientY, lifted:false, timer:null, raf:0, v:0 };
+    pd.onMove=(ev)=>this._dragMove(ev);
+    pd.onUp=(ev)=>this._dragEnd(ev,false);
+    pd.onCancel=()=>this._dragEnd(null,true);
+    pd.onTouchMove=(ev)=>{ if(pd.lifted) ev.preventDefault(); };
+    pd.onCtx=(ev)=>ev.preventDefault();
+    pd.onClick=(ev)=>{ ev.stopPropagation(); ev.preventDefault(); };
+    document.addEventListener('pointermove', pd.onMove);
+    document.addEventListener('pointerup', pd.onUp);
+    document.addEventListener('pointercancel', pd.onCancel);
+    document.addEventListener('touchmove', pd.onTouchMove, {passive:false});
+    document.addEventListener('contextmenu', pd.onCtx);
+    if(touch) pd.timer=setTimeout(()=>this._dragLift(), 250);
+  }
+  _dragLift(){
+    const pd=this._pd; if(!pd||pd.lifted) return;
+    pd.lifted=true; pd.timer=null;
+    const rowEl=pd.rowEl, grp=rowEl.closest('.ek-grp');
+    if(!rowEl.isConnected||!grp){ this._dragEnd(null,true); return; }
+    pd.scrl=rowEl.closest('.scrl');
+    const st0=pd.scrl?pd.scrl.scrollTop:0;
+    const cross=!!this.state.todayView && !this.isMob();
+    const rows=[...grp.querySelectorAll(':scope > .ek-trow')].filter(r=> cross || r.getAttribute('data-pid')===pd.pid);
+    pd.units=rows.map(r=>{ const els=[r]; const nx=r.nextElementSibling; if(nx&&nx.classList.contains('ek-subwrap')) els.push(nx); const top=r.getBoundingClientRect().top+st0; const lb=els[els.length-1].getBoundingClientRect().bottom+st0; return { tid:r.getAttribute('data-tid'), els, top, h:lb-top }; });
+    pd.di=pd.units.findIndex(u=>u.tid===pd.tid);
+    if(pd.di<0){ this._dragEnd(null,true); return; }
+    pd.ti=pd.di;
+    const me=pd.units[pd.di]; pd.h=me.h;
+    const r=rowEl.getBoundingClientRect();
+    pd.offY=pd.y0-r.top;
+    const clone=rowEl.cloneNode(true);
+    clone.className='ek-trow ek-dragclone'; clone.removeAttribute('data-task');
+    clone.style.cssText=(rowEl.getAttribute('style')||'')+`;position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:200;pointer-events:none;`;
+    (rowEl.closest('[data-theme]')||document.body).appendChild(clone);
+    pd.clone=clone;
+    pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transition='transform .15s ease'; }));
+    me.els.forEach(el=>el.classList.add('ek-hole'));
+    if(pd.touch&&navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){} }
+    document.addEventListener('click', pd.onClick, true);
+    this._dragUpdate();
+  }
+  _dragMove(e){
+    const pd=this._pd; if(!pd) return;
+    pd.lastX=e.clientX; pd.lastY=e.clientY;
+    if(!pd.lifted){
+      const dx=e.clientX-pd.x0, dy=e.clientY-pd.y0, d2=dx*dx+dy*dy;
+      if(pd.touch){ if(d2>64) this._dragEnd(null,true); }
+      else if(d2>16) this._dragLift();
+      return;
+    }
+    pd.clone.style.top=(e.clientY-pd.offY)+'px';
+    this._dragUpdate();
+    this._dragAutoScroll();
+  }
+  _dragUpdate(){
+    const pd=this._pd; if(!pd||!pd.lifted) return;
+    const st=pd.scrl?pd.scrl.scrollTop:0;
+    const cy=pd.lastY-pd.offY+st+pd.h/2;
+    const others=pd.units.filter((u,i)=>i!==pd.di);
+    let ti=0; for(const u of others){ if(u.top+u.h/2<cy) ti++; else break; }
+    pd.ti=ti;
+    others.forEach((u,j)=>{ let dy=0; if(j<pd.di&&j>=ti) dy=pd.h; else if(j>=pd.di&&j<ti) dy=-pd.h; u.els.forEach(el=>{ el.style.transform=dy?`translateY(${dy}px)`:''; }); });
+  }
+  _dragAutoScroll(){
+    const pd=this._pd; if(!pd||!pd.lifted||!pd.scrl) return;
+    const r=pd.scrl.getBoundingClientRect(), m=56;
+    let v=0; if(pd.lastY<r.top+m) v=-Math.ceil((r.top+m-pd.lastY)/4); else if(pd.lastY>r.bottom-m) v=Math.ceil((pd.lastY-(r.bottom-m))/4);
+    pd.v=v;
+    if(v&&!pd.raf){ const step=()=>{ const p=this._pd; if(!p||!p.lifted||!p.v){ if(p) p.raf=0; return; } p.scrl.scrollTop+=p.v; this._dragUpdate(); p.raf=requestAnimationFrame(step); }; pd.raf=requestAnimationFrame(step); }
+  }
+  _dragEnd(e, cancelled){
+    const pd=this._pd; if(!pd) return;
+    this._pd=null;
+    if(pd.timer) clearTimeout(pd.timer);
+    if(pd.raf) cancelAnimationFrame(pd.raf);
+    document.removeEventListener('pointermove', pd.onMove);
+    document.removeEventListener('pointerup', pd.onUp);
+    document.removeEventListener('pointercancel', pd.onCancel);
+    document.removeEventListener('touchmove', pd.onTouchMove);
+    document.removeEventListener('contextmenu', pd.onCtx);
+    if(!pd.lifted) return;
+    setTimeout(()=>document.removeEventListener('click', pd.onClick, true), 350);
+    const others=pd.units.filter((u,i)=>i!==pd.di);
+    const moved=!cancelled && pd.ti!==pd.di;
+    const beforeId=moved ? (pd.ti<others.length ? others[pd.ti].tid : null) : null;
+    const st=pd.scrl?pd.scrl.scrollTop:0;
+    const me=pd.units[pd.di];
+    let holeTop;
+    if(!moved) holeTop=me.top;
+    else if(pd.ti<pd.di) holeTop=others[pd.ti].top;
+    else holeTop=(pd.ti<others.length ? others[pd.ti].top : others[others.length-1].top+others[others.length-1].h)-pd.h;
+    const clone=pd.clone;
+    clone.style.transition='top .15s ease, transform .15s ease, box-shadow .15s ease';
+    clone.style.top=(holeTop-st)+'px'; clone.style.transform='scale(1)'; clone.style.boxShadow='none';
+    if(!moved) pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transform=''; }));
+    setTimeout(()=>{
+      clone.remove();
+      pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transition=''; el.style.transform=''; }));
+      me.els.forEach(el=>el.classList.remove('ek-hole'));
+      if(moved){ if(this.state.todayView) this.dropTodayOnRow(pd.tid, beforeId, pd.gkey); else this.reorderTaskAny(pd.tid, beforeId, pd.gkey); }
+    }, 160);
   }
   // ▼ dropTodayOnRow — dépôt sur une ligne d'Aujourd'hui : réordonne (todayOrder) seulement si la ligne cible est dans le groupe de la tâche glissée (`key` = groupe de la cible) ; sinon rien — jamais de changement de statut.
   dropTodayOnRow(dragId, beforeId, key){
@@ -4188,10 +4310,10 @@ class Flux extends React.Component {
       const selR = st.selectedId===t.id;
       const isRel = !!entry.relanceDue;
       const grpKey = gkey || (isRel ? 'relance' : t.status);
-      let rowStyle = 'position:relative;flex-wrap:nowrap;cursor:grab;';
+      const canDrag = !(isEd('title')||isEd('due')||isEd('person')||isEd('status')||isEd('proj')||isEd('relance'));
+      let rowStyle = 'position:relative;flex-wrap:nowrap;';
       if(selR) rowStyle += 'background:#f2f5fb;';
       if(isEd('status')||isEd('person')||isEd('proj')||isEd('relance')) rowStyle += 'z-index:25;';
-      if(st.todayDragOverId===t.id) rowStyle += 'box-shadow:inset 0 2px 0 #81d0f5;';
       const statusOptions = SORDER.map(k=>{ const m=STATUS[k]; const on=t.status===k;
         return { key:k, label:m.label, dot:m.dot,
           style:'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--text);'+(on?'font-weight:600;':''),
@@ -4247,7 +4369,7 @@ class Flux extends React.Component {
         edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
         isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
         onRelanceClick:(e)=>{ stop(e); this.startEdit(t.id,'relance'); }, onRelanceChange:(e)=>{ this.updateRelance(t.id, e.target.value); this.stopEdit(); }, onRelanceBlur:()=>this.stopEdit(),
-        draggable: !(isEd('title')||isEd('due')||isEd('person')||isEd('status')||isEd('proj')||isEd('relance')),
+        draggable: canDrag,
         rowStyle, stop,
         onCheck:(e)=>{ stop(e); this.toggleDoneAnyUndo(t.id); },
         today:!!t.today,
@@ -4271,12 +4393,7 @@ class Flux extends React.Component {
         onMenuAddSub:(e)=>{ stop(e); this.setState({ rowMenuId:null, subAddId:t.id, subDraft:'' }); },
         onMenuNote:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.toggleSelect(t.id); },
         onMenuDelete:(e)=>{ stop(e); this.setState({ rowMenuId:null }); this.askDelete(t.id); },
-        onDragStart:(e)=>{ this._todayDrag=t.id; e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain', t.id); }catch(_){} const id=t.id; requestAnimationFrame(()=>{ if(this._todayDrag===id) this.setState({todayDragId:id}); }); },
-        // Indicateur d'insertion seulement là où le dépôt est possible : même statut (et même groupe — une ligne « À relancer » n'en est pas), même projet, sauf en Aujourd'hui sur ordinateur où l'entrelacement entre projets est libre.
-        onDragEnter:(e)=>{ e.preventDefault(); const did=this._todayDrag||this.state.todayDragId; if(!did||did===t.id) return; const cur=this.taskByIdAny(did); const ok=!!cur && cur.task.status===t.status && grpKey===cur.task.status && (cur.projId===entry.projId || (st.todayView && !this.isMob())); if(ok){ if(this.state.todayDragOverId!==t.id) this.setState({todayDragOverId:t.id}); } else if(this.state.todayDragOverId){ this.setState({todayDragOverId:null}); } },
-        onDragOver:(e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; },
-        onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.dropTodayOnRow(this._todayDrag||st.todayDragId, t.id, grpKey); },
-        onDragEnd:()=>{ this._todayDrag=null; this.setState({todayDragId:null,todayDragOverId:null,todayDragOverKey:null}); },
+        onPointerDown:(e)=>this.dragPointerDown(e, t.id, entry.projId, grpKey, canDrag),
       };
     };
     const todayEntriesAll = this.todayTasks(st);
@@ -4285,7 +4402,7 @@ class Flux extends React.Component {
     const entryPName = e => { const pp=(e.people||[]).find(x=>x.id===e.task.person); return pp?(pp.name||'').trim().toLowerCase():''; };
     const tMatch = e => (!tfS.length||tfS.indexOf(e.task.status)>=0) && (!tfP.length||tfP.indexOf(e.projId)>=0) && (!tfN.length||tfN.indexOf(entryPName(e))>=0);
     const _relSort=(a,b)=>{ const ad=a.task.relance||'', bd=b.task.relance||''; return ad===bd?0:(ad<bd?-1:1); };
-    const _flatToday=(e)=>{ const r=tvm(e,'relance'); return Object.assign({}, r, { draggable:false, rowStyle:r.rowStyle.replace('cursor:grab;','cursor:default;') }); };
+    const _flatToday=(e)=>Object.assign({}, tvm(e,'relance'), { draggable:false });
     const _dragToday = !!st.todayDragId;
     // Groupes Aujourd'hui ordonnés par statut : À relancer → En cours → À faire → En attente → Terminé. Les tâches validées AUJOURD'HUI restent visibles (cochées) dans le groupe « Terminé » jusqu'au lendemain (todayTasks les inclut si today && doneAt=aujourd'hui) ; le groupe « done » n'apparaît que sous l'onglet « Tous » (_grpInTab). Les groupes vides restent masqués même pendant un glisser : le glisser ne change plus de groupe (sept. 2026).
     const _relList = todayEntriesAll.filter(e=>e.relanceDue).filter(tMatch).slice().sort(_relSort).map(_flatToday);
@@ -4301,8 +4418,6 @@ class Flux extends React.Component {
       items,
       // Groupe toujours monté (comme l'écran Projet) ; masqué en CSS s'il est vide.
       hidden: items.length===0,
-      onOver:(e)=>{ e.preventDefault(); },
-      onDrop:(e)=>{ e.preventDefault(); this.applyTodayDrop(g.key); },
     }); }).filter(g=> _grpInTab(g.key) );
     const todayList = todayGroups.reduce((acc,g)=>acc.concat(g.items),[]);
 
@@ -4360,7 +4475,7 @@ class Flux extends React.Component {
     const _taskEntries = _taskScopeProjects.flatMap(p=>{ const isCur=p.id===st.currentProjectId; const tks=isCur?st.tasks:(p.tasks||[]); const ppl=isCur?st.people:(p.people||[]); return (tks||[]).map(tk=> ({ task:tk, projId:p.id, projName:p.name, projNumber:p.number||'', projColor:p.color||'#0f3f93', people:ppl })); });
     const _projTab2 = st.projStatusTab || 'all';
     const _taskPerson = (!st.allMode && st.projPersonFilter) ? st.projPersonFilter : '';
-    const projTaskGroups = [{ key:'doing', label:STATUS.doing.label },{ key:'todo', label:STATUS.todo.label },{ key:'wait', label:STATUS.wait.label },{ key:'done', label:'Terminées' }].map(g=>{ let list=_taskEntries.filter(e=> e.task.status===g.key && (!_taskPerson || e.task.person===_taskPerson)); if(g.key==='done') list=list.slice().sort((a,b)=>(b.task.doneAt||0)-(a.task.doneAt||0)); const items=list.map(e=>{ const r=tvm(e, g.key); const tid=e.task.id; return Object.assign({}, r, { onDrop:(ev)=>{ ev.preventDefault(); ev.stopPropagation(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, tid, g.key); } }); }); return Object.assign({}, g, { items, hidden: (_projTab2==='all') ? (items.length===0) : (g.key!==_projTab2), onOver:(e)=>{ e.preventDefault(); }, onDrop:(e)=>{ e.preventDefault(); this.reorderTaskAny(this._todayDrag||this.state.todayDragId, null, g.key); } }); });
+    const projTaskGroups = [{ key:'doing', label:STATUS.doing.label },{ key:'todo', label:STATUS.todo.label },{ key:'wait', label:STATUS.wait.label },{ key:'done', label:'Terminées' }].map(g=>{ let list=_taskEntries.filter(e=> e.task.status===g.key && (!_taskPerson || e.task.person===_taskPerson)); if(g.key==='done') list=list.slice().sort((a,b)=>(b.task.doneAt||0)-(a.task.doneAt||0)); const items=list.map(e=>tvm(e, g.key)); return Object.assign({}, g, { items, hidden: (_projTab2==='all') ? (items.length===0) : (g.key!==_projTab2) }); });
 
     return {
       allMode, onSelectAllProjects:()=>this.setState({allMode:true, allFilters:{status:{},cat:{},person:{}}, projOpen:false, projQuery:'', selectedId:null}),
@@ -4752,7 +4867,7 @@ class Flux extends React.Component {
           const fold = g.key==='done';
           const open = !fold || doneOpen;
           return (
-          <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
+          <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')}>
             {fold
               ? this.renderDoneLabel(g)
               : <div className="ek-glabel"><b>{g.label}</b><span className="c">{g.items.length}</span></div>}
@@ -4787,8 +4902,7 @@ class Flux extends React.Component {
 
   renderTodayRow(t){
     return (
-      <div key={t.id} className="ek-trow" data-task="1" draggable={t.draggable} style={css(t.rowStyle)}
-        onDragStart={t.onDragStart} onDragEnter={t.onDragEnter} onDragOver={t.onDragOver} onDrop={t.onDrop} onDragEnd={t.onDragEnd}>
+      <div key={t.id} className="ek-trow" data-task="1" data-tid={t.id} data-pid={t.projId} style={css(t.rowStyle)} onPointerDown={t.draggable ? t.onPointerDown : undefined}>
         <span className={'ek-ck'+(t.done?' on':'')} onClick={t.onCheck} title={t.done?'Rouvrir la tâche':'Marquer comme terminée'}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
         </span>
@@ -4892,6 +5006,7 @@ class Flux extends React.Component {
               </div>
             </div>}
         </span>
+        {t.draggable && <span className="ek-grip" title="Glisser pour réordonner"><svg viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="3" r="1.4"></circle><circle cx="7" cy="3" r="1.4"></circle><circle cx="3" cy="8" r="1.4"></circle><circle cx="7" cy="8" r="1.4"></circle><circle cx="3" cy="13" r="1.4"></circle><circle cx="7" cy="13" r="1.4"></circle></svg></span>}
       </div>
     );
   }
@@ -5066,7 +5181,7 @@ class Flux extends React.Component {
                         </React.Fragment>}
                   </div>
                 : v.todayGroups.map(g=>
-                    <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')+(g.hi?' drop-hi':'')} onDragOver={g.onOver} onDragEnter={g.onOver} onDrop={g.onDrop}>
+                    <div key={g.key} className={'ek-grp'+(g.hidden?' ek-hidden':'')}>
                       {g.key==='done'
                         ? this.renderDoneLabel(g)
                         : <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>}
