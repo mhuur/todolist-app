@@ -1341,7 +1341,21 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 <link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap">
 </head>
 <body>
-<div id="login-screen" class="login-screen"><div class="login-box"><div class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg></div><h1>MyTodo</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-2.9.8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8 2.1-6.3 0-11.7-3.8-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
+<div id="login-screen" class="login-screen" style="display:none"><div class="login-box"><div class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path></svg></div><h1>MyTodo</h1><p>Connecte-toi pour synchroniser tes données entre tous tes appareils</p><button class="btn-google" onclick="doLogin()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-2.9.8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8 2.1-6.3 0-11.7-3.8-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg> Se connecter avec Google</button><div id="login-msg"></div></div></div><div id="app" style="display:none;width:100%"></div><div id="pl-host"></div>
+<script>
+// ▼ Écran de connexion différé — masqué (style inline) tant que Firebase n'a pas restauré la session :
+// sinon il flashait à chaque rechargement sur téléphone, le temps que onAuthStateChanged réponde
+// (correctif sept. 2026). L'indice localStorage 'auth-hint' (posé à la connexion, retiré à la
+// déconnexion) le fait apparaître tout de suite pour un visiteur non connecté. Garde-fou : affiché de
+// toute façon après 8 s si l'état d'authentification n'est toujours pas connu (Firebase injoignable).
+// Script séparé de l'init Firebase pour s'exécuter même si le SDK n'a pas chargé.
+(function(){
+  var hint=false; try{hint=!!localStorage.getItem('auth-hint')}catch(e){}
+  if(!hint) document.getElementById('login-screen').style.display='flex';
+  window.__authKnown=false;
+  setTimeout(function(){ if(!window.__authKnown && !window.__demoMode) document.getElementById('login-screen').style.display='flex'; },8000);
+})();
+</script>
 <script>
 /* ── Firebase Init ── */
 firebase.initializeApp({
@@ -1379,6 +1393,8 @@ function doLogout(){if(confirm("Se déconnecter ?"))auth.signOut()}
 
 auth.onAuthStateChanged(async user=>{
   currentUser=user;
+  window.__authKnown=true;
+  try{ if(user) localStorage.setItem('auth-hint','1'); else localStorage.removeItem('auth-hint'); }catch(e){}
   if(user){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
