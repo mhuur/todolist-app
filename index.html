@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>MyTodo</title>
 <!-- ── App installable (PWA) : c'est ce qui fait disparaître le bandeau du navigateur une fois l'app ajoutée à l'écran d'accueil. Sans le manifeste ET sw.js, Chrome ne propose pas l'installation. ── -->
 <link rel="manifest" href="manifest.json">
@@ -4713,7 +4713,9 @@ class Flux extends React.Component {
     // le bouton ＋ flottant qui l'ouvre et lui donne le focus. Il se referme dès qu'on le quitte vide.
     const mob = this.isMob();
     const ouvert = !mob || !!this.state.mobAdd;
-    const ouvrir = ()=>this.setState({mobAdd:true}, ()=>{ const el=document.querySelector('#flux-root .ek-thinadd input'); if(el){ el.scrollIntoView({block:'nearest'}); el.focus(); } });
+    // Pas de scrollIntoView : le champ est fixé en bas de l'écran (bandeau), le faire défiler ne fait que
+    // pousser l'en-tête hors de la vue quand le clavier s'ouvre. Le focus suffit.
+    const ouvrir = ()=>this.setState({mobAdd:true}, ()=>{ const el=document.querySelector('#flux-root .ek-thinadd input'); if(el) el.focus(); });
     const fermerSiVide = (el)=>{ if(mob && !(el.value||'').trim()) this.setState({mobAdd:false}); };
     return (
       <React.Fragment>
