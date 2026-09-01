@@ -926,6 +926,11 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-htab{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;padding:5px 0;border:none;background:none;border-bottom:2px solid transparent;transition:color .12s,border-color .12s}
 #flux-root .ek-htab.on{color:var(--text);border-color:#0f3f93}
 #flux-root .ek-htab:hover:not(.on){color:var(--text2)}
+/* Onglets de statut (Tous/En cours/À faire/En attente) et filtre Personne MASQUÉS partout, à la demande
+   de Romain (sept. 2026) — code intact, retirer ces deux lignes les fait réapparaître sur ordinateur
+   (le bloc @media téléphone a ses propres règles, indépendantes). !important : conteneurs en display:flex inline. */
+#flux-root div:has(>.ek-htab){display:none!important}
+#flux-root [data-fchip]{display:none!important}
 /* ── Écran Aujourd'hui (thème clair Ekopak) : lignes, groupes, panneau détail ── */
 #flux-root .ek-trow{display:flex;align-items:center;gap:15px;padding:7px 8px;border-bottom:1px solid var(--divider);border-radius:6px;position:relative;transition:background .12s}
 #flux-root .ek-trow:hover{background:#eef2f8}
