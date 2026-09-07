@@ -5088,18 +5088,18 @@ class Flux extends React.Component {
         {!todayOnly && !v.planning &&
         <div style={css('flex:none;display:flex;align-items:center;gap:20px;padding:14px 32px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5;')}>
           <div data-projsel style={css('flex:none;min-width:0;')}>
-            {(v.allMode || !v.hasProject)
-              ? <div className="ek-ov">Projet</div>
+            {(v.todayView || v.allMode || !v.hasProject)
+              ? <div className="ek-ov">{v.todayView?'Tous les projets':'Projet'}</div>
               : (v.projNumEditing
                   ? <input className="ek-ov" autoFocus defaultValue={v.projNumber} onKeyDown={v.onProjNumKey} onBlur={v.onProjNumBlur} onClick={e=>e.stopPropagation()} placeholder="N° / Réf." style={css('border:1px solid '+v.projColor+';border-radius:5px;padding:1px 5px;background:var(--panel);font-family:inherit;font-weight:700;color:'+v.projColor+';min-width:120px;outline:none;')} />
                   : <div className="ek-ov" onClick={v.onProjNumToggle} title="Numéro / référence du projet — cliquer pour éditer" style={css('cursor:text;'+(v.projNumber?('color:'+v.projColor+';font-weight:700;'):''))}>{v.projNumber||'＋ N° / Réf.'}</div>)}
             <div className="ek-projpick" onClick={v.onProjToggle} title="Changer de projet">
-              {(v.allMode || !v.hasProject)
-                ? <h1>{v.allMode?'Tous les projets':'Aucun projet'}</h1>
+              {(v.todayView || v.allMode || !v.hasProject)
+                ? <h1>{v.todayView?"Aujourd'hui":(v.allMode?'Tous les projets':'Aucun projet')}</h1>
                 : (v.projNameEditing
                     ? <input autoFocus defaultValue={v.projName} onKeyDown={v.onProjNameKey} onBlur={v.onProjNameBlur} onClick={e=>e.stopPropagation()} style={css("font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.01em;border:1px solid "+v.projColor+";border-radius:7px;padding:1px 8px;background:var(--panel);outline:none;max-width:430px;")} />
                     : <h1 onClick={v.onProjNameToggle} title="Cliquer pour renommer — le chevron change de projet">{v.projName}</h1>)}
-              {!v.allMode && v.hasProject && v.projDeadlineJ &&
+              {!v.todayView && !v.allMode && v.hasProject && v.projDeadlineJ &&
                 <span className={'ek-jbadge '+v.projDeadlineCls} title="Jours avant l'échéance du projet">{v.projDeadlineJ}</span>}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
               {v.projOpen &&
@@ -5129,7 +5129,7 @@ class Flux extends React.Component {
                 </div>}
             </div>
           </div>
-          {!v.allMode && v.hasProject &&
+          {!v.todayView && !v.allMode && v.hasProject &&
             <button className="ek-projdel" onClick={v.onProjDelCurrent} title="Supprimer ce projet">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
             </button>}
