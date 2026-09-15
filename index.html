@@ -3793,6 +3793,10 @@ class Flux extends React.Component {
     document.addEventListener('mousedown', this._docDown, true);
     document.addEventListener('click', this._docClick, true);
     document.addEventListener('keydown', this._docKey, true);
+    // ▼ Téléphone : la feuille de détail pousse une entrée d'historique à l'ouverture (componentDidUpdate),
+    // si bien que la touche « retour » d'Android la ferme au lieu de quitter l'app. _panelHist = entrée en place.
+    this._onPop = ()=>{ if(this._panelHist){ this._panelHist=false; if(this.state.selectedId) this.setState({ selectedId:null }); } };
+    window.addEventListener('popstate', this._onPop);
     this._purgeStaleTodayDone();
   }
   // ▼ _purgeStaleTodayDone — au démarrage, retire d'Aujourd'hui les tâches validées un AUTRE jour (nettoie le flag today + la position). L'affichage reste correct sans ça — todayTasks filtre déjà sur doneAt=aujourd'hui — mais évite que le flag today ne s'accumule.
@@ -3810,12 +3814,18 @@ class Flux extends React.Component {
       return { tasks, projects, todayOrder:order };
     });
   }
-  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); document.removeEventListener('keydown', this._docKey, true); if(this._mq&&this._onMq){ if(this._mq.removeEventListener) this._mq.removeEventListener('change', this._onMq); else this._mq.removeListener(this._onMq); } if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
+  componentWillUnmount(){ document.removeEventListener('click', this._docClick, true); document.removeEventListener('mousedown', this._docDown, true); document.removeEventListener('keydown', this._docKey, true); window.removeEventListener('popstate', this._onPop); if(this._panelHist){ this._panelHist=false; try{ history.back(); }catch(e){} } if(this._mq&&this._onMq){ if(this._mq.removeEventListener) this._mq.removeEventListener('change', this._onMq); else this._mq.removeListener(this._onMq); } if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } }
   // ▼ toast d'annulation (undo) : action réversible en 1 clic pendant ~5s (complétion / retrait d'Aujourd'hui). Remplace les modales de confirmation.
   showUndo(msg, action){ if(this._undoTimer) clearTimeout(this._undoTimer); this.setState({ undo:{ msg, action } }); this._undoTimer=setTimeout(()=>{ this._undoTimer=null; this.setState({ undo:null }); }, 5000); }
   doUndo(){ const u=this.state.undo; if(this._undoTimer){ clearTimeout(this._undoTimer); this._undoTimer=null; } this.setState({ undo:null }); if(u&&u.action) u.action(); }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    /* Feuille de détail sur téléphone ↔ historique : ouverture = pushState (retour Android la ferme via _onPop) ;
+       fermeture par la croix / suppression / clic ailleurs = on retire l'entrée (history.back ; _onPop ne fait
+       alors rien puisque _panelHist est déjà à false). Ordinateur : rien. */
+    const hadSel = !!(prevState && prevState.selectedId), hasSel = !!this.state.selectedId;
+    if(hasSel && !hadSel && this.isMob() && !this._panelHist){ try{ history.pushState({ ekPanel:1 }, ''); this._panelHist=true; }catch(e){} }
+    else if(!hasSel && hadSel && this._panelHist){ this._panelHist=false; try{ history.back(); }catch(e){} }
     try {
       const st = this.state;
       const projects = this._snapshotCurrent(st);   // réécrit l'état plat de travail dans le projet courant
@@ -4067,9 +4077,11 @@ class Flux extends React.Component {
   // Pendant le glisser, tout se passe en DOM direct (aucun setState) : clone flottant .ek-dragclone qui suit le
   // pointeur, ligne d'origine évidée (.ek-hole, garde sa place), voisines candidates décalées par transform avec
   // transition (le creux se déplace en direct), défilement automatique de la liste près des bords. Candidates =
-  // unités (ligne + son bloc sous-tâches) du même groupe de statut ET du même projet — sauf Aujourd'hui sur
-  // ordinateur où l'entrelacement entre projets est libre ; elles sont toujours contiguës (Tâches : entrées groupées
-  // par projet ; téléphone : renderRowsByProject). Au relâcher, le clone rejoint le creux (150 ms) puis
+  // unités (ligne + son bloc sous-tâches) du même groupe de statut ET du même projet — sauf Aujourd'hui où
+  // l'entrelacement entre projets est libre (ordinateur ET téléphone) ; elles sont toujours contiguës (Tâches :
+  // entrées groupées par projet ; téléphone : renderRowsByProject). Téléphone, Aujourd'hui : les en-têtes de projet
+  // .ek-phead intercalés (pd.hdrs) sont décalés avec la zone de lignes qui glisse, pour que le creux reste lisible ;
+  // ils sont réécrits au re-render après le dépôt. Au relâcher, le clone rejoint le creux (150 ms) puis
   // reorderTaskAny / dropTodayOnRow appliquent l'ordre ; relâché sans déplacement ou annulé, tout revient en place.
   // Un clic capturé est bloqué 350 ms après le dépôt pour ne pas ouvrir la tâche relâchée.
   dragPointerDown(e, tid, pid, gkey, ok){
@@ -4100,9 +4112,10 @@ class Flux extends React.Component {
     if(!rowEl.isConnected||!grp){ this._dragEnd(null,true); return; }
     pd.scrl=rowEl.closest('.scrl');
     const st0=pd.scrl?pd.scrl.scrollTop:0;
-    const cross=!!this.state.todayView && !this.isMob();
+    const cross=!!this.state.todayView;
     const rows=[...grp.querySelectorAll(':scope > .ek-trow')].filter(r=> cross || r.getAttribute('data-pid')===pd.pid);
     pd.units=rows.map(r=>{ const els=[r]; const nx=r.nextElementSibling; if(nx&&nx.classList.contains('ek-subwrap')) els.push(nx); const top=r.getBoundingClientRect().top+st0; const lb=els[els.length-1].getBoundingClientRect().bottom+st0; return { tid:r.getAttribute('data-tid'), els, top, h:lb-top }; });
+    pd.hdrs=cross ? [...grp.querySelectorAll(':scope > .ek-phead')].map(el=>({ el, top:el.getBoundingClientRect().top+st0 })) : [];
     pd.di=pd.units.findIndex(u=>u.tid===pd.tid);
     if(pd.di<0){ this._dragEnd(null,true); return; }
     pd.ti=pd.di;
@@ -4115,6 +4128,7 @@ class Flux extends React.Component {
     (rowEl.closest('[data-theme]')||document.body).appendChild(clone);
     pd.clone=clone;
     pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transition='transform .15s ease'; }));
+    pd.hdrs.forEach(h=>{ h.el.style.transition='transform .15s ease'; });
     me.els.forEach(el=>el.classList.add('ek-hole'));
     if(pd.touch&&navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){} }
     document.addEventListener('click', pd.onClick, true);
@@ -4141,6 +4155,10 @@ class Flux extends React.Component {
     let ti=0; for(const u of others){ if(u.top+u.h/2<cy) ti++; else break; }
     pd.ti=ti;
     others.forEach((u,j)=>{ let dy=0; if(j<pd.di&&j>=ti) dy=pd.h; else if(j>=pd.di&&j<ti) dy=-pd.h; u.els.forEach(el=>{ el.style.transform=dy?`translateY(${dy}px)`:''; }); });
+    /* en-têtes de projet (téléphone, Aujourd'hui) : suivent la zone de lignes décalée — ceux situés entre le point de dépôt et le creux */
+    if(pd.hdrs.length){ const me=pd.units[pd.di]; let lo=Infinity, hi=-Infinity, dy=0;
+      if(ti<pd.di){ lo=others[ti].top; hi=me.top; dy=pd.h; } else if(ti>pd.di){ const last=others[ti-1]; lo=me.top+me.h; hi=last.top+last.h; dy=-pd.h; }
+      pd.hdrs.forEach(h=>{ const on=h.top>=lo&&h.top<hi; h.el.style.transform=on?`translateY(${dy}px)`:''; }); }
   }
   _dragAutoScroll(){
     const pd=this._pd; if(!pd||!pd.lifted||!pd.scrl) return;
@@ -4173,10 +4191,11 @@ class Flux extends React.Component {
     const clone=pd.clone;
     clone.style.transition='top .15s ease, transform .15s ease, box-shadow .15s ease';
     clone.style.top=(holeTop-st)+'px'; clone.style.transform='scale(1)'; clone.style.boxShadow='none';
-    if(!moved) pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transform=''; }));
+    if(!moved){ pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transform=''; })); pd.hdrs.forEach(h=>{ h.el.style.transform=''; }); }
     setTimeout(()=>{
       clone.remove();
       pd.units.forEach(u=>u.els.forEach(el=>{ el.style.transition=''; el.style.transform=''; }));
+      pd.hdrs.forEach(h=>{ h.el.style.transition=''; h.el.style.transform=''; });
       me.els.forEach(el=>el.classList.remove('ek-hole'));
       if(moved){ if(this.state.todayView) this.dropTodayOnRow(pd.tid, beforeId, pd.gkey); else this.reorderTaskAny(pd.tid, beforeId, pd.gkey); }
     }, 160);
@@ -4879,14 +4898,14 @@ class Flux extends React.Component {
     );
   }
 
-  // ▼ renderRowsByProject — TÉLÉPHONE, vues multi-projets (Aujourd'hui, « Tous les projets ») : les lignes d'un groupe de statut sont regroupées par projet, sous un en-tête de projet (.ek-phead) écrit une seule fois. Tri stable par première apparition du projet dans la liste ; l'ordre au sein d'un projet est conservé. Sur ordinateur les lignes restent à plat (flatMap direct). La cellule projet des lignes est masquée par le CSS téléphone : l'en-tête la porte.
-  renderRowsByProject(gkey, items){
+  // ▼ renderRowsByProject — TÉLÉPHONE, vues multi-projets (Aujourd'hui, « Tous les projets ») : les lignes d'un groupe de statut sont regroupées par projet, sous un en-tête de projet (.ek-phead). « Tous les projets » : tri stable par première apparition du projet (un en-tête par projet) ; l'ordre au sein d'un projet est conservé. Aujourd'hui (`byRuns`, sept. 2026) : l'ordre manuel (todayOrder) est respecté tel quel et un en-tête est écrit à chaque changement de projet entre deux lignes consécutives — le même projet peut donc apparaître plusieurs fois, ce qui rend l'entrelacement entre projets réordonnable au doigt. Sur ordinateur les lignes restent à plat (flatMap direct). La cellule projet des lignes est masquée par le CSS téléphone : l'en-tête la porte.
+  renderRowsByProject(gkey, items, byRuns){
     const first={}; items.forEach((t,i)=>{ if(!(t.projId in first)) first[t.projId]=i; });
-    const sorted=items.slice().sort((a,b)=> first[a.projId]-first[b.projId]);
+    const sorted=byRuns ? items : items.slice().sort((a,b)=> first[a.projId]-first[b.projId]);
     const out=[]; let prev=null;
-    sorted.forEach(t=>{
+    sorted.forEach((t,i)=>{
       if(t.projId!==prev){ prev=t.projId; out.push(
-        <div key={'ph_'+gkey+'_'+t.projId} className="ek-phead">
+        <div key={'ph_'+gkey+'_'+t.projId+(byRuns?'_'+t.id:'')} className="ek-phead">
           <span className={'ek-phdot'+(t.isInbox?' none':'')} style={css(t.isInbox?'':'background:'+t.projColor+';')}></span>
           {t.isInbox
             ? <span className="ek-phnum none">Sans projet</span>
@@ -5185,7 +5204,7 @@ class Flux extends React.Component {
                       {g.key==='done'
                         ? this.renderDoneLabel(g)
                         : <div className="ek-glabel"><b className={g.key==='relance'?'rel':''}>{g.label}</b><span className="c">{g.items.length}</span></div>}
-                      {(g.key!=='done' || !!this.state.doneOpen) && (this.isMob() ? this.renderRowsByProject(g.key, g.items) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)]))}
+                      {(g.key!=='done' || !!this.state.doneOpen) && (this.isMob() ? this.renderRowsByProject(g.key, g.items, true) : g.items.flatMap(t=> t.subsOpen ? [this.renderTodayRow(t), this.renderTodaySubs(t)] : [this.renderTodayRow(t)]))}
                       {!g.items.length && <div className="ek-droppad"></div>}
                     </div>)}
             </div>
