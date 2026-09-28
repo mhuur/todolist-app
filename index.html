@@ -1480,17 +1480,13 @@ async function loadFromCloud(){
     const doc=await db.collection('users').doc(currentUser.uid).get();
     if(doc.exists){
       const d=doc.data();
-      /* "Plus récent gagne" : si le cache localStorage est plus récent que le cloud (écriture cloud ratée/raccourcie < 1,5 s), on le récupère au lieu de l'écraser aveuglément. */
+      /* "Plus récent gagne" : si le cache localStorage est plus récent que le cloud (écriture cloud ratée/raccourcie < 1,5 s), on le récupère au lieu de l'écraser aveuglément.
+         Seulement si ce cache a été fait à partir de la version cloud actuelle (_base) : sinon un autre appareil a écrit depuis, et repousser le cache effacerait ses modifications. */
       let p=null;try{const lr=localStorage.getItem(SK);if(lr)p=JSON.parse(lr)}catch(e){}
-      const useLocal=p&&(p._ts||0)>(d._ts||0);
-      const src=useLocal?p:d;
-      S.projects=src.projects||[];S.trash=src.trash||[];S.archive=src.archive||[];S.globalOrder=src.globalOrder||[];
-      if(src.crm){S.crm=src.crm}else{initCRM()}
-      S.feedback=src.feedback&&Array.isArray(src.feedback.items)?src.feedback:{items:[]};
-      S.priceLib=src.priceLib&&typeof src.priceLib==='object'?{schemas:src.priceLib.schemas||{},quotes:Array.isArray(src.priceLib.quotes)?src.priceLib.quotes:[]}:{schemas:{},quotes:[]};
-      S.flux=src.flux||null;S.timesheet=tsNorm(src.timesheet);S.projCrm=pcNorm(src.projCrm);
-      S._dataTs=src._ts||Date.now();
-      localStorage.setItem(SK,JSON.stringify(dataSnapshot()));
+      const useLocal=p&&(p._ts||0)>(d._ts||0)&&p._base===(d._ts||0);
+      applyData(useLocal?p:d);
+      S._cloudTs=d._ts||0;_cloudJ=_contentJ(d);
+      localStorage.setItem(SK,JSON.stringify(localSnapshot()));
       if(useLocal&&currentUser){saveToCloudNow();} /* re-pousse la version locale récupérée */
     }else{
       /* First login: check if localStorage has data to migrate */
@@ -1523,24 +1519,81 @@ async function loadFromCloud(){
     const local=localStorage.getItem(SK);
     if(local){const p=JSON.parse(local);S.projects=p.projects||[];S.trash=p.trash||[];S.archive=p.archive||[];S.globalOrder=p.globalOrder||[];if(p.crm){S.crm=p.crm}else{initCRM()}
     S.feedback=p.feedback&&Array.isArray(p.feedback.items)?p.feedback:{items:[]};
-    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S.projCrm=pcNorm(p.projCrm);S._dataTs=p._ts||Date.now();
+    S.priceLib=p.priceLib&&typeof p.priceLib==='object'?{schemas:p.priceLib.schemas||{},quotes:Array.isArray(p.priceLib.quotes)?p.priceLib.quotes:[]}:{schemas:{},quotes:[]};S.flux=p.flux||null;S.timesheet=tsNorm(p.timesheet);S.projCrm=pcNorm(p.projCrm);S._dataTs=p._ts||Date.now();S._cloudTs=p._base||0;
     S.projects.forEach(p=>{S.openProjects[p.id]=true;if(!p.tasks)p.tasks=[];})}else{initCRM()}
   }
 }
 
 // Source unique du payload persisté + horodatage `_ts` (sert au "plus récent gagne" au chargement → localStorage = filet de sécurité si une écriture cloud est ratée/raccourcie).
 function dataSnapshot(){ return {projects:S.projects,trash:S.trash,archive:S.archive,globalOrder:S.globalOrder,crm:S.crm,projCrm:S.projCrm,feedback:S.feedback,priceLib:S.priceLib,flux:S.flux,timesheet:S.timesheet,_ts:S._dataTs||0}; }
-async function saveToCloudNow(){
-  if(!currentUser)return;
+// Cache localStorage = snapshot + _base (le _ts de la version cloud dont il dérive, cf. loadFromCloud).
+function localSnapshot(){ return {...dataSnapshot(),_base:S._cloudTs||0}; }
+// ▼ applyData — charge un payload (cloud ou cache) dans S. Seul point d'affectation des données persistées au chargement cloud.
+function applyData(src){
+  S.projects=src.projects||[];S.trash=src.trash||[];S.archive=src.archive||[];S.globalOrder=src.globalOrder||[];
+  if(src.crm){S.crm=src.crm}else{initCRM()}
+  S.feedback=src.feedback&&Array.isArray(src.feedback.items)?src.feedback:{items:[]};
+  S.priceLib=src.priceLib&&typeof src.priceLib==='object'?{schemas:src.priceLib.schemas||{},quotes:Array.isArray(src.priceLib.quotes)?src.priceLib.quotes:[]}:{schemas:{},quotes:[]};
+  S.flux=src.flux||null;S.timesheet=tsNorm(src.timesheet);S.projCrm=pcNorm(src.projCrm);
+  S._dataTs=src._ts||Date.now();
+}
+/* ▼ Synchro multi-appareils. S._cloudTs = _ts de la version cloud avec laquelle cet onglet est à jour ; S._dataTs ≠ S._cloudTs = modifs locales pas encore écrites.
+   Écriture gardée : si le cloud a bougé depuis (autre appareil), on n'écrase pas — on recharge le cloud et on prévient.
+   Lectures et écritures passent par la file _syncQ pour ne jamais se chevaucher. */
+let _syncQ=Promise.resolve();
+function _syncRun(fn){_syncQ=_syncQ.then(fn,fn);return _syncQ}
+function _cloudDirty(){return (S._dataTs||0)!==(S._cloudTs||0)}
+/* _cloudJ = contenu de la version cloud connue, sans _ts, clés triées (Firestore ne rend pas les clés dans l'ordre écrit).
+   Un save() qui ne change rien (ouvrir un menu, changer d'onglet…) n'écrit donc rien et ne fait pas bouger le _ts cloud. */
+let _cloudJ=null;
+function _stableJ(v){if(Array.isArray(v))return '['+v.map(x=>x===undefined?'null':_stableJ(x)).join(',')+']';if(v&&typeof v==='object')return '{'+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+_stableJ(v[k])).join(',')+'}';return JSON.stringify(v)}
+function _contentJ(d){const {_ts,_base,...c}=d||{};return _stableJ(c)}
+function _takeCloud(d){applyData(d);S._cloudTs=d._ts||0;_cloudJ=_contentJ(d);migrateData();try{localStorage.setItem(SK,JSON.stringify(localSnapshot()))}catch(e){};render()}
+function saveToCloudNow(){return _syncRun(_saveToCloudNow)}
+async function _saveToCloudNow(){
+  if(!currentUser||!_cloudDirty())return;
+  const ref=db.collection('users').doc(currentUser.uid);
   const data=dataSnapshot();
   const stripped=JSON.parse(stripImgs(JSON.stringify(data)));
+  const j=_contentJ(stripped);
+  if(j===_cloudJ){ /* rien de changé par rapport au cloud : pas d'écriture */
+    S._dataTs=S._cloudTs;try{localStorage.setItem(SK,JSON.stringify(localSnapshot()))}catch(e){}
+    if(syncEl){syncEl.textContent="✓";syncEl.className="sync-indicator"}
+    return;
+  }
   try{
-    await db.collection('users').doc(currentUser.uid).set(stripped);
+    const cur=await ref.get({source:'server'});
+    if(cur.exists&&(cur.data()._ts||0)!==(S._cloudTs||0)){
+      clearTimeout(saveTimer);saveTimer=null;
+      _takeCloud(cur.data());
+      if(syncEl){syncEl.textContent="✓";syncEl.className="sync-indicator"}
+      toast("Modifié sur un autre appareil — données rechargées, ta dernière modification n'a pas été enregistrée");
+      return;
+    }
+    await ref.set(stripped);
+    S._cloudTs=data._ts;_cloudJ=j;
+    try{localStorage.setItem(SK,JSON.stringify(localSnapshot()))}catch(e){}
     if(syncEl){syncEl.textContent="✓";syncEl.className="sync-indicator"}
   }catch(e){
     console.error("Cloud save error:",e);
     if(syncEl){syncEl.textContent="✗";syncEl.className="sync-indicator error"}
   }
+}
+// ▼ refreshFromCloud — au retour sur l'onglet : écrit d'abord les modifs en attente (écriture gardée), puis relit le cloud et le reprend s'il a bougé.
+let _refreshAt=0;
+function refreshFromCloud(){
+  if(!currentUser||window.__demoMode||S._cloudTs===undefined)return; /* _cloudTs posé par loadFromCloud : pas avant la fin du 1er chargement */
+  if(Date.now()-_refreshAt<2000)return; _refreshAt=Date.now(); /* focus + visibilitychange arrivent ensemble */
+  clearTimeout(saveTimer);saveTimer=null;
+  _syncRun(_saveToCloudNow);
+  _syncRun(async()=>{
+    if(_cloudDirty())return;
+    try{
+      const cur=await db.collection('users').doc(currentUser.uid).get({source:'server'});
+      if(!cur.exists||_cloudDirty())return;
+      if((cur.data()._ts||0)!==(S._cloudTs||0))_takeCloud(cur.data());
+    }catch(e){console.error("Cloud refresh error:",e)}
+  });
 }
 
 function saveToCloud(){
@@ -1552,7 +1605,10 @@ function saveToCloud(){
 // Flush la sauvegarde cloud EN ATTENTE avant fermeture/onglet caché (réduit la fenêtre de perte de 1,5 s).
 function flushSave(){ if(!saveTimer)return; clearTimeout(saveTimer); saveTimer=null; if(currentUser){ try{ saveToCloudNow(); }catch(e){} } }
 window.addEventListener('pagehide',flushSave);
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden')flushSave(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden')flushSave(); else refreshFromCloud(); });
+// Fenêtre ordinateur restée visible (2e écran) : le retour du focus vaut retour sur l'onglet. Retour du réseau : réécrire ce qui n'a pas pu partir.
+window.addEventListener('focus',refreshFromCloud);
+window.addEventListener('online',refreshFromCloud);
 
 const SK="todolist-data-v3";
 let S={projects:[],tab:"flux",groupByProject:false,openProjects:{},trash:[],archive:[],ex:{},wo:0,openTasks:{},globalOrder:[],gFilter:"all",gSort:"smart",gQ:"",gSection:"plan",crm:{products:[],suppliers:[],contactAlias:{},contactIgnore:{},contactPending:[]},crmView:"sup",crmQ:"",projCrm:{technos:[],projects:[]},pjView:"proj",pjQ:"",feedback:{items:[]},fbQ:"",priceLib:{schemas:{},quotes:[]},flux:null,timesheet:{projects:[],weeks:{}},tsCol:{},tsAdd:null,tsEdit:null,plFilterSup:"",plFilterProd:"",plFilterProjet:"",plSortBy:null,plSortDir:"asc",plSearch:{}};
@@ -1564,7 +1620,7 @@ function load(){/* Data loaded from cloud in onAuthStateChanged */}function migr
 function getStatus(a){if(a.status==='done')return'done';if(a.paused)return'wt';return'ec'}
 const PCOLS=["#38BDF8","#F59E0B","#22C55E","#E879F9","#F87171","#2DD4BF","#A78BFA","#FBBF24","#F472B6","#818CF8"];
 function pCol(pid){if(pid==="__inbox")return"#F59E0B";const p=fp(pid);return(p&&p.color)||PCOLS[0]}
-function save(){S._dataTs=Date.now();try{localStorage.setItem(SK,JSON.stringify(dataSnapshot()))}catch{};saveToCloud()}
+function save(){S._dataTs=Date.now();try{localStorage.setItem(SK,JSON.stringify(localSnapshot()))}catch{};saveToCloud()}
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function du(d){if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(d+"T00:00:00")-n)/864e5)}
 function dcc(d){const v=du(d);return v===null?"#64748B":v<0?"#F87171":v<=3?"#FBBF24":"#34D399"}
@@ -1667,7 +1723,7 @@ function oEF(el){document.querySelectorAll('.ab.ed').forEach(b=>b.classList.remo
 function oEB(el){setTimeout(()=>{if(document.activeElement===el)return;const b=el.closest('.ab');if(b&&!b.contains(document.activeElement))b.classList.remove('ed')},200)}
 function sEd(){document.querySelectorAll('.atx[contenteditable]').forEach(el=>{if(el._r)return;el._r=true;el.addEventListener('focus',()=>oEF(el));el.addEventListener('blur',()=>oEB(el));el.addEventListener('paste',function(e){const it=e.clipboardData&&e.clipboardData.items;if(!it)return;for(let i=0;i<it.length;i++){if(it[i].type.indexOf('image')!==-1){e.preventDefault();const f=it[i].getAsFile();const r=new FileReader();r.onload=function(ev){const img=document.createElement('img');img.src=ev.target.result;const s=window.getSelection();if(s.rangeCount){const rr=s.getRangeAt(0);rr.deleteContents();rr.insertNode(img);rr.collapse(false)}else el.appendChild(img);const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}};r.readAsDataURL(f);break}}});el.addEventListener('input',function(){const a=fa(el.dataset.pid,el.dataset.aid);if(a){a.text=el.innerHTML;save()}})})}
 function expD(){const d=localStorage.getItem(SK);if(!d)return;const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download="mytodo-backup.json";a.click();URL.revokeObjectURL(u)}
-function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
+function impD(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const p=JSON.parse(ev.target.result);if(!p.projects)return;if(!confirm("Remplacer toutes les données ?"))return;localStorage.setItem(SK,ev.target.result);const impData=JSON.parse(ev.target.result);S.projects=impData.projects||[];S.trash=impData.trash||[];S.archive=impData.archive||[];S._dataTs=Date.now();saveToCloudNow().then(()=>location.reload())}catch{}};r.readAsText(f)};inp.click()}
 
 function sortA(acts){return acts.filter(x=>x.status!=="done")}
 
