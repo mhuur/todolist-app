@@ -1163,6 +1163,23 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-dsubadd svg{width:20px;height:20px;flex:none}
 #flux-root .ek-dsubadd input{flex:1;min-width:0;border:none;background:none;outline:none;font-family:inherit;font-size:15px;color:var(--text)}
 #flux-root .ek-dsubadd input::placeholder{color:var(--muted)}
+/* Ligne « Projet » de la feuille de détail (téléphone seulement, rendue si isMob()) */
+#flux-root .ek-dproj{margin:-4px 0 14px}
+#flux-root .ek-dprojbtn{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--panel)}
+#flux-root .ek-dprojbtn.open{border-color:#0f3f93}
+#flux-root .ek-dprojbtn .ic{width:18px;height:18px;flex:none;color:var(--muted)}
+#flux-root .ek-dprojbtn .cv{width:16px;height:16px;flex:none;color:var(--muted);margin-left:auto;transition:transform .15s}
+#flux-root .ek-dprojbtn.open .cv{transform:rotate(180deg)}
+#flux-root .ek-dproj .dot{width:8px;height:8px;border-radius:2px;flex:none}
+#flux-root .ek-dproj .dot.inbox{border:1.5px dashed #95a0b3;background:none}
+#flux-root .ek-dproj .num{font-size:12px;font-weight:700;flex:none}
+#flux-root .ek-dproj .nm{min-width:0;font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flux-root .ek-dprojlist{margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:5px;background:var(--panel);box-shadow:0 14px 32px rgba(15,63,147,.12);max-height:300px;overflow-y:auto}
+#flux-root .ek-dprojlist input{width:100%;box-sizing:border-box;height:40px;border:1px solid var(--line);border-radius:8px;padding:0 10px;margin-bottom:4px;font-family:inherit;color:var(--text);background:var(--panel);outline:none}
+#flux-root .ek-dprojit{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 8px;border-radius:8px;cursor:pointer}
+#flux-root .ek-dprojit.on .nm{color:#0f3f93}
+#flux-root .ek-dprojit.create .nm{color:#0f3f93;font-weight:500}
+#flux-root .ek-dprojit .chk{width:16px;height:16px;flex:none;margin-left:auto;color:#0f3f93}
 
 /* ══ Téléphone (≤600 px) — mise en page mobile. Tout ce bloc est enfermé dans la media query : le rendu ordinateur est inchangé. Complète le bloc « Mobile responsive » plus haut (qui vise surtout les écrans legacy) et doit rester APRÈS lui + après les styles .c2wrap / #flux-root pour gagner en cascade. ══ */
 @media(max-width:600px){
@@ -1195,14 +1212,14 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
      Sur ordinateur, l'en-tête ne bouge pas — tout ceci est dans la media query. */
   /* :has([data-projsel]) restreint la règle à l'en-tête de l'écran Projet — sans lui, le sélecteur
      :first-child attrape aussi la barre d'outils du Planning et son flex-wrap:wrap saute. */
-  #flux-root>div>div:first-child:has([data-projsel]){flex-wrap:nowrap!important;gap:7px!important;padding:8px 9px!important;height:auto!important}
-  #flux-root [data-projsel]{flex:1 1 auto!important;min-width:0;display:flex;align-items:baseline;gap:8px}
-  #flux-root [data-projsel]>.ek-ov{flex:none;font-size:9.5px!important;letter-spacing:.08em!important}
-  #flux-root .ek-projpick{margin-top:0!important;min-width:0;flex:1 1 auto;gap:4px!important}
-  #flux-root .ek-projpick h1{font-size:15px!important;max-width:none!important;min-width:0;flex:0 1 auto}
+  #flux-root>div>div:first-child:has([data-projsel]){flex-wrap:nowrap!important;gap:5px!important;padding:8px 9px!important;height:auto!important}
+  #flux-root [data-projsel]{flex:1 1 auto!important;min-width:0;display:flex;align-items:baseline;gap:6px}
+  #flux-root [data-projsel]>.ek-ov{flex:none;font-size:9.5px!important;letter-spacing:.03em!important}
+  #flux-root .ek-projpick{margin-top:0!important;min-width:0;flex:1 1 auto;gap:3px!important}
+  #flux-root .ek-projpick h1{font-size:14.5px!important;max-width:none!important;min-width:0;flex:0 1 auto}
   /* le chevron rétrécit mais reste facile à toucher : c'est toute la zone .ek-projpick qui est cliquable */
-  #flux-root .ek-projpick>svg{width:14px!important;height:14px!important}
-  #flux-root .ek-projpick .ek-jbadge{padding-left:6px!important;padding-right:6px!important}
+  #flux-root .ek-projpick>svg{width:11px!important;height:11px!important}
+  #flux-root .ek-projpick .ek-jbadge{padding-left:4px!important;padding-right:4px!important}
   /* La cellule projet des lignes ne sert qu'à distinguer les projets entre eux : en mono-projet elle
      répète l'en-tête à chaque ligne. Masquée sur téléphone seulement, et seulement là — elle reste
      en vue Aujourd'hui et « Tous les projets », qui mélangent les projets (et servent à réassigner). */
@@ -1217,7 +1234,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root div:has(>.ek-htab){display:none!important}
   #flux-root [data-fchip]{display:none!important}
   #flux-root div:has(>.ek-todaypill){flex:none!important;gap:0!important}
-  #flux-root .ek-todaypill{flex:none!important;height:34px;padding:0 9px!important;gap:4px!important;font-size:13px}
+  #flux-root .ek-todaypill{flex:none!important;height:34px;padding:0 7px!important;gap:4px!important;font-size:13px}
   #flux-root .ek-todaylab{display:none}
   /* Le menu s'ancre sur tout le bloc [data-projsel] (bord gauche de l'en-tête), pas sur .ek-projpick : ancré au nom,
      décalé par le n° du projet, il débordait de ~50 px à droite et la corbeille + le crayon sortaient de l'écran. */
@@ -1228,7 +1245,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
      renommer / n° / supprimer passent par le menu ⋮ du projet courant (.ek-projmore, rendu si isMob()). */
   #flux-root .ek-pmenu .ek-pmx{display:none}
   #flux-root .ek-pmenu .ek-fitem{min-height:44px}
-  #flux-root .ek-projmore .ek-x{width:32px;height:34px;opacity:1!important}
+  #flux-root .ek-projmore .ek-x{width:22px;height:34px;opacity:1!important}
+  /* l'entretoise flex:1 de l'en-tête ne sert à rien ([data-projsel] prend déjà la place) et coûte un gap */
+  #flux-root>div>div:first-child:has([data-projsel])>div:empty{display:none}
   #flux-root .ek-projmore .ek-x svg{width:18px;height:18px}
   #flux-root .ek-projpick h1{cursor:pointer}
   /* En-tête du Planning : titre seul, puis « Sans date » + choix de la fenêtre de temps */
@@ -4242,7 +4261,8 @@ class Flux extends React.Component {
       if(!toProjId) return _close;
       let task=null, fromPid=null;
       if(st.tasks.some(t=>t.id===id)){ task=st.tasks.find(t=>t.id===id); fromPid=st.currentProjectId; }
-      else { for(const p of (st.projects||[])){ const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ task=tt; fromPid=p.id; break; } } }
+      // saute le projet courant : son entrée dans st.projects est une copie périmée (la vérité est st.tasks) — sinon une tâche sortie du projet courant y est retrouvée et dupliquée
+      else { for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ task=tt; fromPid=p.id; break; } } }
       if(!task || fromPid===toProjId) return _close;
       const moved={...task, deps:[]};
       const strip=arr=> arr.filter(t=>t.id!==id).map(t=> (t.deps&&t.deps.indexOf(id)>=0)?{...t,deps:t.deps.filter(d=>d!==id)}:t);
@@ -4261,7 +4281,8 @@ class Flux extends React.Component {
       const _close={ editing:{id:null,field:null}, projPickQuery:'' };
       let task=null, fromPid=null;
       if(st.tasks.some(t=>t.id===id)){ task=st.tasks.find(t=>t.id===id); fromPid=st.currentProjectId; }
-      else { for(const p of (st.projects||[])){ const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ task=tt; fromPid=p.id; break; } } }
+      // saute le projet courant : son entrée dans st.projects est une copie périmée (la vérité est st.tasks) — sinon une tâche sortie du projet courant y est retrouvée et dupliquée
+      else { for(const p of (st.projects||[])){ if(p.id===st.currentProjectId) continue; const tt=(p.tasks||[]).find(t=>t.id===id); if(tt){ task=tt; fromPid=p.id; break; } } }
       if(!task) return _close;
       const moved={...task, deps:[]};
       const strip=arr=> arr.filter(t=>t.id!==id).map(t=> (t.deps&&t.deps.indexOf(id)>=0)?{...t,deps:t.deps.filter(d=>d!==id)}:t);
@@ -4469,7 +4490,24 @@ class Flux extends React.Component {
         subDraft: st.panelSubDraft||'',
         onSubDraft:(e)=>this.setState({panelSubDraft:e.target.value}),
         onSubAdd:()=>{ const tx=(this.state.panelSubDraft||'').trim(); if(!tx) return; this.addCheck(stask.id, tx); this.setState({panelSubDraft:''}); },
-        onDelete:()=>this.askDelete(stask.id) };
+        onDelete:()=>this.askDelete(stask.id),
+        // ▼ Projet de la tâche — ligne « Projet » de la feuille, téléphone seulement (la cellule projet des lignes y est masquée).
+        // Transient panelProjOpen/panelProjQ. projChoices est une fonction : _projNextSort (même ordre que le sélecteur) est défini plus bas.
+        projId: staskRes.projId,
+        projInbox: staskRes.projId==='__inbox',
+        projName: ((st.projects||[]).find(p=>p.id===staskRes.projId)||{}).name||'Sans projet',
+        projNumber: ((st.projects||[]).find(p=>p.id===staskRes.projId)||{}).number||'',
+        projColor: ((st.projects||[]).find(p=>p.id===staskRes.projId)||{}).color||accent,
+        projOpen: st.panelProjOpen===stask.id, projQ: st.panelProjQ||'',
+        onProjToggle:()=>this.setState(s=>({ panelProjOpen: s.panelProjOpen===stask.id?false:stask.id, panelProjQ:'' })),
+        onProjQ:(e)=>this.setState({ panelProjQ:e.target.value }),
+        projChoices:()=>{ const q=(st.panelProjQ||'').trim(), ql=q.toLowerCase(); const pick=(pid)=>{ this.moveTaskToProject(stask.id, pid); this.setState({ panelProjOpen:false, panelProjQ:'' }); };
+          const list=(st.projects||[]).filter(p=>p.id!=='__inbox' && (!ql || p.name.toLowerCase().indexOf(ql)>=0 || (p.number||'').toLowerCase().indexOf(ql)>=0)).sort(_projNextSort)
+            .map(p=>({ id:p.id, name:p.name, number:p.number||'', color:p.color||accent, on:p.id===staskRes.projId, onPick:()=>pick(p.id) }));
+          if(!ql || 'sans projet'.indexOf(ql)>=0) list.push({ id:'__inbox', name:'Sans projet', number:'', color:'', inbox:true, on:staskRes.projId==='__inbox', onPick:()=>pick('__inbox') });
+          const exact=(st.projects||[]).some(p=>p.id!=='__inbox' && p.name.toLowerCase()===ql);
+          if(q && !exact) list.push({ id:'__create', name:'Créer « '+q+' »', create:true, onPick:()=>{ this.createProjectForTask(stask.id, q); this.setState({ panelProjOpen:false, panelProjQ:'' }); } });
+          return list; } };
     }
     const confirmRes = st.confirmId ? this.taskByIdAny(st.confirmId) : null;
     const confirmTask = confirmRes ? confirmRes.task : null;
@@ -5262,6 +5300,29 @@ class Flux extends React.Component {
                 <button className="ek-dx trash" onClick={v.sel.onDelete} title="Supprimer la tâche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
                 <button className="ek-dx close" onClick={v.onCloseDetail} title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
               </div>
+              {/* Téléphone : ligne « Projet » — seul moyen d'y changer le projet d'une tâche (cellule projet des lignes masquée). */}
+              {this.isMob() &&
+                <div className="ek-dproj">
+                  <div className={'ek-dprojbtn'+(v.sel.projOpen?' open':'')} onClick={v.sel.onProjToggle}>
+                    <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                    <span className={'dot'+(v.sel.projInbox?' inbox':'')} style={v.sel.projInbox?undefined:css('background:'+v.sel.projColor+';')}></span>
+                    {v.sel.projNumber && <span className="num" style={css('color:'+v.sel.projColor+';')}>{v.sel.projNumber}</span>}
+                    <span className="nm">{v.sel.projName}</span>
+                    <svg className="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                  </div>
+                  {v.sel.projOpen &&
+                    <div className="ek-dprojlist">
+                      <input value={v.sel.projQ} onChange={v.sel.onProjQ} placeholder="Chercher ou créer un projet…"
+                        onKeyDown={e=>{ if(e.key==='Escape') v.sel.onProjToggle(); else if(e.key==='Enter'){ const c=v.sel.projChoices(); const hit=c.find(o=>!o.create)||c[0]; if(hit) hit.onPick(); } }} />
+                      {v.sel.projChoices().map(o=>
+                        <div key={o.id} className={'ek-dprojit'+(o.on?' on':'')+(o.create?' create':'')} onClick={o.onPick}>
+                          {!o.create && <span className={'dot'+(o.inbox?' inbox':'')} style={o.inbox?undefined:css('background:'+o.color+';')}></span>}
+                          {o.number && <span className="num" style={css('color:'+o.color+';')}>{o.number}</span>}
+                          <span className="nm">{o.name}</span>
+                          {o.on && <svg className="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>}
+                        </div>)}
+                    </div>}
+                </div>}
               <div style={css("font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;")}>Note</div>
               {/* rows=1 + auto-hauteur : sur téléphone la note est un encadré d'une ligne qui grandit
                   à l'écriture. Sur ordinateur le min-height:220px de .ek-dnote reste plus grand, donc
