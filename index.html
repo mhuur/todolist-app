@@ -1219,7 +1219,16 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root div:has(>.ek-todaypill){flex:none!important;gap:0!important}
   #flux-root .ek-todaypill{flex:none!important;height:34px;padding:0 9px!important;gap:4px!important;font-size:13px}
   #flux-root .ek-todaylab{display:none}
-  #flux-root .ek-pmenu{min-width:0!important;width:calc(100vw - 24px)!important;max-width:none!important}
+  /* Le menu s'ancre sur tout le bloc [data-projsel] (bord gauche de l'en-tête), pas sur .ek-projpick : ancré au nom,
+     décalé par le n° du projet, il débordait de ~50 px à droite et la corbeille + le crayon sortaient de l'écran. */
+  #flux-root [data-projsel]{position:relative}
+  #flux-root .ek-projpick{position:static!important}
+  #flux-root .ek-pmenu{min-width:0!important;width:calc(100vw - 18px)!important;max-width:none!important}
+  /* Crayon et corbeille du menu : cibles tactiles de 36 px */
+  #flux-root .ek-pmenu .ek-pmx{width:36px;height:36px;margin-left:2px}
+  #flux-root .ek-pmenu .ek-pmx svg{width:16px;height:16px}
+  #flux-root .ek-pmenu .ek-fitem{padding-top:4px;padding-bottom:4px;min-height:44px}
+  #flux-root .ek-projpick h1{cursor:pointer}
   /* En-tête du Planning : titre seul, puis « Sans date » + choix de la fenêtre de temps */
   #flux-root .ek-planbar{height:auto!important;flex-wrap:wrap;padding:10px 12px!important;gap:8px 10px!important}
   #flux-root .ek-planbar>span:nth-child(2){display:none}
@@ -4549,7 +4558,8 @@ class Flux extends React.Component {
       onProjNumKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.setProjNumber(st.currentProjectId, e.target.value); this.setState({projNumEdit:false}); } else if(e.key==='Escape'){ this.setState({projNumEdit:false}); } },
       onProjNumBlur:(e)=>{ this.setProjNumber(st.currentProjectId, e.target.value); this.setState({projNumEdit:false}); },
       projNameEditing: !!curProj && !!st.projNameEdit,
-      onProjNameToggle:(e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); this.setState(s=>({ projNameEdit:!s.projNameEdit })); },
+      // Téléphone : toucher le nom ouvre le sélecteur (le clic remonte à .ek-projpick) au lieu de passer en édition — on visait trop souvent le menu. Le crayon du menu renomme.
+      onProjNameToggle:(e)=>{ if(this.isMob()) return; if(e&&e.stopPropagation)e.stopPropagation(); this.setState(s=>({ projNameEdit:!s.projNameEdit })); },
       onProjNameKey:(e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.renameProject(st.currentProjectId, e.target.value); this.setState({projNameEdit:false}); } else if(e.key==='Escape'){ this.setState({projNameEdit:false}); } },
       onProjNameBlur:(e)=>{ this.renameProject(st.currentProjectId, e.target.value); this.setState({projNameEdit:false}); },
       projOpen: st.projOpen, projQuery: st.projQuery, projList, projCreate: !!pq && !projExact,
