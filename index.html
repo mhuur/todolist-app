@@ -1177,7 +1177,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-dprojlist{margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:5px;background:var(--panel);box-shadow:0 14px 32px rgba(15,63,147,.12);max-height:300px;overflow-y:auto}
 #flux-root .ek-dprojlist input{width:100%;box-sizing:border-box;height:40px;border:1px solid var(--line);border-radius:8px;padding:0 10px;margin-bottom:4px;font-family:inherit;color:var(--text);background:var(--panel);outline:none}
 #flux-root .ek-dprojit{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 8px;border-radius:8px;cursor:pointer}
-#flux-root .ek-dprojit.on .nm{color:#0f3f93}
+#flux-root .ek-dprojit.on{background:#eaf1fb;box-shadow:inset 3px 0 0 #0f3f93}
+#flux-root .ek-dprojit.on .nm{color:#0f3f93;font-weight:700}
+#flux-root .ek-dprojit .chk{display:none}
 #flux-root .ek-dprojit.create .nm{color:#0f3f93;font-weight:500}
 #flux-root .ek-dprojit .chk{width:16px;height:16px;flex:none;margin-left:auto;color:#0f3f93}
 
@@ -1245,6 +1247,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
      renommer / n° / supprimer passent par le menu ⋮ du projet courant (.ek-projmore, rendu si isMob()). */
   #flux-root .ek-pmenu .ek-pmx{display:none}
   #flux-root .ek-pmenu .ek-fitem{min-height:44px}
+  /* Projet courant : surlignage bleu pâle + liseré à gauche + gras, à la place de la coche qui décalait le badge (demande de Romain, sept. 2026) */
+  #flux-root .ek-pmenu .ek-fitem .chk{display:none}
+  #flux-root .ek-pmenu .ek-fitem.on{background:#eaf1fb;box-shadow:inset 3px 0 0 #0f3f93;font-weight:700}
   #flux-root .ek-projmore .ek-x{width:22px;height:34px;opacity:1!important}
   /* l'entretoise flex:1 de l'en-tête ne sert à rien ([data-projsel] prend déjà la place) et coûte un gap */
   #flux-root>div>div:first-child:has([data-projsel])>div:empty{display:none}
