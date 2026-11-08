@@ -1029,9 +1029,19 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #flux-root .ek-todaypill svg{width:16px;height:16px}
 #flux-root .ek-subwrap{padding:2px 0 8px 21px;display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--divider)}
 #flux-root .ek-subrow{display:flex;align-items:center;gap:9px;padding:4px 0}
-#flux-root .ek-subwrap .ek-subrow[draggable="true"]{cursor:grab}
-#flux-root .ek-subwrap .ek-subrow[draggable="true"]:active{cursor:grabbing}
-#flux-root .ek-subwrap .ek-subrow.dragover{box-shadow:inset 0 2px 0 #81d0f5}
+#flux-root .ek-subwrap .ek-subrow[data-sid]{position:relative;cursor:grab}
+#flux-root .ek-subwrap.ek-sdragging,#flux-root .ek-subwrap.ek-sdragging *{cursor:grabbing!important;user-select:none}
+#flux-root .ek-subwrap .ek-subrow.dragover{box-shadow:inset 0 2px 0 #3aaae8}
+#flux-root .ek-subwrap .ek-subrow.dragafter{box-shadow:inset 0 -2px 0 #3aaae8}
+#flux-root .ek-subrow.ek-slift{opacity:.4}
+#flux-root .ek-sgrip{position:absolute;left:-15px;top:50%;transform:translateY(-50%);width:12px;height:20px;display:flex;align-items:center;justify-content:center;color:#c2cbd9;opacity:0;transition:opacity .12s}
+#flux-root .ek-subrow:hover .ek-sgrip{opacity:1}
+#flux-root .ek-sgrip svg{width:8px;height:13px}
+#flux-root .ek-subghost{cursor:pointer;color:#c2cbd9;font-size:12px;font-weight:500;gap:7px;padding:3px 0 3px 1px;opacity:0;transition:opacity .12s,color .12s}
+#flux-root .ek-subwrap:hover .ek-subghost,#flux-root .ek-trow:hover+.ek-subwrap .ek-subghost{opacity:1}
+#flux-root .ek-subghost:hover{color:#3aaae8}
+#flux-root .ek-subghost svg{width:13px;height:13px;flex:none}
+#flux-root .ek-x.addsub:hover{background:#e6f6fd;color:#3aaae8}
 #flux-root .ek-sck{width:15px;height:15px;border-radius:4px;border:1.6px solid #c2cbd9;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;cursor:pointer;background:var(--panel)}
 #flux-root .ek-sck:hover{border-color:#8fc02e}
 #flux-root .ek-sck.on{background:#8fc02e;border-color:#8fc02e;color:#fff}
@@ -1316,6 +1326,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   #flux-root .ek-x,#flux-root .ek-tgl,#flux-root .ek-xsub,#flux-root .ek-xsubdel,#flux-root .ek-pmx{opacity:1!important}
   #flux-root .ek-x.addtoday{opacity:.55!important}
   #flux-root .ek-subrow{min-height:40px}
+  /* Sous-tâches au doigt : appui long pour glisser (subPointerDown), donc pas de poignée ni de sélection de texte.
+     Le ＋ de la ligne est masqué (place comptée) : on ajoute depuis la feuille, ou par la ligne « Ajouter » visible en permanence. */
+  #flux-root .ek-sgrip{display:none}
+  #flux-root .ek-subrow[data-sid]{user-select:none;-webkit-touch-callout:none}
+  #flux-root .ek-trow>.ek-x.addsub{display:none!important}
+  #flux-root .ek-subghost{opacity:1}
   /* Panneau détail : feuille plein écran */
   #flux-root [data-panel]{width:100%!important;padding:16px!important;border-left:none!important;box-shadow:none!important}
   /* la note devient un encadré d'une ligne, qui grandit si on écrit — pas un pavé de 140 px */
@@ -4069,6 +4085,69 @@ class Flux extends React.Component {
   deleteCheck(id,iid){ this.patchCheck(id, arr=>arr.filter(i=>i.id!==iid)); }
   // ▼ reorderCheck — réordonne les sous-tâches d'une tâche par drag (insertion avant beforeId). Cross-projet via patchCheck.
   reorderCheck(id, dragId, beforeId){ if(!dragId||dragId===beforeId){ this.setState({subDragId:null,subDragOverId:null}); return; } this.patchCheck(id, arr=>{ const a=[...arr]; const di=a.findIndex(x=>x.id===dragId); if(di<0) return arr; const [m]=a.splice(di,1); const bi=beforeId?a.findIndex(x=>x.id===beforeId):-1; a.splice(bi<0?a.length:bi,0,m); return a; }); this.setState({subDragId:null,subDragOverId:null}); }
+  // ▼ Glisser-déposer des sous-tâches (pointer events, nov. 2026) — remplace le drag natif HTML5 (inopérant au doigt).
+  // Ordinateur : on attrape la sous-tâche n'importe où (sauf case, boutons, champ) ou par sa poignée ⋮⋮ (.ek-sgrip,
+  // visible au survol) ; elle se soulève après 4 px. Téléphone : appui long 250 ms sans bouger (bouger avant =
+  // défilement normal). Pendant le glisser : DOM direct (aucun setState) — sous-tâche estompée (.ek-slift), trait bleu
+  // au-dessus de la sous-tâche cible (.dragover) ou sous la dernière (.dragafter). Au relâcher : reorderCheck.
+  // Les candidates sont les seules sous-tâches de la même tâche (.ek-subrow[data-sid] du même .ek-subwrap).
+  subPointerDown(e, tid, sid, ok){
+    if(!ok || this._spd || this._pd) return;
+    if(e.button!==undefined && e.button!==0) return;
+    if(e.target.closest('button,input,textarea,.ek-sck')) return;
+    const touch = e.pointerType!=='mouse';
+    if(!touch) e.preventDefault();
+    const pd = this._spd = { tid, sid, touch, el:e.currentTarget, x0:e.clientX, y0:e.clientY, lifted:false, moved:false, before:null, timer:null };
+    pd.onMove=(ev)=>this._subMove(ev);
+    pd.onUp=()=>this._subEnd(false);
+    pd.onCancel=()=>this._subEnd(true);
+    pd.onTouchMove=(ev)=>{ if(pd.lifted) ev.preventDefault(); };
+    pd.onCtx=(ev)=>ev.preventDefault();
+    pd.onClick=(ev)=>{ ev.stopPropagation(); ev.preventDefault(); };
+    document.addEventListener('pointermove', pd.onMove);
+    document.addEventListener('pointerup', pd.onUp);
+    document.addEventListener('pointercancel', pd.onCancel);
+    document.addEventListener('touchmove', pd.onTouchMove, {passive:false});
+    document.addEventListener('contextmenu', pd.onCtx);
+    if(touch) pd.timer=setTimeout(()=>this._subLift(), 250);
+  }
+  _subLift(){
+    const pd=this._spd; if(!pd||pd.lifted) return;
+    pd.lifted=true; pd.timer=null;
+    pd.wrap=pd.el.closest('.ek-subwrap');
+    if(!pd.el.isConnected||!pd.wrap){ this._subEnd(true); return; }
+    pd.el.classList.add('ek-slift'); pd.wrap.classList.add('ek-sdragging');
+    if(pd.touch&&navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){} }
+    document.addEventListener('click', pd.onClick, true);
+  }
+  _subMove(e){
+    const pd=this._spd; if(!pd) return;
+    if(!pd.lifted){
+      const dx=e.clientX-pd.x0, dy=e.clientY-pd.y0, d2=dx*dx+dy*dy;
+      if(pd.touch){ if(d2>64) this._subEnd(true); return; }
+      if(d2<=16) return;
+      this._subLift(); if(!pd.lifted) return;
+    }
+    const rows=[...pd.wrap.querySelectorAll(':scope > .ek-subrow[data-sid]')];
+    rows.forEach(r=>r.classList.remove('dragover','dragafter'));
+    const others=rows.filter(r=>r!==pd.el);
+    let before=null; for(const r of others){ const b=r.getBoundingClientRect(); if(e.clientY<b.top+b.height/2){ before=r; break; } }
+    if(before) before.classList.add('dragover'); else if(others.length) others[others.length-1].classList.add('dragafter');
+    pd.before=before?before.getAttribute('data-sid'):null; pd.moved=true;
+  }
+  _subEnd(cancel){
+    const pd=this._spd; if(!pd) return; this._spd=null;
+    if(pd.timer) clearTimeout(pd.timer);
+    document.removeEventListener('pointermove', pd.onMove);
+    document.removeEventListener('pointerup', pd.onUp);
+    document.removeEventListener('pointercancel', pd.onCancel);
+    document.removeEventListener('touchmove', pd.onTouchMove, {passive:false});
+    document.removeEventListener('contextmenu', pd.onCtx);
+    if(!pd.lifted) return;
+    setTimeout(()=>document.removeEventListener('click', pd.onClick, true), 350);
+    if(pd.wrap){ pd.wrap.classList.remove('ek-sdragging'); pd.wrap.querySelectorAll('.ek-subrow').forEach(r=>r.classList.remove('dragover','dragafter','ek-slift')); }
+    if(!cancel && pd.moved) this.reorderCheck(pd.tid, pd.sid, pd.before);
+  }
   // Supprime une personne sans toucher aux tâches : elles repassent en "Non assigné" (person='').
   deletePerson(id){ this.setState(st=>{ const person={...st.filters.person}; delete person[id]; const collapsed={...st.collapsed}; delete collapsed['pe:'+id]; return { people: st.people.filter(p=>p.id!==id), tasks: st.tasks.map(t=> t.person===id ? {...t, person:''} : t), filters:{...st.filters, person}, collapsed, personMenuId:null, labelEdit:{type:null,id:null} }; }); }
 
@@ -4483,14 +4562,17 @@ class Flux extends React.Component {
         statusLabel:sm.label, statusDot: done?'#8fc02e':sm.dot, statusOptions,
         hasPerson:!!pp, personName:pp?pp.name:'', personQuery:st.personQuery, personMenu,
         noteHas: !!(t.notes||'').trim() || _subs.some(s=>(s.note||'').trim()),
-        // Sous-tâches toujours dépliées dès qu'il y en a (plus de chevron) ; dépliée aussi pendant l'ajout via le menu ⋮ (subAddId).
+        // Sous-tâches toujours dépliées dès qu'il y en a (plus de chevron) ; dépliée aussi pendant l'ajout (subAddId : ＋ de la ligne, menu ⋮ ou ligne « Ajouter »).
         subsOpen: _subs.length>0 || st.subAddId===t.id,
         subAdding: st.subAddId===t.id,
-        subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':'')+(st.subDragOverId===sb.id?' dragover':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.setState({ subDelConfirm:{ taskId:t.id, checkId:sb.id, text:sb.text||'' } }); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onDragStart:(e)=>{ e.stopPropagation(); e.dataTransfer.effectAllowed='move'; this.setState({subDragId:sb.id}); }, onDragOver:(e)=>{ e.preventDefault(); e.stopPropagation(); if(st.subDragOverId!==sb.id) this.setState({subDragOverId:sb.id}); }, onDrop:(e)=>{ e.preventDefault(); e.stopPropagation(); this.reorderCheck(t.id, st.subDragId, sb.id); }, onDragEnd:(e)=>{ e.stopPropagation(); this.setState({subDragId:null,subDragOverId:null}); } })),
+        subs: _subs.map(sb=>({ id:sb.id, txt:sb.text, note:sb.note||'', hasNote:!!(sb.note||'').trim(), editing: st.subEditId===sb.id, noteOpen: st.subNoteId===sb.id, cls:'ek-subrow'+(sb.done?' done':''), ckCls:'ek-sck'+(sb.done?' on':''), onCheck:(e)=>{ stop(e); this.toggleCheck(t.id, sb.id); }, onDelete:(e)=>{ stop(e); this.setState({ subDelConfirm:{ taskId:t.id, checkId:sb.id, text:sb.text||'' } }); }, onTextClick:(e)=>{ stop(e); this.setState({subEditId:sb.id, subNoteId:null}); }, onTextKey:(e)=>{ if(e.key==='Enter'||e.key==='Escape'){ e.target.blur(); } }, onTextBlur:(e)=>{ const val=(e.target.value||'').trim(); if(val) this.updateCheckText(t.id, sb.id, val); this.setState({subEditId:null}); }, onNoteToggle:(e)=>{ stop(e); this.setState(s=>({subNoteId:s.subNoteId===sb.id?null:sb.id, subEditId:null})); }, onNoteChange:(e)=>this.updateCheckNote(t.id, sb.id, e.target.value), onPointerDown:(e)=>this.subPointerDown(e, t.id, sb.id, st.subEditId!==sb.id && st.subNoteId!==sb.id) })),
         subDraft: st.subDraft||'', onSubDraft:(e)=>this.setState({subDraft:e.target.value}),
         // Entrée = ajoute la sous-tâche et garde un champ vide pour enchaîner ; Échap ou clic ailleurs (blur) = le champ vide disparaît.
         onSubKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.subDraft||'').trim(); if(v){ this.addCheck(t.id, v); this.setState({subDraft:''}); } } else if(e.key==='Escape'){ this.setState({subDraft:'', subAddId:null}); e.target.blur(); } },
-        onSubBlur:()=>{ this.setState({subDraft:'', subAddId:null}); },
+        // Clic ailleurs : le texte tapé est gardé comme sous-tâche (rien n'est perdu), puis le champ disparaît.
+        onSubBlur:()=>{ const v=(this.state.subDraft||'').trim(); if(v) this.addCheck(t.id, v); this.setState({subDraft:'', subAddId:null}); },
+        // Ajout rapide sans le menu ⋮ : bouton ＋ de la ligne (ordinateur, au survol) et ligne « ＋ Ajouter une sous-tâche » sous les sous-tâches existantes.
+        onAddSub:(e)=>{ stop(e); this.setState({ rowMenuId:null, subAddId:t.id, subDraft:'' }); },
         titleStyle:'flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;'+(done?'color:#95a0b3;text-decoration:line-through;':(t.status==='wait'?'color:#5d6a82;':'color:var(--text);')),
         edTitle:isEd('title'), edDue:isEd('due'), edPerson:isEd('person'), edStatus:isEd('status'),
         isWait: t.status==='wait', relanceISO:t.relance||'', relanceShort:this._relShort(t.relance), relanceText:this.formatDue(t.relance).text, relanceColor:this.formatDue(t.relance).color, edRelance:isEd('relance'),
@@ -5131,6 +5213,9 @@ class Flux extends React.Component {
                 </span>}
           </span>
         </span>
+        <button className="ek-x addsub" onClick={t.onAddSub} title="Ajouter une sous-tâche">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
         {t.today
           ? <button className="ek-x today" onClick={t.onUnmark} title="Retirer d'aujourd'hui (sans supprimer)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"></path><path d="M9 14h6"></path></svg>
@@ -5168,7 +5253,8 @@ class Flux extends React.Component {
       <div key={t.id+'_s'} className="ek-subwrap">
         {t.subs.map(s=>
           <React.Fragment key={s.id}>
-            <div className={s.cls} draggable={!s.editing} onDragStart={s.onDragStart} onDragOver={s.onDragOver} onDrop={s.onDrop} onDragEnd={s.onDragEnd} title="Glisser pour réordonner">
+            <div className={s.cls} data-sid={s.id} onPointerDown={s.onPointerDown}>
+              <span className="ek-sgrip" title="Glisser pour réordonner"><svg viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="3" r="1.4"></circle><circle cx="7" cy="3" r="1.4"></circle><circle cx="3" cy="8" r="1.4"></circle><circle cx="7" cy="8" r="1.4"></circle><circle cx="3" cy="13" r="1.4"></circle><circle cx="7" cy="13" r="1.4"></circle></svg></span>
               <span className={s.ckCls} onClick={s.onCheck}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
               {s.editing
                 ? <input className="ek-subedit" autoFocus defaultValue={s.txt} onKeyDown={s.onTextKey} onBlur={s.onTextBlur} onClick={t.stop} />
@@ -5179,6 +5265,7 @@ class Flux extends React.Component {
             {s.noteOpen && <div className="ek-subnote"><textarea autoFocus className="ek-subnotein" placeholder="Note sur cette sous-tâche…" value={s.note} onChange={s.onNoteChange} onClick={t.stop} /></div>}
           </React.Fragment>)}
         {t.subAdding && <div className="ek-subrow"><input className="ek-subaddin" autoFocus placeholder="Ajouter une sous-tâche…" value={t.subDraft} onChange={t.onSubDraft} onKeyDown={t.onSubKey} onBlur={t.onSubBlur} /></div>}
+        {!t.subAdding && t.subs.length>0 && <div className="ek-subrow ek-subghost" onClick={t.onAddSub}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg><span>Ajouter une sous-tâche</span></div>}
       </div>
     );
   }
